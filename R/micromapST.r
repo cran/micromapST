@@ -13,6 +13,7 @@
 # Updated Package Version 130604 - V1.0  - Final Edit and fixes for release.
 #                                        - Dynamically defined variables must be globalVariables add.
 #                                        - Formal Release of package.
+# Updated Package Version 131127 - V1.01 - Correct segmented and centered  bars to handle only two data columns
 #
 #  Update Log by Jim Pearson
 #    May 31, 2009 - corrected dates on three column micromap
@@ -133,6 +134,8 @@
 #          register them with R via globalVariable function to add them to the list for rcmd check.
 #          During testing, the variables do not show up as globals and are protected within the 
 #          micromapST namespace.  - re-released.
+#    Nov. 27, 2013 - Correct the parameter check for segmented and centered bars to permit a 
+#          minimum of 2 data columns.
 #       
 #        .
 ########
@@ -273,6 +276,7 @@ micromapST = function(
 #  Updated and Extended by:  Jim Pearson, April 20, 2009
 #  Updated and Extended by:  Jim Pearson, August 28, 2012
 #  Updated and Extended by:  Jim Pearson, May and June, 2013
+#  Updated and Extended by:  Jim Pearson, Nov, 2013
 #
 #  Packaged by: Jim Pearson
 #
@@ -378,7 +382,8 @@ micromapST = function(
 #           the stateFrame for the first bar segment.  col2 is the column number of the 
 #           last bar segments.  The columns must be contiguous between the col1 column and 
 #           the col2 column. E.g. col1 = 3, col2 = 9, indicates columns 3 through 9 in the 
-#           stateFrame are to be used for the segment bar values.
+#           stateFrame are to be used for the segment bar values.  The number of data columns
+#           can range from 2 to 9 columns.
 #
 #     Panel types using three column parameters:
 #     
@@ -2274,7 +2279,7 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
 #  bars using the percentage.  The complete bar will be drawn from the left to right edge of 
 #  the panel.
 #
-#  The data structure has 2 to 9 values per state.
+#  The data structure can have between 2 to 9 values per state.
 #  Each state must have the same number of values. This limitation may be removed in the future.
 #
 #  panelData => data.frame where each row is a state with the stateId as the row.name.
@@ -2320,7 +2325,7 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
          warning(paste("SEGBAR-05 The first column number of bar values cannot be => the last column number.",col1[j],col2[j]))
         ErrFnd = TRUE
       }
-   wD = col2[j] - col1[j]
+   wD =  ( col2[j] - col1[j] + 1 )   # corrected to calculate the number of data columns
    if (wD < 2 || wD > 9)
       {
          warning(paste("SEGBAR-06 The number of bar values for segmented/normalized bar plots must be between 2 and 9.",wD))
@@ -2555,7 +2560,7 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
 #  The other bar segments are plotted to it's left and right as appropriate.
 #
 #
-#  The data structure has 2 to 9 values per state.
+#  The data structure can have between 2 to 9 data values per state.
 #  Each state must have the same number of values. This limitation may be removed in the future.
 #
 #  panelData => data.frame where each row is a state with the stateId as the row.name.
@@ -2598,7 +2603,7 @@ rlStateCtrBar = function(j) {
          warning(paste("CTRBAR-05 The first column number of bar values cannot be => the last column number.",col1[j],col2[j]))
         ErrFnd = TRUE
       }
-   wD = col2[j] - col1[j]
+   wD = ( col2[j] - col1[j] + 1 )  # corrected to properly calculate the number of data columns.
    if (wD < 2 || wD > 9)
       {
          warning(paste("CTRBAR-06 The number of bar values for centered bar plots must be between 2 and 9.",wD))
@@ -2616,6 +2621,7 @@ rlStateCtrBar = function(j) {
    #
    # Colors - series of lighter colors of the base colors for each bar.
    #   Use an adjusted list of percentages based on the Number of Segments.
+   #      2 step = 50, 100
    #      3 step = 33.3, 66.6, 100
    #      4 step = 25, 50, 75, 100
    #      5 step = 20, 40, 60, 80, 100

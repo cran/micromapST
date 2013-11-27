@@ -1,7 +1,6 @@
-b59c9d42227b9a5475d3edb8857d2648 *CITATIONS
-bbafffdd57585ec6aed623a3ec424f5c *DESCRIPTION
+26ca049eb46325ebf984cd2556b9cc9f *DESCRIPTION
 5e96f7993e22cc2601348af715b1d90f *NAMESPACE
-7971e54f8744021e1310d7a3b89ae8ff *R/micromapST.r
+0c17de488b3f5a2667e2ab8348ca6eb7 *R/micromapST.r
 57daeb801c865bf4f07a4b7d4ecc6d42 *R/panelFunctions.r
 7bc963141ddec43510f090fd63e17764 *data/Educ8thData.RData
 ce34a0d8bcbe7d78f5ba73cb2e73b257 *data/TSdata.RData
@@ -14,13 +13,14 @@ d5b6365f5b18c4f44df7a722db8765e5 *data/wflung00and95.rda
 2b74babf1e09363f9e6fdd0ef2df70b5 *data/wflung00cnty.rda
 53259970a47d2df2408bed0e69e4f89f *data/wmlung5070.rda
 83776ff77c931b4704527c4de32a2a04 *data/wmlung5070US.rda
+3fbb6793c04ea6064d3e8db7941a3e17 *inst/CITATION
 fa203d9373c1385fcc9a64a695087b06 *man/Educ8thData.Rd
 3f0818f27052fc2e3d762b8f0e419f2e *man/TSdata.Rd
-bac66062146389ca77d494196785eadc *man/micromapST-package.Rd
-f59044a659833f365c5b1ee0bc777af8 *man/micromapST.Rd
+b123a8c0fc44fe8d0cdc2f92c4597e9a *man/micromapST-package.Rd
+c489820d22df94082705850c1c253695 *man/micromapST.Rd
 89a3ca6ee068a9ef6043719cdddaecec *man/micromapSTDefaults.Rd
 50d45d389d5d6c57398ccddb3c7ac5d8 *man/micromapSTSetDefaults.Rd
-523d81dc565303496a07a3ed2d5d4898 *man/panelDesc.Rd
+fbaacb5950c008ccc735036980d67b34 *man/panelDesc.Rd
 5c932adff57696132fbdbd9fe982cac7 *man/stateNamesFips.Rd
 16dc1bb6321a721d3d34b075724a0c7c *man/stateNationVisBorders.Rd
 82f0b634f5f643b08992d81c00764f3d *man/statePop2010.Rd

@@ -159,7 +159,7 @@
         \item{\code{'segbar'}, \code{'normbar'}, \code{'ctrbar'}}{uses \code{col1} and \code{col2} to specify the
            data columns for the first and last columns in the stateFrame.
            Data is used from contiguous columns starting from col1 to col2,
-           with a minimum of 2 columns and a maximum of 30 columns.
+           with a minimum of 2 columns and a maximum of 9 columns.
            }
            
         \item{\code{'scatdot'}}{uses \code{col1} and \code{col2} to specify the x and y values for a

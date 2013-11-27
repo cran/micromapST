@@ -253,6 +253,7 @@ micromapST(statePop2010,panelDesc,sortVar=6,ascend=FALSE,
 dev.off()
 ## End Example 5
 
+
 ######
 #   micromapST - Example 6 - centered (diverging) stacked bars
 #
@@ -283,6 +284,8 @@ dev.off()
 rm(Educ8thData)
 
 ### End of example 6
+
+
 
 
 }
