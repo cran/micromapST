@@ -1,0 +1,33 @@
+micromapST - Version 1.0.0 Original Release
+
+micromapST - Version 1.0.1 - Updates
+
+1) Horizontal Stacked Bar glyph's (segbar, normbar, and ctrbar) (segments)
+should support a minimum of 2 segments.  Code requires a minimum of 3 segments.
+Fixed code to allow a minimum of 2 segments.
+
+micromapST - Version 1.0.2 - Updates
+
+The following updates were made to the micromapST packages for release 1.0.2, January 10, 2014.
+
+Enhancements:
+1) Added variable bar heights to the horizontal stacked bar glyphs (segbar, normbar, and ctrbar). 
+
+2) Added dot at the mid-point of the horizontal stacked bar glyphs (segbar, mormbar)  Not needed
+on the centered horizontal stacked bars, since they are already lined up on the median value.
+
+4) Added the ability to provide the name of a column in the stateFrame as well the column number.
+
+5) Added the ability to provide the name of a column in the sortVar call argument.
+
+Fixes:
+a) Renamed the details variables to better relate to the attribute they are controlling 
+and the glyph type.
+
+b) Fixed the logic used by the sortVar call argument to support the specification of multiple 
+columns for the sorting order.  The original code worked when 1 column was specified, but did not
+properly handle multiple columns.  Problem identified and fixed.
+
+
+
+6) Fi

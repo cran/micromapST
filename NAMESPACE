@@ -1,6 +1,5 @@
 export(micromapST)
 export(micromapSTSetDefaults)
-export(micromapSTDefaults)
 importFrom("RColorBrewer",brewer.pal)
 importFrom("graphics", arrows, boxplot, axis, points, lines, mtext, par, legend, polygon, rect, strheight, strwidth, symbols, text,
   plot, plot.default, plot.design, plot.function, plot.new, plot.xy, plot.window,  

@@ -12,11 +12,11 @@
 \format{
   A data frame with 1 observations on the following 5 variables.
   \describe{
-    \item{\code{RATEWM_50}}{a numeric vector, US age adjusted mortality rates for 1950-1969}
-    \item{\code{COUNTWM_50}}{a numeric vector, US number of cases from 1950-1969}
-    \item{\code{RATEWM_70}}{a numeric vector, US age adjusted mortality rates for 1970-1994}
-    \item{\code{COUNTWM_70}}{a numeric vector, US number of cases from 1970-1994}
-    \item{\code{PERCENT}}{a numeric vector, change from 1950-1969 to 1970-1994 US rates.}
+    \item{RATEWM_50}{a numeric vector, US age adjusted mortality rates for 1950-1969}
+    \item{COUNTWM_50}{a numeric vector, US number of cases from 1950-1969}
+    \item{RATEWM_70}{a numeric vector, US age adjusted mortality rates for 1970-1994}
+    \item{COUNTWM_70}{a numeric vector, US number of cases from 1970-1994}
+    \item{PERCENT}{a numeric vector, change from 1950-1969 to 1970-1994 US rates.}
   }
 }
 \details{

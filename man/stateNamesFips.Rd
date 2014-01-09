@@ -10,8 +10,8 @@ state names.
 \format{
   A data frame with 51 observations of the following 2 variables.
   \describe{
-    \item{\code{fips}}{a numeric vector, 2 digit state FIPS code.}
-    \item{\code{ab}}{a character vector, 2 character State Abbreviation (postal code)}
+    \item{fips}{a numeric vector, 2 digit state FIPS code.}
+    \item{ab}{a character vector, 2 character State Abbreviation (postal code)}
   }
 }
 \details{

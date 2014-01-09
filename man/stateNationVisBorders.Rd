@@ -2,15 +2,14 @@
 \alias{stateNationVisBorders}
 \docType{data}
 \title{US National Boundary Points}
-\description{
-stateNationVisBorders - A set of boundary points for the US, its 50 states and DC.
+\description{stateNationVisBorders - A set of boundary points for the US, its 50 states and DC.
 }
 \usage{stateNationVisBorders}
 \format{
   A data frame with 108 elements of the following 2 variables.
   \describe{
-    \item{\code{x}}{the x coordinate for the boundary point}
-    \item{\code{y}}{the y coordinate for the boundary point}
+    \item{x}{the x coordinate for the boundary point}
+    \item{y}{the y coordinate for the boundary point}
   }
 }
 \details{
@@ -21,7 +20,6 @@ stateNationVisBorders - A set of boundary points for the US, its 50 states and D
   national US boundary. The boundaries have been smoothed following Monmonier's visibility
   map.
 }
-
 \source{
 Mark Monmonier's visibility map, modified by Daniel B. Carr, George Mason University,
 Fairfax, VA

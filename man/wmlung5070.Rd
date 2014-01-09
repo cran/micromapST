@@ -13,11 +13,11 @@
   A data frame with 51 observations, 1 for each state + DC, 
   on the following 5 variables.
   \describe{
-    \item{\code{RATEWM_50}}{a numeric vector, state age-adjusted rates during 1950-69}
-    \item{\code{COUNTWM_50}}{a numeric vector, the number of lung cancer deaths during 1950-69}
-    \item{\code{RATEWM_70}}{a numeric vector, state age-adjusted rates during 1970-94}
-    \item{\code{COUNTWM_70}}{a numeric vector, the number of lung cancer deaths during 1970-94}
-    \item{\code{PERCENT}}{a numeric vector of the percent change in rate from 1950-69 to 1970-94}
+    \item{RATEWM_50}{a numeric vector, state age-adjusted rates during 1950-69}
+    \item{COUNTWM_50}{a numeric vector, the number of lung cancer deaths during 1950-69}
+    \item{RATEWM_70}{a numeric vector, state age-adjusted rates during 1970-94}
+    \item{COUNTWM_70}{a numeric vector, the number of lung cancer deaths during 1970-94}
+    \item{PERCENT}{a numeric vector of the percent change in rate from 1950-69 to 1970-94}
   }
 }
 \details{
@@ -41,7 +41,6 @@
    originally provided to NCI by the National Center for Health 
    Statistics.
 }
-
 \author{Linda W. Pickle and Jim Pearson of StatNet Consulting, LLC, Gaithersburg, MD}
 \references{
   Devesa SS, Grauman DJ, Blot WJ, Pennello GA, Hoover RN, 

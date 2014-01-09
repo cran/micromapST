@@ -10,12 +10,12 @@
 \format{
   A data frame with 2577 observations on the following 6 variables.
   \describe{
-    \item{\code{fips}}{a numeric vector of 5 digit fips codes identifying the state and the county}
-    \item{\code{rate}}{a numeric vector of age-adjusted rates by county during 2000-4 for white females}
-    \item{\code{count}}{a numeric vector of the number of white female lung cancer deaths during 2000-4 by county}
-    \item{\code{pop}}{a numeric vector of the white female population in the county during 2000}
-    \item{\code{stcode}}{a numberic vector of the 2 digit state fips code}
-    \item{\code{stabr}}{a character vector of the 2 character state postal code}
+    \item{fips}{a numeric vector of 5 digit fips codes identifying the state and the county}
+    \item{rate}{a numeric vector of age-adjusted rates by county during 2000-4 for white females}
+    \item{count}{a numeric vector of the number of white female lung cancer deaths during 2000-4 by county}
+    \item{pop}{a numeric vector of the white female population in the county during 2000}
+    \item{stcode}{a numberic vector of the 2 digit state fips code}
+    \item{stabr}{a character vector of the 2 character state postal code}
   }
 }
 \details{

@@ -29,7 +29,7 @@
 }
 
 \source{
-    The National Center for Education Statistics, Department of Education
+    The National Center for Education Statistics, Department of Education\cr
     http://nces.ed.gov/nationsreportcard/states/
 }
 \keyword{datasets}

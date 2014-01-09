@@ -14,6 +14,14 @@
 #                                        - Dynamically defined variables must be globalVariables add.
 #                                        - Formal Release of package.
 # Updated Package Version 131127 - V1.01 - Correct segmented and centered  bars to handle only two data columns
+# Updated Package Version 140104 - V1.02 - Add diagonal line in scatter plot with equal x and y values.
+#                                        - Update NormSeg, Seg, Centered Seg to use variable width bars.
+#                                        - Changed method of providing colors and details parameters.
+#                                        - Correct median dot in scatter plots
+#                                        - Add logic to allow numeric (integer) or column names in col1, col2, col3
+#                                        - Correct logic to handle multiple columns in sortVar.
+#                                       
+#
 #
 #  Update Log by Jim Pearson
 #    May 31, 2009 - corrected dates on three column micromap
@@ -38,7 +46,7 @@
 #        - add variable for reference value label text (refTexts) per column.
 #             panelDesc$refTexts -> vector, one per column.
 #        - add variable to color the reference value label test 
-#             details$colRefTxt
+#             details$Ref.Text.col
 #        - No reference label (legend) is printed if no refTexts for the
 #             column is provided.
 #    January 30, 2011 - Determine running directory and load
@@ -49,7 +57,7 @@
 #        - integrated the test/demo code correctly.
 #        - made adjustments to handle the micromapST namespace.
 #        - changed refVals and refTexts to local variables (lRefVals and lRefTexts) to add clarity.
-#        - changed parameter for BoxPlots colMedian to colBpMedian to kill duplication with the colMedian 
+#        - changed parameter for BoxPlots colMedian to BoxP.Median.col to kill duplication with the colMedian 
 #          used on the general graphic
 #        - Modified "Details" and "Colors" variable to be unique and
 #          re-ordered by subroutine usage.
@@ -96,7 +104,7 @@
 #        - added panelInBound to generating x and y axis labels.
 #    May 11, 2013 - reduced Y axis labels size to get more detail
 #        - replaced wflung00cnty data file.
-#        - created segbardata data file.
+#        - created segbar data file.
 #        - fixed problem with saving new time series file - needed names on all dimensions.
 #        - fixed problem with at and labels argments on mtext calls.
 #        - saved original tests in init/tests directory and replace them 
@@ -125,7 +133,7 @@
 #        - Added names check for box plot,
 #        - Added "list" type check for box plot.
 #        - Reorganized test to not cause a secondary error.
-#        - Added idty parameter to details and rlStateID to adjust text alignment.
+#        - Added Id.Text.adj parameter to details and rlStateID to adjust text alignment.
 #    June 2, 2013 - fix DotSE missing X1 variable - should be x.
 #        - Added code to do proper capitalization of state abbreviations and full state names.
 #        - Added code to intercept common names for Washington, D. C. and convert to "D.C."
@@ -136,13 +144,31 @@
 #          micromapST namespace.  - re-released.
 #    Nov. 27, 2013 - Correct the parameter check for segmented and centered bars to permit a 
 #          minimum of 2 data columns.
-#       
+#    Jan 4-9, 2014 - The diagonal line added to the scatter plots must reflect equal x and y values. 
+#          Current line is diagonal to the box not the data.
+#         - Add option to vary the segment bar width from small to larger from left to right for
+#           the NormSeg, SegBar, and Centered SegBar glyphics.
+#         - Changed method of setting up details variables within the micromapST namespace.
+#           Originally, user had to provide a complete list of all of the details variables.  If
+#           one was missing or misspelled, no detection or correction.  New method, starts by 
+#           assigning all of the variables from the default values. Then takes the provided details
+#           list from the user and merges it into the already declared variables.  If a variable
+#           does not exist or is misspelled, it is caught by checking against the default list of names
+#           and not processed.  In the future, a similar structure will be used to check the 
+#           ranges or types of information to validate the user provided details variable values.
+#         - Correct median dot in scatter dot plots to only appear in the 4 and 6 rows (just either side
+#           of the median row.
+#         - Update logic in sortVar option to correctly handle multiple sort columns.  
+#         - Add ability to reference data.frame columns by name in the col1, col2, col3 and sortVar
+#           parameters.
+#         - Enhanced parameter verification and error checking to help user understand the specific
+#           problem and correct it fast.  Don't allow R to abort if possible.
 #        .
 ########
 
 ########
 #
-# Copyrighted 2013 - by: Dan Carr, GMU and Linda Pickle and Jim Pearson of StatNet Consulting, LLC.
+# Copyrighted 2013, 2014 - by: Dan Carr, GMU and Linda Pickle and Jim Pearson of StatNet Consulting, LLC.
 #
 ########
 
@@ -190,24 +216,66 @@
 #
 #
 
-globalVariables(c("ne","ng","ib","ie","topMar","botMar","botMarLegend","botMardif",
+globalVariables(c("ne","ng","ib","ie",
+                "topMar","botMar","botMarLegend","botMardif",
                 "leftMarAxis","rowSep","rowSize","groupedRowSize","groupedRowSep",
-                "mapWidth","idWidth","sc","pad","padex","padMinus","line1","line2",
-                "lineTiclab","=.NULL","line3","line4","line5","colGrid","lwdGrid",
-                "mgpTop","mgpBottom","padjBottom","mgpLeft","colPanelFill",
-                "colOutline","cexText","cexTitle","ltyRefVal","lwdRefVal",
-                "colRefVal","colGRefVal","colRefTxt","colGRefTxt","lengthArrow",
-                "lwdArrow","lwdArrowShadow","colArrowShadow","cexArrow","barht",
-                "colBarOutline","lwdBarOutline","colBarZero","lwdBarZero","ltyBarZero",
-                "colSBarOutline","lwdSBarOutline","thinBox","thickBox","useBlack",
-                "medianLine","colBpDotMedian","pchMedian","cexMedian","lwdMedian",
-                "colBpMedian","colBpOutline","lwdOutlier","cexOutlier",
-                "colBpGreyOutliner","idDotPch","pchDot","cexDot","conf","lwdConf","cexConf",
-                "OutlineDot","colDotOutline","lwdDotOutline","lwdTs","axisCexTs",
-                "hGridTs","lwdSCD","bgFillSCD","medPchSCD","medColSCD","axisCexSCD",
-                "sizePchSCD","xscSCD","yscSCD","hGridSCD","colIdOutline","cexId",
-                "cexIdDot","idty","colMapBackgr","colLineBackgr","colLineForegr",
-                "colLineNation","cexState","lwdBackGr","lwdForeGr","lwdNation"),
+                
+                "Map.width","Id.width",
+                
+                "sc","pad","padex","padMinus",
+                "Title.Line.1.pos","Title.Line.2.pos","Title.Line.3.pos",
+                "Title.Line.4.pos","Title.Line.5.pos","lineTiclab",
+                "Title.cex",
+                
+                "Grid.Line.col","Grid.Line.lwd","mgpTop","mgpBottom","padjBottom","mgpLeft",
+                
+                "Panel.Fill.col","Panel.Outline.col",
+                
+                "Text.cex",
+                
+                "Ref.Val.lty","Ref.Val.lwd","Ref.Val.col","Ref.Val.BW.col",
+                "Ref.Text.col","Ref.Text.BW.col","Ref.Text.cex",
+                
+                "Arrow.Head.length","Arrow.lwd","Arrow.cex",
+                "Arrow.Shadow.lwd","Arrow.Shadow.col",
+             
+                "Bar.barht","Bar.Outline.col","Bar.Outline.lwd","Bar.Outline.lty",
+             
+                "CSNBar.barht",
+                "CSNBar.Outline.col","CSNBar.Outline.lwd","CSNBar.Outline.lty",
+                "CSNBar.First.barht","CSNBar.Last.barht",
+                
+                "SNBar.varht","SNBar.two.ended",                
+                "SNBar.Middle.Dot","SNBar.MDot.pch","SNBar.MDot.pch.fill","SNBar.MDot.pch.lwd","SNBar.MDot.pch.size",
+                "SNBar.MDot.pch.border.col","SNBar.MDot.pch.border.lwd",
+                
+                "CBar.Zero.Line.col","CBar.Zero.Line.lwd","CBar.Zero.Line.lty",
+                "CBar.varht","CBar.two.ended",
+          
+                "BoxP.thin","BoxP.thick","BoxP.Use.Black",
+                "BoxP.Median.Line",
+                "BoxP.Median.Dot.col","BoxP.Median.Dot.pch","BoxP.Median.Dot.cex","BoxP.Median.Dot.lwd",
+                "BoxP.Median.col",
+                "BoxP.Outline.col",
+                "BoxP.Outlier.lwd","BoxP.Outlier.cex","BoxP.Outlier.BW.col",
+                
+                "Dot.pch","Dot.pch.size","Dot.conf","Dot.conf.lwd","Dot.conf.size","Dot.Outline","Dot.Outline.col","Dot.Outline.lwd",
+                
+                "TS.lwd","TS.Axis.cex","TS.hGrid",
+                
+                "SCD.Bg.pch","SCD.Bg.pch.lwd","SCD.Bg.pch.size","SCD.Bg.pch.fill",
+                "SCD.Fg.pch","SCD.Fg.pch.lwd","SCD.Fg.pch.size",
+                "SCD.Median.pch","SCD.Median.pch.lwd","SCD.Median.pch.size","SCD.Median.pch.fill",
+                "SCD.Axis.cex",
+                "SCD.xsc","SCD.ysc","SCD.hGrid",
+                "SCD.DiagLine","SCD.DiagLine.col","SCD.DiagLine.lwd","SCD.DiagLine.lty",
+                
+                "Id.Dot.pch",
+                "Id.Dot.Outline.col","Id.Text.cex","Id.Dot.cex","Id.Text.adj",
+                
+                "Map.Bg.col","Map.Bg.Line.col","Map.Fg.Line.col","Map.Nation.Line.col",
+                "Map.State.Spec.cex","Map.Bg.Line.lwd","Map.Fg.Line.lwd","Map.Nation.Line.lwd"),
+ 
                 "micromapST",add=TRUE)
 
 #
@@ -250,6 +318,85 @@ simpleCap <- function (x)
 #   gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", name, perl=TRUE)
 #
 
+#
+#  Subroutine to take the colx vectors, convert numeric to integer, convert character by matching
+#   with column names to column numbers.   NA's become "0", Invalid column numbers or names become "0".
+#  Errors are flaged by the glyphics code.
+#
+CheckColx <- function(wcol,colname,wnam2,len_wnam) 
+   {
+     # wcol = col vector from panelDesc
+     # colname = character name of col vector for error message.
+     # wnam2 = character list of column names and row numbers (in character format)
+     # len_wnam = number of original columns.
+     #
+     # Rules:  "0" means invalid number, out of range number or invalid name.
+     #         NAs are converted to "0" values.
+     #         Glyphics check for valid values based on need.  
+     #
+     #
+     xwcol <- wcol
+     l_wcol <- length(wcol)
+     ErrFnd = FALSE
+     
+     if (is.factor(xwcol))
+       { xwcol <- as.character(xwcol) }
+       
+     if (is.numeric(xwcol))
+       {  # have number
+       
+         rcol <- as.integer(xwcol)  # convert numeric to integer.
+         rcol[is.na(rcol)] <- 0     # get rid of NA.  Turn to zeros doesn't et rid of negatives.
+      
+         if (any(rcol < 0))
+           {
+             ErrFnd = TRUE
+             xmsg <- paste("CCOL-01 The one or more of the column number(s) are negative: ",sep="")
+             xmsg <- paste(xmsg,paste(rcol,collapse=", ")," Literal:",wcol)
+             warning(xmsg)
+           } else {
+             if (any(rcol > len_wnam))
+               {
+                 ErrFnd = TRUE
+                 xmsg <- paste("CCOL-02 The one or more of the column number(s) is greater than the columns in the stateFrame data.frame: ",sep="")
+                 xmsg <- paste(xmsg,paste(rcol,collapse=", "))
+                 warning(xmsg)
+               } 
+           
+           }
+         # if ErrFnd = FALSE, the all number in vector are within range.
+         # check valid range in glyph  (NA become zeros.) Leave the final check to the glyphics.
+       } else {     
+         if (is.character(xwcol))
+           {  # have character - may be name or number - check each
+              # get number for other code, if column name.
+
+              xcol <- match(xwcol,wnam2,nomatch=0)    # match against column names and numbers (as characters)          
+              rcol <- ifelse(xcol>len_wnam,xcol-len_wnam,xcol)  # adjust matches to row numbers to real row numbers.       
+
+              # name and character number converted to integer       
+              # bad and NA values are "0" and will be caught in the glyphic    
+           
+           } else {
+              # invalid variable type
+              ErrFnd = TRUE
+              xmsg = paste("CCOL-03 The type of ",colname," panelDesc variable is invalid. ",typeof(xcol),".  Must be integer or character.",sep="")
+              warning(xmsg)
+           } 
+      }
+     if (ErrFnd)
+       { 
+         return (rep.int(0,l_wcol))
+       } else {
+         # clean up any NAs in list, set to 0
+         rcol[is.na(rcol)]  = 0   # set NA to 0 (invalid)
+         return (rcol)
+         #print(rcol)
+       }
+        
+   }        
+
+
 ###
 #
 #  micromapST
@@ -267,7 +414,8 @@ micromapST = function(
     title=c("",""),
     plotNames=c("ab","full")[2],         # default = "full"
     colors = micromapSTDefaults$colors,
-    details= micromapSTDefaults$details)
+    details = NULL)
+    #details= micromapSTDefaults$details)
 {
 #
 #  Routine:   micromapST
@@ -277,6 +425,7 @@ micromapST = function(
 #  Updated and Extended by:  Jim Pearson, August 28, 2012
 #  Updated and Extended by:  Jim Pearson, May and June, 2013
 #  Updated and Extended by:  Jim Pearson, Nov, 2013
+#  Updated and Extended by   Jim Pearson, Jan, 2014
 #
 #  Packaged by: Jim Pearson
 #
@@ -358,56 +507,57 @@ micromapST = function(
 #         bar  will accept negative values and plot from 0 in that direction.
 #
 #  col1, col2, col3
-#    These values idenfity the column numbers in stateFrame to be used as data for most
+#    These values idenfity the column numbers or column names in stateFrame to be used as data for most
 #       of the panel types.  They are used by:
 #            "dot", "bar", "dotse", "dotconf", "scatdot", "segbar", "ctrbar", "normbar"
-#      
+#      ls
 #     Panel types using only one column parameter:
 #
-#       Dot and bar plots require column 1 = value  (height of bar)
+#       Dot and bar plots require only one column (col1) = value  (height of bar)
 #
-#     Panel types using two column parameters:
+#     Panel types dotse, arrows, ScatDat, SegBar, CtrBar, NormBar using two column 
+#       parameters (col1 and col2):
 #  
-#       Dotse and arrow dots require columns 1 and 2
-#           dotse needs  col1=estimates         and col2=standard errors 
-#                  Plus and minus the SE is draw around the estimates
+#       dotse needs:  col1=estimates and col2=standard errors 
+#            Plus and minus the SE is draw around the estimates
 #
-#           arrows needs col1=beginning (older) and col2=ending (newer) values. The arrow head
-#                  is on the col2 end of the arrow.
+#       arrows needs col1=beginning (older) and col2=ending (newer) values. 
+#            The arrow head is on the col2 end of the arrow.
 #                  
-#       ScatDat requires 2 columns.  
-#                col1 = x value (horizontal axis), col2 = y value (vertical axis).
+#       scatdot needs: col1 = x value (horizontal axis), col2 = y value (vertical axis)
+#            for each data point (one per state)..
 #
-#       SegBar, CtrBar, and NormBar requires 2 columns. col1 is the column number in  
-#           the stateFrame for the first bar segment.  col2 is the column number of the 
-#           last bar segments.  The columns must be contiguous between the col1 column and 
-#           the col2 column. E.g. col1 = 3, col2 = 9, indicates columns 3 through 9 in the 
-#           stateFrame are to be used for the segment bar values.  The number of data columns
-#           can range from 2 to 9 columns.
+#       segbar, ctrbar, and normbar need: col1 is the name or number of the   
+#           column in the stateFrame for the first bar segment length values,  
+#           col2 is the column name or number of the column in the stateFrame containing 
+#           the length of the last bar segment.  The columns between col1 and col2 contain
+#           the lengths of the other bar segments in the glyphic.  col1 must preceed col2 in 
+#           the stateFrame data.frame.The number of data columns (bar segments) can range from 2 to 9 columns.
 #
-#     Panel types using three column parameters:
+#     Panel type dotconf using three column parameters: (col1, col2, col3):
 #     
-#       Dotconf requires 3 columns values
-#           col1=estimate, col2=lower and col3=upper bounds
+#        dotconf needs: col1=estimate, col2=lower and col3=upper bounds
 #
-#     Panel types not requiring column parameters:
+#     Panel following types do not requiring any column parameters:
 #
-#       Boxplots require 0 columns - uses "panelData" vector in panelDesc
-#           The boxplot vector from the boxplot(...,plot=F) function.
+#       boxplots uses the "panelData" vector in panelDesc to provide the name of a saved boxplot structure.
+#           The boxplot structure is created by saving the results of aboxplot(...,plot=F) call.
 #
-#       ts and tsconf require 0 columns - uses "panelData" vector in the panelDesc.
-#           The name of a array(51,"x",4) is passed to provide the time series data.
+#       ts and tsconf use the "panelData" vector in the panelDesc to obtain the name of a matrix 
+#           the data for the time series. The name represents a array(51,"x",4).  The first dimension 
+#           represents the states (51).  The second dimension represents the number of samples in the 
+#           time series.  The third dimension are the "x", "low.y", "y", and "high.y" values for 
+#           each sample.  For ts glyphics, the "low.y" and "high.y" values are ignored, but required.
 #
 #  lab1, lab2
-#     Two label lines at the top of columns. Use "" for blank
+#     Two label lines at the top of columns. Use "" for blank, not NA or MULL.
 #
 #  lab3
 #     One label line at the bottom of a each column,
 #     typically measurement units
 #
 #  lab4
-#     One label line for used with the Y axis on each panel.  Only used
-#     with time series panels.
+#     One label line for used with the Y axis on each panel.  Only used with time series panels.
 #
 #  refVals           # P-2010/07/23  changed variable from refvals to refVals 
 #                    #    to be consistant.
@@ -454,19 +604,20 @@ micromapST = function(
 #
 # Individual Parameters:
 #
-# rowNames: Type of state id used as row.names in stateFrame. The default is "ab" for abbreviation, 
+# rowNames: Type of state id used as row.names in stateFrame data.frame. The default is "ab" for abbreviation, 
 #           Acceptable values are: "ab", "full", "fips".
 #
-# plotNames: State label use in in the plot. The default is the "full" for full name
-#           Acceptable values are: "ab", "full"
+# plotNames: State label use in in the plot when an ID column is requested. 
+#           The default is the "full" for full name. Acceptable values are: "ab", "full"
 #
-# sortVar   The column number in the stateFrame to be used as the variable in sorting.  
+# sortVar   The column name or number in the stateFrame to be used as the variable in sorting.  
 #           Can be a vector of column subscripts to break ties.
-#           Warning: The sortVar parameter cannot be used to sort a boxplot or time series.
+#           Warning: The sortVar parameter cannot be used to sort a boxplot or time series, since data
+#           is not contained in the stateFrame.
 #
 # ascend    TRUE default sorts in ascending order.  FALSE indicated descending order.
 #
-# title     A vector with one or two character strings to use the title. 
+# title     A vector with one or two character strings to use the title.for the page.
 #      
 #####
 #
@@ -488,172 +639,216 @@ micromapST = function(
 #      see rlMicromapSTDefaults$colors for more details
 #
 #
-# details   spacing, line widths and other details
-#      see rlMicromapSTDefaults$details
+# details   defines the spacing, line widths, colors and many many other details controling the 
+#      style and apparence of the generated glyphs.
 #
-#      The r1MicromapSTDefaults$details contains the line spacing and text size, 
-#              group spacing, etc. instead of the panel tables.  
-#              Yet, panels and the default must be in sync.
+#      see the micromapSTDefaults$details section for more details.
+#
+#      The function automatically loads the default values into the code when the function 
+#      is started.  The user can use the details parameter to override any of the items and values
+#      in the micromapST package.  To override a value, create a list as follows:
+#
+#      details = list(<variable name> = <value>,,,  )
+#
+#      See the micromapSTSetDefaults function below for a definition of each micromapST 
+#      variable and it's default.
 #
 #####
 
+
+
 #______________________Argument Checks______________________
-
-# Check input data format
-
-# stateFrame - data frame
-if(!is.data.frame(stateFrame)) stop("First argument (stateFrame) must be a data.frame")
-
-nr = nrow(stateFrame)
-if(nr!=51) stop(paste("The first argument (stateFrame) must have 51 rows (states plus DC). It only has",nr,".",sep=""))
-
 #
-#   JP - Make sure the input data.frame is at least two columns - add one.
+
+micromapSTDefaults <- micromapSTSetDefaults()  # get master list of variables and defaults
+
+#______________stateFrame - data frame______________
+#
+
+#  check to see if the stateFrame was provided.
+
+   if (missing(stateFrame) || is.null(stateFrame) || is.na(stateFrame) || !is.data.frame(stateFrame)) 
+     { 
+       stop("MST-01 First argument (stateFrame) is missing or not a data.frame.")
+     }
+     
+   nr = nrow(stateFrame)
+   if (nr!=51)
+     {
+        stop(paste("MST-02 The first argument (stateFrame) must have 51 rows (states plus DC). It only has",nr,".",sep=""))
+     }
+     
+#
+#   JP - Make sure the input data.frame is at least two columns - add one.  A single column data.frame
+#        acts differently then a two or more column data.frame under many operations.
 #   JP - Dot code (at least) has problems with single column stateFrame structures.
+#
 #   To protect code and any other areas that may have problems,
 #   quick fix is to append "0" column to the right of the provided data.frame.
 #   This forces the data.frame to be at least 2 columns.
 #
 
-Ex = rep(0,nr)
-SFrame = cbind(stateFrame,Ex)   # move to SFrame and add Zero column.
+   Ex = rep(0,nr)
+   SFrame = cbind(stateFrame,Ex)     # move to SFrame and add Zero column.
 
-#
-#  headers or US rate rows should not be included in data.format.
-#
+# have SFrame and stateFrame put together
 
-# Check panel description format
-
-if(!is.data.frame(panelDesc))
-    stop("Panel descriptor argument (2nd argument) must be a data.frame")
-
-# Check for panelDesc$type validity
-
-valid = c("map","mapcum","maptail","mapmedian",
-          "id","arrow","bar",
-          "dot","dotse","dotconf",
-          "ts","tsconf",
-          "scatdot",
-          "segbar","normbar","ctrbar",
-          "boxplot")        # idDot and rank are not currently implemented
-
-type = as.character(panelDesc$type)
-subs = match(type,valid)
-
-if(any(is.na(subs)))
-    stop(paste("The panelDesc data.frame has an invalid panel type. ",type[is.na(subs)], " was found.",sep=""))
-
-
-ncol = nrow(panelDesc)
-blank = rep('',ncol)
-
-if(is.null(panelDesc$lab1)) lab1 = blank else
-              lab1 = as.character(panelDesc$lab1)
-
-if(is.null(panelDesc$lab2)) lab2 = blank else
-              lab2 = as.character(panelDesc$lab2)
-
-if(is.null(panelDesc$lab3)) lab3 = blank else
-              lab3 = as.character(panelDesc$lab3)
-
-if(is.null(panelDesc$lab4)) lab4 = blank else
-              lab4 = as.character(panelDesc$lab4)
-
-
-
-# Column width defaults
-
-###  Add check of column type to table of miniumal or statics column widths.
-
-plotWidth = par("pin")[1]
-
-if(is.null(panelDesc$colSize)){
-     #  no colSize provided by User - create the default version.
-     
-     colSize = rep(0,length(type))             # set vector to zeros. Length equal the number of columns requested.
-
-     # check for "map..." type panel columns
-     loc = substring(type,1,3)=='map'
-     # was "map" the start of the type name for column?
-     if(any(loc))  colSize[loc] = details$mapWidth  # set size for map for columns doing maps.
-
-     # check for "id" type panel columns
-     loc = type=='id'   # is column type = "id"
-     if(any(loc))
-       {
-         sub = ifelse(plotNames=="full",1,2)  # yes, set size for ID (ab or full)
-         colSize[loc] = details$idWidth[sub]
-       }
-     # Get plot width and calculate size of each remaining column.
-     #   Assume equal width for each non-id or non-map column.
-     #
-     equalWidth= (plotWidth-sum(colSize))/sum(colSize==0)
-     colSize = ifelse(colSize==0,equalWidth,colSize)
-  } else {
-     colSize = panelDesc$colSize
-  }
-
-#
-#if (sum(colSize) >= plotWidth)
-#  {
-#     warning("The sum of colSize vector provided in the panelDesc argument is greater then the plotting area width.")
-#  }
-# did not work - try again later..
+#_____________Set up for State names and abbreviation links.
 #
 
-#  Setup for stateId checks
-sortedStateId = sort(stateNamesFips$ab)
+   rlStateNamesFips = stateNamesFips
+   rlStateVisBorders = stateVisBorders
+   rlStateNationVisBorders = stateNationVisBorders
 
-# more panelDesc checks and setups after the function definitions.
+   #  Setup for stateId checks
+   sortedStateId = sort(stateNamesFips$ab)
+
+   # Get state abbreviation as polygon link
+   #  
+
+   fullNames = row.names(rlStateNamesFips)    # List of full state names.
+
+   curnam = row.names(SFrame)                 # Get list of current names in row.names.
+
+   # get proper capitalization of state ab or full names.
+   curnam2 = as.vector(sapply(curnam,function(x) simpleCap(x)))
+   
+   #  Compare against common "DC" names and replace with "D.C."
+   DCnames = c("Washington, D. C.",   "Washington D. C.",
+               "Washington, D C",   "Washington D C",
+               "Washington, Dc",    "Washington Dc",
+               "District Columbia", "District Of Columbia",
+               "DC","Dc","D C","D. C.")
+   
+   curnam2[!is.na(match(curnam2,DCnames))] = "D.C."            
+
+#_________ Build the column name list for verification later
+
+   wSFnam      <- names(stateFrame)       # get the column names from data.frame
+   len_wSFnam  <- length(wSFnam)          # record the number of "named" rows in list (at front.)
+   wSFNameList <- c(wSFnam,seq(from=1, to=len_wSFnam))   # add valid row numbers to the list.
+
+#  wSFNameList now contains a list of the column names and column numbers as character strings.
+#  This string will be used to verify any user provided column names or character column numbers.
 
 #
-#  Verify "colors=" argument
-#
-#  Second purpose is to set the graphics colors not in the "colors" vector to grays or colors.
-#  
+#  headers or US rate rows should not be included in data.format. 
 #
 
-colFull = TRUE                  # control logical = TRUE doing Color, FALSE doing Greys
-cGood = FALSE
-doDotOutline = details$OutlineDot
+#_______________panelDesc structure_______________
+#
 
-if (length(colors) == 14)
-  {
-    cGood = TRUE             # colors must a vector of 14 colors  or "bw"
-  } else {
-    if (length(colors) == 1)
-      {
-        if (colors == "bw" || colors == "greys" || colors == "grays")
+####### Processed later
+
+#_______________rowNames option___________________
+#
+
+   stateId = switch(rowNames,
+      # if "ab", use current name
+      "ab"=  rlStateNamesFips$ab[match(toupper(curnam), rlStateNamesFips$ab)],
+      
+      # if "fips", convert to abrv name      
+      "fips"= rlStateNamesFips$ab[match(as.integer(curnam), rlStateNamesFips$fips)],
+      
+      # if "full" state name, convert abrv name
+      "full"= rlStateNamesFips$ab[match(curnam2,fullNames)],
+      
+      #  No match..
+      warning("MST-03 Check rownames type, must be 'ab', 'fips', or 'full'.")
+   )
+
+   if (any(is.na(stateId)))
+     {  # one of the state abrv or full names are not valid
+       BadList = paste(curnam[is.na(stateId)],collapse=" ")  # create a list of bad names.
+       stop(paste("MST-04 The following row names in the stateFrame data.frame are invalid: ",BadList,sep=""))
+     }
+
+
+#_______________plotNames option__________________
+#
+
+# Get statenames or abbreviations to plot_______________________
+   stateNames = switch(plotNames,
+          "ab"=stateId,
+
+          "full"= fullNames[match(stateId,rlStateNamesFips$ab)],
+
+          warning("MST-05 Check plotNames type, must be 'ab' or 'full'.")
+   )
+
+#_______________title option______________________
+#
+
+#  checks missing,, is character, length = 1 or 2.
+
+
+#_______________sortVar option____________________
+#
+
+# sort and store stateFrame, stateid, and stateNames____________
+   if (missing(sortVar) || is.na(sortVar) || is.null(sortVar))
+     { 
+        # if field omitted (null) sort by state name
+        ord = order(stateNames)
+     } else  {
+        litsortVar = sortVar
+        sortVar = CheckColx(litsortVar,'sortVar',wSFNameList,len_wSFnam)
+        if (!all(sortVar>0))                     # check to see if all values are good
           {
-
-            xbw <- brewer.pal(name="Greys",8)
-            greyColors <- c(xbw[c(3:7)],"#000000","#E8E8E8")
-            TransRgb <- t(col2rgb(greyColors))/255
-            TransColors <- rgb(TransRgb[,1],TransRgb[,2],TransRgb[,3],.2)
-            colors <- c(greyColors,TransColors)
-            colFull = FALSE
-            cGood = TRUE
-            doDotOutline = TRUE  # outline dots in dot glyphs.
+            warning(paste("MST-06 One of the column names or numbers in the sortVar parameter is out of range or does not exist in the data: ",litsortVar,sep=""))
+            ord = order(stateNames)
+          } else {  
+            if (length(sortVar)>1)
+              {
+                 # sortVar is a vector of column numbers must do a do.call
+                  ord = do.call(order,SFrame[,sortVar])            # if field a numeric and present, sort by specified SFrame column.
+              } else {
+                  ord = order(SFrame[,sortVar[1]])
+              }
+         
           }
-      }
-  }
-
-if (!cGood)
-  {
-    warning('The colors argument is not valid. Must equal "bw", "greys" or a vector of 14 colors') 
-  }
-
-
-####
+     }
+#_______________ascend option_____________________
 #
-#  add checks to make sure colors and details are data.frames.
-#
-####
 
-#####
+   if (!(missing(ascend) || is.null(ascend) || is.na(ascend)))
+     {
+       if (is.logical(ascend))
+         {
+           if(!ascend)ord = rev(ord)
+         } else {
+           warning("MST-07 The ascend parameter is not a logical variable.")
+         }
+     }    
+
+
+#_______________SORT the data array as requested____________
 #
-# Define panel functions=====================================
-#    All of these functions are internal to the micromapST function.
+   assign("dat",SFrame[ord,])                       # data fields    "dat" has sorted data frame of the stateFrame
+   assign("stateId",stateId[ord])                   # StateID        "stateId" in order of the dat
+   assign("stateNames",stateNames[ord])             # StateNames
+   assign("datOrder",ord)                           # data order for use with panelData.
+   
+#
+
+#_______________colors parameter__________________
+#
+
+#  See below..
+
+#_______________details overrides_________________
+#
+
+#  See below.
+
+#########
+
+
+#####################
+#
+# Define panel glyph functions=====================================
+#
+#    All of these glyph creating functions are internal to the micromapST function.
 #
 
 #####
@@ -670,38 +865,58 @@ rlStateArrow = function(j){
   #  col1[j] points to the stateFrame column holding the first arrow end point.value
   #  col2[j] points to the startFrame column holding the second arrow end point value
   #
+  wnam <- names(dat)
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (col1[j] > wdim[2])
-    { 
-       warning(paste("ARROW-01 Specified column number in col1 for the first end point is out of range.",col1[j],"Not in stateFrame."))
+  if (col1[j] == 0)   # invalid name or column number
+    {
+       xmsg <- paste("ARROW-01 Specified column name or number in col1 for the first end point is out of range or does not exist: ",litcol1[j]," in stateFrame for column ",j,sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
-  if (col1[j] < 1)
+  if (col2[j] == 0)
+    { 
+       xmsg <- paste("ARROW-02 Specified column name or number in col2 for the second end point is out of range or does not exist: ",litcol2[j]," in stateFrame for column ",j,sep="")
+       warning(xmsg)
+       ErrFnd = TRUE
+    }
+  if (col1[j] > wdim[2])   # invalid name or column number
     {
-       warning(paste("ARROW-02 Specified column number in col1 for the first end point is <= 0.",col1[j],"Not in stateFrame."))
+       xmsg <- paste("ARROW-03 Specified column in col1 is too high ",col1[j], " for column ",j,". Literal=",litcol1[j],sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
   if (col2[j] > wdim[2])
-     { 
-        warning(paste("ARROW-03 Specified column number in col2 for the second end point is out of range.",col2[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-     }
-  if (col2[j] < 1)
-     {
-        warning(paste("ARROW-04 Specified column number in col2 for the second end point is <= 0.",col2[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-     }
+    { 
+       xmsg <- paste("ARROW-04 Specified column in col2 is too high ",col2[j], " for column ",j,". Literal=",litcol2[j],sep="")
+       warning(xmsg)
+       ErrFnd = TRUE
+    }
   
   if (ErrFnd) return()    # Error warning noted, return from function.
   
+  
   x1 = dat[,col1[j]]      # Arrow uses two columns from the state.frame (col1 = arrow start points
   x2 = dat[,col2[j]]      #              col2 = arrow end points.)
+  
   refval = lRefVals[j]    # change to lRefVals - JP-2010/07/23   Reference value for column
   reftxt = lRefTexts[j]   # added - JP-2010/07/23                Reference test for column
   
-  good = !is.na(x1+x2)                   # test to see if both values are present.
+  good1 = !is.na(x1)                   # test to see if both values are present.
+  good2 = !is.na(x2)
+  good = !is.na(x1+x2)   # used by code to skip bad entries.
   
+  if (!all(good1))
+    {
+       xmsg <- paste("ARROW-05 Missing value in start point data (col1) for column ",j,sep="")
+       warning(xmsg)
+    }
+  if (!all(good2))
+    {
+       xmsg <- paste("ARROW-06 Missing value in end point data (col2) for column ",j,sep="")
+       warning(xmsg)
+    }
+    
   rx = range(x1,x2,na.rm=T)              # range on of all x1 and x2 values for all states.
   
   rx = sc*diff(rx)*c(-.5,.5)+mean(rx)    # 
@@ -715,18 +930,18 @@ rlStateArrow = function(j){
   panelSelect(panels,1,j)               # Select the first panel in the column
   panelScale(rx,ry)                     # scale panels for all states, based on above calculations.  rx and ry.
   
-  mtext(lab1[j],side=3,line=line1,cex=cexText)                 # top labels (2)  (above panel # 1)
-  mtext(lab2[j],side=3,line=line2,cex=cexText)
+  mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)                 # top labels (2)  (above panel # 1)
+  mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
  
   atRx <- panelInbounds(rx)
-  axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))              # tick labels. 
+  axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))              # tick labels. 
 
   panelSelect(panels,ng,j)              # Select the last panel in the column
   panelScale(rx,ry)                     # temp set scale to 0 to 1.
   
   # padj in axis needed to make grid line label close
-  axis(side=1,mgp=mgpBottom,padj=padjBottom,tck=0,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # bottom pad
-  mtext(side=1,lab3[j],line=line3,cex=cexText)                      # bottom labels.
+  axis(side=1,mgp=mgpBottom,padj=padjBottom,tck=0,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # bottom pad
+  mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)                      # bottom labels.
 
 
   #_________________drawing loop__________________
@@ -743,19 +958,19 @@ rlStateArrow = function(j){
      panelSelect(panels,i,j)          # select current panel
      panelScale(rx,c(1-pad,ke+pad))   # scale to rx by 1,ke (pad)  (ry = effectively 0.33 to 5.67 (pad = 0.67)
                                       #   Scale = rx by 0.33 to 5.67 with arrows at 1,2,3,4,5...
-     panelFill(col=colPanelFill) 
+     panelFill(col=Panel.Fill.col) 
   
      arrLim = max(diff(rx)/par("pin")/1000) * 1.05
   
-     axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid lines in panel
+     axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid lines in panel
 
      # if a refval is provided then add line.
      if(!is.na(refval))
         {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
         }
       
-     panelOutline(col=colOutline)     # outline panel 
+     panelOutline(col=Panel.Outline.col)     # outline panel 
   
      oldpar = par(lend="butt")        # save old 
   
@@ -769,10 +984,10 @@ rlStateArrow = function(j){
           #  Alternative is to suppressWarnings...
           if(abs(x1[m]-x2[m])> arrLim){         #  If arrow length is > 1.05/1000 inch do line draw...
              arrows(x1[m],laby[k],x2[m],laby[k],col=colors[pen[k]],
-                    length=lengthArrow,lwd=lwdArrow)
+                    length=Arrow.Head.length,lwd=Arrow.lwd)
           } else {
              # length of arrow is zero, so plot a dot..
-             points(x1[m],laby[k],pch=20,cex=cexDot,col=colors[pen[k]])
+             points(x1[m],laby[k],pch=20,cex=Dot.pch.size,col=colors[pen[k]])
           }
         }  
      }   
@@ -788,7 +1003,7 @@ rlStateArrow = function(j){
   # Column done check for reference line.
   
   if(!is.na(refval)) 
-             rlStateRefText(j,reftxt)  # added reftxt field - JP-2010/07/23
+             rlStateRefText(j,reftxt)  # added reftxt field - JP-2010/07/2
 
 }
 
@@ -806,20 +1021,22 @@ rlStateBar = function(j){
   #
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (col1[j] > wdim[2])
+  if (col1[j] == 0 )
     { 
-       warning(paste("SGLBAR-01 Specified column number in col1 for the bar height value is out of range.",col1[j],"Not in stateFrame."))
+       xmsg <- paste("SGLBAR-01 Specified column name or number in col1 for the bar height value is out of range, invalid or does not exist .",litcol1[j]," in stateFrame.",sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
-  if (col1[j] < 1)
-    {
-       warning(paste("SGLBAR-02 Specified column number in col1 for the bar height value is <= 0.",col1[j],"Not in stateFrame."))
+  if (col1[j] > wdim[2] )
+    { 
+       xmsg <- paste("SGLBAR-02 Column number in col1 is too high: ",col1[j],"  Literal=",litcol1[j],sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
    
   if (ErrFnd) return ()    # error warning found - return.
 
-  py =  barht*c(-.5,-.5,.5,.5,NA)     #  barht = 2/3 (0.6667)
+  py =  Bar.barht*c(-.5,-.5,.5,.5,NA)     #  Bar.barht = 2/3 (0.6667)
   ry = c(0,1)
   refval = lRefVals[j]    # changed to lRefVals - JP-2010/07/23
   reftxt = lRefTexts[j]   # new - JP-2010/07/23
@@ -829,6 +1046,11 @@ rlStateBar = function(j){
   x = dat[,col1[j]]             # one column
   
   good = !is.na(x)
+  if (!all(good))
+    {
+      xmsg <- paste("SGLBAR-03 Missing value in bar length data (col1) for column ",j,". Literal=",litcol1[j],sep="")
+      warning(xmsg)
+    }
   
   rx = range(x,na.rm=T)         # get range of values (min-1, max-2)
   if(rx[2]<=0){                 
@@ -848,18 +1070,18 @@ rlStateBar = function(j){
 
   panelSelect(panels,1,j)                         # first panel
   panelScale(rx,ry)                               # scale to match data.
-  mtext(lab1[j],side=3,line=line1,cex=cexText)    # two column top column titles
-  mtext(lab2[j],side=3,line=line2,cex=cexText)
+  mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)    # two column top column titles
+  mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
   
   atRx = panelInbounds(rx)
-  axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # top of column axis labels
+  axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # top of column axis labels
 
   panelSelect(panels,ng,j)                        # last panel
   panelScale(rx,ry)
   # padj in axis needed to make grid line label close
   
-  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))  # both labels
-  mtext(side=1,lab3[j],line=line3,cex=cexText)    # bottom column title
+  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))  # both labels
+  mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)    # bottom column title
 
   # _______________drawing loop___________________
 
@@ -871,16 +1093,16 @@ rlStateBar = function(j){
      
      panelSelect(panels,i,j)                     # select current panel
      panelScale(rx,c(1-pad,ke+pad))              # scale to 1 or 5 entries         
-     panelFill(col=colPanelFill)
+     panelFill(col=Panel.Fill.col)
      
-     axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grids
+     axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grids
      
      # if a refval is provided then add line.
         if(!is.na(refval))
            {
-             lines(rep(refval,2),c(1-padMinus,ke+padMinus), lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+             lines(rep(refval,2),c(1-padMinus,ke+padMinus), lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
            }          
-     panelOutline(col=colOutline)                # outline full panel
+     panelOutline(col=Panel.Outline.col)                # outline full panel
      
      for (k in 1:ke){
         m = gsubs[k]                             # draw each entry (1 to ke), get index from gsubs
@@ -889,9 +1111,9 @@ rlStateBar = function(j){
            # good value - draw bars are polygons.  (why to polygon)
            polygon(c(0,val,val,0,NA),rep(laby[k],5)+py,col=colors[pen[k]]) 
            polygon(c(0,val,val,0,NA),rep(laby[k],5)+py,
-               col=colBarOutline,lwd=lwdBarOutline,density=0)
+               col=Bar.Outline.col,lwd=Bar.Outline.lwd,density=0)
         }
-        lines(c(0,0),c(1-.5*barht,ke+.5*barht),col=1) # bar base line  
+        lines(c(0,0),c(1-.5*Bar.barht,ke+.5*Bar.barht),col=1) # bar base line  
      }   
   }
 
@@ -919,13 +1141,13 @@ rlStateBoxplot = function(j,boxnam){
    boxlist = tryCatch(get(boxnam, pos=1),error=function(e) e)
    if (inherits(boxlist,"error"))
      {
-        warning(paste("BOXP-00 List ",boxnam," does not exist or is bad.",sep=""))
+        warning(paste("BOXP-01 List ",boxnam," does not exist or is bad.",sep=""))
         ErrFnd = TRUE
      
      } else {
         if (!is.list(boxlist))
           {
-             warning("BOXP-01 Data structure for Boxplots must be a list.")
+             warning("BOXP-02 Data structure for Boxplots must be a list.")
              ErrFnd = TRUE
 
           } else {
@@ -934,7 +1156,7 @@ rlStateBoxplot = function(j,boxnam){
             if (length(lnam) < 1)
               {    
                 # must have at least 1 element and name.
-	        warning("BOXP-07 No names exist on list of boxplot data.")
+	        warning("BOXP-03 No names exist on list of boxplot data.")
 	        ErrFnd = TRUE
 
               } else {
@@ -943,28 +1165,28 @@ rlStateBoxplot = function(j,boxnam){
                 if (any(is.na(match(lnam,nbox))))
                   {
                      # at least one of the list names does not match or is missing.
-                     warning("BOXP-06 The list names do not match the standard boxplot function output list names.")
+                     warning("BOXP-04 The list names do not match the standard boxplot function output list names.")
                      ErrFnd = TRUE
 
                   } else {
                     nc = dim(boxlist$stat)[2]                # number of columns in boxplot stats data list.
                     if (nc != 51)
                       {
-                         warning("BOXP-02 The $stats matrix in the boxplot data must have 51 elements - one for each state and DC.")
+                         warning("BOXP-05 The $stats matrix in the boxplot data must have 51 elements - one for each state and DC.")
                          ErrFnd = TRUE
                       }
    
                     nr = dim(boxlist$stat)[1]
                     if (nr != 5)
                       {
-                         warning("BOXP-05 The $stats matrix in the boxplot data does not have 5 values per state/DC.") 
+                         warning("BOXP-06 The $stats matrix in the boxplot data does not have 5 values per state/DC.") 
                          ErrFnd = TRUE
                       }
    
                     nn = sort(unique(boxlist$names))          # get list of unique state ids used 
                     if (length(nn) != 51)
                       {
-                         warning("BOXP-03 The boxplot list does not contain 51 unique state ids.")
+                         warning("BOXP-07 The boxplot list does not contain 51 unique state ids.")
                          ErrFnd = TRUE
                       }
    
@@ -972,7 +1194,7 @@ rlStateBoxplot = function(j,boxnam){
                     if (any(tnn))   # test to see if any did NOT match
                       {
                          lnn = paste(nn[tnn],collapse=" ")
-                         warning(paste("BOXP-04 The abbreviated state ids found in the boxplot list $names list contain invalid values: ",lnn,sep=""))
+                         warning(paste("BOXP-08 The abbreviated state ids found in the boxplot list $names list contain invalid values: ",lnn,sep=""))
                          ErrFnd = TRUE
                       }
                   }
@@ -991,9 +1213,9 @@ rlStateBoxplot = function(j,boxnam){
    # y boxplot scaling               # standard - horizontal box - no vertical 
                                      #     (y) dimensions
    py = c(-.5,-.5,.5,.5)
-   thiny = thinBox*py
-   thicky = thickBox*py 
-   medy = medianLine*c(-.5,.5)
+   thiny = BoxP.thin*py
+   thicky = BoxP.thick*py 
+   medy = BoxP.Median.Line*c(-.5,.5)
   
    ry = c(0,1)                       # used in y scaling for grid lines
   
@@ -1075,18 +1297,18 @@ rlStateBoxplot = function(j,boxnam){
    # _____________top of column______
    panelSelect(panels,1,j)   # top panel - add title.
    panelScale(rx,ry)
-   mtext(lab1[j],side=3,line=line1,cex=cexText)             # top column titles
-   mtext(lab2[j],side=3,line=line2,cex=cexText)
+   mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)             # top column titles
+   mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
    
    atRx = panelInbounds(rx)
-   axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # top axis labels
+   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # top axis labels
 
    # ____________bottom of column____
    panelSelect(panels,ng,j)  # bottom panel - add sub title and refvals.
    panelScale(rx,ry)
    # padj in axis needed to make grid line label close
-   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # bottom axis labels
-   mtext(side=1,lab3[j],line=line3,cex=cexText)             # bottom column titles
+   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # bottom axis labels
+   mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)             # bottom column titles
 
    # _______________drawing loop___________________
 
@@ -1105,17 +1327,17 @@ rlStateBoxplot = function(j,boxnam){
       
       panelSelect(panels,i,j)   # select panel for group i in column j)
       panelScale(rx,c(1-pad,ke+pad))   # set scale for panel
-      panelFill(col=colPanelFill)           # set fill for panel
+      panelFill(col=Panel.Fill.col)           # set fill for panel
       
-      axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid lines
+      axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid lines
   
      # if a refval is provided then add line.
      if(!is.na(refval))
         {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
         }
       
-      panelOutline(col=colOutline)     # outline panel
+      panelOutline(col=Panel.Outline.col)     # outline panel
 
       for (k in 1:ke){
          # cycle through row-groups and build each box plot
@@ -1131,32 +1353,32 @@ rlStateBoxplot = function(j,boxnam){
             if (colFull)
               {  # full color do the correct color
                  points(vals,rep(ht,length(vals)),pch=1,
-                    col=ifelse(useBlack,"black",colors[kp]),
-                    cex=cexOutlier,lwd=lwdOutlier)
+                    col=ifelse(BoxP.Use.Black,"black",colors[kp]),
+                    cex=BoxP.Outlier.cex,lwd=BoxP.Outlier.lwd)
               } else {
                  # Greys - do the a grey.
                  points(vals,rep(ht,length(vals)),pch=1,
-                    col=colBpGreyOutliner,
-                    cex=cexOutlier,lwd=lwdOutlier)
+                    col=BoxP.Outlier.BW.col,
+                    cex=BoxP.Outlier.cex,lwd=BoxP.Outlier.lwd)
               }
          }  
  
          # draw thin lower to upper box.
          polygon(thin[,m],rep(ht,4)+ thiny,col=colors[kp],border=NA)
-#        polygon(thin[,m],rep(ht,4)+ thiny,col=colBpOutline,density=0) # don't outline boxes
+#        polygon(thin[,m],rep(ht,4)+ thiny,col=BoxP.Outline.col,density=0) # don't outline boxes
          # draw middle think box
          polygon(thick[,m],rep(ht,4)+ thicky,col=colors[kp],border=NA)
-#        polygon(thick[,m],rep(ht,4)+ thicky,col=colBpOutline,density=0) # don't outline boxes
+#        polygon(thick[,m],rep(ht,4)+ thicky,col=BoxP.Outline.col,density=0) # don't outline boxes
 
-#        points(med[m],ht,col=colBpDotMedian,pch=pchMedian,cex=cexMedian)  # don't put a dot in.
-#        points(med[m],ht,col="black",pch=1,cex=cexMedian)
+#        points(med[m],ht,col=BoxP.Median.Dot.col,pch=BoxP.Median.Dot.pch,cex=BoxP.Median.Dot.cex)  # don't put a dot in.
+#        points(med[m],ht,col="black",pch=1,cex=BoxP.Median.Dot.cex)
 
-#        polygon(med[m]+px,ht+medianLine*dy,lwd=1,density=0)   # median line?
+#        polygon(med[m]+px,ht+BoxP.Median.Line*dy,lwd=1,density=0)   # median line?
 
 #        Lines looked crooked
          segments(med[m],ht+medy[1],med[m],ht+medy[2],         # use segment line.
-               col=colBpMedian,lwd=lwdMedian)
-#        lines(rep(med[m],2),ht+medy,col=colBpMedian,lwd=lwdMedian)
+               col=BoxP.Median.col,lwd=BoxP.Median.Dot.lwd)
+#        lines(rep(med[m],2),ht+medy,col=BoxP.Median.col,lwd=BoxP.Median.Dot.lwd)
       }   
    }
    par(oldpar)
@@ -1188,14 +1410,16 @@ rlStateDot = function(j){
   #
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (col1[j] > wdim[2])
+  if (col1[j] == 0)
     { 
-       warning(paste("SGLDOT-01 Specified column number in col1 for the dot value is out of range.",col1[j],"Not in stateFrame."))
+       xmsg<-paste("SGLDOT-01 Specified column name or number in col1 for the dot value is out of range or does not exist.",litcol1[j]," in stateFrame in column ",j,sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
-  if (col1[j] < 1)
-    {
-       warning(paste("SGLDOT-02 Specified column number in col1 for the dot value is <= 0.",col1[j],"Not in stateFrame."))
+  if (col1[j] > wdim[2])
+    { 
+       xmsg <- paste("SGLDOT-02 Specified column name or number in col1 is too high: ",col1[j]," for column ",j,". Literal=",litcol1[j],sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
   
@@ -1206,7 +1430,11 @@ rlStateDot = function(j){
   x = as.double(as.vector(dat[,col1[j]]))   # one value - the dot.
  
   good = !is.na(x)
- 
+  if (!all(good))
+    {
+       xmsg<-paste("SGLDOT-03 Missing value in dot data (col1) for column ",j,". Literal=",litcol1[j],sep="")
+       warning(xmsg)
+    }
   refval = lRefVals[j]    # get reference value for this column, changed 
                          #   to lRefVals - JP-2010/07/23
   reftxt = lRefTexts[j]   # new - JP-2010/07/23
@@ -1220,17 +1448,17 @@ rlStateDot = function(j){
   # ____________labeling axis_______________
   panelSelect(panels,1,j)
   panelScale(rx,ry)
-  mtext(lab1[j],side=3,line=line1,cex=cexText)   # top column titles
-  mtext(lab2[j],side=3,line=line2,cex=cexText)
+  mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)   # top column titles
+  mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
 
   atRx = panelInbounds(rx)
-  axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))  # top axis labels
+  axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))  # top axis labels
  
   panelSelect(panels,ng,j)
   panelScale(rx,ry)
   # padj in axis needed to make grid line label close
-  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))  # bottom axis labels
-  mtext(side=1,lab3[j],line=line3,cex=cexText)   # bottom column titles
+  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))  # bottom axis labels
+  mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles
 
   # _______________drawing loop___________________
   for (i in 1:ng){
@@ -1240,25 +1468,25 @@ rlStateDot = function(j){
      laby = ke:1 
      panelSelect(panels,i,j)
      panelScale(rx,c(1-pad,ke+pad))
-     panelFill(col=colPanelFill)
-     axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid
+     panelFill(col=Panel.Fill.col)
+     axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid
      
      # if a refval is provided then add line.
      if(!is.na(refval))
         {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
         }
      
-     panelOutline(colOutline) 
+     panelOutline(Panel.Outline.col) 
      for (k in 1:ke){
         # step through values for this panel
         m=gsubs[k]
         if(good[m]){    # if good - plot dot.
            if (doDotOutline) 
              {
-               points(x[m],laby[k],pch=pchDot,cex=cexDot,lwd=lwdDotOutline, col=colDotOutline,bg=colors[pen[k]])         
+               points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,lwd=Dot.Outline.lwd, col=Dot.Outline.col,bg=colors[pen[k]])         
              } else {
-               points(x[m],laby[k],pch=pchDot,cex=cexDot,col=NA, bg=colors[pen[k]])
+               points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,col=NA, bg=colors[pen[k]])
              }
         }
         
@@ -1291,37 +1519,40 @@ rlStateDotConf = function(j){
   
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (col1[j] > wdim[2])
+  if (col1[j] == 0 )
     { 
-       warning(paste("DOTCONF-01 Specified column number in col1 for dot values is out of range.",col1[j],"Not in stateFrame."))
+       warning(paste("DOTCONF-01 Specified column name or number in col1 for dot values is out of range or does not exist: ",litcol1[j]," in stateFrame for column ",j,sep=""))
        ErrFnd = TRUE
     }
-  if (col1[j] < 1)
-    {
-       warning(paste("DOTCONF-02 Specified column number in col1 for dot values is <= 0.",col1[j],"Not in stateFrame."))
-       ErrFnd = TRUE
-    }
-  if (col2[j] > wdim[2])
+  if (col2[j] == 0 )
     { 
-       warning(paste("DOTCONF-03 Specified column number in col2 for lower confidence values is out of range.",col2[j],"Not in stateFrame."))
+       warning(paste("DOTCONF-02 Specified column name or number in col2 for lower confidence values is out of range or does not exist: ",litcol2[j]," in stateFrame for column ",j,sep=""))
        ErrFnd = TRUE
     }
-  if (col2[j] < 1)
-    {
-       warning(paste("DOTCONF-04 Specified column number in col2 for lower confidence values is <= 0.",col2[j],"Not in stateFrame."))
-       ErrFnd = TRUE
-    }
-  if (col3[j] > wdim[2])
+  if (col3[j] == 0 )
     { 
-       warning(paste("DOTCONF-03 Specified column number in col2 for upper confidence values is out of range.",col2[j],"Not in stateFrame."))
+       warning(paste("DOTCONF-03 Specified column name or number in col3 for upper confidence values is out of range or does not exist: ",litcol3[j]," in stateFrame for column ",j,sep=""))
        ErrFnd = TRUE
     }
-  if (col3[j] < 1)
-    {
-       warning(paste("DOTCONF-04 Specified column number in col2 for upper confidence values is <= 0.",col2[j],"Not in stateFrame."))
+  if (col1[j] > wdim[2] )
+    { 
+       xmsg<-paste("DOTCONF-04 Specified column number is too high for col1: ",col1[j],". Literal=",litcol1[j],sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
-
+  if (col2[j] > wdim[2] )
+    { 
+       xmsg<-paste("DOTCONF-05 Specified column number is too high for col2: ",col2[j],". Literal=",litcol2[j],sep="")
+       warning(xmsg)
+       ErrFnd = TRUE
+    }
+  if (col3[j] > wdim[2] )
+    { 
+       xmsg<-paste("DOTCONF-06 Specified column number is too high for col3: ",col3[j],". Literal=",litcol3[j],sep="")
+       warning(xmsg)
+       ErrFnd = TRUE
+    }
+ 
   if (ErrFnd) return ()        # error warning found - return
  
   x = dat[,col1[j]]              # Col 1 = DOT - median/mean
@@ -1329,9 +1560,25 @@ rlStateDotConf = function(j){
   upper = dat[,col3[j]]          # Col 3 = upper
  
   good1 = !is.na(x)              # Good Col1 values (dot value)
-  good2 = !is.na(upper+lower)    # Good col2,3 values (upper and lower)
- 
-  if(!all(good2))warning("Missing Value in Confidence Intervals") 
+  good2L = !is.na(lower)         # Good col2 values (lower)
+  good2U = !is.na(upper)         # Good col3 values (upper)
+  good2 = !is.na(upper+lower)
+  
+  if (!all(good1))
+    {
+      xmsg <- paste("DOTCONF-07 Missing value in median for column ",j,sep="")
+      warning(xmsg)
+    }
+  if (!all(good2L))
+    {
+      xmsg <- paste("DOTCONF-08 Missing value in lower confidence interval for column ",j,sep="")
+      warning(xmsg)
+    }
+  if (!all(good2U))
+    {
+      xmsg <- paste("DOTCONF-09 Missing value in upper confidence interval for column ",j,sep="")
+      warning(xmsg)
+    }
  
   refval = lRefVals[j]           # changed to lRefVals, JP-2010/07/23
   reftxt = lRefTexts[j]          # new - JP-2010/07/23
@@ -1349,18 +1596,18 @@ rlStateDotConf = function(j){
 
   panelSelect(panels,1,j)     # labels (line 1, line 2 and top axis)
   panelScale(rx,ry)
-  mtext(lab1[j],side=3,line=line1,cex=cexText)    # top column titles
-  mtext(lab2[j],side=3,line=line2,cex=cexText)
+  mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)    # top column titles
+  mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
   
   atRx = panelInbounds(rx)
-  axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))  # top axis labels
+  axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))  # top axis labels
   
   # panel ng has bottom axis and line 3 + later image.
   panelSelect(panels,ng,j)    # labels (bottom -> axis and line 3)
   panelScale(rx,ry)
   # padj in axis needed to make grid line label close
-  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # bottom axis labels
-  mtext(side=1,lab3[j],line=line3,cex=cexText)  # bottom column title
+  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # bottom axis labels
+  mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)  # bottom column title
  
   # line 4 is added if refval is present
 
@@ -1373,16 +1620,16 @@ rlStateDotConf = function(j){
      laby = ke:1
      panelSelect(panels,i,j)   
      panelScale(rx,c(1-pad,ke+pad))   # Adjusted scale for interior
-     panelFill(col=colPanelFill)
-     axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # vertical grid lines
+     panelFill(col=Panel.Fill.col)
+     axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # vertical grid lines
      
      # if a refval is provided then add line.
      if(!is.na(refval))
         {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
         }
      
-     panelOutline(col=colOutline)     # outline scaled image.
+     panelOutline(col=Panel.Outline.col)     # outline scaled image.
      for (k in 1:ke){ 
         m = gsubs[k]
         
@@ -1393,20 +1640,20 @@ rlStateDotConf = function(j){
         if(good2[m])  # if valid upper value.
           {
              lines(c(lower[m],upper[m]),rep(laby[k],2),
-                   col=colors[pen[k]],lwd=lwdConf)
+                   col=colors[pen[k]],lwd=Dot.conf.lwd)
           }
         if (doDotOutline) 
           {
-             points(x[m],laby[k],pch=pchDot,cex=cexDot,lwd=lwdDotOutline,col=colDotOutline,bg=colors[pen[k]])         
+             points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,lwd=Dot.Outline.lwd,col=Dot.Outline.col,bg=colors[pen[k]])         
           } else {
-             points(x[m],laby[k],pch=pchDot,cex=cexDot,col=NA, bg=colors[pen[k]])
+             points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,col=NA, bg=colors[pen[k]])
           }
      }   
 
-     #   segments(lower[gsubs],laby,upper[gsubs],laby,col=color[pen],lwd=lwdConf)
+     #   segments(lower[gsubs],laby,upper[gsubs],laby,col=color[pen],lwd=Dot.conf.lwd)
      #   points(x[gsubs],laby,pch=pch,cex=dotCex,col=colors[pen])
-     #   points(x[gsubs],laby,pch=1,cex=cexDot,col=colDotOutline,
-     #         lwd=lwdDotOutline)
+     #   points(x[gsubs],laby,pch=1,cex=Dot.pch.size,col=Dot.Outline.col,
+     #         lwd=Dot.Outline.lwd)
    }
 
   # ____________________________PanelOutline____________________
@@ -1429,45 +1676,60 @@ rlStateDotConf = function(j){
 rlStateDotSe = function(j){
   #   j = current panel column
   #
-  #   col1 indicates the column number for the dot value in the stateFrame.
+  #   col1 indicates the column number for the dot value in the stamicroteFrame.
   #   col2 indicates the column number for the SE value in the stateFrame.
   
   wdim <- dim(dat)
   ErrFnd = FALSE
   
-  if (col1[j] > wdim[2])
+  if (col1[j] == 0 )
     { 
-       warning(paste("DOTSE-01 Specified column number in col1 for dot values is out of range.",col1[j],"Not in stateFrame."))
+       warning(paste("DOTSE-01 Specified column name or number in col1 for dot values is out of range, invalid, or does not exist .",litcol1[j]," in stateFrame.",sep=""))
        ErrFnd = TRUE
     }
-  if (col1[j] < 1)
-    {
-       warning(paste("DOTSE-02 Specified column number in col1 for dot values is <= 0.",col1[j],"Not in stateFrame."))
-       ErrFnd = TRUE
-    }
-  if (col2[j] > wdim[2])
+  if (col2[j] == 0 )
     { 
-       warning(paste("DOTSE-03 Specified column number in col2 for SE values is out of range.",col2[j],"Not in stateFrame."))
+       warning(paste("DOTSE-02 Specified column name or number in col2 for SE values is out of range, invalid, or does not exist .",litcol2[j]," in stateFrame.",sep=""))
        ErrFnd = TRUE
     }
-  if (col2[j] < 1)
-    {
-       warning(paste("DOTSE-04 Specified column number in col2 for SE values is <= 0.",col2[j],"Not in stateFrame."))
+  if (col1[j] > wdim[2] )
+    { 
+       xmsg<-paste("DOTSE-03 Column number for col1 data is too high: ",col1[j]," for column ",j,". Literal=",litcol1[j],sep="")
+       warning(xmsg)
+       ErrFnd = TRUE
+    }
+  if (col2[j] > wdim[2] )
+    { 
+       xmsg<-paste("DOTSE-04 Column number for col1 data is too high: ",col2[j]," for column ",j,". Literal=",litcol2[j],sep="")
+       warning(xmsg)
        ErrFnd = TRUE
     }
 
   if (ErrFnd) return ()   # error warning found - return
   
   x = dat[,col1[j]]
-  zval = qnorm(.5+conf/200)
+  zval = qnorm(.5+Dot.conf/200)
   inc = zval*dat[,col2[j]]
   upper = x+inc
   lower = x-inc
  
   good1 = !is.na(x)
+  if (!all(good1))
+    {
+      xmsg <- paste("DOTSE-05 Missing data in the dot median data (col1) for column ",j,sep="")
+      warning(xmsg)
+    }
   good2 = !is.na(upper)
- 
-  if(any(is.na(inc)))warning("Missing Value in Standard Errors")
+  if (!all(good2))
+     { 
+       xmsg <- paste("DOTSE-06 Missing data in the SE data (col2) for column ",j,sep="")
+       warning(xmsg)
+     }
+  
+  if(any(is.na(inc)))
+    {
+       warning(paste("DOTSE-07 Missing Value in Standard Errors for column ",j,sep=""))
+    }
   refval = lRefVals[j]          # changed to lRefVals, JP-2010/07/23
   reftxt = lRefTexts[j]         # new - JP-2010/07/23
 
@@ -1482,17 +1744,16 @@ rlStateDotSe = function(j){
 
   panelSelect(panels,1,j)
   panelScale(rx,ry)
-  mtext(lab1[j],side=3,line=line1,cex=cexText)   # top column titles
-  mtext(lab2[j],side=3,line=line2,cex=cexText)
+  mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)   # top column titles
+  mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
   
   atRx = panelInbounds(rx)
-  axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))  # top axis labels
-
+  axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))  # top axis labels
   panelSelect(panels,ng,j)
   panelScale(rx,ry)
   # padj in axis needed to make grid line label close
-  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # bottom axis labels
-  mtext(side=1,lab3[j],line=line3,cex=cexText)   # bottom column titles
+  axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # bottom axis labels
+  mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles
 
 #__________________drawing loop________________
 
@@ -1503,30 +1764,30 @@ rlStateDotSe = function(j){
      laby = ke:1 
      panelSelect(panels,i,j)
      panelScale(rx,c(1-pad,ke+pad))
-     panelFill(col=colPanelFill)
-     axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid
+     panelFill(col=Panel.Fill.col)
+     axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid
      
      # if a refval is provided then add line.
      if(!is.na(refval))
         {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
         }
      
-     panelOutline(colOutline)
+     panelOutline(Panel.Outline.col)
      for (k in 1:ke){
         m = gsubs[k]
         if(good2[m])  # if upper value good.
           {
              lines(c(lower[m],upper[m]),rep(laby[k],2),
-                   col=colors[pen[k]],lwd=lwdConf)
+                   col=colors[pen[k]],lwd=Dot.conf.lwd)
           }
         if(good1[m])
           {
             if (doDotOutline) 
              {
-               points(x[m],laby[k],pch=pchDot,cex=cexDot,lwd=lwdDotOutline,col=colDotOutline,bg=colors[pen[k]])         
+               points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,lwd=Dot.Outline.lwd,col=Dot.Outline.col,bg=colors[pen[k]])         
              } else {
-               points(x[m],laby[k],pch=pchDot,cex=cexDot,col=NA, bg=colors[pen[k]])
+               points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,col=NA, bg=colors[pen[k]])
              }
           }  
      }   
@@ -1551,7 +1812,7 @@ rlStateDotSe = function(j){
 rlStateId = function(j){
   #  j = panel column number
   
-  py = barht*c(-.5,-.5,.5,.5,NA)
+  py = Bar.barht*c(-.5,-.5,.5,.5,NA)
   px = c(.04,.095,.095,.04,NA)
   idstart = .137
 
@@ -1564,8 +1825,8 @@ rlStateId = function(j){
 
   panelSelect(panels,1,j)      # start at I = 1, but j= is the current column.
   panelScale(rx,ry)
-  mtext('U.S.',side=3,line=line1,cex=cexText)
-  mtext('States',side=3,line=line2,cex=cexText)
+  mtext('U.S.',side=3,line=Title.Line.1.pos,cex=Text.cex)
+  mtext('States',side=3,line=Title.Line.2.pos,cex=Text.cex)
 
 # Cycle thought the GROUPS (ng)
   for (i in 1:ng){
@@ -1578,8 +1839,8 @@ rlStateId = function(j){
      panelScale(rx,c(1-npad,ke+npad))
      gnams = stateNames[gsubs]
      polygon(rep(px,ke),rep(laby,rep(5,ke)) + py,col=colors[pen])
-     polygon(rep(px,ke),rep(laby,rep(5,ke)) + py,col=colIdOutline,density=0)
-     text(rep(idstart,ke), laby-idty, gnams, adj=c(0,0), cex=cexText,xpd=T)
+     polygon(rep(px,ke),rep(laby,rep(5,ke)) + py,col=Id.Dot.Outline.col,density=0)
+     text(rep(idstart,ke), laby-Id.Text.adj, gnams, adj=c(0,0), cex=Text.cex,xpd=T)
   }
 
   # No reference values for this type of column
@@ -1598,7 +1859,7 @@ rlStateIdDot = function(j){
 
   #________________ Scaling _______________
 
-  #  py = barht*c(-.5,-.5,.5,.5,NA)  # form the box... (not used its a PCH)
+  #  py = Bar.barht*c(-.5,-.5,.5,.5,NA)  # form the box... (not used its a PCH)
   rx = c(0,1)
   ry = c(0,1)
   idstart = .137
@@ -1608,8 +1869,8 @@ rlStateIdDot = function(j){
 
   panelSelect(panels,1,j)
   panelScale(rx,ry)
-  mtext('U.S.',side=3,line=line1,cex=cexText)
-  mtext('States',side=3,line=line2,cex=cexText)
+  mtext('U.S.',side=3,line=Title.Line.1.pos,cex=Text.cex)
+  mtext('States',side=3,line=Title.Line.2.pos,cex=Text.cex)
  
   for (i in 1:ng){
      gsubs = ib[i]:ie[i]
@@ -1619,9 +1880,9 @@ rlStateIdDot = function(j){
      panelSelect(panels,i,j)
      panelScale(rx,c(1-pad,ke+pad))
      gnams = stateNames[gsubs]
-     points(dotstart,laby,pch=idDotPch,col=colors[pen],cex=cexDot)
-     #points(dotstart,laby,pch=1,col=colDotOutline,cex=cexDot)
-     text(rep(idstart,ke),laby+.1,gnams,adj=0,cex=cexText)
+     points(dotstart,laby,pch=Id.Dot.pch,col=colors[pen],cex=Dot.pch.size)
+     #points(dotstart,laby,pch=1,col=Dot.Outline.col,cex=Dot.pch.size)
+     text(rep(idstart,ke),laby+.1,gnams,adj=0,cex=Text.cex)
   }
 
   #  No reference values for this type of column.
@@ -1653,8 +1914,8 @@ rlStateMap = function(j){
   panelScale()
   par(xpd=T)
   
-  mtext("Highlighted",side=3,line=line1,cex=cexText)
-  mtext("States",side=3,line=line2,cex=cexText)
+  mtext("Highlighted",side=3,line=Title.Line.1.pos,cex=Text.cex)
+  mtext("States",side=3,line=Title.Line.2.pos,cex=Text.cex)
 
   # Drawing Loop
 
@@ -1663,10 +1924,10 @@ rlStateMap = function(j){
     if(i==6){                   # line break in maps.   Group 6 - middle group of 11.
       panelSelect(panels,6,j)
       panelScale()
-      panelFill (col=colPanelFill)
+      panelFill (col=Panel.Fill.col)
       
       panelOutline()
-      text (.5,.55,'Median For Sorted Panel',cex= cexText*0.8)
+      text (.5,.55,'Median For Sorted Panel',cex= Text.cex*0.8)
       next  # skip to next FOR item
     }
     
@@ -1674,41 +1935,45 @@ rlStateMap = function(j){
     panelScale(rxpoly,rypoly)
     gsubs = ib[i]:ie[i]
 
+    #  Add median state coloring to the row above and below the median line.
     if(i==5) gsubs = c(gsubs,26)  # slot 5 - add 26 to this group
     if(i==7) gsubs = c(gsubs,26)  # slot 7 - add 26 to this group
+    #    26 (median) must always be the 6th name on the list to get painted black.
   
-    gnams = stateId[gsubs]
+    gnams = stateId[gsubs]    # index to state id's (translation)
   
     # now find the state regions to plot
     
-    back = is.na(match(rlStateVisBorders$st,gnams))
+    back = is.na(match(rlStateVisBorders$st,gnams))   # list of states not involved.
     
     if(any(back)){
       polygon(rlStateVisBorders$x[back], rlStateVisBorders$y[back],
-          density=-1, col=colMapBackgr, border=FALSE)         # fill in states
+          density=-1, col=Map.Bg.col,  border=FALSE)         # fill in states
       polygon(rlStateVisBorders$x[back], rlStateVisBorders$y[back],
-          col=colLineBackgr, density=0, lwd=lwdBackGr)     # outline states
+          density=0,  col=Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)       # outline states
     }
 
-    fore = !back
-    pen = match(bnd.ord,gnams,nomatch=0)
+    fore = !back    # reverse to list of states involved in this row. (by definition this is 5 states.
+    
+    pen = match(bnd.ord,gnams,nomatch=0)      
     pen = pen[pen>0]
     
     polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
-          density=-1, col=colors[pen], border=FALSE)        # fill in states
+          density=-1, col=colors[pen], border=FALSE)        # fill in states (1 to 5, 6)
     
     polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
-          density=0,  col=colLineForegr, lwd=lwdForeGr) # outline states
+          density=0,  col=Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)     # outline states
   
     polygon(rlStateNationVisBorders$x, rlStateNationVisBorders$y,
-          density=0, col=colLineNation, lwd=lwdNation)  # outside US boundary
+          density=0, col=Map.Nation.Line.col, lwd=Map.Nation.Line.lwd)      # outside US boundary
   
     # might be made a function
-    if(i==1){
-       text(135,31,'DC',cex=cexState,adj=.5, col=1)
-       text(22, 17,'AK',cex=cexState,adj=.5, col=1)
-       text(47, 8, 'HI',cex=cexState,adj=.5, col=1)
-    }
+    if (i==1)
+      {
+        text(135,31,'DC',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(22, 17,'AK',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(47, 8, 'HI',cex=Map.State.Spec.cex,adj=.5, col=1)
+      }
   
   }  # i loop
   
@@ -1725,11 +1990,10 @@ rlStateMap = function(j){
 rlStateMapCum = function(j){
 
   # Works using state abbreviations
-  # bnd.ord gives abbreviations in the
-  #           the boundary are stored.
+  # bnd.ord gives abbreviations in the order the boundary are stored.
   # stateId give the abbreviations in the order plotted 
 
-  bnd.ord = rlStateVisBorders$st[is.na(rlStateVisBorders$x)] # State abbrev
+  bnd.ord = rlStateVisBorders$st[is.na(rlStateVisBorders$x)]   # State abbrev for states with boundaries
   rxpoly = range(rlStateVisBorders$x,na.rm=TRUE)
   rypoly = range(rlStateVisBorders$y,na.rm=TRUE)
 
@@ -1745,12 +2009,12 @@ rlStateMapCum = function(j){
   y.sep = .19*legfactor + 0.05            #  .185
   box.y = 1.025*legfactor +c(y.ht,rev(y.ht),NA) + 0.07 - 0.06  ## down 0.06
 
-  polygon(box.x,c(box.y,box.y+y.sep),col=c(colMapBackgr,colors[7]))
+  polygon(box.x,c(box.y,box.y+y.sep),col=c(Map.Bg.col,colors[7]))
   polygon(box.x,c(box.y,box.y+y.sep),col=1,density=0)
   
-  mtext("Cumulative Maps",side=3,line=line1,cex=cexText)
-  mtext('States Featured Above',side=3,line=line2,at=.20,cex=cexText,adj=0)
-  mtext('States Featured Below',side=3,line=lineTiclab,at=.20,cex=cexText,adj=0)
+  mtext("Cumulative Maps",side=3,line=Title.Line.1.pos,cex=Text.cex)
+  mtext('States Featured Above',side=3,line=Title.Line.2.pos,at=.20,cex=Text.cex,adj=0)
+  mtext('States Featured Below',side=3,line=lineTiclab,at=.20,cex=Text.cex,adj=0)
 
   # Drawing Loop
 
@@ -1759,47 +2023,65 @@ rlStateMapCum = function(j){
      if(i==6){
         panelSelect(panels,6,j)
         panelScale()
-        panelFill (col=colPanelFill)
+        panelFill (col=Panel.Fill.col)
         panelOutline()
-        text (.5,.55,'Median For Sorted Panel',cex=cexText)
+        text (.5,.55,'Median For Sorted Panel',cex=Text.cex)
         next
      }
      panelSelect(panels,i,j)
      panelScale(rxpoly,rypoly)
      gsubs = ib[i]:ie[i]
-
+     
+     #  cont is list of states up to and including this row.
      if(i < 5)  cont = stateId[1:(5*i)] else cont = stateId[1:(5*i-4)]
+                 # i = 1,   cont = stateId[1:5]
+                 # i = 2,   cont = stateId[1:10]
+                 # i = 7,   cont = stateId[1:31]  (5*7=35-4=31) (-4 compensates for the median row.
+                 # i = 11,  cont = stateId[1:51]
+                 
      if(i == 5) {gsubs = c(gsubs,26); cont = stateId[1:26]}
      if(i == 7) gsubs = c(gsubs,26) 
 
-     gnams = stateId[gsubs]
+     gnams = stateId[gsubs]    # translate from sequence number to sorted order of states (abbrev)
+                       # list of states in this row.
 
      # now find the state regions to plot
-     back = is.na(match(rlStateVisBorders$st,cont))
-     if(any(back)){
-           polygon(rlStateVisBorders$x[back],rlStateVisBorders$y[back],
-               density=-1, col=colMapBackgr,border=F)         # fill in states
-           polygon(rlStateVisBorders$x[back], rlStateVisBorders$y[back],
-               density=0,  col=colLineBackgr,lwd=lwdBackGr) # outline states
-     }
+ 
+     back = is.na(match(rlStateVisBorders$st,cont))   # list of states not reference or used yet...
+              # back = TRUE is no match between boundary file and cont - needing background color
+ 
+     if (any(back))
+       {
+         polygon(rlStateVisBorders$x[back],rlStateVisBorders$y[back],
+               density=-1, col=Map.Bg.col, border=F)        # fill in states with general fill.
+         polygon(rlStateVisBorders$x[back], rlStateVisBorders$y[back],
+               density=0,  col=Map.Bg.Line.col,lwd=Map.Bg.Line.lwd)   # outline states
+       }
 
-     fore = !back
-     pen = match(bnd.ord,gnams,nomatch=0)
-     pen = ifelse(pen==0 & match(bnd.ord,cont,nomatch=0)>0,7, pen)
-     pen = pen[pen>0]
+     fore = !back                                     # fore is a list of active states from other rows and this one..
+     
+     pen = match(bnd.ord,gnams,nomatch=0)             # match current states in row to boundary list, if found = TRUE, otherwize = 0 (no boundary).
+                                                      # list is 51 long.
+                                                      
+     pen = ifelse(pen==0 & match(bnd.ord,cont,nomatch=0)>0, 7, pen)   # colors 1-6 or 7.
+           # if pen=0 (not in this row) and in cont list (used), then use color 7.
+     
+     pen = pen[pen>0]                                 # colors - Categories (5), Black (1), used (1) = 7 total
+     
      polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
-        density=-1,col=colors[pen], border=F)           # fill in states
+        density=-1, col=colors[pen],   border=F)           # fill in states
      polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
-        density=0, col=colLineForegr, lwd=lwdForeGr)    # outline states
+        density=0,  col=Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)      # outline states
 
+     
      polygon(rlStateNationVisBorders$x,rlStateNationVisBorders$y,
-        col=colLineNation,density=0,lwd=lwdNation)      # US outside boundary
+        col=Map.Nation.Line.col,density=0,lwd=Map.Nation.Line.lwd)      # US outside boundary
 
      # might be made a function
      if(i==1){
-        text(135,31,'DC',cex=cexState,adj=.5, col=1)
-        text(22,17,'AK',cex=cexState,adj=.5, col=1)
-        text(47,8,'HI',cex=cexState,adj=.5, col=1)
+        text(135,31,'DC',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(22,17,'AK',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(47,8,'HI',cex=Map.State.Spec.cex,adj=.5, col=1)
      }
 
    }  # i loop
@@ -1837,63 +2119,71 @@ rlStateMapMedian = function(j){
   y.sep = .19*legfactor + 0.05    # .185
   box.y = 1.025*legfactor +c(y.ht,rev(y.ht),NA) + 0.07 - 0.03
   
-  polygon(box.x,c(box.y,box.y+y.sep),col=c(colMapBackgr,colors[7]))
+  polygon(box.x,c(box.y,box.y+y.sep),col=c(Map.Bg.col,colors[7]))
   polygon(box.x,c(box.y,box.y+y.sep),col=1,density=0)
 
-  mtext("Median Based Contours",side=3,line=line1,cex=cexText)
-  mtext('States In This Half',side=3,line=line2,at=.26,cex=cexText,adj=0)
-  mtext('States In Other Half',side=3,line=lineTiclab,at=.26,cex=cexText,adj=0)
+  mtext("Median Based Contours",side=3,line=Title.Line.1.pos,cex=Text.cex)
+  mtext('States In This Half',side=3,line=Title.Line.2.pos,at=.26,cex=Text.cex,adj=0)
+  mtext('States In Other Half',side=3,line=lineTiclab,at=.26,cex=Text.cex,adj=0)
 
   # Drawing Loop
 
   for (i in 1:ng){
 
-     if(i==6){
-        panelSelect(panels,6,j)
-        panelScale()
-        panelFill (col=colPanelFill)
-        panelOutline()
-        text (.5,.58,'Median For Sorted Panel',cex=cexText)
-        next  
-     }
+     if (i==6)
+       {
+         panelSelect(panels,6,j)
+         panelScale()
+         panelFill (col=Panel.Fill.col)
+         panelOutline()
+         text (.5,.58,'Median For Sorted Panel',cex=Text.cex)
+         next   # exit for loop  
+       }
      panelSelect(panels,i,j)
      panelScale(rxpoly,rypoly)
      gsubs = ib[i]:ie[i]
+
      if(i <= 5) cont = stateId[1:26] else cont = stateId[26:51]
+
      if(i == 5) gsubs = c(gsubs,26)
      if(i == 7) gsubs = c(gsubs,26) 
+
      #  gsubs = current state list
      #  cont  = state list to be colored cream.
 
      gnams = stateId[gsubs]
 
      # now find the state regions to plot
-     back = is.na(match(rlStateVisBorders$st,cont))
+     back = is.na(match(rlStateVisBorders$st,cont))   # every state not active.
+   
      if(any(back)){
           polygon(rlStateVisBorders$x[back],rlStateVisBorders$y[back],
-             density=-1,col=colMapBackgr,border=F)          # fill in states
+             density=-1,col=Map.Bg.col,border=F)          # fill in states
           polygon(rlStateVisBorders$x[back], rlStateVisBorders$y[back],
-             density=0, col=colLineBackgr,lwd=lwdBackGr) # outline states
+             density=0, col=Map.Bg.Line.col,lwd=Map.Bg.Line.lwd) # outline states
 
      }
 
      fore = !back     # 
+     
      pen = match(bnd.ord,gnams,nomatch=0)
-     pen = ifelse(pen==0 & match(bnd.ord,cont,nomatch=0)>0,7, pen)
+     
+     pen = ifelse(pen==0 & match(bnd.ord,cont,nomatch=0)>0, 7, pen)
+     
      pen = pen[pen>0]
 
      polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
         density=-1,col=colors[pen], border=F)       # fill in states
      polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
-        density=0, col=colLineForegr, lwd=lwdForeGr) # outline states
+        density=0, col=Map.Fg.Line.col, lwd=Map.Fg.Line.lwd) # outline states
 
      polygon(rlStateNationVisBorders$x,rlStateNationVisBorders$y,
-        density=0, col=colLineNation,lwd=lwdNation)  # outside US boundary
+        density=0, col=Map.Nation.Line.col,lwd=Map.Nation.Line.lwd)  # outside US boundary
 
      if(i==1){
-        text(135,31,'DC',cex=cexState,adj=.5, col=1)
-        text(22,17,'AK',cex=cexState,adj=.5, col=1)
-        text(47,8,'HI',cex=cexState,adj=.5, col=1)
+        text(135,31,'DC',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(22,17,'AK',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(47,8,'HI',cex=Map.State.Spec.cex,adj=.5, col=1)
      }
 
    }   # i loop
@@ -1939,11 +2229,11 @@ rlStateMapTail = function(j){
   polygon(box.x,box.y+y.sep,col=colors[7])
   polygon(box.x,box.y+y.sep,col=1,density=0)
 
-  mtext("Two Ended Cumulative Maps",side=3,line=line1,cex=cexText)
-  mtext('States Highlighted',side=3,line=line2,at=.25,cex=cexText,adj=0)
+  mtext("Two Ended Cumulative Maps",side=3,line=Title.Line.1.pos,cex=Text.cex)
+  mtext('States Highlighted',side=3,line=Title.Line.2.pos,at=.25,cex=Text.cex,adj=0)
   
   #  JP - removed - temp
-  #  mtext('Further From Median',side=3,line=lineTiclab,at=.15,cex=cexText,adj=0)
+  #  mtext('Further From Median',side=3,line=lineTiclab,at=.15,cex=Text.cex,adj=0)
 
   # Drawing Loop
 
@@ -1952,36 +2242,43 @@ rlStateMapTail = function(j){
      if(i==6){
         panelSelect(panels,6,j)
         panelScale()
-        panelFill (col=colPanelFill)
+        panelFill (col=Panel.Fill.col)
         panelOutline()
-        text (.5,.58,'Median For Sorted Panel',cex=cexText)
+        text (.5,.58,'Median For Sorted Panel',cex=Text.cex)
         next
      }
      panelSelect(panels,i,j)  
      panelScale(rxpoly,rypoly)
      # get list of states in this group.
      gsubs = ib[i]:ie[i]
+     
      if(i < 5) cont = stateId[1:(5*i)]
+     
      if(i==5)  {gsubs = c(gsubs,26); cont = stateId[1:26]}
      if(i==7)  {gsubs = c(gsubs,26); cont = stateId[26:51]} 
+     
      if(i > 7) cont = stateId[(5*i-8):51]
+     
      # get list of group state names 
      gnams = stateId[gsubs]
 
      # now find the state regions to plot
      #   plot states with cream filling (reported states)
+     
      back = is.na(match(rlStateVisBorders$st,cont))
+     
      if(any(back)){
          # paint fill
          polygon(rlStateVisBorders$x[back],rlStateVisBorders$y[back],
-              density=-1,col=colMapBackgr,border=F)          # fill in states
+              density=-1,col=Map.Bg.col,border=F)          # fill in states
          # paint lines
          polygon(rlStateVisBorders$x[back], rlStateVisBorders$y[back],
-              density=0, col=colLineBackgr,lwd=lwdBackGr) # outline states
+              density=0, col=Map.Bg.Line.col,lwd=Map.Bg.Line.lwd) # outline states
      }
 
      fore = !back
      #  current 5 states with colors.
+     
      pen = match(bnd.ord,gnams,nomatch=0)
      pen = ifelse(pen==0 & match(bnd.ord,cont,nomatch=0)>0,7, pen)
      pen = pen[pen>0]
@@ -1989,16 +2286,16 @@ rlStateMapTail = function(j){
      polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
         density=-1,col=colors[pen], border=F)        # fill in states
      polygon(rlStateVisBorders$x[fore], rlStateVisBorders$y[fore],
-        density=0, col=colLineForegr, lwd=lwdForeGr) # outline states
+        density=0, col=Map.Fg.Line.col, lwd=Map.Fg.Line.lwd) # outline states
 
      #  The US border.
      polygon(rlStateNationVisBorders$x,rlStateNationVisBorders$y,
-        density=0, col=colLineNation, lwd=lwdNation) # outside US boundary
+        density=0, col=Map.Nation.Line.col, lwd=Map.Nation.Line.lwd) # outside US boundary
 
      if(i==1){
-        text(135,31,'DC',cex=cexState,adj=.5, col=1)
-        text(22,17,'AK',cex=cexState,adj=.5, col=1)
-        text(47,8,'HI',cex=cexState,adj=.5, col=1)
+        text(135,31,'DC',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(22,17,'AK',cex=Map.State.Spec.cex,adj=.5, col=1)
+        text(47,8,'HI',cex=Map.State.Spec.cex,adj=.5, col=1)
      }
 
    }   #  i loop
@@ -2055,7 +2352,7 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
    if (inherits(DataList,"error"))
      {
      
-        warning(paste(MsgLabel,"-00 data.frame ",dataNam," does not exist or is not valid.",sep=""))
+        warning(paste(MsgLabel,"-01 data.frame ",dataNam," does not exist or is not valid.",sep=""))
         ErrFnd = TRUE
         
      } else {
@@ -2066,7 +2363,7 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
   
         if (!is.array(workDArr))
           {
-            warning(paste(MsgLabel,"-09 The data structured passed in the panelData field is not an array. Structure name = ",dataNam,sep=""))
+            warning(paste(MsgLabel,"-02 The data structured passed in the panelData field is not an array. Structure name = ",dataNam,sep=""))
             ErrFnd = TRUE
           }
    
@@ -2074,12 +2371,12 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
    
         if (dimDArr[1] != 51)
           {
-            warning(paste(MsgLabel,"-10 The time serial array\'s 1st dimension is not 51 (states and DC). It is ",dimDArr[1],".",sep=""))
+            warning(paste(MsgLabel,"-03 The time serial array\'s 1st dimension is not 51 (states and DC). It is ",dimDArr[1],".",sep=""))
             ErrFnd = TRUE
           }
         if (dimDArr[2] < 2 || dimDArr[2] > 31)
           {
-            warning(paste(MsgLabel,"-12 The time serial array\'s 2nd dimension is not between 2 and 30 (number of time periods).  It is ",dimDArr[2],".",sep=""))
+            warning(paste(MsgLabel,"-04 The time serial array\'s 2nd dimension is not between 2 and 30 (number of time periods).  It is ",dimDArr[2],".",sep=""))
             ErrFnd = TRUE
           }
   
@@ -2087,14 +2384,14 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
           {
             if (dimDArr[3] !=4)
               {
-                warning(paste(MsgLabel,"-11 The time serial array\'s 3rd dimension is not 4.  It is ",dimDArr[3],",",sep=""))
+                warning(paste(MsgLabel,"-05 The time serial array\'s 3rd dimension is not 4.  It is ",dimDArr[3],",",sep=""))
                 ErrFnd = TRUE
               }
           } else {
      
             if (dimDArr[3] !=2)
               {
-                warning(paste(MsgLabel,"-13 The time serial array\'s 3rd dimension is not 2.  It is ",dimDArr[3],".",sep=""))
+                warning(paste(MsgLabel,"-06 The time serial array\'s 3rd dimension is not 2.  It is ",dimDArr[3],".",sep=""))
                 ErrFnd = TRUE
               }
           }
@@ -2103,7 +2400,7 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
         if (any(tnn))    # non-match found.
           {
              lnn <- paste(wDArrNames[tnn],collapse=" ")
-             warning(paste(MsgLabel,"-14 Rownames on array do not match state ID list. The bad state IDs are:",lnn,sep=""))
+             warning(paste(MsgLabel,"-07 Rownames on array do not match state ID list. The bad state IDs are:",lnn,sep=""))
              ErrFnd = TRUE
           }
         
@@ -2156,11 +2453,11 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
    
    panelSelect(panels,1,j)   # top panel - add title.
    panelScale(rx,ry)
-   mtext(lab1[j],side=3,line=line1,cex=cexText)   # top column titles
-   mtext(lab2[j],side=3,line=line2,cex=cexText)
+   mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)   # top column titles
+   mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
   
    atRx = panelInbounds(rx)
-   axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # top axis labels
+   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # top axis labels
 
    # ____________bottom of column____
    
@@ -2169,8 +2466,8 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
    
    # padj in axis needed to make grid line label close
    
-   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx)) # bottom axis labels
-   mtext(side=1,lab3[j],line=line3,cex=cexText)  # bottom column titles
+   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # bottom axis labels
+   mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)  # bottom column titles
 
    # _______________drawing loop___________________
 
@@ -2191,9 +2488,9 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
       
       panelSelect(panels,i,j)           # select panel for group i in column j)
       panelScale(rx,ry)                 # set scale for panel  (should this be ry * 5 or 1?)
-      panelFill(col=colPanelFill)            # set fill for panel
+      panelFill(col=Panel.Fill.col)            # set fill for panel
       
-      axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid lines
+      axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid lines
       
       if (i==6)  # median panel
         {
@@ -2202,19 +2499,19 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
       
           atRy = panelInbounds(ry)
         }
-      if (hGridTs)
+      if (TS.hGrid)
         {
-           axis(side=2,tck=1,labels=F,col=colGrid,lwd=lwdGrid, at=atRy) # Grid lines
+           axis(side=2,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd, at=atRy) # Grid lines
         }
-      axis(side=2,tick=F,mgp=mgpLeft,cex.axis= axisCexTs*.75 , at=atRy, labels=as.character(atRy)) # Y axis labels
-      mtext(lab4[j],side=2,line=line5,cex=axisCexTs)  # Y axis title
+      axis(side=2,tick=F,mgp=mgpLeft,cex.axis= TS.Axis.cex*.75 , at=atRy, labels=as.character(atRy)) # Y axis labels
+      mtext(lab4[j],side=2,line=Title.Line.5.pos,cex=TS.Axis.cex)  # Y axis title
       
       #if(!is.na(refval))
       #   # add vertical line for reference.
       #   lines(rep(refval,2),c(1-padMinus,ke+padMinus), 
-      #         lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
+      #         lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
       
-      panelOutline(col=colOutline)     # outline panel
+      panelOutline(col=Panel.Outline.col)     # outline panel
    
 
       for (k in 1:ke)                  # Process each slot of panel - step 1 to 5 or 1 to 1
@@ -2250,7 +2547,7 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
            }
     
          #  Plot mid Line
-         lines(wX,wLine,col=colors[kp],lwd=lwdTs)
+         lines(wX,wLine,col=colors[kp],lwd=TS.lwd)
        }   
       saveAtRy = atRy
     }
@@ -2282,6 +2579,8 @@ rlStateTSConf = function(j,dataNam,conf=TRUE){
 #  The data structure can have between 2 to 9 values per state.
 #  Each state must have the same number of values. This limitation may be removed in the future.
 #
+#  Feature added to make each segment a different thickness. 1/4/2014
+#
 #  panelData => data.frame where each row is a state with the stateId as the row.name.
 #     The columns are the bar segment values.
 
@@ -2299,32 +2598,23 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
    wdim <- dim(dat)
    ErrFnd = FALSE
    
-   if (col1[j] > wdim[2])
+   if (col1[j] == 0 )
      { 
-        warning(paste("SEGBAR-01 Specified column number in col1 for the first segment bar values is out of range.",col1[j],"Not in stateFrame."))
+        warning(paste("SEGBAR-01 Specified column name or number in col1 for the first segment bar values is out of range, invalid, or does not exist .",litcol1[j]," in stateFrame.",sep=""))
         ErrFnd = TRUE
      }
-   if (col1[j] < 1)
-     {
-        warning(paste("SEGBAR-02 Specified column number in col1 for the first segment bar values is <= 0.",col1[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-     }
-   if (col2[j] > wdim[2])
+   if (col2[j] == 0 )
       { 
-         warning(paste("SEGBAR-03 Specified column number in col2 for the last segment bar values is out of range.",col2[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-      }
-   if (col2[j] < 1)
-      {
-         warning(paste("SEGBAR-04 Specified column number in col2 for the last segment bar values is <= 0.",col2[j],"Not in stateFrame."))
+         warning(paste("SEGBAR-02 Specified column name or number in col2 for the last segment bar values is out of range, invalid, or does not exist .",litcol2[j]," in stateFrame.",sep=""))
         ErrFnd = TRUE
       }
    
    if (col1[j] >= col2[j])
       {
-         warning(paste("SEGBAR-05 The first column number of bar values cannot be => the last column number.",col1[j],col2[j]))
+        warning(paste("SEGBAR-05 The first column number of bar values cannot be => the last column number.",litcol1[j],"::",litcol2[j],sep=""))
         ErrFnd = TRUE
       }
+   
    wD =  ( col2[j] - col1[j] + 1 )   # corrected to calculate the number of data columns
    if (wD < 2 || wD > 9)
       {
@@ -2360,6 +2650,8 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
    #
    #    cSteps = cumsum(rep(pInc,NumSegs))^1.35
    #
+   #    thickness = constant  vs.  very based on 2 to 9th segment
+   #
    
    #_______________Gather stats and put in State Order______________
   
@@ -2390,37 +2682,36 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
      } else {
        rx <- c(0,rMax*1.02)
      }
+
    ry = c(0,1)
-   py =  barht*c(-.5,-.5,.5,.5,NA)     #  barht = 2/3 (0.6667)
    
+   pyPat = c(-0.5,-0.5,0.5,0.5,NA)
+   py =  CSNBar.barht * pyPat     #  SNBar.barht = 2/3 (0.6667) (fixed)
+       # py <- c( -1/3, -1/3, +1/3, +1/3, NA)
+   
+   # variable bar height calculations
+   wYPdelta <- (CSNBar.Last.barht - CSNBar.First.barht)/(NumSegs-1)  # increment
+   wYP1 <- CSNBar.First.barht - wYPdelta
+      
    # _____________ Color Patterns _______________
    
    #  Build color patterns for all bar charts
-   baseColors <- t(col2rgb(colors[1:7]))
-   #bgColors   <- t(col2rgb(colPanelFill))
-   bgColors   <- t(col2rgb("white"))
-   
-   #  Old Way with Transparency
-   #transDelta <- 1/NumSegs
-   #vTrans <- cumsum(rep(transDelta,NumSegs))*255
-   #baseColRgb <- sapply(vTrans, function (x) { rgb(baseColors[,1],baseColors[,2],baseColors[,3],x,maxColorValue=255) } )
-   #  baseColRgb[colors,segment]
-   
+   baseColors  <- t(col2rgb(colors[1:7]))
+   bgColors    <- t(col2rgb("white"))
    
    #  New Way with lighter colors - but opaque 
-   #pInc <- cumsum(rep(1/NumSegs,NumSegs))^1.35   # length = NumSegs
    x1 = cumsum(rep(1/NumSegs,NumSegs))
-   #x2 = (( x1 - x1[1] ) ^ 1.35 ) + x1[1]
-   #pInc = x2 / x2[NumSegs]
    x2 = x1 ^ 1.9
    pInc = (x2 * .6) + .4
-   
+ 
    # baseColors -- base 255...
    baseCol2 <- baseColors/255
+  
    # baseCol2[Colors,RGB]
    baseCol3 <- sapply(pInc,function(x) baseCol2 * x)  # colors(1-7),  segment(1-5) for (Rgb=RED)
                                                       # colors(8-14), segment(1-5) for (Rgb=GREEN)
                                                       # colors(15-21),segment(1-5) for (Rbg=BLUE)
+
    # baseCol3[(Colors-Red,Colors-Grn,Colors-Blu),Segments]
    
    baseColMod <- array(baseCol3,c(7,3,NumSegs))
@@ -2430,8 +2721,6 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
                          #
                          #   [1,2,3]   1 fills first, 2 fills next, 3 fills last.
                          #  
-   # baseColMod[Colors,RGB,Segments]
-   # baseColSave <- baseColMod
    
    pIncM <- 1-pInc
    bgCol2 <- bgColors/255
@@ -2449,13 +2738,15 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
           {
             wC <- baseColMod[icl,,isg] + bgColMod[isg,]          
             baseColRgb[icl,isg] <- rgb(wC[1],wC[2],wC[3])
-        }
+          }
       }
    #
    #  Resulting colors are in baseColRgb[color,segment]
    #
-
-
+   #  Now I have a matrix of colors - [x,y] where
+   #   x is the color base - 1 to 7 (we use 1 to 6).
+   #   y is the level based on the number of segments = 1 : NumSegs
+   #
    #   rows - color ID
    #   columns - segment 1:x
    
@@ -2465,11 +2756,12 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
    
    panelSelect(panels,1,j)   # top panel - add title.
    panelScale(rx,ry)
-   mtext(lab1[j],side=3,line=line1,cex=cexText)
-   mtext(lab2[j],side=3,line=line2,cex=cexText)
+
+   mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)
+   mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
    
    atRx = panelInbounds(rx)
-   axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))
+   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))
    
    # ____________bottom of column____
    
@@ -2477,14 +2769,14 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
    panelScale(rx,ry)
    
    # padj in axis needed to make grid line label close
-   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))
+   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))
   
-   mtext(side=1,lab3[j],line=line3,cex=cexText) 
+   mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex) 
 
    # ___________________drawing loop_____________________
 
    oldpar = par(lend="butt")
- 
+   
    #  build each panel for each stacked bar set.
    
      for (i in 1:ng)
@@ -2497,46 +2789,101 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
    
         panelSelect(panels,i,j)
         panelScale(rx,c(1-pad,ke+pad)) #   1 to 5 are the y values for each bar.
-        panelFill(col=colPanelFill)
+        panelFill(col=Panel.Fill.col)
  
-        axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid
+        axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid
         
-     # if a refval is provided then add line.
-     if(!is.na(refval))
-        {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
-        }
+        # if a refval is provided then add line, before segments
+        if(!is.na(refval))
+           {
+             lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
+           }
         
         #
         #  Not checking "good" values provided.
         #
         
+        #
+        #  Process each state's line. 
+        #
         for (k in 1:ke)
          {
            # cycle through row-groups and assign colors to associated states dots.
            m = gsubs[k]
            wX = SBBarPt[m,]            # Get Row of data.
+         
            if (SBnorm) 
              {
                 wX = wX / wX[NumSegs+1] * 100   # last segment value is in NumSegs + 1 to get last column (end point)
              }
-           wYP <- rep(laby[k],5)+py
+   
+           #wYP <- rep(laby[k],5)+py   # height of segment (laby[k] => center line of segbar)
+           wYP <- rep(laby[k],5)       # height of segment (laby[k] => center line of segbar)
+      
+           # calculate box for each segment
+           wYPht = wYP1
       
            for (ik in 1:NumSegs)
             {
+              if (SNBar.varht)
+                {
+                  # variable height bar segments
+                  
+                  wYPht <- wYPht + wYPdelta
+                  wYP2 <- wYP + (pyPat * wYPht)
+                  #print(paste("Seg:",ik,"  wYP2:",wYP2,sep=""))
+                  
+                } else {
+                  # fixed height bar segments
+                  wYP2 <- wYP + py
+                }
               val0 = wX[ik]     # start
               val1 = wX[ik+1]   # end position
               wXP <- c(val0,val1,val1,val0,NA)
               # good value - draw bars are polygons.  (why to polygon)
-              polygon(wXP,wYP,col=baseColRgb[pen[k],ik],lwd=lwdSBarOutline,border=colSBarOutline) 
-              #polygon(wXP,wYP,col=colBarOutline,density=0)
-            }
-       
-         }   
-        panelOutline(colOutline)
+     
+              polygon(wXP,wYP2,col=baseColRgb[pen[k],ik],lwd=CSNBar.Outline.lwd,border=CSNBar.Outline.col,lty=CSNBar.Outline.lty) 
+              #polygon(wXP,wYP2,col=CSNBar.Outline.col,density=0)
+            } # end of ik loop (plotting Segments)
+            #
+            if (SNBar.Middle.Dot)    # do we graph a middle dot on the row?
+              {
+                mY <- laby[k]      # get Y position
+                # put dot on boundary if even number of segments or in middle of middle segment if odd.
+                if ((NumSegs %% 2)==1)
+                  {
+                     # put dot in middle of middle segment.                 
+                    mSeg <- NumSegs %/% 2 + 1
+                    mX <- (wX[mSeg] + wX[mSeg+1])/2   # middle of segment
+                  } else {
+                    # put dot on border between two middle segments.                 
+                    mSeg <- NumSegs %/% 2
+                    mX <- wX[mSeg+1]
+                  }
+                if (SNBar.MDot.pch >= 21 && SNBar.MDot.pch <= 25)
+                  #  treat filled and non-filled symbols differently - get close to same results.
+                  #  with filled, fill is bg, col and lwd deal with border
+                  #  with non-filled, fill is col, lwd deals with border using col.
+                  {  # filled symbol
+                     points(mX,mY,pch=SNBar.MDot.pch, cex=SNBar.MDot.pch.size, 
+                          bg=SNBar.MDot.pch.fill,      # fill color  
+                          col = SNBar.MDot.pch.border.col,    # border color 
+                          lwd = SNBar.MDot.pch.border.lwd)
+                  } else {
+                     # non filled symbol
+                     points(mX,mY,pch=SNBar.MDot.pch, cex=SNBar.MDot.pch.size, 
+                          col = SNBar.MDot.pch.fill,   # fill and border color 
+                          lwd = SNBar.MDot.pch.border.lwd)
+                  }
+              }  # end of Middle Dot drawing.
+           
+           
+         }  # end of k loop   
+        # finish up panel
+        
+        panelOutline(Panel.Outline.col)
  
-      }
-
+      } # end of i loop
   
   par(oldpar)
   # ____________________________PanelOutline____________________
@@ -2577,32 +2924,23 @@ rlStateCtrBar = function(j) {
    wdim <- dim(dat)
    ErrFnd = FALSE
    
-   if (col1[j] > wdim[2])
+   if (col1[j] == 0 )
      { 
-        warning(paste("CTRBAR-01 Specified column number in col1 for the first segment bar values is out of range.",col1[j],"Not in stateFrame."))
+        warning(paste("CTRBAR-01 Specified column name or number in col1 for the first segment bar values is out of range, invalid, or does not exist .",litcol1[j]," in stateFrame.",sep=""))
         ErrFnd = TRUE
      }
-   if (col1[j] < 1)
-     {
-        warning(paste("CTRBAR-02 Specified column number in col1 for the first segment bar values is <= 0.",col1[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-     }
-   if (col2[j] > wdim[2])
+   if (col2[j] == 0 )
       { 
-         warning(paste("CTRBAR-03 Specified column number in col2 for the last segment bar values is out of range.",col2[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-      }
-   if (col2[j] < 1)
-      {
-         warning(paste("CTRBAR-04 Specified column number in col2 for the last segment bar values is <= 0.",col2[j],"Not in stateFrame."))
+        warning(paste("CTRBAR-02 Specified column name or number in col2 for the last segment bar values is out of range, invalid, or does not exist .",litcol2[j]," in stateFrame.",sep=""))
         ErrFnd = TRUE
       }
   
    if (col1[j] >= col2[j])
       {
-         warning(paste("CTRBAR-05 The first column number of bar values cannot be => the last column number.",col1[j],col2[j]))
+        warning(paste("CTRBAR-05 The first column name or number of bar values must proceed the last column name or number.",litcol1[j],"::",litcol2[j],sep=""))
         ErrFnd = TRUE
       }
+   
    wD = ( col2[j] - col1[j] + 1 )  # corrected to properly calculate the number of data columns.
    if (wD < 2 || wD > 9)
       {
@@ -2617,6 +2955,8 @@ rlStateCtrBar = function(j) {
    refval = lRefVals[j]              # get referrence to object, changed 
                                      #    to lRefVals - JP-2010/07/23
    reftxt = lRefTexts[j]             # new - JP-2010/07/23
+   
+   good = !is.na(rowSums(workCB))    # good values
 
    #
    # Colors - series of lighter colors of the base colors for each bar.
@@ -2629,6 +2969,16 @@ rlStateCtrBar = function(j) {
    #    etc.
    #    1/(NumSegs)*step = transparency or lightness level  (100% full)
    
+   #   Dan's addition ==> 
+   #    as the colors are generated from the base color
+   #
+   #    pInc = 1 / NumSegs
+   #
+   #    cSteps = cumsum(rep(pInc,NumSegs))^1.35
+   #
+   #    thickness = constant  vs.  very based on 2 to 9th segment
+   #
+
    #_______________Gather stats and put in State Order______________
   
    #  Sorting has already been done - by stateId or value.
@@ -2643,18 +2993,19 @@ rlStateCtrBar = function(j) {
    CBLRange = range(CBLen,na.rm=TRUE)
 
    NumSegs  = CBLRange[2]                # number of segments
-   CtrSeg   = as.integer(NumSegs/2) + 1  # center segment
 
    CBBarPt  = cbind(rep(0,51),workMatCB)
    CBBarPt  = t(apply(CBBarPt,1,cumsum))
+   
+   #_____________Centering_____________
+
+   CtrSeg   = as.integer(NumSegs/2) + 1  # center segment
 
    if ((NumSegs %% 2) != 0)
      {   # old number of segments
         CtrPt = workMatCB[,CtrSeg]/2 + CBBarPt[,CtrSeg]
-    
      } else {
          # even number of segments
-  
         CtrPt = CBBarPt[,CtrSeg]
      }
 
@@ -2668,36 +3019,35 @@ rlStateCtrBar = function(j) {
    rx = sc*diff(rx)*c(-.5,.5)+mean(rx)
  
    ry = c(0,1)
-   py =  barht*c(-.5,-.5,.5,.5,NA)           #  barht = 2/3 (0.6667)
+ 
+   pyPat = c(-.5,-.5,.5,.5,NA) 
+   py =  CSNBar.barht * pyPat            #  CBar.barht = 2/3 (0.6667) (fixed)
+       # py <- c( -1/3, -1/3, +1/3, +1/3, NA)
    
+   # variable bar height calculations
+   wYPdelta <- (CSNBar.Last.barht - CSNBar.First.barht)/(NumSegs-1)  # increment
+   wYP1 <- CSNBar.First.barht - wYPdelta
+      
    # _____________ Color Patterns _______________
    
    #  Build color patterns for all bar charts
    baseColors <- t(col2rgb(colors[1:7]))
-   #bgColors   <- t(col2rgb(colPanelFill))
    bgColors   <- t(col2rgb("white"))
    
-   #  Old Way with Transparency
-   #transDelta <- 1/NumSegs
-   #vTrans <- cumsum(rep(transDelta,NumSegs))*255
-   #baseColRgb <- sapply(vTrans, function (x) { rgb(baseColors[,1],baseColors[,2],baseColors[,3],x,maxColorValue=255) } )
-   #  baseColRgb[colors,segment]
-   
-   
    #  New Way with lighter colors - but opaque 
-   #pInc <- cumsum(rep(1/NumSegs,NumSegs))^1.35   # length = NumSegs
+
    x1 = cumsum(rep(1/NumSegs,NumSegs))
-   #x2 = (( x1 - x1[1] ) ^ 1.35 ) + x1[1]
-   #pInc = x2 / x2[NumSegs]
    x2 = x1 ^ 1.9
    pInc = (x2 * .6) + .4
 
    # baseColors -- base 255...
    baseCol2 <- baseColors/255
+
    # baseCol2[Colors,RGB]
    baseCol3 <- sapply(pInc,function(x) baseCol2 * x)  # colors(1-7),  segment(1-5) for (Rgb=RED)
                                                       # colors(8-14), segment(1-5) for (Rgb=GREEN)
                                                       # colors(15-21),segment(1-5) for (Rbg=BLUE)
+
    # baseCol3[(Colors-Red,Colors-Grn,Colors-Blu),Segments]
    
    baseColMod <- array(baseCol3,c(7,3,NumSegs))
@@ -2707,8 +3057,6 @@ rlStateCtrBar = function(j) {
                          #
                          #   [1,2,3]   1 fills first, 2 fills next, 3 fills last.
                          #  
-   # baseColMod[Colors,RGB,Segments]
-   # baseColSave <- baseColMod  (???)
    
    pIncM <- 1-pInc
    bgCol2 <- bgColors/255
@@ -2726,7 +3074,7 @@ rlStateCtrBar = function(j) {
           {
             wC <- baseColMod[icl,,isg] + bgColMod[isg,]          
             baseColRgb[icl,isg] <- rgb(wC[1],wC[2],wC[3])
-        }
+          }
       }
    #
    #  Resulting colors are in baseColRgb[color,segment]
@@ -2735,7 +3083,9 @@ rlStateCtrBar = function(j) {
    #   x is the color base - 1 to 7 (we use 1 to 6).
    #   y is the level based on the number of segments = 1 : NumSegs
    #
-   
+   #   rows - color ID
+   #   columns - segment 1:x
+
    # ____________titles and labeling axes_______________
    
    # _____________top of column______
@@ -2743,8 +3093,8 @@ rlStateCtrBar = function(j) {
    panelSelect(panels,1,j)   # top panel - add title.
    panelScale(rx,ry)
    
-   mtext(lab1[j],side=3,line=line1,cex=cexText)
-   mtext(lab2[j],side=3,line=line2,cex=cexText)
+   mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)
+   mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
  
    atRx = panelInbounds(rx)
    atRxAbs = abs(atRx)
@@ -2752,7 +3102,7 @@ rlStateCtrBar = function(j) {
    # Special Note - for the centered segmented bars, the values to the left and right are offsets
    #   and listed as positive -  NOT negative to left and positive to right.
    #
-   axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRxAbs))
+   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRxAbs))
    
    # ____________bottom of column____
    
@@ -2760,9 +3110,9 @@ rlStateCtrBar = function(j) {
    panelScale(rx,ry)
    
    # padj in axis needed to make grid line label close
-   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRxAbs))
+   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRxAbs))
   
-   mtext(side=1,lab3[j],line=line3,cex=cexText) 
+   mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex) 
 
    # ___________________drawing loop_____________________
 
@@ -2780,47 +3130,65 @@ rlStateCtrBar = function(j) {
    
         panelSelect(panels,i,j)
         panelScale(rx,c(1-pad,ke+pad)) #   1 to 5 are the y values for each bar.
-        panelFill(col=colPanelFill)
+        panelFill(col=Panel.Fill.col)
  
-        axis(side=1,at=atRx, tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid
+        axis(side=1,at=atRx, tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid
         
-     # if a refval is provided then add line.
-     if(!is.na(refval))
-        {
-          lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=ltyRefVal,lwd=lwdRefVal,col=icolRefVal)
-        }
+        # if a refval is provided then add line.
+        if(!is.na(refval))
+          {
+            lines(rep(refval,2),c(1-padMinus,ke+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
+          }
         
+        #
+        #  Not checking "good" values provided.
+        #
         
+        #
+        #  Process each state's line. 
+        #
         for (k in 1:ke)
          {
            # cycle through row-groups and assign colors to associated states dots.
            m = gsubs[k]
            wX = CBPlotPts[m,]            # Get Row of data.
       
-           #xcolLine = colors[pen[k]]
-           #xcolFill = colors[pen[k]+7]
-           wYP <- rep(laby[k],5)+py
+           #wYP <- rep(laby[k],5)+py
+           wYP <- rep(laby[k],5)
+      
+           # calculate box for each segment
+           wYPht = wYP1
       
            for (ik in 1:NumSegs)
             {
+              if (CBar.varht)
+                {
+                  # variable height bar segments
+                  
+                  wYPht <- wYPht + wYPdelta
+                  wYP2 <- wYP + (pyPat * wYPht)
+                } else {
+                  # fixed height bar segments
+                  wYP2 <- wYP + py
+                }
               val0 = wX[ik]     # start
               val1 = wX[ik+1]   # end position
               wXP <- c(val0,val1,val1,val0,NA)
               # good value - draw bars are polygons.  (why to polygon)
               
-              polygon(wXP,wYP,col=baseColRgb[pen[k],ik],lwd=lwdSBarOutline,border=colSBarOutline) 
-              #polygon(wXP,wYP,col=colBarOutline,density=0)
-
+              polygon(wXP,wYP2,col=baseColRgb[pen[k],ik],lwd=CSNBar.Outline.lwd,border=CSNBar.Outline.col,lty=CSNBar.Outline.lty) 
+              #polygon(wXP,wYP2,col=CSNBar.Outline.col,density=0)
             }
-       
          }   
+       # finish up panel
+       
        # draw vertical line at zero.
        lines(rep(0,2),c(1-padMinus,ke+padMinus),
-               lty=ltyBarZero,lwd=lwdBarZero,col=colBarZero)
-       panelOutline(colOutline)
+               lty=CBar.Zero.Line.lty,lwd=CBar.Zero.Line.lwd,col=CBar.Zero.Line.col)
+       
+       panelOutline(Panel.Outline.col)
  
       }
-
   
    par(oldpar)
    # ____________________________PanelOutline____________________
@@ -2849,24 +3217,14 @@ rlStateScatDot = function(j){
   #
   wdim <- dim(dat)
    ErrFnd = FALSE
-   if (col1[j] > wdim[2])
+   if (col1[j] == 0 )
      { 
-        warning(paste("SCATDOT-01 Specified column number in col1 for X values is out of range.",col1[j],"Not in stateFrame."))
+        warning(paste("SCATDOT-01 Specified column name or number in col1 for X values is out of range, invalid, or does not exist .",litcol1[j]," in the data frame.",sep=""))
         ErrFnd = TRUE
      }
-   if (col1[j] < 1)
-     {
-        warning(paste("SCATDOT-02 Specified column number in col1 for X values is <= 0.",col1[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-     }
-   if (col2[j] > wdim[2])
+   if (col2[j] == 0 )
       { 
-         warning(paste("SCATDOT-03 Specified column number in col2 for Y values is out of range.",col2[j],"Not in stateFrame."))
-        ErrFnd = TRUE
-      }
-   if (col2[j] < 1)
-      {
-         warning(paste("SCATDOT-04 Specified column number in col2 for Y values is <= 0.",col2[j],"Not in stateFrame."))
+        warning(paste("SCATDOT-02 Specified column name or number in col2 for Y values is out of range, invalid, or does not exist .",litcol2[j]," in the data frame.",sep=""))
         ErrFnd = TRUE
       }
 
@@ -2888,12 +3246,17 @@ rlStateScatDot = function(j){
    
    # x scaling
    rx = range(workSCD$x,na.rm=TRUE)       # range of X values
-   rx = xscSCD*diff(rx)*c(-.5,.5)+mean(rx)     # min to max range with expansion factors.
+   rx = SCD.xsc*diff(rx)*c(-.5,.5)+mean(rx)     # min to max range with expansion factors.
    
    # y scaling                  
    ry = range(workSCD$y,na.rm=TRUE)       # range of Y values
-   ry = yscSCD*diff(ry)*c(-.5,.5)+mean(ry)
+   ry = SCD.ysc*diff(ry)*c(-.5,.5)+mean(ry)
    
+   # diagonal end points
+   dx <- max(rx[1],ry[1])
+   
+   diagr <- c(max(rx[1],ry[1]), min(rx[2],ry[2]))
+  
    # ____________titles and labeling axes_______________
 
  
@@ -2902,11 +3265,11 @@ rlStateScatDot = function(j){
    panelSelect(panels,1,j)   # top panel - add title - above.
    panelScale(rx,ry)         # scaled for data.
    
-   mtext(lab1[j],side=3,line=line1,cex=cexText)
-   mtext(lab2[j],side=3,line=line2,cex=cexText)
+   mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)
+   mtext(lab2[j],side=3,line=Title.Line.2.pos,cex=Text.cex)
  
    atRx = panelInbounds(rx)
-   axis(side=3,mgp=mgpTop,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))
+   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))
 
    # ____________bottom of column____
    
@@ -2914,19 +3277,13 @@ rlStateScatDot = function(j){
    panelScale(rx,ry)
    
    # padj in axis needed to make grid line label close
-   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=cexText,at=atRx,labels=as.character(atRx))
+   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))
    
-   mtext(side=1,lab3[j],line=line3,cex=cexText) 
+   mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex) 
 
    # ___________________drawing loop_____________________
 
-   # set the symbols for the dots and median.
-   workSCD$bg     <- ""
-   workSCD$cex     <- 0.75
-   workSCD$pch     <- 21            # filled circle - default shape
-   workSCD$pch[26] <- medPchSCD     # filled triangle for median dot.
-   
-         # in the ordered list, the median should be 26 of 51 items.
+   # in the ordered list, the median should be 26 of 51 items.
      
    oldpar = par(lend="butt")
 
@@ -2938,11 +3295,18 @@ rlStateScatDot = function(j){
 
       # Set defaults for dots for this panel
      
-      workSCD$bg <- NA                  # default color   - was bgFillSCD
-      workSCD$cex <- .75                # default size, except median.
-      workSCD$bg[26] = medColSCD
-      workSCD$cex[26] <- 1
-       
+      workSCD$bg  <- SCD.Bg.pch.fill    # default color   - was SCD.Bg.pch.fill
+      workSCD$cex <- SCD.Bg.pch.size    # default size, except median
+      workSCD$lwd <- SCD.Bg.pch.lwd     # default line weight
+      workSCD$pch <- SCD.Bg.pch         # default pch code.
+      
+      if (i >= 5 && i <= 7)     # force median dot to be highlighted in 5, 6 and 7 rows. 
+        {
+          workSCD$bg[26]  <- SCD.Median.pch.fill
+          workSCD$cex[26] <- SCD.Median.pch.size
+          workSCD$lwd[26] <- SCD.Median.pch.lwd
+          workSCD$pch[26] <- SCD.Median.pch
+        }  
       gsubs = ib[i]:ie[i]               # get beginning to end index row number in this group  
       ke = length(gsubs)                # get number of rows in group  (5 or 1)  
 
@@ -2951,46 +3315,61 @@ rlStateScatDot = function(j){
       
       panelSelect(panels,i,j)           # select panel for group i in column j)
       panelScale(rx,ry)                 # set scale for panel  (should this be ry * 5 or 1?)
-      panelFill(col=colPanelFill)            # set fill for panel
+      panelFill(col=Panel.Fill.col)            # set fill for panel
       
       # vertical grid lines.
-      axis(side=1,tck=1,labels=F,col=colGrid,lwd=lwdGrid) # grid lines
+      axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid lines
+      
       # y axis labels
-   
-      if (i==6)  # median panel
+      if (i==6)  # median panel 
         {
-          atRy = c(saveAtRy[1],saveAtRy[length(saveAtRy)])   
+          atRy = c(saveAtRy[1],saveAtRy[length(saveAtRy)])   # for margin panel, print the lowest and highest.   
         } else {
-      
-          atRy = panelInbounds(ry)
+          atRy = panelInbounds(ry)                           # prettyprint a range.
         }
-      if (hGridSCD)
+      #  horizontal grid.
+      if (SCD.hGrid)
         {
-           axis(side=2,tck=1,labels=F,col=colGrid,lwd=lwdGrid, at=atRy) # Grid lines
+           axis(side=2,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd, at=atRy) # Grid lines
         }
-      axis(side=2,tick=F,cex.axis=axisCexTs*.75,mgp=mgpLeft,at=atRy,labels=as.character(atRy))
-      mtext(lab4[j],side=2,line=line5,cex=axisCexTs)
       
-      panelOutline(col=colOutline)     # outline panel
+      #  
+      axis(side=2,tick=F,cex.axis=TS.Axis.cex*.75,mgp=mgpLeft,at=atRy,labels=as.character(atRy))
+      mtext(lab4[j],side=2,line=Title.Line.5.pos,cex=TS.Axis.cex)
+      
+      panelOutline(col=Panel.Outline.col)     # outline panel
 
       # dv <- c(gsubs[1:ke],26)
-      
-      for (k in 1:ke)                  # Process each slot of panel - step 1 to 5 or 1 to 1
-        {
-          # cycle through row-groups and assign colors to associated state's dots.
-          m = gsubs[k]
-          workSCD$bg[m] <- colors[pen[k]]       # set approvate color to circle fill.
-          workSCD$cex[m] <- 1
-        }
-      if (ke == 1)                     # median line
+      #
+      # draw diagonal line of symetry from c(min (x, y),min(x,y)) to 
+      #     c(max(x,y), max(x,y)), all point have x=y.
+      #
+      if ((diagr[1] < diagr[2]) && SCD.DiagLine)   
+        {  # draw symetric line if within box range.
+          dx = c(diagr[1],diagr[2])
+          dy = c(diagr[1],diagr[2])
+          lines(dx,dy, col=SCD.DiagLine.col, lwd=SCD.DiagLine.lwd, lty=SCD.DiagLine.lty)  # place a diagonal line on plot.
+        }      
+    
+      if (i == 6)
         {
           wS <- workSCD[gsubs[1],]      # get one entry - the median.
+        
         } else {
+          for (k in 1:ke)                  # Process each slot of panel - step 1 to 5 or 1 to 1
+            {
+               # cycle through row-groups and assign colors to associated state's dots.
+               m = gsubs[k]
+               workSCD$bg[m]   <- colors[pen[k]]       # set approvate color to circle fill.
+               workSCD$cex[m]  <- SCD.Fg.pch.size
+               workSCD$lwd[m]  <- SCD.Fg.pch.lwd
+               workSCD$pch[m]  <- SCD.Fg.pch
+            }
           wS <- workSCD[order(workSCD$cex,decreasing=FALSE),]
           # plot all points by size, others first, colored and median last.   
-        
+   
         }
-       points(wS$x,wS$y,pch=wS$pch, col="black",bg=wS$bg, cex=wS$cex, lwd=0.6)  # removed 
+       points(wS$x,wS$y,pch=wS$pch, col="black",bg=wS$bg, cex=wS$cex, lwd=wS$lwd)  # removed 
        saveAtRy <- atRy  # save for possible use on median panel.
     }
    par(oldpar)
@@ -3023,61 +3402,124 @@ rlStateRefText= function(j,reftext){
    if (!is.null(reftext))
        if (!is.na(reftext)) {
    
-          xt = (strwidth(reftext,cex=cexText) + .2)/2  # length of line and text
+          xt = (strwidth(reftext,cex=Text.cex) + .2)/2  # length of line and text
           xl = par("pin")[2]/2  # x axis
           xp = xl - xt
           # graphic space is 0 to 1 from left to right.
-          # reference line is from 0.24->.37 and 0.63->.76 (x) at line4 = y; 
+          # reference line is from 0.24->.37 and 0.63->.76 (x) at Title.Line.4.pos = y; 
           #   text inserted from .37->,63 (???)
         
-          # way to find graphic length of string --> sw <- strwidth(reftext,cex=cexText)
+          # way to find graphic length of string --> sw <- strwidth(reftext,cex=Text.cex)
 
           # print reference line for legend.
-          #lines(c(.24,.37,NA,.63,.76),rep(line4,5),
-          #      lty=ltyRefVal,col=icolRefVal,lwd=lwdRefVal)
+          #lines(c(.24,.37,NA,.63,.76),rep(Title.Line.4.pos,5),
+          #      lty=Ref.Val.lty,col=iRef.Val.col,lwd=Ref.Val.lwd)
           #  10/10/12-changed above to print section of line on left of reference legend label.
           
-          #text(.50,line4+.01,reftext,cex=cexText,col=icolRefTxt,adj=.5)
+          #text(.50,Title.Line.4.pos+.01,reftext,cex=Ref.Text.cex,col=iRef.Text.col,adj=.5)
           #  10/10/12-changed above to print reference label to right of dash line. Not centered.   
       
           # add text definition for legend.   (5/21/13 - added color to line)
     
-          lines(c(xp, xp+.15),rep(line4,2), lty=ltyRefVal, lwd=lwdRefVal, col=icolRefVal)
-          text(xp + .2,line4+.01,reftext,cex=cexText,col=icolRefTxt,adj=0)
+          lines(c(xp, xp+.15),rep(Title.Line.4.pos,2), lty=Ref.Val.lty, lwd=Ref.Val.lwd, col=iRef.Val.col)
+          text(xp + .2,Title.Line.4.pos+.01,reftext,cex=Text.cex,col=iRef.Text.col,adj=0)
        }
    # later add code to center line and text dependent on length of text (pixels)
 }
 
 #### end of micromap functions
 
+
 #####  end of functions  #####
 
-#####
-#
-# Bring out parameter==============================================
-#
-# JP - copy global variables setup from micromapST.R base into 
-# the local variables this function expects.
-#
-   rlStateNamesFips = stateNamesFips
-   rlStateVisBorders = stateVisBorders
-   rlStateNationVisBorders = stateNationVisBorders
 
+##############################################
+
+
+#_________________ Check panel description content and formats _____________
+#
+
+if(!is.data.frame(panelDesc))
+    stop("MST-10 Panel descriptor argument (2nd argument) must be a data.frame")
+
+#______________Check for panelDesc$type validity______________
+
+valid = c("map","mapcum","maptail","mapmedian",
+          "id","arrow","bar",
+          "dot","dotse","dotconf",
+          "ts","tsconf",
+          "scatdot",
+          "segbar","normbar","ctrbar",
+          "boxplot")              # idDot and rank are not currently implemented
+
+type = as.character(panelDesc$type)
+subs = match(type,valid)
+
+if(any(is.na(subs)))
+    stop(paste("MST-11 The panelDesc data.frame has an incorrect panel type: ",type[is.na(subs)], sep=""))
+
+#_________________panelDesc$labx____________________
+#
+
+ncol = nrow(panelDesc)
+blank = rep('',ncol)
+
+if(is.null(panelDesc$lab1)) lab1 = blank else
+              lab1 = as.character(panelDesc$lab1)
+
+if(is.null(panelDesc$lab2)) lab2 = blank else
+              lab2 = as.character(panelDesc$lab2)
+
+if(is.null(panelDesc$lab3)) lab3 = blank else
+              lab3 = as.character(panelDesc$lab3)
+
+if(is.null(panelDesc$lab4)) lab4 = blank else
+              lab4 = as.character(panelDesc$lab4)
+
+
+#_________Save panelDesc Parameters in to namespace____________
+#
    assign('lab1',lab1)
    assign('lab2',lab2)
    assign('lab3',lab3)
    assign('lab4',lab4)
 
-# Save panelDesc for function use Set
+
+# more panelDesc checks and setups after the function definitions.
+
+#_______________________panelDesc$colx_____________________
+#
 
 # number of columns based on the presence of Descriptions for Column
 
    if(!is.null(panelDesc$col1))
-      assign("col1",panelDesc$col1)
-   if(!is.null(panelDesc$col2))
-      assign("col2",panelDesc$col2)
+     {
+       litcol1 <- panelDesc$col1
+       col1 <- CheckColx(litcol1,"col1",wSFNameList,len_wSFnam)
+     } else {
+       litcol1 <- NULL
+       col1 <- NULL
+     }
+  
+  if(!is.null(panelDesc$col2))
+     {
+       litcol2 <- panelDesc$col2
+       col2 <- CheckColx(litcol2,"col2",wSFNameList,len_wSFnam)
+     } else {
+       litcol2 <- NULL
+       col2 <- NULL
+     }
    if(!is.null(panelDesc$col3))
-      assign("col3",panelDesc$col3)
+     {
+       litcol3 <- panelDesc$col3
+       col3 <- CheckColx(litcol3,"col3",wSFNameList,len_wSFnam)
+     } else {
+       litcol3 <- NULL
+       col3 <- NULL
+     }
+
+#_____________panelDesc$refxxx________________
+#
 
    if(is.null(panelDesc$refVals))
       assign('lRefVals',rep(NA,nrow(panelDesc))) else
@@ -3087,8 +3529,10 @@ rlStateRefText= function(j,reftext){
       assign('lRefTexts',rep(NA,nrow(panelDesc))) else
       assign('lRefTexts',panelDesc$refTexts)
       
-# Check to see if columns are available for
-# the type of plot and values are plausible
+#_____________panelDesc$panelData_______________
+#
+
+#  if present is the typeof correct ?
 
    if(!is.null(panelDesc$panelData)) 
        {
@@ -3099,84 +3543,188 @@ rlStateRefText= function(j,reftext){
    assign('panelData',wPanelData)
    rm(wPanelData)
        
-# Get state abbreviation as polygon link
    #  
 
-   fullNames = row.names(rlStateNamesFips)    # List of full state names.
-
-   curnam = row.names(SFrame)                 # Get list of current names in row.names.
-            # get proper capitalization of state ab or full names.
-   curnam2 = as.vector(sapply(curnam,function(x) simpleCap(x)))
-   
-   #  Compare against common "DC" names and replace with "D.C."
-   DCnames = c("Washington, D. C.",   "Washington D. C.",
-               "Washington, D C",   "Washington D C",
-               "Washington, Dc",    "Washington Dc",
-               "District Columbia", "District Of Columbia",
-               "DC","Dc","D C","D. C.")
-   curnam2[!is.na(match(curnam2,DCnames))] = "D.C."            
-
-   #  
-   stateId = switch(rowNames,
-      # if "ab", use current name
-      "ab"=  rlStateNamesFips$ab[match(toupper(curnam),
-                                  rlStateNamesFips$ab)],
-      # if "fips", convert to abrv name      
-      "fips"= rlStateNamesFips$ab[match(as.integer(curnam),
-                                  rlStateNamesFips$fips)],
-      # if "full" state name, convert abrv name
-      "full"= rlStateNamesFips$ab[match(curnam2,fullNames)],
-      #  No match..
-      warning("check rownames type")
-   )
-
-   if (any(is.na(stateId)))
-     {  # one of the state abrv or full names are not valid
-       BadList = paste(curnam[is.na(stateId)],collapse=" ")  # create a list of bad names.
-       stop(paste("The following row names in the stateFrame data.frame are invalid: ",BadList,sep=""))
-     }
-
-# Get statenames or abbreviations to plot_______________________
-   stateNames = switch(plotNames,
-          "ab"=stateId,
-          "full"= fullNames[match(stateId,rlStateNamesFips$ab)],
-          warning("check plotNames type")
-   )
-
-# sort and store stateFrame, stateid, and stateNames____________
-   if(is.null(sortVar) || is.character(sortVar))
-      ord = order(stateNames) else             # if field omitted (null) or a character, sort by state name
-      ord = order(SFrame[,sortVar])            # if field a numeric and present, sort by specified SFrame column.
-  
-   if(!ascend)ord = rev(ord)
-
-
-   assign("dat",SFrame[ord,])                       # data fields    "dat" has sorted data frame of the stateFrame
-   assign("stateId",stateId[ord])                   # StateID        "stateId" in order of the dat
-   assign("stateNames",stateNames[ord])             # StateNames
-   assign("datOrder",ord)                           # data order for use with panelData.
-   
 # ________________Detail defaults_______________________________
+#
 
-   assign("colors",colors)
+#  Process defaults into the local variables as before.
+
+   wDetails <- micromapSTDefaults$details
+
+   # dynamic assignment of defaults to individual variables in "micromapST"
+   #  namespace.
+   defNam = names(wDetails)
+   for (i in 1:length(wDetails))
+     {
+       assign(defNam[i],wDetails[[i]])    # assign default values.
+     }
    
+   # All details names must be in the globalVariable call to be visible to CRAN checks.
+   #
+   # The defaults have been moved to the individual variables.
+   # Keep the list of names around to be to verify user supplied names.
+   #
+
+   
+# Now overlay with any values provided by user.
+
    #
    # dynamic assignment of detail data.frame to individual variables in the 
    #  "micromapST' namespace..
    #
-   nam = names(details)                            # parse th details list into variable that can be
-   for (i in 1:length(details)){                   #  referenced using the list's name.
-      assign(nam[i],details[[i]])
-   }
-   
+   # Should I add code to verify names provided?
+   #
+   if (!(missing(details) || is.null(details) || is.na(details)))
+     {
+       if (typeof(details) == "list")
+         {
+           nam = names(details)                 # parse the details list into variable that can be
+           nam_match = match(nam,defNam)
+       
+           for (i in 1:length(details))         #  referenced using the list's name.
+             {
+               if(is.na(nam_match[i]))
+                 {
+                    # invalid variable name in details
+                    xmsg <- paste("MST-12 Invalid details variable name: ",nam[i], " in the details list. IGNORED.",sep="")
+                    warning(xmsg)
+                 } else {
+                    # valid name
+                    assign(nam[i],details[[i]])
+                 }
+             }
+         } else {
+             stop("MST-13 The details parameter is not a list.")
+         }
+     }
    
    # 
    # This is the code the rcmd check could not detect the scope of the detail$ variables.
    #
 
 
-   dy = details[["dy"]]                      # for debugging
-   cexTitle = details[["cexTitle"]]          # Used in this function
+#_________________colors _______________________________________
+#
+
+#  Must do after completing the details list processing
+#
+#  Verify "colors=" argument
+#
+#  Second purpose is to set the graphics colors not in the "colors" vector to grays or colors.
+#  
+#
+
+colFull = TRUE                  # control logical = TRUE doing Color, FALSE doing Greys
+NoErrs = TRUE
+doDotOutline = Dot.Outline
+
+if (missing(colors) || is.null(colors) || is.na(colors))
+  {
+     colors = micromapSTDefaults$colors
+  } 
+
+if (typeof(colors) == "character")
+  {
+    if (length(colors) != 14)
+      {
+        if (length(colors) == 7)    # check for the basic colors.
+          {
+            # we have the basic 7 colors. Expand to the list of 14.
+            colorlab <- names(colors)
+            TransColors <- adjustcolor(colors,0.2)
+            colors <- c(colors, TransColors)
+            if (!is.null(colorlab))
+              { names(colors) <- c(colorlab,paste("l_",colorlab,sep="")) }
+        
+          } else {
+      
+           if (length(colors) == 1)
+             {
+               if (colors == "bw" || colors == "greys" || colors == "grays")
+                 {
+                   #  set up the colors for printing in BW or Gray tones
+                   
+                   #  Get the main greys for the 5 colors (the middle 3-7 grays in the RColorBrewer scale.
+                   #    and add the black for the median and a grey for the state highlight color.
+                   xbw <- brewer.pal(name="Greys",8)
+                   greyColors <- c(xbw[c(3:7)],"#000000","#E8E8E8")
+                   
+                   #  Build the transparent colors for the segmented bar charts.
+                   TransColors <- adjustcolor(greyColors,0.2)
+                  
+                   #  Set up the grey color vector as requested.
+                   colors <- c(greyColors,TransColors)
+                   
+                   #  Set up running parameters.
+                   colFull = FALSE
+                   doDotOutline = TRUE  # outline dots in dot glyphs.
+                  
+                 } else {
+                   
+                   warning("MST-15 A single value is provided for the colors. It''s not 'BW', 'greys', or 'grays' and no other valid is supported.  The default colors vector will be used.")
+                   colors = micromapSTDefaults$colors
+                
+                }
+             } else {
+               warning("MST-016 The colors vector has the incorrect number of elements.  It must have 1 or 14 entries.")
+             }
+          }
+      } else {
+        # have 14 values in vector
+       
+      }
+  } else {
+    warning("MST-17 The colors vector does not contain character elements, Vector type is invalid.  The default colors are used.")
+    colors = micromapSTDefaults$colors
+  }
+
+   assign("colors",colors)
+
+#____ end of color check and adjustments.___
+
+
+
+#___panelDesc_________User specificed column width processing and checking
+
+###  Add check of column type to table of miniumal or statics column widths.
+###  Must have details lists processed to do this.
+
+plotWidth = par("pin")[1]
+
+if(is.null(panelDesc$colSize)){
+     #  no colSize provided by User - create the default version.
+     
+     colSize = rep(0,length(type))             # set vector to zeros. Length equal the number of columns requested.
+
+     # check for "map..." type panel columns
+     loc = substring(type,1,3)=='map'
+     # was "map" the start of the type name for column?
+     if(any(loc))  colSize[loc] = Map.width  # set size for map for columns doing maps.
+
+     # check for "id" type panel columns
+     loc = type=='id'   # is column type = "id"
+     if(any(loc))
+       {
+         sub = ifelse(plotNames=="full",1,2)  # yes, set size for ID (ab or full)
+         colSize[loc] = Id.width[sub]
+       }
+     # Get plot width and calculate size of each remaining column.
+     #   Assume equal width for each non-id or non-map column.
+     #
+     equalWidth= (plotWidth-sum(colSize))/sum(colSize==0)
+     colSize = ifelse(colSize==0,equalWidth,colSize)
+  } else {
+     colSize = panelDesc$colSize
+  }
+
+#
+#if (sum(colSize) >= plotWidth)
+#  {
+#     warning("The sum of colSize vector provided in the panelDesc argument is greater then the plotting area width.")
+#  }
+# did not work - try again later..
+#
 
 #  
 #  Make adjustments for color or grays
@@ -3185,15 +3733,17 @@ rlStateRefText= function(j,reftext){
 if (colFull)
   {  
     # set color values to work variables
-    icolRefVal = colRefVal
-    icolRefTxt = colRefTxt
+    iRef.Val.col = Ref.Val.col
+    iRef.Text.col = Ref.Text.col
     
   } else {
   
     # set gray values to work variables
-    icolRefVal = colGRefVal
-    icolRefTxt = colGRefTxt
+    iRef.Val.col = Ref.Val.BW.col
+    iRef.Text.col = Ref.Text.BW.col
   }
+
+
   
 # __________________________layout
 
@@ -3230,8 +3780,8 @@ if (colFull)
     }
    colnames(cparm) <- c("cSize","lSep","rSep")
 
-   topMar = details[["topMar"]]
-   botMar = details[["botMar"]]
+   #topMar = details[["topMar"]]
+   #botMar = details[["botMar"]]
    legfactor=1
 
    # add space if reference values provided.
@@ -3240,9 +3790,13 @@ if (colFull)
       # if not null field.
       if(any(!is.na(panelDesc$refVals))){
          # value provided - not NA
-         botMar = details[["botMarLegend"]]
+         #botMar = details[["botMarLegend"]]
          # revisit calculation below to be more precise
-         legfactor= 9/(9-details[['botMardif']])
+         #legfactor= 9/(9-details[['botMardif']])
+      
+         botMar = botMarLegend
+         # revisit calculation below to be more precise
+         legfactor= 9/(9-botMardif)
       }      
    }
    assign('legfactor',legfactor,sys.frame(which = -1))  # set legfactor in environment -1 (caller's space.)
@@ -3260,16 +3814,18 @@ if (colFull)
        # nrow = 11 -> 5,5,5,5,5,1,5,5,5,5,5 states = 11 groups
    # individual panels (rows(11) and columns)
    assign("panels",panelLayout(nrow=11,ncol=ncol,
-                        topMargin=topMar,                   # 0.95
+                        topMargin=topMar,                    # 0.95
                         leftMargin=0,                      
-                        bottomMargin=botMar,                # 0.5
-                        rowSep=details[["rowSep"]],         # c(0,0,0,0,0,.1,.1,0,0,0,0,0)
-                        rowSize=details[["rowSize"]],       # c(7,7,7,7,7,1.65,7,7,7,7,7)
-                        colSize=colSize,                    # calculated colsizes (???)
-                        colSep=colSep))                     # c(.1,.1,.1) for 3
+                        bottomMargin=botMar,                 # 0.5
+                        #rowSep=details[["rowSep"]],         # c(0,0,0,0,0,.1,.1,0,0,0,0,0)
+                        #rowSize=details[["rowSize"]],       # c(7,7,7,7,7,1.65,7,7,7,7,7)
+                        rowSep=rowSep,                       # c(0,0,0,0,0,.1,.1,0,0,0,0,0)
+                        rowSize=rowSize,                     # c(7,7,7,7,7,1.65,7,7,7,7,7)
+                        colSize=colSize,                     # calculated colsizes (???)
+                        colSep=colSep))                      # c(.1,.1,.1) for 3
 
-   grounpedRowSize = details[["groupedRowSize"]]            # c(35,1.65,35)
-   groupedRowSep   = details[["groupedRowSep"]]             # c(0,.1,.1,0)
+   #grounpedRowSize = details[["groupedRowSize"]]            # c(35,1.65,35)
+   #groupedRowSep   = details[["groupedRowSep"]]             # c(0,.1,.1,0)
 
    # Major panel group  title-top, panels, title-bottom  by columns (overlays panels)
    # section of panels (top(25), median(1), bottom(25) and "N" columns wide.
@@ -3328,14 +3884,17 @@ if (colFull)
       panelScale()
  
       if(length(title)==1){
-         text(.5,.77,title,cex=cexTitle)
+         text(.5,.77,title,cex=Title.cex)
       } else {
-         text(.5, .9,title[1],cex=cexTitle)
-         text(.5,.65,title[2],cex=cexTitle)
+         text(.5, .9,title[1],cex=Title.cex)
+         text(.5,.65,title[2],cex=Title.cex)
    }
 } # end of micromapST Function
 
 ###  End of micromapST
+
+
+###############################################################
 
 ###
 #
@@ -3348,12 +3907,9 @@ if (colFull)
 #
 ###
 
-
 micromapSTSetDefaults = function()
    {
-      return(micromapSTDefaults)
-   }
-
+ 
 #
 #  build micromapSTDefaults data.frame so it can be exported.
 #
@@ -3384,7 +3940,8 @@ names(colorsRef) = c("white","lighter gray","light gray",
                      "light green blue","mid green blue")           
 
 # Region colors________________________________________________
-colorsRgb = matrix(c(
+
+colorsRgb = matrix(c(                       # the basic 7 colors.
  1.00, .15, .15,  #region 1: red
   .90, .55, .00,  #region 2: orange
   .00, .65, .00,  #region 3: green
@@ -3394,192 +3951,238 @@ colorsRgb = matrix(c(
  1.00,1.00, .80), #non-highlighted foreground
   ncol=3,byrow=TRUE)
 
-colors = c( grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3]),
-            grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],.2))
+colors = c( grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3]),            # solid colors
+            grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],.2))         # translucent colors.
+
 names(colors) =c("red","orange","green","greenish blue", "purple","black","light yellow",
                  "l_red","l_orange","l_green","l_greenish blue", "l_purple","l_black","l_light yellow")       
+
+
+# Details variable list _________________________________________
 
 ## JP added temp variables so function would read in in R 2.7
 #      cannot use values within the details list since it's not really built yet.
 
 tempne      = 5                           # number of states per panel
-tempcolGrid = colorsRef["white"]          # grid line color
+tempGrid.Line.col = colorsRef["white"]          # grid line color
 
 tempcolFill = colorsRef["lighter gray"]   # panel and default fill color
-tempCexText = .7
+tempText.cex = .7
+
 
 details = list(
 
 # panel layout grouping 
-    ne = tempne,                   # number of item per group
-    ng = ceiling(51/tempne),       # number of groups of states 
-    ib =  c(1, 6,11,16,21,26,27,32,37,42,47), #group lower index
-    ie =  c(5,10,15,20,25,26,31,36,41,46,51), #group upper index
+    ne = tempne,                   # number of item per group 1
+    ng = ceiling(51/tempne),       # number of groups of states 2 
+    ib =  c(1, 6,11,16,21,26,27,32,37,42,47), #group lower index 3
+    ie =  c(5,10,15,20,25,26,31,36,41,46,51), #group upper index 4
 
 # panel layout margin allocation
     # JP - changed median row size to 1.5.
-    topMar       = .95,       # margin panel height (inches)
-    botMar       = .5,        # no legend bottom margin
-    botMarLegend = .5,
-    botMardif    = .2,        # maybe not needed
-    leftMarAxis  = .2,        # left margin adjustment when Y axis is printed.
+    topMar       = 0.95,       # margin panel height (inches) 5
+    botMar       = 0.5,        # no legend bottom margin 6
+    botMarLegend = 0.5,        #                         7
+    botMardif    = 0.2,        # maybe not needed 8
+    leftMarAxis  = 0.2,        # left margin adjustment when Y axis is printed 9.
     #                1 2 3 4 5   6   7 8 9 10 11
-    rowSep       = c(0,0,0,0,0,.1,.1,0,0,0,0,0),
+    rowSep       = c(0,0,0,0,0,0.1,0.1,0,0,0,0,0),   # 10
     #                1 2 3 4 5 6 7 8 9 10 11
-    rowSize      = c(7,7,7,7,7,1.65,7,7,7,7,7),  # JP change 1.5 to 1.65 on Median strip.
+    rowSize      = c(7, 7, 7, 7, 7, 1.65, 7, 7, 7, 7, 7),  # JP change 1.5 to 1.65 on Median strip 11.
     #                 1-5 6 7-11
-    groupedRowSize = c(35,1.65,35),             # JP changed 1.5 to 1.65 to give median a little more room 
+    groupedRowSize = c(35, 1.65, 35),             # JP changed 1.5 to 1.65 to give median a little more room  12
     #               1-5 5-6 6-7 7-11  
-    groupedRowSep  = c(0,.1,.1,0),
+    groupedRowSep  = c(0,0.1,0.1,0),              # 13
 
 # panel column width allocation
              ## JP changed map width to 1.4
-    mapWidth    = 1.4,        # map width should be set portionally to the height of the panel
-    idWidth     = c(.9,.30),  # full and ab
+    Map.width    = 1.4,        # map width should be set portionally to the height of the panel 14
+    Id.width     = c(0.9,0.30),  # full and ab 15
    
 # panel scaling
-    sc       = 1.08,             # x and y axis scale expansion factor
-    pad      = .67,              # y axis padding for integer plotting locates
+    sc       = 1.08,             # x and y axis scale expansion factor   16
+    pad      = 0.67,              # y axis padding for integer plotting locates  17
                                  # ry = c(1-pad,ke+pad),ke = no. items in panel
-    padex    = .34,              # total panel padding
+    padex    = 0.34,              # total panel padding  18
                                  # (.67-.5)=.17 padding at top and bottom of panel
-    padMinus = .63,              # .67 - .04 # keep reference line off panel edge
+    padMinus = 0.63,              # .67 - .04 # keep reference line off panel edge  19
 
 # mtext line placement (Titles)
     ##  JP adjusted placement of lines (titles)
-    line1        = 1.75,         # top panel 1st line placement    
-    line2        = 1.05,         # top panel 2nd line placement
-    lineTiclab   =.2,            # lowest line for map legend text 
-    line3        = .65,          # bottom panel line placement
-    line4        = -.7,          # reference line (below panel)
-    line5        = .40,          # Y axis titles for ScatDot and TS.
-
+    Title.Line.1.pos  = 1.75,         # top panel 1st line placement       20
+    Title.Line.2.pos  = 1.05,         # top panel 2nd line placement       21
+    Title.Line.3.pos  = 0.65,          # bottom panel line placement        23
+    Title.Line.4.pos  = -0.7,          # reference line (below panel)       24
+    Title.Line.5.pos  = 0.40,          # Y axis titles for ScatDot and TS.  25
+    Title.cex         = 1.0,          #                                    26
+    lineTiclab   =0.2,                # lowest line for map legend text     22
+  
 # grid line parameters
-    colGrid      = tempcolGrid,  # grid line color
-    lwdGrid      = 1,            # weight of grid line
-    mgpTop       = c(2,.1,0),    # gridline (tick) placement
-    mgpBottom    = c(2,0,0),     # gridline (tick) placement
-    padjBottom   = -.7,          # gridline (tick  placement
-    mgpLeft      = c(.75,0.1,0),   # left axis labels.
+    Grid.Line.col     = tempGrid.Line.col,  # grid line color  27
+    Grid.Line.lwd     = 1,            # weight of grid line   28
+    mgpTop            = c(2,0.1,0),    # gridline (tick) placement  29
+    mgpBottom         = c(2,0,0),     # gridline (tick) placement  30
+    padjBottom        = -0.7,          # gridline (tick  placement  31
+    mgpLeft           = c(0.75,0.1,0), # left axis labels           32.
 
 # panels
-    colPanelFill  = tempcolFill, # panel fill color
-    colOutline    = "black",     # panel outline color
+    Panel.Fill.col    = tempcolFill, # panel fill color            33
+    Panel.Outline.col = colorsRef["black"],     # panel outline color  34
 
 # Title and Text - cex for character size
-    cexText       = tempCexText, ## JP decreased text size.  Used almost everywhere.
-    cexTitle      = 1.0,
+    Text.cex          = tempText.cex, ## JP decreased text size.  Used almost everywhere. 35
 
 # refVals parameters
 
     # see padMinus above for other parameters 
-    ltyRefVal     = "dashed",    # dash line
-    lwdRefVal     = 1.5,
-    colRefVal     = colorsRef["mid green"],
-    colGRefVal    = colorsRef["black"],
+    Ref.Val.lty       = "dashed",    # dash line    36
+    Ref.Val.lwd       = 1.5,                        #   37
+    Ref.Val.col       = colorsRef["mid green"],     #   38
+    Ref.Val.BW.col    = colorsRef["black"],         #   39
 
 # refText parameters
-    colRefTxt     = colorsRef["black"],   # JP 10/10/12-changed from black to mid green.
+    Ref.Text.cex      = tempText.cex,               #   40
+    Ref.Text.col      = colorsRef["black"],   # JP 10/10/12-changed from black to mid green.  # 41
                                           #  5/21/13 - changed back to black.
-    colGRefTxt    = colorsRef["black"],
+    Ref.Text.BW.col   = colorsRef["black"],   # 42
 
 #__________________________________________________________ 
 # working parameters for each panel graphing subfunction within micromapST
 
 # arrow plot parameters
-    lengthArrow   = .08,
-    lwdArrow      = 2.5,                  ## JP decrease arrow width.
-    lwdArrowShadow = 4.0,                 # Arrows shadow when border needed.
-    colArrowShadow = colorsRef["black"],  # Not Used.
-    cexArrow      = .08,                  # Not Used
-
+    Arrow.lwd         = 2.5,                  ## JP decrease arrow width.  44
+    Arrow.cex         = .08,                  # Not Used   45
+    Arrow.Head.length = .08,                  #  Length of arrow head in inches.  43
+    Arrow.Shadow.col  = colorsRef["black"],   # Not Used.  46
+    Arrow.Shadow.lwd  = 4.0,                  # Arrows shadow when border needed. (Not used) 47
+ 
 # bar plot parameters
-    barht         = 2/3,           # fraction of line spacing
-    colBarOutline = colorsRef["black"],
-    lwdBarOutline = .5,
-    
-    colBarZero    = colorsRef["white"],
-    lwdBarZero    = 1,
-    ltyBarZero    = "dotted",
+    Bar.barht         = 2/3,           # fraction of line spacing  48
+    Bar.Outline.col   = colorsRef["black"],   #  49
+    Bar.Outline.lwd   = .5,                   #  50
+    Bar.Outline.lty   = "solid",              #  51
 
-# segmented bar parameters
-    colSBarOutline = colorsRef["black"],
-    lwdSBarOutline = .75,
+# segmented bar parameters - segbar and normbar only
+    SNBar.varht           = TRUE,                 #  59
+    SNBar.two.ended       = FALSE,                #  62   (not implemented)
+    SNBar.Middle.Dot      = TRUE,                 #  draw dot in middle point of segmented bars 63
+    SNBar.MDot.pch        = 21,                   #  middle point symbol  64
+    SNBar.MDot.pch.fill       = colorsRef["white"],   # middle point symbol fill/color    65
+    SNBar.MDot.pch.size       = 0.6,             # middle point symbol size          66
+    SNBar.MDot.pch.border.lwd = 0.6,              # middle point symbol border lwd    67
+    SNBar.MDot.pch.border.col = 'black',          # middle point symbol.border.col with using filled symbols 68
+
+# segmented bar parameters - centered bar only
+    CBar.Zero.Line.col       = colorsRef["white"],   #  52
+    CBar.Zero.Line.lwd       = 1,                    #  53
+    CBar.Zero.Line.lty       = "dotted",             #  54
+    CBar.varht          = TRUE,                 #  69
+    CBar.two.ended      = FALSE,                #  70   (not implemented)
+    #  CtrSeg uses the rest of the segbar parameters.
+
+# segmented bar parameters for all (segbar, normbar and ctrbar)
+    CSNBar.barht           =  2/3,                 #  bar heights (percentage of row) 55
+    CSNBar.Outline.col     = colorsRef["black"],   #  bar outline border color 56
+    CSNBar.Outline.lwd     = .75,                  #  bar outline border width 57
+    CSNBar.Outline.lty     = "solid",              #  bar outline border type  58
+    CSNBar.First.barht     = 0.3333,               #  60
+    CSNBar.Last.barht      = 0.80,                 #  61
+
     
 # box plot parameters
-    thinBox       =.2,     # was .29     ## JP decreased line width
-    thickBox      =.60,    # was .58
+    BoxP.thin            =.2,                       # was .29     ## JP decreased line width   71
+    BoxP.thick           =.60,                      # was .58                                  72
    
-    useBlack      = FALSE, # FALSE = Use the Color for outliners;  TRUE = use black
+    BoxP.Use.Black       = FALSE,                   # FALSE = Use the Color for outliners;  TRUE = use black  73
   
-    medianLine    = .88,
-    colBpDotMedian= colorsRef["white"],      ## JP changed from colDotMedian for clarity
-
-    pchMedian     = 19,
-    cexMedian     =.95, 
-    lwdMedian     = 2,
-    colBpMedian   = colorsRef["black"],     ## JP changed to colBpMedian from colMedian - was duplicate - set to black.
-    colBpOutline  = colorsRef["dark gray"], 
+    BoxP.Median.Line     = 0.80,                     #                                  74
   
-    lwdOutlier    = .4,               ## JP decreased dot line width
-    cexOutlier    = .7,               # see cexDot  ## JP decreased dot size  (was .6)
-    colBpGreyOutliner = colorsRef["dark gray"], 
+    BoxP.Median.Dot.col  = colorsRef["white"],      ## JP changed from colDotMedian for clarity  75
+    BoxP.Median.Dot.pch  = 19,                      #  76
+    BoxP.Median.Dot.cex  = 0.95,                      #  77
+    BoxP.Median.Dot.lwd  = 2,                       #  78
+    BoxP.Median.col      = colorsRef["black"],      ## JP changed to BoxP.Median.col from colMedian - was duplicate - set to black  79.
   
-# id State Dot parameters
-    idDotPch      = 21,               # rlStateIdDot 
-
-# dot plot parameters
-
-    pchDot        = 21,              # plotting character  (1 circle, 16 dot, 21 filled circle)
-    cexDot        = .9,              # dot size            ## JP adjusted dot size.
-
-    conf          = 95,              # % confidence interval
-    lwdConf       = 2,
-    cexConf       = .55,             # Not Used
-
-    OutlineDot    = FALSE,           ## JP added option to control Dot outline.
-    colDotOutline = colorsRef["black"],
-    lwdDotOutline = .5,
+    BoxP.Outline.col     = colorsRef["dark gray"],  # color for outline when using colors 80
+  
+    BoxP.Outlier.lwd     = 0.4,               ## JP decreased dot border line width   * 81
+    BoxP.Outlier.cex     = 0.7,               # see Dot.pch.size  ## JP decreased dot size  (was .6)   * 82
+    BoxP.Outlier.BW.col  = colorsRef["dark gray"],  # color for outline when using BW mode 83
+  
+# dot plot parameters (dot, dotconf, dotse)
+    Dot.pch              = 21,              # plotting character  (1 circle, 16 dot, 21 filled circle)  # 84
+    Dot.pch.size         = 0.9,              # dot size            ## JP adjusted dot size.              # 85
+                                          # use default lwd, lty, and border color (.col = black)     
+    Dot.Outline          = FALSE,           ## JP added option to control Dot outline.     # 89
+    Dot.Outline.col      = colorsRef["black"],                                             # 90
+    Dot.Outline.lwd      = 0.5,                                                             # 91
+ 
+# dot conf parameters
+    Dot.conf             = 95,              # % confidence interval                        # 86
+    Dot.conf.lwd         = 2,                                                              # 87
+    Dot.conf.size        = 0.55,             # Not Used                                     # 88
+                                          # use default lty, and border color (.col = black)   
  
 # ts and tsconf parameters
-    lwdTs         = 1.1,             # TS Line weight
-    axisCexTs     = tempCexText * .7,
-    hGridTs       = FALSE,
+    TS.lwd               = 1.1,             # TS Line weight                                   92
+    TS.Axis.cex          = tempText.cex * .7,                                      # 93
+    TS.hGrid             = FALSE,                                                  # 94
     
-# scatdot parameters
-    lwdSCD        = .4,              # Scat Dot symbol border line size.
-    bgFillSCD     = tempcolFill,     # not selected symbol fill (bg) color
-    medPchSCD     = 21,              # median symbol PCH value (21 = filled circle)
-    medColSCD     = colorsRef["black"],  # color for median symbol fill.
-    axisCexSCD    = tempCexText * .7,
-    sizePchSCD    = tempCexText * .7,
-    xscSCD        = 1.08,            # fudge for margins to try and not clip circles.
-    yscSCD        = 1.12,             # fudge for margins to try and not clip circles.
-    hGridSCD      = FALSE, 
+# scatdot parameters 
+    SCD.Bg.pch           =  21,               # Background symbol pch                            95
+    SCD.Bg.pch.lwd       =  0.6,              # Background symbol border line weight             96
+    SCD.Bg.pch.size      =  0.75,             # Background symbol size                           97
+    SCD.Bg.pch.fill      =  'transparent',    # Background symbol fill (bg) color (19:25)               98
+    SCD.Fg.pch           =  21,               # Foreground symbol pch                            99
+    SCD.Fg.pch.lwd       =  0.6,              # Foreground symbol border line weight            100
+    SCD.Fg.pch.size      =  1,                # Foreground symbol size                          101
+    SCD.Median.pch       =  21,               # median symbol PCH value (21 = filled circle)    102
+    SCD.Median.pch.lwd   =  0.6,              # median symbol border line weight                103
+    SCD.Median.pch.size  =  1,                # median symbol border size (cex)                 104
+    SCD.Median.pch.fill = colorsRef["black"],# median median symbol fill color.                105
+    SCD.Axis.cex         = tempText.cex * .7, # not used                                        106
+    SCD.xsc              = 1.08,              # fudge for margins to try and not clip circles.(not used) 107
+    SCD.ysc              = 1.12,              # fudge for margins to try and not clip circles.(not used) 108
+    SCD.hGrid            = FALSE,             # draw horizontal grid.                            109
+ 
+    SCD.DiagLine         = TRUE,               #    110
+    SCD.DiagLine.col     = tempGrid.Line.col,  #    111
+    SCD.DiagLine.lwd     = 1.25,               #    112
+    SCD.DiagLine.lty     = "solid",            #    113
 
-# id link panel (state lab and dot)
-    colIdOutline  = colorsRef["dark gray"],
-    cexId         = .9,        ## JP decreased ID text size.
-    cexIdDot      = .6,        # Not Used.
-    idty          = 1/3,       # subtract to lower text baseline for state names.
+# id State Dot parameters (link - State Lab and Dot)
+    Id.Text.cex          = .9,        ## JP decreased ID text size.     114
+    Id.Text.adj          = 1/3,       # subtract to lower text baseline for state names.  115
+    Id.Dot.pch           = 21,               # rlStateIdDot              116
+    Id.Dot.cex           = .6,        # Not Used.                      117
+    Id.Dot.Outline.col   = colorsRef["dark gray"],                  # 118
 
-# map parameters
-    colMapBackgr  = tempcolFill,        # map/state background fill color
-    colLineBackgr = tempcolGrid,
-    colLineForegr = colorsRef["black"], 
-    colLineNation = colorsRef["black"],
-    cexState      = .32,                    # label size for AK, HI, DC in top map.  
-    lwdBackGr     = 1, 
-    lwdForeGr     = 1,
-    lwdNation     = 1
+# map parameters  
+    Map.Bg.col           = tempcolFill,        # map/state background fill color    119
+    Map.Bg.Line.col      = tempGrid.Line.col,              #   120
+    Map.Bg.Line.lwd      = 1,                              #   121
+    Map.Fg.Line.col      = colorsRef["black"],             #   122
+    Map.Fg.Line.lwd      = 1,                              #   123
+    Map.Nation.Line.col  = colorsRef["black"],             #   124
+    Map.Nation.Line.lwd  = 1,                              #   125
+    Map.State.Spec.cex   = .32                    # label size for AK, HI, DC in top map.   #  126 
 
   )
+
+#
+# When something is added or deleted from this structure, change the 
+# globalVariables call at the start of this module.
+#
 
 #
 #  Set up variable in the micromapST namespace - used by micromapST and micromapSTSetDefaults functions.
 #
 
 micromapSTDefaults = list(colors=colors,details=details)
+
+
+     return(micromapSTDefaults)
+   }
 
 ####
 #
@@ -3599,8 +4202,8 @@ micromapSTDefaults = list(colors=colors,details=details)
      #packageStartupMessage(libraryName)
      #packageStartupMessage(pkgName)
      # generate default data.frame for micromapST.
-     rlMicromapSTDefaults <- micromapSTSetDefaults()
-     micromapSTDefaults <<- rlMicromapSTDefaults
+     #rlMicromapSTDefaults <- micromapSTSetDefaults()
+     #micromapSTDefaults <<- rlMicromapSTDefaults
   
     }
 
