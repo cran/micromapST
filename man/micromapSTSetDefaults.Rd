@@ -27,6 +27,12 @@ lists.
 The default colors in the colors list are: red, orange, green, greenish-blue and lavender
 for the state colors, black for the median state color, and light yellow for the
 cummulative hightlighting on the map.
+The default values in the details list can be found in the micromapSTDefaults documentation.
+
+This function is primarily used internally by micromapST.  However, if the user wants to see
+values of all of the internal variables or wants to make wholesale changes to the layout and
+operational changes to the colors and details list, this function can be used to create a copy
+of the full colors and details lists.
 }
 \author{
 Daniel B. Carr, George Mason University, Fairfax VA, and Jim Pearson, StatNet Consulting,

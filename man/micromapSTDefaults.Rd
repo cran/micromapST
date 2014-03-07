@@ -6,7 +6,8 @@
 The micromapSTDefaults data.frame provides all of the detailed structure,
 colors, sizing, font sizes, separation distances, line weights and types, spacing, etc.
 required to physically construct the requested micromapST graphic for an 8.5" by 11" page
-in portrait format.  The data.frame is mainly used internal to micromapST, but a copy can 
+in portrait format with 1/2" margines.  The data.frame is mainly used internal to micromapST, 
+but a copy can 
 be obtained by a user when a large number of changes are required.  This is not recommended.
 The primary purpose of this section is to provide a list and description of 
 many of the variables in the details list that can be used to enable or disable
@@ -44,7 +45,8 @@ the user. }
       }
      }
      If colors = 'greys' or 'grays' or 'bw', the entire plot will be done using 
-     black/white/gray shades. Additional color palettes may be supported in future releases.
+     the packages standard black/white/gray shades. 
+     Additional color palettes may be supported in future releases.
        
      If a colors vector is not provided, the package default colors will be used:
      \itemize{
@@ -56,12 +58,16 @@ the user. }
      It is strongly recommended to use the default.
     }
     \item{details}{is a list structure that contains the variables and values for the 
-       detailed operation of micromapST.  The list of variables is:
+       detailed layout and operation of micromapST.  The list of variables is:
        \describe{
         \item{ne}{= 5, items (rows) per group.}
-        \item{ng}{= 11, groups of states}
-        \item{ib}{= c(1,6,11,16,21,26,27,32,37,42,47), index for lower items in each of the 11 groups }
-        \item{ie}{= c(5,10,15,20,25,26,31,36,41,46,51), index for upper items in each of the 11 groups }
+        \item{ng}{= 11, groups of states. The one state median row counts as 1.}
+        \cr
+        \item{ib}{= c(1,6,11,16,21,26,27,32,37,42,47), index for first items in each of the 11 groups }
+        \item{ie}{= c(5,10,15,20,25,26,31,36,41,46,51), index for last items in each of the 11 groups }
+        \cr
+        The \var{ib} and \var{ie} variables are used to index into the sorted list of states to pull out the states 
+        for a particular group/row.
         \cr
         \item{topMar}{= 0.95, top margin in inches}
         \item{botMar}{= 0.5, bottom margin in inches}
@@ -69,27 +75,27 @@ the user. }
         \item{botMardif}{= 0.2,  bottom margin difference}
         \item{leftMarAxis}{= 0.2, left margin when Y axis labels and title are required}
         \cr    
-        \item{rowSep}{= c(0,0,0,0,0,0.1,0.1,0.0.0.0.0), separation between rows in 
-        each panel (0.1 around the median row, 0 for others)}
+        \item{rowSep}{= c(0,0,0,0,0,0.1,0.1,0.0.0.0.0), location of row separations in 
+        each column of panels (0.1 around the median row, 0 for others). (inches)}
         \item{rowSize}{= c(7,7,7,7,7,1.6,7,7,7,7,7), size of rows in each panel 
-        (1.5 pixels for median row, 7 pixels for others)}
-        \item{groupedRowSize}{= c(35, 1.65, 35),  size of panels (1.5 pixels for median panel, 
-        35 pixels for others)}
+        (1.6 row units for median row, 7 row units for the 5 item groups)}
+        \item{groupedRowSize}{= c(35, 1.65, 35),  size of panels (1.65 row units for median panel, 
+        35 row units for the 5 item groups.)}
         \item{groupedRowSep}{= c(0,0.1,0.1,0), separation between panels 
         (0.1 inches for median panel, 0 for others)}
         \item{Map.Width}{= 1.4 inches, width of each map}
-        \item{Id.Width}{= c(0.9, 0.3),  width of id column (full name and abbreviated)}
+        \item{Id.Width}{= c(0.9, 0.3),  width of id columns (full name (0.9) and abbreviated (0.2)) inches}
         \cr  
-        \item{sc}{= 1.08, x axis scale expansion factor}
+        \item{sc}{= 1.08, x axis scale expansion factor.  Applied to the data range to calculate the graph's range.}
         \item{pad}{= 0.67, y axis padding for integer plotting locations}
         \item{padex}{= 0.34 inches, total panel padding (i.e., 0.17 at top and bottom of panel)}
         \item{padMinus}{= 0.63 inches, spacing to keep reference line off panel edge}
         \cr
-        \item{Title.Line1}{= 1.75 inches, top panel 1st line placement, used with lab1}
-        \item{Title.Line2}{= 1.05 inches, top panel 2nd line placement, used with lab2}
-        \item{Title.Line3}{= 0.65 inches, bottom panel line placement, used with lab3}
-        \item{Title.Line4}{= -0.7 inches, reference line (below panel), used with reftext}
-        \item{Title.Line5}{= .40 inches, Y axis label placement (left of panel), used with lab4}
+        \item{Title.Line1}{= 1.75 inches, top panel 1st line placement above the first panel, used with lab1}
+        \item{Title.Line2}{= 1.05 inches, top panel 2nd line placement above the first panel, used with lab2}
+        \item{Title.Line3}{= 0.65 inches, bottom panel line placement below the last panel, used with lab3}
+        \item{Title.Line4}{= -0.7 inches, reference line legend below last panel, used with reftext}
+        \item{Title.Line5}{= .40 inches, Y axis label placement (to the left of panel), used with lab4}
         \item{Title.cex}{= 1.0, text size of title, used with title}
         \item{lineTiclab}{= 0.2 inches, lowest line for map legend text, used with map glyph for footer label}
         \cr 
@@ -99,7 +105,7 @@ the user. }
         \item{mgpTop}{= c(2,0.1,0), Top margin line for 'X' axis labels and axis line.}
         \item{mgpBottom}{= c(2,0,0), Bottom margin line for 'X' axis labels and axis line.}
         \item{padjBottom}{= -0.7, Axis tick label placement adjustment}
-        \item{mgpLeft}{= c(.75, .05, 0), Left 'Y' axis margin line for axis labels and axis line.}
+        \item{mgpLeft}{= c(0.75, 0.05, 0), Left 'Y' axis margin line for axis labels and axis line.}
         \cr 
         \item{Panel.Fill.col}{= "#EBEBEB", * defaults to light gray}
         \item{Panel.Outline.col}{= "black", * color of panel outlines}
@@ -190,7 +196,7 @@ the user. }
         \item{CBar.Zero.Line.col}{= "white", * centered bar "zero" vertical line color}
         \item{CBar.Zero.Line.lwd}{= 1, * line width for centered bar "zero" vertical line}
         \item{CBar.Zero.Line.lty}{= "dotted", * type of centered bar "zero" line}
-        \item{CBar.varht}{= TRUE,  * enables variable height bars.}
+        \item{CBar.varht}{= FALSE,  * enables variable height bars.}
         \item{CBar.two.ended}{= FALSE, * request two ended variable height bars be used 
         (small to large to small). (*** Not implemented ***)}
        }
@@ -199,35 +205,36 @@ the user. }
        \describe{
         \item{CSNBar.Outline.col}{= "#262626FF", * very dark gray, color of 
         bar segment outline in segmented bar plots.}
-        \item{CSNBar.Outline.lwd}{= .75, * line weight for bar segment outline in 
+        \item{CSNBar.Outline.lwd}{= 0.75, * line weight for bar segment outline in 
         segmented bar plots.}
         \item{CSNBar.Outline.lty}{= 'solid', * line type for bar segment outline 
         in segmented bar plots.}
-        \item{CSNBar.First.barht}{= .3333, * height of first bar when variable 
+        \item{CSNBar.First.barht}{= 0.3333, * height of first bar when variable 
         height bars are used. Must be less than SBar.Last.barht and in the range 
-        of .333 to .6667,}
-        \item{CSNBar.Last.barht}{= .80, * height of last bar when variable height bars are used.  
-        Must be greater than SBar.First.barht and in the range of .6667 to .90.}
+        of 0.333 to 0.6667,  SNBar.varht or CBar.varht must be TRUE for this option of function.}
+        \item{CSNBar.Last.barht}{= 0.80, * height of last bar when variable height bars are used.  
+        Must be greater than CSNBar.First.barht and in the range of 0.6667 to 0.90. CSNBar.varht or 
+        CBar.varht must be TRUE for this option of function.}
        }
        The following variables are used by the \option{segbar} and \option{normbar} glyphs:
        \describe{
-        \item{SNBar.barht}{= .66667, * fixed height of bar when variable height 
-        bars are is not used.  Should never be greater than .90. Usable range 
+        \item{SNBar.barht}{= 0.66667, * fixed height of bar when variable height 
+        bars are is not used.  Should never be greater than 0.90. Usable range 
         is 0.333 to 0.90.}
-        \item{SNBar.varht}{= TRUE, * enables variable height bars from 
+        \item{SNBar.varht}{= FALSE, * enables variable height bars from 
         SBar.First.barht to SBar.Last.barht.}
         \item{SNBar.two.ended}{= FALSE, * request two ended variable height bars be used 
         (small to large to small).(*** Not implemented ***)}
-        \item{SNBar.Middle.Dot}{=TRUE, * request a dot be draw in at the mid point in the 
+        \item{SNBar.Middle.Dot}{=FALSE, * request a dot be draw in at the mid point in the 
         segmented bars.}
-        \item{SNBar.MDot.pch}{=21, * type of point/symbol used as the mid point dot.}
+        \item{SNBar.MDot.pch}{=21, * type of point/symbol used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
         \item{SNBar.MDot.pch.col}{='white', * color of the point/symbol used as the 
-        mid point dot.}
-        \item{SNBar.MDot.pch.size}{=0.3, * size of point/symbol used as the mid point dot.}
+        mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
+        \item{SNBar.MDot.pch.size}{=0.3, * size of point/symbol used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
         \item{SNBar.MDot.pch.border.lwd}{=NA, * line width of outline of point/symbol 
-        used as the mid point dot.}
+        used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
         \item{SNBar.MDot.pch.border.col}{=NA, * color of outline of point/symbol used as 
-        the mid point dot.}
+        the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
        }
        The following variables are used by the scatter dot glyph (\option{scatdot}):
        \describe{
@@ -258,9 +265,9 @@ the user. }
         \item{SCD.hGrid}{= FALSE, * whether or not to include horizontal grid lines in panel}
         \cr
         \item{SCD.DiagLine}{= TRUE, * whether or not to include x=y sloped line}
-        \item{SCD.DiagLine.col}{= colGrid, * color of sloped line, default, grid line color}
-        \item{SCD.DiagLine.lwd}{= 1, * line weight of sloped line, default, grid line color}
-        \item{SCD.DiagLine.lty}{= 'solid', * line type of sloped line, default, grid line color}
+        \item{SCD.DiagLine.col}{= colGrid, * color of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
+        \item{SCD.DiagLine.lwd}{= 1, * line weight of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
+        \item{SCD.DiagLine.lty}{= 'solid', * line type of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
        }
        The following variables are used by the time series glyphs (\option{ts} and \option{tsconf}):
        \describe{
@@ -269,8 +276,9 @@ the user. }
         \item{TS.hGrid}{= FALSE, * whether or not to include horizontal 
         grid lines in panel}
        }
-   Only the variable(s) requiring change need to be included in the list provided 
-   to the details= paramater in the call.  The beginning of the variable names indicates
+   When changing the colors list, then the entire list must be specified.  To change the values of items
+   in the details list, only the variable(s) requiring change need to be specified as a list for the 
+   details=  parmater in the call.  In general, the beginning of the variable names indicates
    the glyph the variable is associated, in most cases.
    \preformatted{
        Arrow.    -> arrow glyph
@@ -299,7 +307,7 @@ the user. }
    all that is required is:
    \preformatted{
 
-      details = list(SBar.Middle.Dot=FALSE)
+      details = list(SNBar.Middle.Dot=FALSE)
     }
    } 
   }

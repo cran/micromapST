@@ -31,7 +31,7 @@
   provides the means of defining how many columns to create, the type of glyph per column, 
   where the data required by the glyph is located in the \var{stateFrame} (column number or name) 
   or the name of a supplimental data structure when the glyph is boxplots or time series 
-  (via the \var{panelData=} list entry), the column titles, and the column''s reference value and label
+  (via the \var{panelData} list entry), the column titles, and the column''s reference value and label
   for the link micromap generation.
 
   \bold{Glyph Types}
@@ -39,8 +39,9 @@
   The \var{type} vector defines the type of glyph to be used for each column.
   The available glyphs are:
       \describe{
-        \item{Map types:}{'map', 'mapcum','maptail','mapmedian',}
-        \item{State ID and/or Name:}{'id',} 
+        \item{Map types:}{'map', 'mapcum','maptail','mapmedian'}
+        \item{State ID and/or Name:}{'id'} 
+        \item{Ranking:}{'rank'}
         \item{Graphical Type:}{'dot', 'dotse','dotconf', 'bar', 'arrow', 'ts', 
         'tsconf','scatdot', 'segbar', 'normbar', 'ctrbar', 'boxplot'}
       }
@@ -60,6 +61,7 @@
          \cr 
          \item{id}{ - generates a column with a colored identifier (a square) 
          and the state name or abbreviation.}
+         \item{rank}{ - number the states in rank order from 1 to 51, sequentially.} 
          \cr
          \item{arrow}{ - an arrow between two values with a head.}
          \cr
@@ -71,9 +73,9 @@
          \item{dotse}{ - a dot for a single value and its standard error.}
          \item{dotconf}{ - a dot for a single value and its confidence interval.}
          \cr
-         \item{ts}{ - a time series line for up to 15 sets 'x' and 'y' values for 
+         \item{ts}{ - a time series line for up to 30 sets 'x' and 'y' values for 
          each state.} 
-         \item{tsconf}{ - a time series line for a up to 15 sets of 'x', 'y' and upper 'y' 
+         \item{tsconf}{ - a time series line for a up to 30 sets of 'x', 'y' and upper 'y' 
          and lower 'y' values as a confidence interval band for each state.}  
          \cr
          \item{segbar}{ - a horizontal stacked (segmented) bar plot 
@@ -219,7 +221,8 @@
   
   For the time series and time series with confidence interval, the glyphs require a 3 dimensional 
   array of data.  The first dimension ([st,,]) represents the 51 states.  The second dimension ([,t,]) 
-  ranges from 2 to 15. One for each data point. The third dimension ([,,v]) provides the values at 
+  ranges from 2 to "n".  There is no upper limit, but 200-250 samples is a practical limit.
+  One for each data point. The third dimension ([,,v]) provides the values at 
   data point "t" for state "st".  [,,1] is the "x" axis value. For time series, is usually 
   just the value 1 to 15 to order the "y" values.  [,,2] is the median "y" value.  For time series 
   with confidence intervals: [,,3] is the lower value "y" and [,,4] is the upper value "y".
@@ -262,6 +265,7 @@
         \item{id}{ - generates a column with a color identifier (a filled in square) 
          and the state name. The plotNames parameter in the \var{micromapST} call controls 
          whether the state''s full name or 2 character abbreviation is displayed.}
+        \item{rank}{ - sequentially number states from 1 (highest rank) to 51 (lowest rank)}
         \cr
         \item{arrow}{ - an arrow from value 1 to value 2 with value 2 
          the head of the arrow.}
@@ -280,13 +284,13 @@
          \cr
         \item{ts}{ - a time series line plot for each state. 
          The glyph use the panelData vector to get the name of a three (3) dimensional array 
-         the data for the plot. The array contains one entry per state, 1 to 15 data points 
+         the data for the plot. The array contains one entry per state, 1 to 30 data points 
          and the "x" and "y" values.
          See section on \var{panelData} below for more details.}  
         \item{tsconf}{ - a time series line and confidence interval 
          band for each state.   
          The glyph use the panelData vector to get the name of a three (3) dimensional array 
-         the data for the plot. The array contains one entry per state, 1 to 15 data points 
+         the data for the plot. The array contains one entry per state, 1 to 30 data points 
          and the "x", "y", lower "y" and upper "y" values.
          See section on \var{panelData} below for more details.}  
         \cr
@@ -320,7 +324,7 @@
          \var{col1} indicates \var{stateFrame} column containing the 'x' values and 
          \var{col2} indicates the column containing the 'y' values.}
       }
-     Example: \code{type=c('id','map','boxplot')}  
+     Example: \code{type=c('id','map','rank', 'boxplot')}  
      To specify a \var{micromapST} with three columns, left to right,
      containing the state label, a map and a boxplot.
     }\cr
@@ -385,13 +389,16 @@
       abbreviation (2 character) for the state associated with the data. There must 
       be 51 rows in the data.frame. Each row must be data produced by the 
       \option{boxplot} function.  The state abbreviation must be used as the boxplot$names 
-      to be able to associate the individual boxplots to each state.
+      to be able to associate the individual boxplots to each state.  The "names" attribute
+      must contain the state name.
       
       For the time series glyph (ts), the data must be a three (3) dimensional array.  
       The first dimension \code{[st,,]} represent one entry for each state (1 to 51).  
-      The second dimension \code{[,t,]} indexes up to 15 data points for the state.  
+      The second dimension \code{[,t,]} indexes up to 30 data points for the state.  
       The third dimension \code{[,,v]} are the data point values.  \code{[,,1]} is 
       the "x" value and \code{[,,2]} is the median "y" value for the data point.  
+      The rownames associated with the first dimension must be the 51 state/DC names to 
+      link the elements of this structure the presentation order of the states.
       
       For the time series with confidence intervals glyph (tsconf), the array is extended to include:  
       \code{[,,3]} and \code{[,,4]} for the lower and upper "y" values.
