@@ -5,8 +5,8 @@
 \description{
 The micromapSTDefaults data.frame provides all of the detailed structure,
 colors, sizing, font sizes, separation distances, line weights and types, spacing, etc.
-required to physically construct the requested micromapST graphic for an 8.5" by 11" page
-in portrait format with 1/2" margines.  The data.frame is mainly used internal to micromapST, 
+required to physically construct the requested micromapST graphic for an 8.5 inches  by 11 inches page
+in portrait format with 1/2 inch margines.  The data.frame is mainly used internal to micromapST, 
 but a copy can 
 be obtained by a user when a large number of changes are required.  This is not recommended.
 The primary purpose of this section is to provide a list and description of 
@@ -17,7 +17,7 @@ the user. }
 \format{The data.frame contains two lists: colors and details.
  \describe{
   \item{colors}{The colors vector is the name of a color palette or a vector of 
-  7 or 14 color names or values ('#xxxxxx'). The vector defines the colors used for:
+  7 or 14 color names or values ("#xxxxxx"). The vector defines the colors used for:
     \itemize{
       \item{The 5 colors in each group for the states and symbols in the glyphcs. 
       One color per row (state).}
@@ -26,13 +26,13 @@ the user. }
       highlight states already referenced previously or have meaning depend on 
       the type of map requested. The usage is as follows:
        \preformatted{
-        'map'       - not used.
-        'mapcum'    - highlight states previously referenced
+        "map"       - not used.
+        "mapcum"    - highlight states previously referenced
                       above.
-        'maptail'   - highlight states previously referenced
+        "maptail"   - highlight states previously referenced
                       above the median row and highlight 
                       remaining states below the median row.
-        'mapmedian' - highlight all states above the median 
+        "mapmedian" - highlight all states above the median 
                       in maps above the median row and highlight 
                       all states below the median in maps 
                       below the median row.
@@ -44,18 +44,19 @@ the user. }
       of the original color e.g., adjustcolors(colors,0.2)
       }
      }
-     If colors = 'greys' or 'grays' or 'bw', the entire plot will be done using 
+     If colors = "greys" or "grays" or "bw", the entire plot will be done using 
      the packages standard black/white/gray shades. 
      Additional color palettes may be supported in future releases.
        
      If a colors vector is not provided, the package default colors will be used:
      \itemize{
-       \item 5 state colors: 'red', 'orange', 'green', 'greenish blue', 'lavender'
-       \item 1 median state color: 'black'
-       \item 1 highlighed states: 'light yellow' and 
+       \item 5 state colors: "red", "orange", "green", "greenish blue", "lavender"
+       \item 1 median state color: "black"
+       \item 1 highlighed states: "light yellow" and 
        \item 7 translucent colors using the above colors at 20\%.
      }
-     It is strongly recommended to use the default.
+     The colors parameter is optional and should only be used when the colors are to be 
+     overridden for a set of linked micromaps.
     }
     \item{details}{is a list structure that contains the variables and values for the 
        detailed layout and operation of micromapST.  The list of variables is:
@@ -99,13 +100,13 @@ the user. }
         \item{Title.cex}{= 1.0, text size of title, used with title}
         \item{lineTiclab}{= 0.2 inches, lowest line for map legend text, used with map glyph for footer label}
         \cr 
-        \item{Grid.col}{= 'white' * Grid line color}
+        \item{Grid.col}{= "white" * Grid line color}
         \item{Grid.lwd}{= 1, Grid line width}
         \cr
-        \item{mgpTop}{= c(2,0.1,0), Top margin line for 'X' axis labels and axis line.}
-        \item{mgpBottom}{= c(2,0,0), Bottom margin line for 'X' axis labels and axis line.}
+        \item{mgpTop}{= c(2,0.1,0), Top margin line for "X" axis labels and axis line.}
+        \item{mgpBottom}{= c(2,0,0), Bottom margin line for "X" axis labels and axis line.}
         \item{padjBottom}{= -0.7, Axis tick label placement adjustment}
-        \item{mgpLeft}{= c(0.75, 0.05, 0), Left 'Y' axis margin line for axis labels and axis line.}
+        \item{mgpLeft}{= c(0.75, 0.05, 0), Left "Y" axis margin line for axis labels and axis line.}
         \cr 
         \item{Panel.Fill.col}{= "#EBEBEB", * defaults to light gray}
         \item{Panel.Outline.col}{= "black", * color of panel outlines}
@@ -114,9 +115,9 @@ the user. }
        }
        The following variable relate to the reference text and line features:
        \describe{
-        \item{Ref.Val.lty}{= 'dashed', * set reference value line to dashed}
+        \item{Ref.Val.lty}{= "dashed", * set reference value line to dashed}
         \item{Ref.Val.lwd}{= 1.5, * line width of reference line}
-        \item{Ref.Val.col}{=  "mid green", * color of reference line when color is used.}
+        \item{Ref.Val.col}{=  "midgreen", * color of reference line when color is used.}
         \item{Ref.Val.BW.col}{= "black", * color of reference line when grays are used.}
         \item{Ref.Text.cex}{= 0.7, * size of reference line text}
         \item{Ref.Text.col}{= "black", * color of reference line text when color is used.}
@@ -137,7 +138,7 @@ the user. }
         Should never be > .90. Usable range is 0.333 to 0.90}
         \item{Bar.Outline.col}{= "black", * color of bar outline.}
         \item{Bar.Outline.lwd}{= 0.5, * line width for bar outline }
-        \item{Bar.Outline.lty}{= 'solid', * line type for bar outline }
+        \item{Bar.Outline.lty}{= "solid", * line type for bar outline }
        }
        The following variables are used by the \option{boxplot} glyph:
        \describe{
@@ -152,7 +153,7 @@ the user. }
         \item{BoxP.Median.Dot.lwd}{= 2, * line width for median.} 
         \item{BoxP.Median.col}{= "black", * color of median box}
         \cr
-        \item{BoxP.Outline.col}{= '#262626FF", * boxplot outline color}
+        \item{BoxP.Outline.col}{= "#262626FF", * boxplot outline color}
         \cr 
         \item{BoxP.Outlier.lwd}{= 0.4, * line width of outlier outlines.}
         \item{BoxP.Outlier.cex}{= 0.7, * size of outlier dots.}
@@ -180,9 +181,9 @@ the user. }
         \item{Id.Dot.cex}{= 0.6, * size of dot symbol for state ID}
         \item{Id.Dot.Outline.col}{= "dark gray", * outlines of ID}
        }
-       The following variables are used by all of the 'map' type glyphs:
+       The following variables are used by all of the "map" type glyphs:
        \describe{
-        \item{Map.Bg.col}{= #262626FF", * color of state fill in maps}
+        \item{Map.Bg.col}{= "#262626FF", * color of state fill in maps}
         \item{Map.Bg.Line.col}{= "white", * background of maps}
         \item{Map.Bg.Line.lwd}{= 1,  * line weight for map background boundaries}
         \item{Map.Fg.Line.col}{= "black", * foreground color of maps}
@@ -193,9 +194,9 @@ the user. }
        }
        The following variables are used by the \option{ctrbar} glyph:
        \describe{
-        \item{CBar.Zero.Line.col}{= "white", * centered bar "zero" vertical line color}
-        \item{CBar.Zero.Line.lwd}{= 1, * line width for centered bar "zero" vertical line}
-        \item{CBar.Zero.Line.lty}{= "dotted", * type of centered bar "zero" line}
+        \item{CBar.Zero.Line.col}{= "white", * centered bar zero vertical line color}
+        \item{CBar.Zero.Line.lwd}{= 1, * line width for centered bar zero vertical line}
+        \item{CBar.Zero.Line.lty}{= "dotted", * type of centered bar zero line}
         \item{CBar.varht}{= FALSE,  * enables variable height bars.}
         \item{CBar.two.ended}{= FALSE, * request two ended variable height bars be used 
         (small to large to small). (*** Not implemented ***)}
@@ -207,7 +208,7 @@ the user. }
         bar segment outline in segmented bar plots.}
         \item{CSNBar.Outline.lwd}{= 0.75, * line weight for bar segment outline in 
         segmented bar plots.}
-        \item{CSNBar.Outline.lty}{= 'solid', * line type for bar segment outline 
+        \item{CSNBar.Outline.lty}{= "solid", * line type for bar segment outline 
         in segmented bar plots.}
         \item{CSNBar.First.barht}{= 0.3333, * height of first bar when variable 
         height bars are used. Must be less than SBar.Last.barht and in the range 
@@ -228,7 +229,7 @@ the user. }
         \item{SNBar.Middle.Dot}{=FALSE, * request a dot be draw in at the mid point in the 
         segmented bars.}
         \item{SNBar.MDot.pch}{=21, * type of point/symbol used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
-        \item{SNBar.MDot.pch.col}{='white', * color of the point/symbol used as the 
+        \item{SNBar.MDot.pch.col}{="white", * color of the point/symbol used as the 
         mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
         \item{SNBar.MDot.pch.size}{=0.3, * size of point/symbol used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
         \item{SNBar.MDot.pch.border.lwd}{=NA, * line width of outline of point/symbol 
@@ -244,7 +245,7 @@ the user. }
         non-active data points.}
         \item{SCD.Bg.pch.size}{= 0.75, * size of point/symbol used as non-active 
         data points.}
-        \item{SCD.Bg.pch.fill}{= 'transparent', * fill color for not selected state's 
+        \item{SCD.Bg.pch.fill}{= "transparent", * fill color for not selected state's 
         dots.}
         \item{SCD.Fg.pch}{= 21, * type of point/symbol for active data points}
         \item{SCD.Fg.pch.lwd}{= 0.6, * Scatter dot symbol outline line weight for 
@@ -267,7 +268,7 @@ the user. }
         \item{SCD.DiagLine}{= TRUE, * whether or not to include x=y sloped line}
         \item{SCD.DiagLine.col}{= colGrid, * color of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
         \item{SCD.DiagLine.lwd}{= 1, * line weight of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
-        \item{SCD.DiagLine.lty}{= 'solid', * line type of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
+        \item{SCD.DiagLine.lty}{= "solid", * line type of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
        }
        The following variables are used by the time series glyphs (\option{ts} and \option{tsconf}):
        \describe{
@@ -321,7 +322,7 @@ To do large scale customization, call the micromapSTSetDefaults function to get
 a copy of the entire data.frame and modify this copy.  This is not recommended.  
 }
 \author{Daniel B. Carr, George Mason University, Fairfax VA, 
-with contributions from Jim Pearson and Linda Pickle of 
+with contributions from James B Pearson and Linda Pickle of 
 StatNet Consulting, LLC, Gaithersburg, MD
 }
 \keyword{data structure}

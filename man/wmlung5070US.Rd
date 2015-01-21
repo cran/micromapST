@@ -21,7 +21,7 @@
 }
 \details{
  see wmlung5070 for further details.
-  The row name is always "US" indicating US rates.
+  The row name is always \var{US} indicating US rates.
   This dataset is used by the micromapST examples.
 }
 \author{Linda W. Pickle and Jim Pearson of StatNet Consulting, LLC, Gaithersburg, MD}

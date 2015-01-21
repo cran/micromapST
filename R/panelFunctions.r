@@ -5,15 +5,18 @@
 
 panelFill <-
 function(col="#D0D0D0",border=NA,...)
-# fill a panel specified by "usr" with fill color of "col" and and outline color of "border="
+# fill a panel specified by "usr" with a fill color of "col=" and a outline color of "border="
 {
-    xy <- par("usr")               # get usr data with polygon points.  Fil with "col"
+    xy <- par("usr")               # get usr data (x&y scaling) - points on the panel box
+    #  draw polygon (box) with color "border" and fill "col"
     polygon(xy[c(1, 2, 2, 1)], xy[c(3, 3, 4, 4)],col=col,border=border,xpd=TRUE,...)
 }
 
 
 panelGrid <-
 function(x = NULL, y = NULL, col = 2, lwd = 1, lty = 1)
+#
+# defaults = col = red,  lwd = 1 pt,  lty = solid
 # place grids in panel.  If x present = vertical grids
 #                        if y present = horizontal grids  
 #                        if x and y present = both grids
@@ -53,7 +56,7 @@ function(x, n=1)
 
 panelOutline <-
 function(col = "black", lwd = 1, lty = 1)
-# Outline panel in "col". Current panel = "usr"
+# Outline panel in "col". Current panel = "usr", col="black", lwd = 1, lty = solid
 {
 	xy <- par("usr")            # get window size (save to reuse)
 	polygon(xy[c(1, 2, 2, 1)], xy[c(3, 3, 4, 4)], density=0, col=col, xpd=TRUE)
@@ -107,9 +110,14 @@ function(layout, i = 1, j = 1, margin = NULL)
 	    stop("PS-01 Dimension error. Program error - index 'i' or 'j' is out of bounds.")
 	
 	if(is.null(margin)) {               # "margin" is missing.
-            k = dim[2] * (i - 1) + j
+            k = dim[2] * (i - 1) + j          # #col * (rowInx-1) + colInx 
+                     # datfig layout as C1R1, C2R1, C3R1, C4R1, C2R1, ...
 	    par(fig = layout$datfig[k,  ], 
-	        mai = layout$pad[c(4, 1, 3, 2)] )
+	        mai = layout$pad[c(4, 1, 3, 2)] )  # pad is c(L(1), R(2), T(3), B(4))
+	               # 
+	           # fig is c(x1, x2, y1, y2)     # no units.
+	           # mai is c(bot, left, top, right) <- pad[c(4,1,3,2)] in inches
+	           
 	}
 	else {
 	    vec = 1:4

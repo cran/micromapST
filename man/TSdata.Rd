@@ -16,32 +16,32 @@ The data are age-adjusted (2000 U.S. standard) female lung cancer mortality rate
   the lower 95\% confidence limit, and finally the upper 95\% confidence limit value.
 }
 \details{
-  The first dimension [s,,] of 51 elements contains each state or DC.  
+  The first dimension [\var{st},,] of 51 elements contains each state or DC.  
   This dimension is referenced by the rownames of the array.
   
-  The second dimension [,t,] of 15 elements in this case are the time periods
+  The second dimension [,\var{t},] of \var{n} elements in this case are the time periods
   in the time series.  Our example uses the years 1996 to 2010 as the 
-  time period values.
+  time period values.  A reasonable number of points is between 200 and 300.
 
-  The third dimension [,,v] of 2 or 4 elements is the x or y values during the time period.
+  The third dimension [,,\var{v}] of 2 or 4 elements is the x or y values during the time period.
   If the no confidence data is provided, the third dimension is 2:
   \itemize{
-  \item data[,,1] is the X value 
-  \item data[,,2] is the mid-Y value (Y) 
+  \item data[,,\var{1}] is the X value 
+  \item data[,,\var{2}] is the mid-Y value (Y) 
   }
-  If a confidence band is being plotted in \option{"tsconf"} graphs then 
+  If a confidence band is being plotted in \option{\var{tsconf}} graphs then 
   there are 4 elements.
   \itemize{
-  \item data[,,1] is the X value 
-  \item data[,,2] is the mid-Y value (Y) 
-  \item data[,,3] is the low-Y value
-  \item data[..4] is the high-Y value
+  \item data[,,\var{1}] is the X value 
+  \item data[,,\var{2}] is the mid-Y value (Y) 
+  \item data[,,\var{3}] is the low-Y value
+  \item data[..\var{4}] is the high-Y value
   }
   For example, the x,y coordinates for year=1996 (time period = 1) for the first 
-  state ("AK") is TSdata[1,1,c(1,2)].
+  state (\var{AK}) is TSdata[\var{1},\var{1},c(1,2)].
   
-  This approach was done to allow a data matrix built for the 'tsconf' glyphics 
-  to be used for a 'ts' glyphics.
+  This approach was done to allow a data matrix built for the "tsconf" glyphics 
+  to be used for a \var{ts} glyphics.
   \preformatted{
   
   # how to create a new time series data set 

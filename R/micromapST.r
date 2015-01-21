@@ -25,9 +25,12 @@
 #                                         - Plot the median time series data in the panels above and below
 #                                           the median row.
 #                                         - Adjusted defaults on stacked bar graphs
+# Updated Package Version 140712 - V1.0.4 - Correct single and double quote mark usage in examples
+# Updated Package Version 150121 - V1.0.5 - Fix panelDesc parameter checking logic. Incorrect error 
+#                                           messages generated..
 #            
 #
-#  Update Log by Jim Pearson
+#  Update Log and change details by Jim Pearson
 #    May 31, 2009 - corrected dates on three column micromap
 #        1990-2000 to 2001-5   --> 1996-2000 to 2001-5
 #    June 7, 2009 - Added VerStr as a parameter to be able to determine
@@ -174,8 +177,17 @@
 #           to median row to properly present the data using the same aspect ratio as the other data.
 #         - Adjusted the defaults for the segbar, ctrbar, and normbar graphics to have no center dot
 #           and fixed bar height.
-#             
-#
+#    July 12, 2014 - Corrected usage of single and double quote marks in examples and test code.
+#    December 14, 2014 - The error checking for several panelDesc glyphics and micromapST call 
+#           parameters, generating incorrect messages and causing R errors.  
+#           The checking logic is rewritten.  The use of is.na and is.null was not appropriate
+#           to verify contents and colunms in the panelDesc data.frame.  Changed logic to use names()
+#           to check the user provided list names for validity.  In the glyphics, logic was changed 
+#           to again use the "names" list to verify the required lists were present for the 
+#           specific glyphic.
+#           The "colors" parameter is not longer required.  The default color lists are used if
+#           an override list is not provided.
+#    January 21, 2015 - included citations to JSS article and fixed release NOTES on global variables.
 #        .
 ########
 
@@ -289,7 +301,10 @@ globalVariables(c("ne","ng","ib","ie",
                 "Map.Bg.col","Map.Bg.Line.col","Map.Fg.Line.col","Map.Nation.Line.col",
                 "Map.State.Spec.cex","Map.Bg.Line.lwd","Map.Fg.Line.lwd","Map.Nation.Line.lwd",
              
-                "MST.Debug"),
+                "MST.Debug",
+                
+                "stateVisBorders","stateNationVisBorders","stateNamesFips"
+                ),
                                      
                 "micromapST",add=TRUE)
 
@@ -308,7 +323,6 @@ globalVariables(c("ne","ng","ib","ie",
 groupPanelOutline = function (panelGroup, j )
    ## used in micromapST function  - assumes 3 rows in the panels..
 {
-
   for (i in 1:3){
      panelSelect(panelGroup,i,j)  # select a space
      panelScale()               # scale it
@@ -335,7 +349,9 @@ simpleCap <- function (x)
 
 #
 #  Subroutine to take the colx vectors, convert numeric to integer, convert character by matching
-#   with column names to column numbers.   NA's become "0", Invalid column numbers or names become "0".
+#   with column names to column numbers.   NA's become "0", Invalid column numbers or names become "0"
+#
+#.
 #  Errors are flaged by the glyphics code.
 #
 CheckColx <- function(wcol,colname,wnam2,len_wnam) 
@@ -395,7 +411,7 @@ CheckColx <- function(wcol,colname,wnam2,len_wnam)
            } else {
               # invalid variable type
               ErrFnd = TRUE
-              xmsg = paste("CCOL-03 The type of ",colname," panelDesc variable is invalid. ",typeof(xcol),".  Must be integer or character.",sep="")
+              xmsg = paste("CCOL-03 The type of ",colname," panelDesc variable is invalid. ",typeof(xwcol),".  Must be integer or character.",sep="")
               warning(xmsg)
            } 
       }
@@ -428,9 +444,8 @@ micromapST = function(
     ascend=TRUE,     
     title=c("",""),
     plotNames=c("ab","full")[2],         # default = "full"
-    colors = micromapSTDefaults$colors,
+    colors = NULL,
     details = NULL)
-    #details= micromapSTDefaults$details)
 {
 #
 #  Routine:   micromapST
@@ -458,16 +473,13 @@ micromapST = function(
 #   Defaults List for call simulation
 #     stateFrame <- data
 #     panelDesc
-#     rowNames <- "ab"
-#     sortVar <- NULL
-#     ascend <- TRUE
-#     title <- c("titles")
+#     rowNames  <- "ab"
+#     sortVar   <- NULL
+#     ascend    <- TRUE
+#     title     <- c("titles")
 #     plotNames <- "full"
-#     colors <- micromapSTDefaults$colors
-#     details <- NULL
-
-#     
-#
+#     colors    <- NULL
+#     details   <- NULL
 #
 #
 #####
@@ -539,8 +551,8 @@ micromapST = function(
 #         bar  will accept negative values and plot from 0 in that direction.
 #
 #  col1, col2, col3
-#    These values idenfity the column numbers or column names in stateFrame to be used as data for most
-#       of the panel types.  They are used by:
+#    These values idenfity the column numbers or column names in stateFrame to be 
+#       used as data for most of the panel types.  They are used by:
 #            "dot", "bar", "dotse", "dotconf", "scatdot", "segbar", "ctrbar", "normbar"
 #      ls
 #     Panel types using only one column parameter:
@@ -564,7 +576,8 @@ micromapST = function(
 #           col2 is the column name or number of the column in the stateFrame containing 
 #           the length of the last bar segment.  The columns between col1 and col2 contain
 #           the lengths of the other bar segments in the glyphic.  col1 must preceed col2 in 
-#           the stateFrame data.frame.The number of data columns (bar segments) can range from 2 to 9 columns.
+#           the stateFrame data.frame.The number of data columns (bar segments) can 
+#           range from 2 to 9 columns.
 #
 #     Panel type dotconf using three column parameters: (col1, col2, col3):
 #     
@@ -572,14 +585,16 @@ micromapST = function(
 #
 #     Panel following types do not requiring any column parameters:
 #
-#       boxplots uses the "panelData" vector in panelDesc to provide the name of a saved boxplot structure.
-#           The boxplot structure is created by saving the results of aboxplot(...,plot=F) call.
+#       boxplots uses the "panelData" vector in panelDesc to provide the name of a saved 
+#           boxplot structure.  The boxplot structure is created by saving the 
+#           results of aboxplot(...,plot=F) call.
 #
-#       ts and tsconf use the "panelData" vector in the panelDesc to obtain the name of a matrix 
-#           the data for the time series. The name represents a array(51,"x",4).  The first dimension 
-#           represents the states (51).  The second dimension represents the number of samples in the 
-#           time series.  The third dimension are the "x", "low.y", "y", and "high.y" values for 
-#           each sample.  For ts glyphics, the "low.y" and "high.y" values are ignored, but required.
+#       ts and tsconf use the "panelData" vector in the panelDesc to obtain the name of 
+#           a matrix the data for the time series. The name represents a array(51,"x",4).  
+#           The first dimension represents the states (51).  The second dimension 
+#           represents the number of samples in the time series.  The third dimension 
+#           are the "x", "low.y", "y", and "high.y" values for each sample.  
+#           For ts glyphics, the "low.y" and "high.y" values are ignored, but required.
 #
 #  lab1, lab2
 #     Two label lines at the top of columns. Use "" for blank, not NA or MULL.
@@ -606,7 +621,8 @@ micromapST = function(
 #     specified. 
 #
 #  panelData           # (old boxplot column)
-#      names a list object with a boxplot data or time series data (x/y or x/yl/ym/yh data for each state.
+#      names a list object with a boxplot data or time series data (x/y or x/yl/ym/yh 
+#      data for each state.
 #
 #      The boxplot list the xxxx$names list must be the abbreviated state id
 #      for the entry and the related data in the structure. 
@@ -624,9 +640,11 @@ micromapST = function(
 #         be the associate state id (a 2 character abbreviation).  This 
 #         is required so the time series array can be properly associated 
 #         with the data in the stateFrame when it's sorted.
-#         For time series with no confidence band, column 1 is the x value and column 2 is the y value.  
-#         For time series with a confidence band, column 1 is the x value, column 2 is the y-low value, 
-#         column 3 is the y-median value, and column 4 is the  y-high value.
+#         For time series with no confidence band, column 1 is the x value and 
+#             column 2 is the y value.  
+#         For time series with a confidence band, column 1 is the x value, 
+#             column 2 is the y-low value, column 3 is the y-median value, 
+#             and column 4 is the  y-high value.
 #                
 #      Note:  Some descriptors may be omitted if none of the panel plots need them.
 #             often refValues and boxplots can be omitted 
@@ -636,16 +654,18 @@ micromapST = function(
 #
 # Individual Parameters:
 #
-# rowNames: Type of state id used as row.names in stateFrame data.frame. The default is "ab" for abbreviation, 
+# rowNames: Type of state id used as row.names in stateFrame data.frame. 
 #           Acceptable values are: "ab", "full", "fips".
+#           The default is "ab" for abbreviation, 
 #
 # plotNames: State label use in in the plot when an ID column is requested. 
-#           The default is the "full" for full name. Acceptable values are: "ab", "full"
+#           The default is the "full" for full name. 
+#           Acceptable values are: "ab", "full"
 #
-# sortVar   The column name or number in the stateFrame to be used as the variable in sorting.  
-#           Can be a vector of column subscripts to break ties.
-#           Warning: The sortVar parameter cannot be used to sort a boxplot or time series, since data
-#           is not contained in the stateFrame.
+# sortVar   The column name or number in the stateFrame to be used as the variable 
+#           in sorting.  Can be a vector of column subscripts to break ties.
+#           Warning: The sortVar parameter cannot be used to sort a boxplot or 
+#           time series, since data is not contained in the stateFrame.
 #
 # ascend    TRUE default sorts in ascending order.  FALSE indicated descending order.
 #
@@ -725,12 +745,14 @@ micromapSTDefaults <- micromapSTSetDefaults()  # get master list of variables an
 
 # have SFrame and stateFrame put together
 
-#_____________Set up for State names and abbreviation links.
+#_____________Set up for State names and abbreviation links. (Lazy Data loads)
 #
 
    rlStateNamesFips = stateNamesFips
    rlStateVisBorders = stateVisBorders
    rlStateNationVisBorders = stateNationVisBorders
+   
+####
 
    #  Setup for stateId checks
    sortedStateId = sort(stateNamesFips$ab)
@@ -898,45 +920,48 @@ rlStateArrow = function(j){
   wnam <- names(dat)
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (is.null(col1))
-    {
+  
+  if (is.na(match('col1',PDUsed))) {
+    
       xmsg <- paste("ARROW-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (is.null(col2))
-    {
+  }
+  if (is.na(match('col2',PDUsed))) {
+    
       xmsg <- paste("ARROW-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (!ErrFnd)  
-    {
-      if (col1[j] == 0)   # invalid name or column number
-        {
+  }
+  if (!ErrFnd) { 
+    
+      if (is.na(col1[j]) || col1[j] == 0) {  # invalid name or column number
+        
            xmsg <- paste("ARROW-01 Specified column name or number in col1 for the first end point is out of range or does not exist: ",litcol1[j]," in stateFrame for column ",j,sep="")
            warning(xmsg)
            ErrFnd = TRUE
-        }
-      if (col2[j] == 0)
-        { 
-           xmsg <- paste("ARROW-02 Specified column name or number in col2 for the second end point is out of range or does not exist: ",litcol2[j]," in stateFrame for column ",j,sep="")
-           warning(xmsg)
-           ErrFnd = TRUE
-        }
-      if (col1[j] > wdim[2])   # invalid name or column number
-        {
+      } else {
+        if (col1[j] > wdim[2]) {   # invalid name or column number
+        
            xmsg <- paste("ARROW-03 Specified column in col1 is too high ",col1[j], " for column ",j,". Literal=",litcol1[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-      if (col2[j] > wdim[2])
-        { 
+      }
+      if (is.na(col2[j]) || col2[j] == 0) {
+        
+           xmsg <- paste("ARROW-02 Specified column name or number in col2 for the second end point is out of range or does not exist: ",litcol2[j]," in stateFrame for column ",j,sep="")
+           warning(xmsg)
+           ErrFnd = TRUE
+      } else {
+        if (col2[j] > wdim[2]) {
+        
            xmsg <- paste("ARROW-04 Specified column in col2 is too high ",col2[j], " for column ",j,". Literal=",litcol2[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-    }  
+      }
+  }  
   if (ErrFnd) return()    # Error warning noted, return from function.
   
   
@@ -972,6 +997,7 @@ rlStateArrow = function(j){
   # ____________labeling and axes_______________
 
   panelSelect(panels,1,j)               # Select the first panel in the column
+  
   panelScale(rx,ry)                     # scale panels for all states, based on above calculations.  rx and ry.
   
   mtext(lab1[j],side=3,line=Title.Line.1.pos,cex=Text.cex)                 # top labels (2)  (above panel # 1)
@@ -981,6 +1007,7 @@ rlStateArrow = function(j){
   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))              # tick labels. 
 
   panelSelect(panels,ng,j)              # Select the last panel in the column
+  
   panelScale(rx,ry)                     # temp set scale to 0 to 1.
   
   # padj in axis needed to make grid line label close
@@ -1065,28 +1092,31 @@ rlStateBar = function(j){
   #
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (is.null(col1))
-    {
+  
+  if (is.na(match('col1',PDUsed))) {
+  
       xmsg <- paste("SGLBAR-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (!ErrFnd)  
-    {
-      if (col1[j] == 0 )
-        { 
+  }
+ 
+  if (!ErrFnd) {
+ 
+      if (is.na(col1[j]) || col1[j] == 0 ) {
+         
            xmsg <- paste("SGLBAR-01 Specified column name or number in col1 for the bar height value is out of range, invalid or does not exist: ",litcol1[j]," in stateFrame.",sep="")
            warning(xmsg)
            ErrFnd = TRUE
-        }
-      if (col1[j] > wdim[2] )
-        { 
+      } else {
+        if (col1[j] > wdim[2] ) {
+        
            xmsg <- paste("SGLBAR-02 Column number in col1 is too high: ",col1[j],"  Literal=",litcol1[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-   
-    }
+      }
+  }
+ 
   if (ErrFnd) return ()    # error warning found - return.
 
   py =  Bar.barht*c(-.5,-.5,.5,.5,NA)     #  Bar.barht = 2/3 (0.6667)
@@ -1193,83 +1223,84 @@ rlStateBoxplot = function(j,boxnam){
    ErrFnd = FALSE
    
    boxlist = tryCatch(get(boxnam, pos=1),error=function(e) e)
-   if (inherits(boxlist,"error"))
-     {   # could not find object named in boxnam.
+   
+   if (inherits(boxlist,"error")) {
+        # could not find object named in boxnam.
         warning(paste("BOXP-01 List named:",boxnam," does not exist or is bad.",sep=""))
         ErrFnd = TRUE
      
-     } else {
-        if (!is.list(boxlist))
-          {
+   } else {
+        if (!is.list(boxlist)) {
+          
              warning("BOXP-02 Data structure for Boxplots must be a list.")
              ErrFnd = TRUE
 
-          } else {
+        } else {
           
             lnam = names(boxlist)    # names of lists in boxlist
             
-            if (is.null(lnam) || is.na(lnam))
-              {
+            if (is.null(lnam) || is.na(lnam)) {
+              
                  warning("BOXP-11 The boxplot data is not valid.")
                  ErrFnd = TRUE
 
-              } else { 
-                if (length(lnam) != 6)
-                  {    
+            } else { 
+                if (length(lnam) != 6) {
+                  
                     # must have at least 1 element and name.
 	            warning("BOXP-11 The boxplot data is not a valid structure. Should contain 6 lists.")
 	            ErrFnd = TRUE
 
-                  } else {
+                } else {
                     nbox = c("stats","n","conf","out","group","names")  # correct list of names for boxplot data.
                
-                    if (any(is.na(match(lnam,nbox))))
-                      {
+                    if (any(is.na(match(lnam,nbox)))) {
+                      
                          # at least one of the list names does not match or is missing.
                          warning("BOXP-04 The boxplot data names do not match the standard boxplot function output list names. Invalid structure.")
                          ErrFnd = TRUE
    
-                      } else {
+                    } else {
                         nc = dim(boxlist$stat)[2]                # number of rows in boxplot stats data list.
-                        if (nc != 51)
-                          {
+                        if (nc != 51) {
+                          
                              warning("BOXP-05 The $stats matrix in the boxplot data must have 51 elements - one for each state and DC.")
                              ErrFnd = TRUE
-                          }
+                        }
    
                         nr = dim(boxlist$stat)[1]                # get number of 
-                        if (nr != 5)
-                          {
+                        if (nr != 5) {
+                          
                              warning("BOXP-06 The $stats matrix in the boxplot data does not have 5 values per state/DC.") 
                              ErrFnd = TRUE
-                          }
+                        }
        
                         nn = sort(unique(boxlist$names))          # get list of unique state ids used 
-                        if (is.null(nn) || is.na(nn))
-                          {
+                        if (is.null(nn) || is.na(nn)) {
+                          
                              warning("BOXP-03 The list of names is missing from the boxplot data.")
                              ErrFnd = TRUE
                           
-                          } else {
-                            if (length(nn) != 51)
-                              {
+                        } else {
+                            if (length(nn) != 51) {
+                              
                                  warning("BOXP-07 The boxplot list does not contain 51 entries.")
                                  ErrFnd = TRUE
-                              }
+                            }
       
                             tnn = is.na(match(nn,sortedStateId))
-                            if (any(tnn))   # test to see if any did NOT match
-                              {
+                            if (any(tnn)) {   # test to see if any did NOT match
+                              
                                  lnn = paste(nn[tnn],collapse=" ")
                                  warning(paste("BOXP-08 The abbreviated state ids found in the boxplot list $names list contain invalid values: ",lnn,sep=""))
                                  ErrFnd = TRUE
-                              }
-                          }
-                      }
-                  }
-              }
-          }   
-     }
+                            }
+                        }
+                    }
+                }
+            }
+        }   
+   }
    
    if (ErrFnd) return ()
    
@@ -1479,34 +1510,36 @@ rlStateDot = function(j){
   #
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (is.null(col1))
-    {
+  
+  if (is.na(match('col1',PDUsed))) {
+    
       xmsg <- paste("SGLDOT-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (!ErrFnd)  
-    {
-      if (col1[j] == 0)
-        { 
+  }
+  if (!ErrFnd) {  
+    
+      if (is.na(col1[j]) || col1[j] == 0) {
+        
            xmsg<-paste("SGLDOT-01 Specified column name or number in col1 for the dot value is out of range or does not exist: ",litcol1[j]," in stateFrame in column ",j,sep="")
            warning(xmsg)
            ErrFnd = TRUE
-        }
-      if (col1[j] > wdim[2])
-        { 
+      } else {
+        if (col1[j] > wdim[2]) {
+        
            xmsg <- paste("SGLDOT-02 Specified column name or number in col1 is too high: ",col1[j]," for column ",j,". Literal=",litcol1[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-    } 
+      }
+  } 
   if (ErrFnd)  return ()    # error warning found - return
 
   #  JB - add "as.double(as.vector(" to handle variation in how objects are converted.
   
-  x = as.double(as.vector(dat[,col1[j]]))   # one value - the dot.
+  xdat = as.double(as.vector(dat[,col1[j]]))   # one value - the dot.
  
-  good = !is.na(x)
+  good = !is.na(xdat)
   if (!all(good))
     {
        xmsg<-paste("SGLDOT-03 Missing value in dot data (col1) for column ",j,". Literal=",litcol1[j],sep="")
@@ -1519,7 +1552,7 @@ rlStateDot = function(j){
   ry = c(0,1)
 
   #____________scale x axis______________________
-  rx = range(x,na.rm=TRUE)
+  rx = range(xdat,na.rm=TRUE)
   rx = sc*diff(rx)*c(-.5,.5)+mean(rx)
 
   # ____________labeling axis_______________
@@ -1561,9 +1594,9 @@ rlStateDot = function(j){
         if(good[m]){    # if good - plot dot.
            if (doDotOutline) 
              {
-               points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,lwd=Dot.Outline.lwd, col=Dot.Outline.col,bg=colors[pen[k]])         
+               points(xdat[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,lwd=Dot.Outline.lwd, col=Dot.Outline.col,bg=colors[pen[k]])         
              } else {
-               points(x[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,col=NA, bg=colors[pen[k]])
+               points(xdat[m],laby[k],pch=Dot.pch,cex=Dot.pch.size,col=NA, bg=colors[pen[k]])
              }
         }
         
@@ -1596,71 +1629,76 @@ rlStateDotConf = function(j){
   
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (is.null(col1))
-    {
+  
+  if (is.na(match('col1',PDUsed))) {
       xmsg <- paste("DOTCONF-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (is.null(col2))
-    {
+  }
+  if (is.na(match('col2',PDUsed))) {
       xmsg <- paste("DOTCONF-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (is.null(col3))
-    {
+  }
+  if (is.na(match('col3',PDUsed))) {
       xmsg <- paste("DOTCONF-12 'col3' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (!ErrFnd)  
-    {
-      if (col1[j] == 0 )
-        { 
+  }
+  if (!ErrFnd) {  
+    
+      if (is.na(col1[j]) || col1[j] == 0 ) {
+         
            warning(paste("DOTCONF-01 Specified column name or number in col1 for dot values is out of range or does not exist: ",litcol1[j]," in stateFrame for column ",j,sep=""))
            ErrFnd = TRUE
-        }
-      if (col2[j] == 0 )
-        { 
-           warning(paste("DOTCONF-02 Specified column name or number in col2 for lower confidence values is out of range or does not exist: ",litcol2[j]," in stateFrame for column ",j,sep=""))
-           ErrFnd = TRUE
-        }
-      if (col3[j] == 0 )
-        { 
-           warning(paste("DOTCONF-03 Specified column name or number in col3 for upper confidence values is out of range or does not exist: ",litcol3[j]," in stateFrame for column ",j,sep=""))
-           ErrFnd = TRUE
-        }
-      if (col1[j] > wdim[2] )
-        { 
+      } else {
+        if (col1[j] > wdim[2] ) {
+        
            xmsg<-paste("DOTCONF-04 Specified column number is too high for col1: ",col1[j],". Literal=",litcol1[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-      if (col2[j] > wdim[2] )
-        { 
+      }
+      if (is.na(col2[j]) || col2[j] == 0 ) {
+         
+           warning(paste("DOTCONF-02 Specified column name or number in col2 for lower confidence values is out of range or does not exist: ",litcol2[j]," in stateFrame for column ",j,sep=""))
+           ErrFnd = TRUE
+      } else {
+        if (col2[j] > wdim[2] ) {
+        
            xmsg<-paste("DOTCONF-05 Specified column number is too high for col2: ",col2[j],". Literal=",litcol2[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-      if (col3[j] > wdim[2] )
-        { 
+      }
+      if (is.na(col3[j]) || col3[j] == 0 ) {
+      
+           warning(paste("DOTCONF-03 Specified column name or number in col3 for upper confidence values is out of range or does not exist: ",litcol3[j]," in stateFrame for column ",j,sep=""))
+           ErrFnd = TRUE
+      } else {
+        if (col3[j] > wdim[2] ) {
+        
            xmsg<-paste("DOTCONF-06 Specified column number is too high for col3: ",col3[j],". Literal=",litcol3[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
+      }
  
-    }
+  }
+  
   if (ErrFnd) return ()        # error warning found - return
  
+  # get data and verify it
+  
   x = dat[,col1[j]]              # Col 1 = DOT - median/mean
+  
   lower = dat[,col2[j]]          # Col 2 = lower
   upper = dat[,col3[j]]          # Col 3 = upper
  
-  good1 = !is.na(x)              # Good Col1 values (dot value)
+  good1  = !is.na(x)              # Good Col1 values (dot value)
   good2L = !is.na(lower)         # Good col2 values (lower)
   good2U = !is.na(upper)         # Good col3 values (upper)
-  good2 = !is.na(upper+lower)
+  good2  = !is.na(upper+lower)
   
   if (!all(good1))
     {
@@ -1779,44 +1817,47 @@ rlStateDotSe = function(j){
   
   wdim <- dim(dat)
   ErrFnd = FALSE
-  if (is.null(col1))
-    {
+  
+  if (is.na(match('col1',PDUsed))) {
+    
       xmsg <- paste("DOTSE-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (is.null(col2))
-    {
+  }
+  if (is.na(match('col2',PDUsed))) {
+  
       xmsg <- paste("DOTSE-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
     }
-  if (!ErrFnd)  
-    {
+  if (!ErrFnd) {
   
-      if (col1[j] == 0 )
-        { 
+      if (is.na(col1[j]) || col1[j] == 0 ) {
+      
            warning(paste("DOTSE-01 Specified column name or number in col1 for dot values is out of range, invalid, or does not exist: ",litcol1[j]," in stateFrame.",sep=""))
            ErrFnd = TRUE
-        }
-      if (col2[j] == 0 )
-        { 
-           warning(paste("DOTSE-02 Specified column name or number in col2 for SE values is out of range, invalid, or does not exist: ",litcol2[j]," in stateFrame.",sep=""))
-           ErrFnd = TRUE
-        }
-      if (col1[j] > wdim[2] )
-        { 
+      } else {
+        if (col1[j] > wdim[2] ) {
+        
            xmsg<-paste("DOTSE-03 Column number for col1 data is too high: ",col1[j]," for column ",j,". Literal=",litcol1[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-      if (col2[j] > wdim[2] )
-        { 
+      }
+      if (is.na(col2[j]) || col2[j] == 0)  {
+      
+           warning(paste("DOTSE-02 Specified column name or number in col2 for SE values is out of range, invalid, or does not exist: ",litcol2[j]," in stateFrame.",sep=""))
+           ErrFnd = TRUE
+      } else {
+         if (col2[j] > wdim[2] ) {
+        
            xmsg<-paste("DOTSE-04 Column number for col1 data is too high: ",col2[j]," for column ",j,". Literal=",litcol2[j],sep="")
            warning(xmsg)
            ErrFnd = TRUE
         }
-    }
+      }
+  }
+  
   if (ErrFnd) return ()   # error warning found - return
   
   x = dat[,col1[j]]
@@ -1861,8 +1902,11 @@ rlStateDotSe = function(j){
   
   atRx = panelInbounds(rx)
   axis(side=3,mgp=mgpTop,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx))  # top axis labels
+
+
   panelSelect(panels,ng,j)
   panelScale(rx,ry)
+
   # padj in axis needed to make grid line label close
   axis(side=1,mgp=mgpBottom,padj=padjBottom,tick=F,cex.axis=Text.cex,at=atRx,labels=as.character(atRx)) # bottom axis labels
   mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles
@@ -1872,11 +1916,16 @@ rlStateDotSe = function(j){
   for (i in 1:ng){
      gsubs = ib[i]:ie[i]
      ke = length(gsubs)
+
      pen = if(i==6)6 else 1:ke
+
      laby = ke:1 
+
      panelSelect(panels,i,j)
      panelScale(rx,c(1-pad,ke+pad))
+
      panelFill(col=Panel.Fill.col)
+
      axis(side=1,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd) # grid
      
      # if a refval is provided then add line.
@@ -1937,52 +1986,10 @@ rlStateId = function(j){
 
   panelSelect(panels,1,j)      # start at I = 1, but j= is the current column.
   panelScale(rx,ry)
-  mtext('U.S.',side=3,line=Title.Line.1.pos,cex=Text.cex)
-  mtext('States',side=3,line=Title.Line.2.pos,cex=Text.cex)
-
-# Cycle thought the GROUPS (ng)
-  for (i in 1:ng){
-     gsubs = ib[i]:ie[i]           # first element of group to last element of group.
-     ke = length(gsubs)            # number of elements.
-     laby = ke:1
-     pen = if(i==6)6 else 1:ke
-     panelSelect(panels,i,j)
-     npad = ifelse(i==6,.57,pad)
-     panelScale(rx,c(1-npad,ke+npad))
-     gnams = stateNames[gsubs]
-     polygon(rep(px,ke),rep(laby,rep(5,ke)) + py,col=colors[pen])
-     polygon(rep(px,ke),rep(laby,rep(5,ke)) + py,col=Id.Dot.Outline.col,density=0)
-     text(rep(idstart,ke), laby-Id.Text.adj, gnams, adj=c(0,0), cex=Text.cex,xpd=T)
-  }
-
-  # No reference values for this type of column
-}
-
-#####
-#
-# type = 'id' =======================================================
-#
-# rlStateId
-#
-
-rlStateId = function(j){
-  #  j = panel column number
   
-  py = Bar.barht*c(-.5,-.5,.5,.5,NA)
-  px = c(.04,.095,.095,.04,NA)
-  idstart = .137
-
-#_____________ Scaling ______________________ 
- 
-  rx = c(0,diff(panels$coltabs[j+1,])) # width in inches
-  ry = c(0,1)
-
-#______________________panel labels_____________
-
-  panelSelect(panels,1,j)      # start at I = 1, but j= is the current column.
-  panelScale(rx,ry)
   mtext('U.S.',side=3,line=Title.Line.1.pos,cex=Text.cex)
   mtext('States',side=3,line=Title.Line.2.pos,cex=Text.cex)
+
 
 # Cycle thought the GROUPS (ng)
   for (i in 1:ng){
@@ -2824,49 +2831,48 @@ rlStateSegBar = function(j, SBnorm=FALSE) {
    wdim <- dim(dat)
    ErrFnd = FALSE
    
-  if (is.null(col1))
-    {
+   if (is.na(match('col1',PDUsed))) {
+    
       xmsg <- paste("SEGBAR-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (is.null(col2))
-    {
+   }
+   if (is.na(match('col2',PDUsed))) {
+    
       xmsg <- paste("SEGBAR-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
       warning(xmsg)
       ErrFnd = TRUE
-    }
-  if (!ErrFnd)  
-    {
+   }
+   if (!ErrFnd) {
   
-       if (col1[j] == 0 )
-         { 
-            warning(paste("SEGBAR-01 Specified column name or number in col1 for the first segment bar values is out of range, invalid, or does not exist: ",litcol1[j]," in stateFrame.",sep=""))
-            ErrFnd = TRUE
-         }
-       if (col2[j] == 0 )
-         { 
-            warning(paste("SEGBAR-02 Specified column name or number in col2 for the last segment bar values is out of range, invalid, or does not exist: ",litcol2[j]," in stateFrame.",sep=""))
-            ErrFnd = TRUE
-         }
-   
-     } 
-   if (!ErrFnd)
-     {
-       if (col1[j] >= col2[j])
-          {
-            warning(paste("SEGBAR-05 The first column number of bar values cannot be => the last column number.",litcol1[j],"::",litcol2[j],sep=""))
-            ErrFnd = TRUE
-          } else {
-   
-            wD =  ( col2[j] - col1[j] + 1 )   # corrected to calculate the number of data columns
-            if (wD < 2 || wD > 9)
-              {
-                  warning(paste("SEGBAR-06 The number of bar values for segmented/normalized bar plots must be between 2 and 9.",wD))
-                  ErrFnd = TRUE
-              }
-          }
+     if (is.na(col1[j]) || col1[j] == 0 ) {
+         
+         warning(paste("SEGBAR-01 Specified column name or number in col1 for the first segment bar values is out of range, invalid, or does not exist: ",litcol1[j]," in stateFrame.",sep=""))
+         ErrFnd = TRUE
      }
+     if (is.na(col2[j]) || col2[j] == 0 ) {
+         
+         warning(paste("SEGBAR-02 Specified column name or number in col2 for the last segment bar values is out of range, invalid, or does not exist: ",litcol2[j]," in stateFrame.",sep=""))
+         ErrFnd = TRUE
+     }
+   
+   } 
+   if (!ErrFnd) {
+     
+     if (col1[j] >= col2[j]) {
+          
+         warning(paste("SEGBAR-05 The first column number of bar values cannot be => the last column number.",litcol1[j],"::",litcol2[j],sep=""))
+         ErrFnd = TRUE
+     } else {
+   
+         wD =  ( col2[j] - col1[j] + 1 )   # corrected to calculate the number of data columns
+         if (wD < 2 || wD > 9) {
+              
+             warning(paste("SEGBAR-06 The number of bar values for segmented/normalized bar plots must be between 2 and 9.",wD))
+             ErrFnd = TRUE
+         }
+     }
+   }
 
    if (ErrFnd) return ()    # error warning found - return
  
@@ -3170,47 +3176,47 @@ rlStateCtrBar = function(j) {
    wdim <- dim(dat)
    ErrFnd = FALSE
    
-   if (is.null(col1))
-     {
+   if (is.na(match('col1',PDUsed))) {
+     
        xmsg <- paste("SEGBAR-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
        warning(xmsg)
        ErrFnd = TRUE
-     }
-   if (is.null(col2))
-     {
+   }
+   if (is.na(match('col2',PDUsed))) {
+     
        xmsg <- paste("SEGBAR-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
        warning(xmsg)
        ErrFnd = TRUE
-     }
-   if (!ErrFnd)
-     {
-       if (col1[j] == 0 )
-         { 
+   }
+   if (!ErrFnd) {
+     
+       if (is.na(col1[j]) || col1[j] == 0 ) {
+         
             warning(paste("CTRBAR-01 Specified column name or number in col1 for the first segment bar values is out of range, invalid, or does not exist: ",litcol1[j]," in stateFrame.",sep=""))
             ErrFnd = TRUE
-         }
-       if (col2[j] == 0 )
-         { 
+       }
+       if (is.na(col2[j]) || col2[j] == 0 ) {
+        
             warning(paste("CTRBAR-02 Specified column name or number in col2 for the last segment bar values is out of range, invalid, or does not exist: ",litcol2[j]," in stateFrame.",sep=""))
             ErrFnd = TRUE
-         }
-     } 
-   if (!ErrFnd)
-     {
-       if (col1[j] >= col2[j])
-          {
-            warning(paste("CTRBAR-05 The first column name or number of bar values must proceed the last column name or number.",litcol1[j],"::",litcol2[j],sep=""))
-            ErrFnd = TRUE
-          } else {
+       }
+   } 
+   if (!ErrFnd) {
+    
+       if (col1[j] >= col2[j]) {
+          
+          warning(paste("CTRBAR-05 The first column name or number of bar values must proceed the last column name or number.",litcol1[j],"::",litcol2[j],sep=""))
+          ErrFnd = TRUE
+       } else {
    
-            wD = ( col2[j] - col1[j] + 1 )  # corrected to properly calculate the number of data columns.
-            if (wD < 2 || wD > 9)
-               {
-                  warning(paste("CTRBAR-06 The number of bar values for centered bar plots must be between 2 and 9.",wD))
-                  ErrFnd = TRUE
-               }
+          wD = ( col2[j] - col1[j] + 1 )  # corrected to properly calculate the number of data columns.
+          if (wD < 2 || wD > 9) {
+               
+              warning(paste("CTRBAR-06 The number of bar values for centered bar plots must be between 2 and 9.",wD))
+              ErrFnd = TRUE
           }
-     }
+       }
+   }
 
    if (ErrFnd) return ()
 
@@ -3480,32 +3486,33 @@ rlStateScatDot = function(j){
   # 
   #
   wdim <- dim(dat)
-   ErrFnd = FALSE
-   if (is.null(col1))
-     {
-       xmsg <- paste("SEGBAR-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
-       warning(xmsg)
-       ErrFnd = TRUE
-     }
-   if (is.null(col2))
-     {
-       xmsg <- paste("SEGBAR-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
-       warning(xmsg)
-       ErrFnd = TRUE
-     }
-   if (!ErrFnd)
-     {
-       if (col1[j] == 0 )
-         { 
-            warning(paste("SCATDOT-01 Specified column name or number in col1 for X values is out of range, invalid, or does not exist: ",litcol1[j]," in the data frame.",sep=""))
-            ErrFnd = TRUE
-         }
-       if (col2[j] == 0 )
-         { 
-            warning(paste("SCATDOT-02 Specified column name or number in col2 for Y values is out of range, invalid, or does not exist: ",litcol2[j]," in the data frame.",sep=""))
-            ErrFnd = TRUE
-         }
-     }
+  ErrFnd = FALSE
+  
+  if (is.na(match('col1',PDUsed))) {
+     
+      xmsg <- paste("SEGBAR-10 'col1' vector is missing from the panelDesc data.frame.",sep="")
+      warning(xmsg)
+      ErrFnd = TRUE
+  }
+  if (is.na(match('col2',PDUsed))) {
+    
+      xmsg <- paste("SEGBAR-11 'col2' vector is missing from the panelDesc data.frame.",sep="")
+      warning(xmsg)
+      ErrFnd = TRUE
+  }
+  if (!ErrFnd) {
+    
+      if (is.na(col1[j]) || col1[j] == 0 ) {
+        
+         warning(paste("SCATDOT-01 Specified column name or number in col1 for X values is out of range, invalid, or does not exist: ",litcol1[j]," in the data frame.",sep=""))
+         ErrFnd = TRUE
+      }
+      if (is.na(col2[j]) || col2[j] == 0 ) {
+         
+         warning(paste("SCATDOT-02 Specified column name or number in col2 for Y values is out of range, invalid, or does not exist: ",litcol2[j]," in the data frame.",sep=""))
+         ErrFnd = TRUE
+      }
+   }
 
    if (ErrFnd) return ()
   
@@ -3579,8 +3586,8 @@ rlStateScatDot = function(j){
       workSCD$lwd <- SCD.Bg.pch.lwd     # default line weight
       workSCD$pch <- SCD.Bg.pch         # default pch code.
       
-      if (i >= 5 && i <= 7)     # force median dot to be highlighted in 5, 6 and 7 rows. 
-        {
+      if (i >= 5 && i <= 7) {    # force median dot to be highlighted in 5, 6 and 7 rows. 
+        
           workSCD$bg[26]  <- SCD.Median.pch.fill
           workSCD$cex[26] <- SCD.Median.pch.size
           workSCD$lwd[26] <- SCD.Median.pch.lwd
@@ -3741,29 +3748,73 @@ valid = c("map","mapcum","maptail","mapmedian",
           "scatdot",
           "segbar","normbar","ctrbar",
           "boxplot")              # idDot and rank are not currently implemented
+          
+#____________________ List of expected and valid parameters in the panelDesc
+
+PDParms <- c('type',
+             'lab1','lab2','lab3','lab4',
+             'col1','col2','col3',
+             'refVals','refTexts',
+             'panelData'
+            )
+      
+PDUsed <- names(panelDesc)
+
+PDPmatch <- match(PDUsed,PDParms)    # is if all entries in panelDesc are valid
+
+if (any(is.na(PDPmatch))) {
+   #  one of more panelDesc parameters are bad
+   PDErrorList <- paste0(PDUsed[is.na(PDPmatch)],collapse=" ")
+   xmsg <- paste0("PD-01 The following parameters in panelDesc are not valid:",PDErrorList,".  Execution stopped.")
+   stop(xmsg)
+}
+
+#___________________the panelDesc parameters (column names) are good ___________
+
+#________________type parameter
+#
+
+if (is.na(match('type',PDUsed))) {
+   # Error 'type' parameter is not present
+   xmsg <- 'PD-02 The required "type" parameter is not in the panelDesc data.frame.'
+   stop(xmsg)
+}
+
+# get type vector
 
 type = as.character(panelDesc$type)
+
+# test contents of type vector for validity
 subs = match(type,valid)
 
-if(any(is.na(subs)))
-    stop(paste("MST-11 The panelDesc data.frame has an incorrect panel type: ",type[is.na(subs)], sep=""))
+if (any(is.na(subs))) {
+    PDErrorList <- paste0(type[is.na(subs)],collapse=" ")
+    stop(paste("PD-03 The panelDesc data.frame has an incorrect panel type: ",PDErrorList))
 
+}
+
+#  Set up number of glyphics columns
+
+numCol = nrow(panelDesc)
+
+#
 #_________________panelDesc$labx____________________
 #
 
-ncol = nrow(panelDesc)
-blank = rep('',ncol)
+blank = rep('',numCol)  # empty vector for labels
 
-if(is.null(panelDesc$lab1)) lab1 = blank else
+# a NULL column cannot exist in a data.frame.  If the name is present, it exist!
+
+if (is.na(match('lab1',PDUsed))) lab1 = blank else
               lab1 = as.character(panelDesc$lab1)
 
-if(is.null(panelDesc$lab2)) lab2 = blank else
+if (is.na(match('lab2',PDUsed))) lab2 = blank else
               lab2 = as.character(panelDesc$lab2)
 
-if(is.null(panelDesc$lab3)) lab3 = blank else
+if (is.na(match('lab3',PDUsed))) lab3 = blank else
               lab3 = as.character(panelDesc$lab3)
 
-if(is.null(panelDesc$lab4)) lab4 = blank else
+if (is.na(match('lab4',PDUsed))) lab4 = blank else
               lab4 = as.character(panelDesc$lab4)
 
 
@@ -3780,60 +3831,77 @@ if(is.null(panelDesc$lab4)) lab4 = blank else
 #_______________________panelDesc$colx_____________________
 #
 
+NAList <- rep(NA,numCol)
+
 # number of columns based on the presence of Descriptions for Column
 
-   if(!is.null(panelDesc$col1))
-     {
-       litcol1 <- panelDesc$col1
-       col1 <- CheckColx(litcol1,"col1",wSFNameList,len_wSFnam)
-     } else {
-       litcol1 <- NULL
-       col1 <- NULL
-     }
+  if (!is.na(match('col1',PDUsed))) {
+   
+     litcol1 <- panelDesc$col1
+     col1 <- CheckColx(litcol1,"col1",wSFNameList,len_wSFnam)
+   
+  } else {
+   
+     litcol1 <- NAList
+     col1 <- NAList
   
-  if(!is.null(panelDesc$col2))
-     {
-       litcol2 <- panelDesc$col2
-       col2 <- CheckColx(litcol2,"col2",wSFNameList,len_wSFnam)
-     } else {
-       litcol2 <- NULL
-       col2 <- NULL
-     }
-   if(!is.null(panelDesc$col3))
-     {
-       litcol3 <- panelDesc$col3
-       col3 <- CheckColx(litcol3,"col3",wSFNameList,len_wSFnam)
-     } else {
-       litcol3 <- NULL
-       col3 <- NULL
-     }
+  }
+  
+  if (!is.na(match('col2',PDUsed))) {
+    
+    litcol2 <- panelDesc$col2
+    col2 <- CheckColx(litcol2,"col2",wSFNameList,len_wSFnam)
+    
+  } else {
+ 
+    litcol2 <- NAList
+    col2 <- NAList
+    
+  }
+  if(!is.na(match('col3',PDUsed))) {
+   
+    litcol3 <- panelDesc$col3
+    col3 <- CheckColx(litcol3,"col3",wSFNameList,len_wSFnam)
+ 
+  } else {
+ 
+    litcol3 <- NAList
+    col3 <- NAList
+
+  }
 
 #_____________panelDesc$refxxx________________
 #
 
-   if(is.null(panelDesc$refVals))
-      assign('lRefVals',rep(NA,nrow(panelDesc))) else
-      assign('lRefVals',panelDesc$refVals)
+   if (!is.na(match('refVals',PDUsed)))
+      assign('lRefVals',panelDesc$refVals)  else
+      assign('lRefVals',NAList)
 
-   if(is.null(panelDesc$refTexts))
-      assign('lRefTexts',rep(NA,nrow(panelDesc))) else
-      assign('lRefTexts',panelDesc$refTexts)
+   if (!is.na(match('refTexts',PDUsed)))
+      assign('lRefTexts',panelDesc$refTexts) else
+      assign('lRefTexts',NAList)
+      
       
 #_____________panelDesc$panelData_______________
 #
 
 #  if present is the typeof correct ?
 
-   if(!is.null(panelDesc$panelData)) 
-       {
-         wPanelData = panelDesc#panelData
-       } else {
-         wPanelData = NA
-       }
+   if (!is.na(match('panelData',PDUsed))) { 
+  
+      wPanelData = panelDesc#panelData             # save pointer to panelD
+  
+   } else {
+  
+      wPanelData = NAList
+  
+   }
+  
    assign('panelData',wPanelData)
    rm(wPanelData)
        
    #  
+
 
 # ________________Detail defaults_______________________________
 #
@@ -3984,7 +4052,8 @@ plotWidth = par("pin")[1]   #  width in inches.
 
 IdW = Id.width[1]
 
-if(is.null(panelDesc$colSize)){
+if(is.null(panelDesc$colSize)) {
+
      #  no colSize provided by User - create the default version.
      
      colSize = rep(0,length(type))             # set vector to zeros. Length equal the number of columns requested.
@@ -4098,9 +4167,14 @@ if (colFull)
          legfactor= 9/(9-botMardif)
       }      
    }
+   
+   
+   
    assign('legfactor',legfactor,sys.frame(which = -1))  # set legfactor in environment -1 (caller's space.)
 
    ncol   = length(type)
+   
+   
    
    ladj    = c(0,cparm[2:ncol,2],0)          #  0, x2, x2, x2, x2, ... , x2, 0   for ncol + 2
    radj    = c(0,cparm[1:ncol-1,3],0)        #  0, y

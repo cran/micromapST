@@ -9,11 +9,32 @@ if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapST")
        vers <- paste("R package version", meta$Version)
        
        citEntry(entry="Manual",
-       title = "Visualizing Data Patterns with Micromaps",
-       author = personList(as.person("Daniel B. Carr"),
+         title = "Visualizing Data Patterns with Micromaps",
+         author = personList(as.person("Daniel B. Carr"),
                            as.person("Linda Williams Pickle"),
-                           person("Micromap Author Team")),
-       year = "2010",
-       note = "CRC Press",
-       textVersion =
-            paste("Daniel B. Carr and Linda Williams Pickle (2010), Visualizing Data Patterns with Micromaps", sep=""))
+                           person("micromapST Author Team")),
+         year = "2010",
+         note = "CRC Press",
+         textVersion =
+             paste("Daniel B. Carr and Linda Williams Pickle (2010), Visualizing Data Patterns with Micromaps", sep="")
+       )
+
+       citEntry(entry = "Article",
+         title        = "{micromapST}: Exploring and Communicating Geospatial Patterns in US State Data",
+         author       = personList(as.person("Linda Williams Pickle"),
+                          person(c("James", "B."), "Pearson Jr."),
+                          as.person("Daniel B. Carr")),
+         journal      = "Journal of Statistical Software",
+         year         = "2015",
+         volume       = "63",
+         number       = "3",
+         pages        = "1--25",
+         url          = "http://www.jstatsoft.org/v63/i03/",
+       
+         textVersion  =
+         paste("Linda Williams Pickle, James B. Pearson Jr., Daniel B. Carr (2015).",
+               "micromapST: Exploring and Communicating Geospatial Patterns in US State Data.",
+               "Journal of Statistical Software, 63(3), 1-25.",
+               "URL http://www.jstatsoft.org/v63/i03/.")
+       )
+       

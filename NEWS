@@ -1,3 +1,30 @@
+micromapST - Version 1.0.5 - Updates
+
+The following updates were made to the micromapST package for release 1.0.5,
+January 21, 2015.
+
+Enhancements:
+1) The colors call parameter is now optional.  It is only required when you want to override 
+the color scheme used by micromapST.
+
+Fixes & Maintenance:
+1) Verification of panelDesc data.frame parameters incorrectly handled col1, col2, and col3
+vectors.  Logic corrected to properly check the existance and verify the contents of all 
+panelDesc data.frame parameters (columns).  A new error message added if a parameter is
+incorrectly speeded, Empty vectors provided when parameters are missing, and each glyphics
+now properly checks for its required panelDesc information.
+2) Updated the vignettes to contain the publish JSS article on linked micromaps.
+
+
+micromapST - Version 1.0.4 - Updates
+
+The following updates were made to the micromapST package for release 1.0.4,
+July 12, 2014.
+
+Fixes:
+1) Changed code in examples to consistantly use single and double quotes.
+
+
 micromapST - Version 1.0.3 - Updates
 
 The following updates were made to the micromapST package for release 1.0.3,
