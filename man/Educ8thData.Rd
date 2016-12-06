@@ -20,12 +20,12 @@
 }
 \details{
 
-   The dataset contains 51 records, one for each state. The data represents 
+   The dataset contains 51 records, one for each state/area. The data represents 
    the percentage of 8th grade students in 2011 in that state who tested at 
    each proficiency level in math:
    less than basic, basic, proficient and advanced.
    The row name is the state abbreviation - 2 characters.
-   This dataset is used by the micromapST examples.
+   This dataset is used by the \var{micromapSEER} examples using the "USStatesDF" border group.
 }
 
 \source{

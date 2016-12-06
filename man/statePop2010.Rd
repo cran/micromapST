@@ -23,8 +23,10 @@
 }
 \details{
    The dataset contains 51 records, one for each state. The data represents 
-   the population count or percentage of the total population by race and Hispanic ethnicity within
-   the state. This dataset is used by the micromapST examples.
+   the population count or percentage of the total population 
+   by race and Hispanic ethnicity within
+   the state. This dataset is used by the 
+   micromapSEER examples with the "USStatesDF" border group.
 }
 \source{United States Census Bureau, Population Total by State, by Race, Combinations of Two Races, 
  and not Hispanic or Latino, 2010 (Summary File 1, Table QT-P4), URL = http://factfinder2.census.gov/.

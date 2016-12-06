@@ -42,6 +42,9 @@ The data are age-adjusted (2000 U.S. standard) female lung cancer mortality rate
   
   This approach was done to allow a data matrix built for the "tsconf" glyphics 
   to be used for a \var{ts} glyphics.
+  
+  This data is used by micromapSEER with the "USStatesDF" border group.
+  
   \preformatted{
   
   # how to create a new time series data set 

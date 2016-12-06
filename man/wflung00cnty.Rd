@@ -22,7 +22,7 @@
   The rates on this file are directly age adjusted to the US 2000 
   standard population and are expressed as the number of 
   deaths per 100,000 person-years. Counties with from 1 to 9 deaths are suppressed (deleted from the file).
-  This dataset is used by the micromapST examples.
+  This dataset is used by the \var{micromapSEER} examples using the border group of "USStatesDF".
 }
 \source{
   Surveillance Research Program, National Cancer Institute SEER*Stat 

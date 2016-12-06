@@ -27,7 +27,7 @@
 \details{
   See documentation for wflung00and95 for more details.
   The row name is the associated state abbreviation - 2 characters.
-  This dataset is used in the micromapST examples.
+  This dataset is used in the \var{micromapSEER} examples using a border group of "USStatesDF"..
 }
 \author{Linda W. Pickle and Jim Pearson of StatNet Consulting, LLC, Gaithersburg, MD}
 \source{Surveillance Research Program, National Cancer Institute 

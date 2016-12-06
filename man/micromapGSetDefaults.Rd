@@ -1,8 +1,8 @@
-\name{micromapSTSetDefaults}
-\alias{micromapSTSetDefaults}
-\title{function to build the micromapSTDefault data.frame}
+\name{micromapGSetDefaults}
+\alias{micromapGSetDefaults}
+\title{function to build the micromapGDefault data.frame}
 \description{
-The micromapSTSetDefaults function generates a data.frame containing two lists: the colors
+The micromapGSetDefaults function generates a data.frame containing two lists: the colors
 and details list. Each list contains the operational parameters to instruct micromapST on
 how to physically construct a micromapST graphic. 
 The colors list contains 14 rgb colors:\cr
@@ -22,12 +22,12 @@ construction of the micromapST graphic. These lists may be modified by the user,
 is not recommended.  See the micromapSTDefault description for more information on these
 lists.
 }
-\usage{micromapSTSetDefaults()}
+\usage{micromapGSetDefaults()}
 \details{
 The default colors in the colors list are: red, orange, green, greenish-blue and lavender
 for the state colors, black for the median state color, and light yellow for the
 cummulative hightlighting on the map.
-The default values in the details list can be found in the micromapSTDefaults documentation.
+The default values in the details list can be found in the micromapGDefaults documentation.
 
 This function is primarily used internally by micromapST.  However, if the user wants to see
 values of all of the internal variables or wants to make wholesale changes to the layout and
@@ -38,5 +38,5 @@ of the full colors and details lists.
 Daniel B. Carr, George Mason University, Fairfax VA, and Jim Pearson, StatNet Consulting,
 LLC, Gaithersburg, MD 
 }
-\value{\link{micromapSTDefaults}}
+\value{\link{micromapGDefaults}}
 \keyword{functions}

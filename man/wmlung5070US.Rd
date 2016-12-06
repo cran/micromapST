@@ -22,7 +22,7 @@
 \details{
  see wmlung5070 for further details.
   The row name is always \var{US} indicating US rates.
-  This dataset is used by the micromapST examples.
+  This dataset is used by the \var{micromapSEER} examples using the border group of "USStatesDF".
 }
 \author{Linda W. Pickle and Jim Pearson of StatNet Consulting, LLC, Gaithersburg, MD}
 \references{

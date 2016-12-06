@@ -1,87 +1,257 @@
 \name{micromapST}
 \alias{micromapST}
-\title{US Linked Micromap Graphics}
+\alias{micromapST.Version}
+\title{Linked Micromap Graphics Package}
 \description{
-Provides a easy and quick means of creating Linked Micromaps for the 51 U.S. states and the District of Columbia.
-micromapST uses the standard graphics and RColorBrewer packages to rapidly create highly readable linked micromap plots.
+Provides a easy and quick means of creating Linked Micromaps for any collection 
+of geographically associated areas.  The micromapST package 
+uses the standard graphics and RColorBrewer packages to rapidly create 
+highly readable linked micromap plots.
 This gives the user the ability to explore different views of their data quickly. 
 
-Each plot row represents a state.  Each column can be defined to present a different graphical 
-representations of the user's data.  For linked micromaps, the primary columns are a MAP and 
-ID (state name).  The statistical data is presented in the other columns as arrows, bars, 
-boxplots, dots, dots with confidence intervals, and dots with standard error, 
-time series line plots with or without confidence bands, scatter plots and 
-horizontal stacked (segmented) bars..
+\var{micromapST} uses the border and name information contained in border group
+datasets to define the geographical areas used in creating the linked micromaps.
+
+The \var{micromapSEER} function is included to help users of the specialized
+\var{micromapST} for NCI Seer areas called \var{micromapSEER} migrate to this package.  
+The \var{micromapSEER} function, calls \var{micromapST} with the border group set 
+to \var{USSeerBG} to generate linked micromaps for the 20 U. S. Seer Areas.
+
+The \var{micromapST} contains border group datasets with the boundary and name
+information for the following::
+\itemize{
+ \item \var{USStatesBG}   - data from the original \var{micromapST} package for . 
+ the U. S. 50 states and the District of Columbia.
+ \item \var{USSeerBG}     - data for the 21 U. S. Seer Areas.
+ \item \var{KansasBG}     - data for the 105 counties in the state of Kansas.
+ \item \var{NewYorkBG}    - data for the 62 counties in the state of New York.
+ \item \var{MarylandBG}   - data for the 24 counties in the state of Maryland.
+ \item \var{UtahBG}       = data for the 29 counties in the state of Utah
+ \item \var{ChinaBG}      - 34 administrative areas in the country of China.
+ \item \var{UKIrelandBG}  - 218 administrative areas in UK, Ireland and Isle of Man.
+ \item \var{SeoulKoreaBG} - 25 districts in Seoul S. Korea.
+ \item \var{AfricaBG}     - 52 countries of the Africa continent.
 }
-\usage{micromapST ( stateFrame, panelDesc, 
-                    rowNames  = c("ab","fips","full")[1], 
-                    sortVar   = NULL, 
-                    ascend    = TRUE, 
-                    title     = c("", ""),
-                    plotNames = c("ab","full")[2], 
-                    colors    = NULL, 
-                    details   = NULL) 
+
+Each plot row represents a single sub-area (state, county or province) within the border group area.  
+Each column can be defined to present a different graphical representations 
+of the user's data.  
+\cr
+For linked micromaps, the primary columns are a MAP type, 
+ID (sub-area name) and one or more glyphics.  The statistical data is presented in the glyphics columns 
+as one of the following graphics (glyphics):
+\itemize{
+   \item arrows,
+   \item bars,
+   \item boxplots,
+   \item dots,
+   \item dots with confidence intervals,
+   \item dots with standard error,
+   \item dot with a significance marker,
+   \item time series line plots with or without confidence bands,
+   \item scatter plots, and
+   \item horizontal stacked (segmented, centered, and normalized) bars.
+ }
+
+All border groups are distrbuted with the package as .rda datasets.
+}
+\usage{micromapST ( statsDFrame, 
+                     panelDesc, 
+                     rowNamesCol = NULL,
+                     rowNames   = NULL, 
+                     sortVar    = NULL, 
+                     ascend     = TRUE, 
+                     title      = c("", ""),
+                     plotNames  = NULL,
+                     axisScale  = NULL,
+                     staggerLab = NULL,
+                     bordGrp    = NULL,
+                     bordDir    = NULL,
+                     dataRegionsOnly = NULL,
+                     regionsB   = NULL,
+                     grpPattern = NULL,
+                     ignoreNoMatches = FALSE,
+                     colors     = NULL, 
+                     details    = NULL) 
   }
 \arguments{
-  \item{stateFrame}{a data.frame containing data used with the following plots/glyphs:. 
-    \option{arrow}, \option{bar}, \option{segbar}, \option{normbar}, \option{ctrbar}, 
-    \option{dot}, \option{dotse}, \option{dotconf}, and \option{scatdot} plots.
-    The data for the \option{boxplot} and time series plots is more complex and multi-dimensional
-    and is passed to the glyph generation routines via the \var{panelData} parameter (see below.)
+  \item{statsDFrame}{a data.frame containing data used with the following plots/glyphs:. 
+    \var{arrow}, \var{bar}, \var{segbar}, \var{normbar}, \var{ctrbar}, 
+    \var{dot}, \var{dotse}, \var{dotconf}, \var{dotsignif}, 
+    and \var{scatdot} plots.
+    The data for the \var{boxplot} and time series plots (\var{TS} and \var{TSConf})
+    is more complex and multi-dimensional and is passed to the glyph generation routines 
+    via the \var{panelData} parameter (see below for more details.)
     \cr
-    The \var{row.names} of \var{stateFrame} data.frame are used as the state identifiers 
-    to link to the map boundary dataset. The state identifiers must be 
-    the state 2 character abbreviations, state full names, or 2-digit US FIPS codes.
-    The \var{col1}, \var{col2}, and \var{col3} vectors in the \var{panelDesc} data.frame 
-    identify which data columns in the \var{stateFrame} data.frame are associated with 
-    each column panel glyphs,}
+    The \var{row.names} of \var{statsDFrame} data.frame are used as the link identifier between
+    the data row to the map boundary data.  For U.S. state data, the link identifier must
+    be the the state's 2 character abbreviations, full names, or 2-digit US FIPS codes as the \var{id}.
+    For Seer Areas, the area identifier is the Seer Area abbreviates as defined in the 
+    \var{USSeerBG} document. Refer to the documentation on each border group for the exact
+    names, abbrevviations and ids defined for each sub-area. \cr
+    The data columns in the statsDFrame are associated with each graphic using the 
+    \var{col1}, \var{col2}, and \var{col3} vectors in the \var{panelDesc} data.frame by column 
+    name or number.
+    }
   \item{panelDesc}{a data.frame that defines the description of each column: types, 
-    associated data columns in the \var{stateFrame} data.frame, titles (top and bottom), 
-    reference values and text, and names of data.frames
+    associated data columns in the \var{stateFrame} data.frame, column titles (top and bottom), 
+    reference values and text, and names of additional data.frames
     for complex glyphics (time series and boxplots). See section on \var{panelDesc}
     for more details. 
     }  
   \item{rowNames}{defines the type of value used as the row.names in the \var{stateFrame}. 
-    The options are:  \option{"ab"} (2 character state ID, postal code abbreviations), 
-    \option{"full"} (full state name), or \option{"fips"} (2-digit US FIPS code for the state).  
-    The default is \option{"ab"}. 
-    The \var{row.names} of the \var{stateFrame} and identifiers in the \var{panelData} structures 
-    are validated to ensure they conform to the type of state id specified. 
-    No special characters should be used in any state identifier.
-    See \var{stateNamesFips} and \var{state.name} data.frames from the \var{state} dataset included in R
-    for a list of the valid \option{"ab"}, \option{"full"} and \option{"fips"} codes.
+    The options are:  
+    \itemize{
+      \item \option{ab} - an abbreviation for the sub-area: 2 character state ID, 
+       postal code abbreviation, ISO abbreviation, or a generally accepted 
+       abbreviation for the sub-area;
+      \item \option{id} - sub-area ID, numerical integer identifiers.  
+       In the U.S. border groups, the state and county FIPs codes are used. 
+       An alias for \option{id} is \option{FIPS}.;
+      \item \option{full} - the full sub-area names;
+      \item \option{alias} - partial match aliases.  Used only with the Seer Registry
+       sub-area registry names as outputted by the SeerStat programs; or
+      \item \option{alt_ab} - an alternate sub-area abbreviation.  
+       In some areas, there area two accepted set of abbreviations.  
+       If the border group has an alternate abbreviation defined, this 
+       option allows the alternative abbreviation to be used as the \var{rowNames} in the data.
     }
-  \item{sortVar}{defines the column name(s) or number(s) in the \var{stateFrame} 
-    data.frame to be used to sort the \var{stateFrame} data.frames before creating 
+  
+    See the documentation on each border group for details on
+    the full names, abbreviatations, optional alternate abbreviations 
+    and numeric identifiers defined for each area in the particular 
+    border group in the \var{areaNamesAbbrsIDs} R object. \cr
+    The default is \option{ab}.
+    
+    If a border group does not have one of these sets of name data, then the corresponding 
+    option will not be available.
+    
+    The linkage between data and boundaries is accomplished using the strings in the 
+    statsDFrame column identified by \var{rowNamesCol} or if no \var{rowNamesCol} is specified in 
+    the \code{row.names} information of the \var{statsDFrame}, 
+  
+    The linkage values are validated to against the \var{areaNamesAbbrsIDs} data.frame 
+    for the specified border group for the \var{micromapST} call.
+    If a sub-area in the border group is not referenced in the data, it is outlined on the map, 
+    but not colored.  If the sub-area link cannot be matched, a warning message is generated and 
+    the execution of the package is stopped.  Unless, the user has set the \option{noMatchIgnore} 
+    call argument to TRUE and the data will be ignored.
+    
+    The \option{alias} option is implemented to support with the \var{USSeerBG} 
+    border group and data generated by the Seer Stat program. The registry column 
+    identifying the Seer Area contains the Seer Area name and additional information.
+    This option along with the \var{alias} field in the border group allows the 
+    package to use the registry column as the linkage to the boundary data using a  
+    wildcard or partial string allows the registry column generated by Seer Stat 
+    to be used as the linkage.  This option is controlled the \var{enableAlias} variable 
+    in the border group's \var{areaParms} data.frame.
+   }
+  \item{rowNamesCol}{allows the user to specify the data.frame column that contains 
+    the sub-area string to be used to link the data row to the boundary data for the sub-area.
+    The \var{rowNames} option above specifies which name information (full name, abbreviation,
+    id, alternate abbreviations) the sub-area string is matched to in the border group 
+    name information. (see the border group documentation for more details.)  
+    The \var{rowNamesCol} value must be a column number or column name within the 
+    \var{statsDFrame} data.frame.  The default value for \var{rowNamesCol} is to use 
+    row.names of the passed data.frame.
+   }
+  \item{sortVar}{defines the column name(s) or number(s) in the \var{statsDFrame} 
+    data.frame to be used to sort the \var{statsDFrame} data.frames before creating 
     the state micromap.  A vector of column names or numbers can be used sort 
     on multiple columns and to break ties. 
-    For Example: \code{sortVar=c(4,5)} where columns 4 and 5 in the \var{stateFrame} 
+    
+    For Example: \code{sortVar=c(4,5)} where columns 4 and 5 in the \var{statsDFrame} 
     are used in the sort.
     If the user needs to sort the data based on information in the boxplot or time-series data, 
-    the best practice is to copy the data into the stateFrame.
+    the best practice is to copy the data into the \var{statsDFrame}.
     }
   \item{ascend}{a logical value. If \var{TRUE}, \var{sortVar} will be sorted in ascending order. 
-    If \var{FALSE}, sortVar will be sorted in descending order.  The default value is \var{TRUE}.  
+    If \var{FALSE}, \var{sortVar} will be sorted in descending order.  
+    The default value is \var{TRUE}.  
     }
   \item{title}{A character vector with one or two character strings to be used 
     as the title of the overall micromap plot page. 
      \preformatted{  
-    example:  \code{title = "micromapST Title"}\cr  
-          or \code{title = c("title line 1","title line 2")}
+      For example:  
+          \code{title = "micromapST Title"} or   
+          \code{title = c("title line 1","title line 2")}
       }
     }
-  \item{plotNames}{defines the type of state names to be displayed when an "id" glyph column 
-    requested.  The options are: \option{"ab"} or \option{"full"}.  \option{"ab"} 
-    will display the 2 character state abbreviations,  
-    \option{"full"} will display the full state name (except that the 
-    District of Columbia is shown as D.C. because of space limitations).
-    The default is \option{"full"}.
+  \item{plotNames}{defines the type of state names to be displayed when an \var{id} glyph column 
+    requested.  The options are: \option{ab} or \option{full}.  
+    \option{ab} will display the sub-area abbreviations as defined in the border groups name information.
+    \option{full} will display the full sub-area name as defined in the border group name information.
+    (For the U.S. Stata name information, the full name for District of Columbia is shown 
+    as Dist. of Col.. because of space limitations). \cr
+    The default is \option{full}.
     }
-  \item{colors}{is a vector containing  a vector of 7 or 14 color names or values ("#xxxxxx").
-    or the name of a color palette. The vector of 7 or 14 color names or "#xxxxxx" values 
+  \item{axisScale}{defines the type of axis labels to be used and if scaling is applied.  
+    The acceptable values are \option{o}, \option{w}, \option{s}, and \option{sn}.  
+    \option{o} is the original method using the pretty
+    function limiting the values to the range of the data.  
+    \option{w} is the default and uses the Wilkinson algorithm to generate the axis labels for 
+    a set of data,
+    \option{s} uses the wilkinson algorithm,
+    adjusts the range to cover the labels, and determines a scaling to apply to the 
+    labels.  If 1000 is the scaling, "in the thousands" is added to the column titles.
+    \option{sn} uses the wilkinson algorithm, adjusts the range to cover the labels, and checks
+    each value to determine if it should be scaled.  If it is scales, the scale identifier
+    is added as a suffix. (e.g., 1240334 become 1.24M)   "w" is the wilkinson algorithm 
+    without any scaling.
+    }
+  \item{staggerLab}{is a logical variable the controls if the axis labels are staggered and 
+    drawn on on two lines instead of one.  If set to FALSE (the default), the labels are 
+    not staggered.  If TRUE, two lines are used to draw the axis labels, alternating labels
+    on each line.
+    }
+  \item{bordDir}{specifies the path to a border group dataset (.rda) that is external to the 
+    \var{micromapST} package.  The name of the border group is specified in the \var{bordGrp} 
+    parameter.
+    }
+  \item{bordGrp}{specifies which preloaded border group to use for the area names, 
+     abbreviations, numeric identifier, and area boundary data.  The supported 
+     border groups are \var{USStatesBG} and \var{USSeerBG}.  
+     The default \var{bordGrp} value is \var{USSeerBG}.
+    }
+  \item{dataRegionsOnly}{specifies to only map regions containing data when 
+     \var{aP_Regions} is set to \var{TRUE}.  This indicates the name table contains
+     the information to draw partial area maps of regions.  When set to \var{TRUE},
+     only regions within the area are drawn that contain at least one sub-area
+     with data provided by the caller.  If \var{FALSE}, the entire area is drawn.
+     The default is \var{FALSE}.  Retional boundaries are not required, but suggested.
+     See border group documentation for more details.
+    }
+  \item{regionsB}{when regional boundaries are provided, controls whether to 
+     overlay the boundaries on the map.  If dataRegionsOnly is set to \var{TRUE} and 
+     only a subset of regions will be mapped and regional boundaries are 
+     provided, regionsB is et to \var{TRUE}.  The default is \var{FALSE}.
+     Independent of \option{dataRegionsOnly}, if set to \var{TRUE}, if present,
+     regional boundaries are overlayed on the map,  If set to \var{FALSE}, 
+     no regional boundaries are drawn.
+     See border group documentation for more details.
+    }
+  \item{grpPattern}{The micromapST package generates the pattern of rows to panel groups automatically.
+    The pattern is based on a maximum of 5 rows per group and number of rows can only decend from the 
+    edges toward the median row.  The pattern generated by the package can be overriden by using the 
+    \var{grpPattern} to specify the pattern to use as a numeric vector.  The provided vector must 
+    pass the following checks:
+    a) must be a numeric vector,
+    b) the sum of the values in the vector must equal the number of rows in the user 
+    supplied statsDFrame data frame
+    c) the maximum number of rows per panel group is 5.
+    d) the number of rows per panel must be integers and decending from the outside to the middle of the vector.
+    }
+  \item{ignoreNoMatches}{The \var{micromapST} package will automatically handle situations where there is 
+    no data for a sub-area in an area.  However, it will stop processing if there is data for a non-existing 
+    sub-area.  To instruct the package to ignore rows of data for sub-areas that do not have 
+    boundary information in the border group, set the call argument \option{ignoreNoMatches} to \var{TRUE}
+    to get the package to detail the data rows from the processing.
+    }
+  \item{colors}{is a vector containing  a vector of 12 or 24 color names or values ("#xxxxxx").
+    or the name of a color palette. The vector of 12 or 24 color names or "#xxxxxx" values 
     are used to define the colors used for:
     \itemize{
-       \item The 5 colors in each group for the states and symbols in the glyphs. 
+       \item The 6 colors in each group for the states and symbols in the glyphs. 
         One color per row (state).  
        \item 1 color for the median state and glyphics,  
        \item 1 foreground color for highlighted states in the map.  This is used 
@@ -89,87 +259,118 @@ horizontal stacked (segmented) bars..
         on the type of map requested. The usage is as follows:
         \preformatted{
         "map"      - not used.
-        "mapcum"   - highlight states previously referenced
+        "mapcum"   - highlight areas previously referenced
                      above.
-        "maptail"  - highlight states previously referenced 
+        "maptail"  - highlight areas previously referenced 
                      above the median row and highlight 
                      remaining states below the median row.
-        "mapmedian"- highlight all states above the median 
-                     in maps above the median row and highlight 
-                     all states below the median in maps below 
-                     the median row.
-         }                  
-       \item When an 7 additional colors are specified, they are used as the 
-       translucent colors in the tsconf confidence intervals bands. If only 7 colors are provided, the additional
-       7 translucent colors are generated using a 20\% transparent version
-       of the original color 
-       e.g., \code{adjustcolors(colors,0.2)}
+        "mapmedian"- highlight all areas above the median 
+                     in maps above the median row and 
+                     highlight all areas below the median 
+                     in maps below the median row.
+         }            
+       \item 2 accent colors for "mapmedian" sub-area colors for above median and below median.
+       \item When an 12 additional colors are specified, 
+       they are used as the translucent colors in the 
+       \option{tsconf} confidence intervals bands. 
+       If only 12 colors are provided, the additional
+       12 translucent colors are generated using a 20\% 
+       transparent version of the original color.
+       \preformatted{
+          e.g., \code{adjustcolors(colors,0.2)}
+       }
      }
-     The only color palette support is a gray palette to permit publication of the 
-     linked micromaps using a gray scale instead of color.  By setting \var{colors} = "greys", "grays", or "bw",  
-     the entire plot will be generated using gray scale that has been balanced to maintain 
-     readability and reproduction without the use of color printing.  
-     Additional color palettes may be supported in future releases.\cr
+     The only color palette support is a gray palette to permit 
+     publication of the linked micromaps using a gray scale 
+     instead of color.  By setting \var{colors} = "greys", 
+     "grays", or "bw", the entire plot will be generated using 
+     gray scale that has been balanced to maintain readability 
+     and reproduction without the use of color printing.  
+     Additional color palettes may be supported in future releases.
      
-     If a \var{colors} vector is not provided, the package default colors will be used:
+     If a \var{colors} vector is not provided, the package default 
+     colors will be used:
      \itemize{
-       \item 5 state colors: "red", "orange", "green", "greenish blue", "lavender"
+       \item 6 state colors: "red", "orange", "green", "greenish blue", "lavender"
        \item 1 median state color: "black"
-       \item 1 highlighed states: "light yellow" and
-       \item 7 translucent colors using the above colors at 20\%.
+       \item 1 highlighed states: "light yellow" for "map", "mapcum", "maptail"
+       \item 2 highlighed states: "light red" and "light green" for "mapmedian" and
+       \item 12 translucent colors using the above colors at 20\%.
      }
      It is strongly recommended to use the default.
     }
-  \item{details}{defines the spacing, line widths and many other details of the plot layout, 
-    structure and content; see \var{micromapSTDefaults$details} for more details.
+  \item{details}{defines the spacing, line widths and many other details 
+    of the plot layout, structure and content; 
+    see \var{micromapGDefaults$details} for more details.
     Generally \var{details} does not need to be specified, the default values 
     will always be used and are strongly recommended. However, in a few cases, 
     it may be desireable to turn off or disable a feature.  In these cases,
     the user can specify just the specific variable and value in a list and 
     pass it to \var{micromapST} via the \var{details} parameter.  For example:
-      \preformatted{
- details=list(SNBar.Middle.Dot=FALSE,SBar.varht=FALSE)
-      }
+    \preformatted{
+     details=list(SNBar.Middle.Dot=FALSE,SBar.varht=FALSE)
+    }
     The entire details variable list does not have to be passed. See the section 
-    on the \var{micromapSTDefaults$details} for more details.
-   }
- }
+    on the \var{micromapGDefaults$details} for more details.
+  }
+}
 \details{The \var{micromapST} function creates a linked micromap plot for data referencing 
-the 50 US States and DC geographical areas.  The function provides links from 
+a collection of geographic related areas, like the 50 US States and DC geographical areas or 
+U.S. Seer Areas.  
+The function provides links from 
 a US state map to several forms of graphical charts:  
-dot, dot with confidence intervals (\option{dotconf}), dot standard error (\option{dotse}), 
-arrow, bar chart, time series, time series with a confidence band, 
-horizontal stacked (segmented) bar, normalized bar and centered bar charts, 
-scattered dot and box plots. The data values for each column of graphs and each state and DC are 
-provided in the \var{stateFrame} data.frame.  The \var{panelDesc} data.frame specifies the type 
-of chart, the column numbers in the \var{stateFrame} with the statistics for the chart, 
+dot (\option{dot}), 
+dot with confidence intervals (\option{dotconf}), 
+dot standard error (\option{dotse}), 
+dot with significance mark (\option{dotsignif}), 
+arrow (\option{arrow}), 
+bar chart (\option{bar}), 
+time series (\option{ts}), 
+time series with a confidence band (\option{tsconf}), 
+horizontal stacked (segmented) bar (\option{segbar}), 
+normalized bar (\option{normbar}), 
+centered bar charts (\option{ctrbar}), 
+scattered dot (\option{scatdot}), and 
+box plots (\option{boxplot}). 
+The data values for each column of graphs and each area are 
+provided in the \var{statsDFrame} data.frame.  The \var{panelDesc} data.frame specifies the type 
+of chart, the column numbers in the \var{statsDFrame} with the statistics for the chart, 
 column titles, reference values, etc.   Additional data for boxplots and time series
 plots are provided through the \var{panelData} column in the \var{panelDesc} data.frame
 }
 \value{None}
 \references{
-Daniel B. Carr and Linda Williams Pickle, Visualizing Data Patterns with Micromaps, 
-CRC Press, 2010
-}
-\author{
-  Daniel B. Carr, George Mason University, Fairfax VA, with contributions 
-  from James B Pearson and Linda Pickle of StatNet Consulting, LLC, Gaithersburg, MD
-  \cr
+  Daniel B. Carr and Linda Williams Pickle, Visualizing Data Patterns with Micromaps, CRC
+  Press, 2010\cr
   Linda Williams Pickle, James B. Pearson Jr., Daniel B. Carr (2015), micromapST: Exploring and Communicating Geospatial Patterns in US State Data.,
   Journal of Statistical Software, 63(3), 1-25., \url{http://www.jstatsoft.org/v63/i03/}
 }
+\author{
+Daniel B. Carr, George Mason University, Fairfax VA, with contributions 
+from Jim Pearson and Linda Pickle of StatNet Consulting, LLC, Gaithersburg, MD
+}
+\seealso{
+  \link{micromapST},
+  \link{micromapSEER}
+}
 \examples{
 
+
 ######
-#   micromapST - Example # 1 - map with no cumulative shading,
+#   micromapST - Example # 01 - map with no cumulative shading,
 #     2 columns of statistics: dot with 95\% confidence interval, boxplot
-#     sorted in descending order by state rates
+#     sorted in descending order by state rates, using the default
+#     border group of "USStatesBG", with default symbols.
 ####
 # load sample data, compute boxplot
-data(wflung00and95,wflung00and95US,wflung00cnty) 
+
+data(wflung00and95,wflung00and95US,wflung00cnty,envir=environment()) 
+
 wfboxlist = boxplot(split(wflung00cnty$rate,wflung00cnty$stabr),plot=FALSE)  
+
 # set up 4 column page layout
-panelDesc <- data.frame(
+
+panelDesc01 <- data.frame(
   type=c("map","id","dotconf","boxplot"),    
   lab1=c("","","State Rate","County Rates"),  
   lab2=c("","","and 95\% CI","(suppressed if 1-9 deaths)"), 
@@ -180,46 +381,94 @@ panelDesc <- data.frame(
   panelData= c("","","","wfboxlist")          
   ) 
 # set up PDF output file, call package
-pdf(file="EX1-WFLung-2000-2004-State-Dot-County-Box.pdf",width=7.5,height=10)
-micromapST(wflung00and95,panelDesc,sortVar=1,ascend=FALSE,
-       title=c("White Female Lung Cancer Mortality, 2000-2004",
-                  "State Rates & County Boxplots"))  
+
+pdf(file="Ex01-WFLung-2000-2004-State-Dot-County-Box.pdf",width=7.5,height=10)
+
+micromapST(wflung00and95, panelDesc01, sortVar=1, ascend=FALSE,
+               title=c("Ex01-White Female Lung Cancer Mortality, 2000-2004", 
+                       "State Rates & County Boxplots")
+           )  
+
 dev.off()
-##End Example 1
+##End Example 01
 
 ######
-#   micromapST - Example # 2 - map with cumulative shading 
+#   micromapST - Example # 02 - map with cumulative shading 
 #                      from top down (mapcum), arrow and bar charts, 
 #                      sorted in descending order by starting
-#                      value of arrows (1950-69 rates)
+#                      value of arrows (1950-69 rates) using default
+#                      border group of "USStatesDF".  This 
+#                      example also provides custom colors for the 
+#                      linked micromaps, highlights, etc.
+#   
 ####
 # Load example data from package.
-data(wmlung5070,wmlung5070US)  
-panelDesc <- data.frame(
+
+data(wmlung5070,wmlung5070US,envir=environment())  
+
+panelDesc02 <- data.frame(
    type=c("mapcum","id","arrow","bar"),		
    lab1=c("","","Rates in","Percent Change"),       
    lab2=c("","","1950-69 and 1970-94","1950-69 To 1970-94"),  
-   lab3=c("","","Deaths per 100,000","Percent"),
+   lab3=c("MAPCUM","","Deaths per 100,000","Percent"),
    col1=c(NA,NA,"RATEWM_50","PERCENT"), 		
    col2=c(NA,NA,"RATEWM_70",NA)		
  )
-pdf(file="EX2-wmLung50-70-Arrow-Bar.pdf",width=7.5,height=10)
-micromapST(wmlung5070,panelDesc,sortVar=1,ascend=FALSE,
-        title=c("Change in White Male Lung Cancer Mortality Rates",
-                   "from 1950-69 to 1970-94")) 
+ 
+colorsRgb = matrix(c(                    # the basic 7 colors.
+ 213,  62,  79,   #region 1: red	    #D53E4F - Rust Red
+ 252, 141,  89,   #region 2: orange	    #FC8D59 - Brn/Org
+ 253, 225, 139,   #region 3: green	    #FEE08B - Pale Brn
+ 153, 213, 148,   #region 4: greenish blue  #99D594 - med Green
+  50, 136, 189,   #region 5: lavendar 	    #3288BD - Blue
+ 255,   0, 255,   #region 6                 #FF00FF - Magenta    
+ .00, .00, .00,   #region 7: black for median #000000 - Black
+ 230, 245, 152,   #non-highlighted foreground #E6F598 - YellowGreen
+ 255, 174, 185,   # alternate shape upper   #FFAEB9 - Mauve
+ 191, 239, 255,   # alternate shape lower   #BFEFFF - Cyan
+ 242, 242, 242,   # lightest grey for non-referenced sub-areas  #F2F2F2
+ 234, 234, 234),  # lighter grey for background - non-active sub-areas. #EAEAEA
+ 
+  ncol=3,byrow=TRUE)
+
+xcolors = c( grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],
+                            maxColorValue=255),
+              # set solid colors
+            grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],64,
+                            maxColorValue=255))   
+              # set translucent colors for time series.
+
+# set up reference names for color set
+names(xcolors) =c("rustred","orange","lightbrown","mediumgreen", 
+                  "blue","magenta", "black","yellowgreen",
+                  "mauve","cyan","lightest grey","lighter grey",
+                  "l_rustred","l_orange","vlightbrown","lightgreen", 
+                  "lightblue","l_black","l_yelgreen","l_mauve",
+                  "l_cyan","l_lightest grey","l_lighter grey")       
+
+pdf(file="Ex02-WmLung50-70-Arrow-Bar.pdf",width=7.5,height=10)
+
+micromapST(wmlung5070,panelDesc02,sortVar=1,ascend=FALSE,
+        title=c("Ex02-Change in White Male Lung Cancer Mortality Rates",
+                   "from 1950-69 to 1970-94-Diff colors"), colors=xcolors
+            ) 
+
 dev.off()
-##End Example 2
+##End Example 02
 
 ######
-#   micromapST - Example # 3 - Time Series Line Plots with Confidence Bands
+#   micromapST - Example # 03 - Time Series Line Plots with Confidence Bands
 #     maptail option highlights states from extremes to middle state
-#     read in time series data set example
+#     read in time series data set example using the default border group of "USStatesDF".
 ####
-data(TSdata)  
-temprates<-data.frame(TSdata[,,2])  
+
+data(TSdata,envir=environment())  
+temprates     <-  data.frame(TSdata[,,2])  
+
 # TSdata structure is array of size c(51,15,4), 
 # dimensions = 51 states, 15 years, (year label, point value, low limit, high limit)
-panelDesc <- data.frame(                    
+
+panelDesc03   <- data.frame(                    
     type=c("maptail","id","tsconf","dot"),      
     lab1=c("","","Time Series","Female"),  
     lab2=c("","","Annual Rate per 100,000","Most Recent Rate (2010)"),  
@@ -228,23 +477,29 @@ panelDesc <- data.frame(
     col1=c(NA,NA,NA,15),        
     panelData =c(NA,NA,"TSdata",NA)
     )
-ExTitle <- c("Time Series with Confidence bands",
-            "Annual Female Lung Cancer Mortality Rates, 1996-2010")
+ExTitle       <- c("Ex03-Time Series with Confidence bands",
+                    "Annual Female Lung Cancer Mortality Rates, 1996-2010")
 
-pdf(file="EX3-Time-Series-with-Conf.pdf",width=7.5,height=10)
-micromapST(temprates,panelDesc,sortVar=15,ascend=FALSE,title=ExTitle)  
+pdf(file="Ex03-Time-Series-with-Conf.pdf",width=7.5,height=10)
+
+micromapST(temprates,panelDesc03,sortVar="P15",ascend=FALSE,title=ExTitle)  
+
 dev.off()
 
-# end of example 3
+# end of example 03
+
 
 ######
-#   micromapST - Example 4 - dot followed by a scatter dot columns
+#   micromapST - Example 04 - dot followed by a scatter dot columns
 #     use same data as Example 3 to compare 1996 & 2010 rates
 #     mapmedian option shades states above or below the median (light yellow)
+#     using the default border group of "USStatesBG"
+#
+#   USES data loaded for Example 03 (temprates).
+#
 ####
-data(TSdata)
-temprates <- data.frame(TSdata[,,2])  # create simple matrix of rates for dot panel & sorting
-panelDesc <- data.frame(                 
+
+panelDesc04 <- data.frame(                 
     type=c("mapmedian","id","dot","scatdot"),  
     lab1=c("","","Female Lung Cancer Mortality","Comparison of Rates"),   
     lab2=c("","","Rate in 1996 (Sort Variable)",
@@ -254,24 +509,27 @@ panelDesc <- data.frame(
     col1=c(NA,NA,1,1),                 
     col2=c(NA,NA,NA,15)		
     )
-ExTitle <- c( "Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
+ExTitle <- c( "Ex04-Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
                     "Female Lung Cancer Mortality Rates")
 
-pdf(file="EX4-Scatter-Dots.pdf",width=7.5,height=10)
-micromapST(temprates,panelDesc,sortVar=1,ascend=FALSE,title=ExTitle)  
+pdf(file="Ex04-Scatter-Dots.pdf",width=7.5,height=10)
+micromapST(temprates,panelDesc04,sortVar=1,ascend=FALSE,title=ExTitle)  
+
 dev.off()
 
-##End Example 4
+##End Example 04
 
 ######
-#   micromapST - Example 5 - horizontal stacked (segmented) bars
+#   micromapST - Example 05 - horizontal stacked (segmented) bars
 #     segbar plots the input data, normbar plots percent of total
 #     package computes the percents from input data
 #     input for the categories for each state must be in consecutive 
-#     columns of the input data.frame
+#     columns of the input data.frame using the default border group of "USStatesBG"
 ####
-data(statePop2010)
-panelDesc <- data.frame(                   
+
+data(statePop2010,envir=environment())
+
+panelDesc05 <- data.frame(                   
     type=c("map","id","segbar","normbar"), 
     lab1=c("","","Stacked Bar","Normalized Stacked Bar"), 
     lab2=c("","","Counts","Percent"),     
@@ -279,75 +537,506 @@ panelDesc <- data.frame(
     col2=c(NA,NA,"OtherWBH","OtherWBH")		  
     )
 
-pdf(file="EX5-Stkd-Bar-variableheight.pdf",width=7.5,height=10)
-micromapST(statePop2010,panelDesc,sortVar=6,ascend=FALSE,
-     title=c("Stacked Bars: 2010 Census Pop by Race, Sorted by Percent Other Race",
-             "Categories Left to Right: Hispanic, non-Hispanic White, Black, Other"))  
+pdf(file="Ex05-Stkd-Bar-var-height.pdf",width=7.5,height=10)
+micromapST(statePop2010, panelDesc05, sortVar="OtherWBH", ascend=FALSE,
+     title=c("Ex05-Stacked Bars: 2010 Census Pop by Race, Sorted by Count Other Race",
+             "Cat-L to R: Hispanic, non-Hisp White, Black, Other-sn-varbar"),
+     details=list(SNBar.varht=TRUE), axisScale="sn" )  
 dev.off()
-## End Example 5
+## End Example 05
+
+######
+#
+#   micromapST - Example 06 - horizontal stacked (segmented) bars
+#     segbar plots the input data, normbar plots percent of total
+#     package computes the percents from input data
+#     input for the categories for each state must be in consecutive 
+#     columns of the input data.frame using the default border group
+#     of "USStatesBG".
+#
+#     Turning off the variable bar height and the midpoint dot features
+#     in the horizontal stacked bars (segmented)
+#
+#  USES data loaded for Example 05 above - statePop2010.
+#
+####
+
+panelDesc06= data.frame(                   
+      type=c("map","id","segbar","normbar"), 
+      lab1=c("","","Stacked Bar","Normalized Stacked Bar"), 
+      lab2=c("","","Counts","Percent"),     
+      col1=c(NA,NA,"Hisp","Hisp"),                     
+      col2=c(NA,NA,"OtherWBH","OtherWBH")		  
+    )
+
+pdf(file="Ex06-Stkd-Bar-fixedheight-nodot.pdf",width=7.5,height=10)
+
+micromapST(statePop2010,panelDesc06,sortVar=4,ascend=FALSE,
+             title=c("Ex7-Stacked Bars: 2010 Census Pop by Race, Sorted by Other Race",
+             "Cat-L to R: Hisp, non-Hisp White, Black, Other,ID-diamond"),
+             details=list(SNBar.Middle.Dot=FALSE,SNBar.varht=FALSE,Id.Dot.pch=23)
+           )  
+dev.off()
+
+## End Example 06
 
 
 ######
-#   micromapST - Example 6 - centered (diverging) stacked bars
+#   micromapST - Example 07 - centered (diverging) stacked bars
 #
 #     National 8th grade Math Proficiency NAEP Test Scores Data for 2011
 #     source: National Center for Education Statistics, 
 #     http://nces.ed.gov/nationsreportcard/naepdata/
 #     bar segment values - \% in each of 4 categories: 
 #           \% < Basic, \% at Basic, \% Proficient, \% Advanced
+#     using the default border group of "USStatesBG".
 ####
-data(Educ8thData)  
+
+data(Educ8thData,envir=environment())  
+
 # columns = State abbrev, State name, Avg Score, \%s \<basic, 
 #           basic, proficient, advanced
-panelDesc <- data.frame(                 
+
+panelDesc07 <- data.frame(                 
     type=c("map","id","dot","ctrbar"),
     lab1=c("","","Avg. Scores","Math Proficiency"),         
     lab2=c("","","","<Basic, Basic, Proficient, Advanced"),  
     lab3=c("","","","\% to Left of 0           |    \% to Right"),  
     col1=c(NA,NA,"avgscore","PctBelowBasic"),col2=c(NA,NA,NA,"PctAdvanced")   
   )
-ExTitle <- c("Stacked Bars: Educational Progress (NAEP) in Math, 2011, 8th Grade",
-             "Centered at Not Proficient vs. Proficient")
+ExTitle <- c("Ex07-Stacked Bars: Educational Progress (NAEP) in Math, 2011, 8th Grade",
+             "Centered at Not-Prof vs. Prof")
 
-pdf(file="EX6-Educ-Centered-Bar.pdf",width=7.5,height=10)
-micromapST(Educ8thData,panelDesc,sortVar=3, title=ExTitle)  
+pdf(file="Ex07-Educ-Centered-Bar.pdf",width=7.5,height=10)
+
+micromapST(Educ8thData,panelDesc07,
+             sortVar=3, 
+             title=ExTitle)  
+
 dev.off()
-rm(Educ8thData)
 
-### End of example 6
+### End of example 07
 
-
-
-######
-#   micromapST - Example 7 - horizontal stacked (segmented) bars
-#     segbar plots the input data, normbar plots percent of total
-#     package computes the percents from input data
-#     input for the categories for each state must be in consecutive 
-#     columns of the input data.frame
 #
-#     Turning off the variable bar height and the midpoint dot features
-#     in the horizontal stacked bars (segmented)
+#  Example # 08 - Maps Seer Registries using the micromapST function 
+#   with the bordGrp = "USSeerBG".  
 #
+
+data(Seer18Area,envir=environment())
+
+# set up 4 column page layout
+
+panelDesc08 = data.frame(
+  type=c("mapcum","id","dotsignif","arrow")    
+  ,lab1=c("","","Rate Trend APC", "Rate Change")  
+  ,lab2=c("","","Dot-Signif","2002-06 to 2007-11") 
+  ,lab3=c("","","","") 
+  ,col1=c(NA,NA,"RateTrendAPC","Rate20022006")
+  ,col2=c(NA,NA,"pValue", "Rate20072011")
+  ) 
+
+ExTitle       <- c("Ex08 - SeerStat Data - 2002-6 and 2007-11",
+                     "Dot with Signif., Arrow and Bar")
+
+pdf(file="Ex08-DotSignificants.pdf",width=7.5,height=10)
+
+micromapST(Seer18Area,panelDesc08,
+        sortVar="Rate20022006",ascend=FALSE,
+        title=ExTitle,
+        rowNames="alias",rowNamesCol='Registry', 
+        bordGrp="USSeerBG",
+        plotNames="ab")
+
+dev.off()
+#
+#  Both calls are effectively identical.
+#
+#### End of examples 08
+
+
+#####
+#   micromapST - Example 09 - A linked micromap of the counties of the state
+#      of Kansas using the border group "KansasDF". The KansPopInc data is shown
+#      using two dot glypics - current population and average increase per county.
+#####
+
+data(KansPopInc,envir=environment())
+
+# set up 4 column page layout
+
+panelDesc09 = data.frame(
+  type=c("mapcum","id","dot","dot")    
+  ,lab1=c("","","Population", "Average Inc.")  
+  ,lab2=c("","","in 2000","per year") 
+  ,lab3=c("","","UNITS","") 
+  ,col1=c(NA,NA,"Pop","AvgInc")
+  ) 
+
+ExTitle       <- c("Ex09 - Kansas Pop data 8.5x14",
+                     "Current Pop and Average Inc-scaling=sn")
+
+pdf(file="Ex09-Kansas Population and Inc-8.5x14-sn.pdf",width=7.5,height=13)  
+               # legal size page (8.5 x 14) to handle 105 counties.
+               
+#  use scaling "sn" to clean up x-axis labels.
+
+micromapST(KansPopInc,panelDesc09,
+        sortVar=c("AvgInc","Pop"),ascend=FALSE,
+        title=ExTitle, 
+        axisScale="sn",
+        rowNames="full",rowNamesCol='County',
+        bordGrp="KansasBG",
+        plotNames="ab")
+
+dev.off()        
+
+#
+##### Example # 09
+
+#####
+#
+#  Example # 10 - Counties in Kansas on an 11 x 17 page
+#
+
+# set up 4 column page layout
+
+panelDesc10 = data.frame(
+  type=c("map","id","dot",        "dot")    
+  ,lab1=c("",     "",  "Population", "Average Inc.")  
+  ,lab2=c("",     "",  "in 2000",    "per year") 
+  ,lab3=c("",     "",  "People",     "") 
+  ,col1=c(NA,     NA,  "Pop",        "AvgInc")
+  ) 
+
+ExTitle       <- c("Ex10 - Kansas Pop data 11x17",
+                     "Current Pop and Average Inc - scaling=e")
+
+pdf(file="Ex10-Kansas Population and Inc-11x17.pdf", width=10, height=16)  
+          # tabloid size page (11x17) to handle 105 counties.
+
+#  Use default scaling = "e" and no staggered labels, 
+#  Use full county names for data to boundary matching, 
+#  but presented abbreviated county names 
+#  in "id" glyphic column with large page.
+
+micromapST(KansPopInc, panelDesc10, 
+        sortVar=c("AvgInc","Pop"), ascend=FALSE, 
+        title=ExTitle,
+        rowNames="full", rowNamesCol='County',
+        bordGrp="KansasBG",
+        plotNames="ab")
+
+dev.off()        
+#
+#
+#### end of # Ex 10
+
+
+#####
+#
+#   micromapST - Example 11 - A linked micromap of the counties of the state
+#      of New York state using the border group "NewYorkDF". 
+#      The pop/inc data is shown using two dot glyphs, an arrow and bar glyph
+#      (2010 Population, an arrow showing the change in population from 2000 to 2010, 
+#      Population in 2000, and a bar showing the amount of the change.)
+#      
+#####
+
+data(nyPopData,envir=environment())
+
+nyPopData$Dif00_10 <- nyPopData$Pop_2010 - nyPopData$Pop_2000
+
+# set up 6 column page layout with colSize
+
+panelDesc11 <- data.frame(
+  type=c("map","id","dot",           "arrow",        "dot",     "bar")    
+  ,lab1=c("",  "",  "Population in", "Increase from","Pop 2005","Incre")  
+  ,lab2=c("",  "",  "2010",          "2000",         "",        "2000to2010") 
+  ,lab3=c("",  "",  "",              "",             "",        "") 
+  ,col1=c(NA,  NA,  "Pop_2010",      "Pop_2000",     "Pop_2000","Dif00_10")
+  ,col2=c(NA,  NA,  "",              "Pop_2010",     "",        "")
+  ,colSize=c(NA,NA, 15,              20,             5,        20)
+  ) 
+
+ExTitle       <- c("Ex11 - New York Population data",
+                     "2010 Pop and since 2000-colSize,sn,stag")
+
+pdf(file="Ex11-New York Pop 2010 and Change-sn colSize.pdf", 
+     width=7.5, height=10.5) 
+
+micromapST(nyPopData, panelDesc11, 
+        sortVar="Pop_2000", ascend=FALSE,
+        title=ExTitle,
+        rowNames="full",rowNamesCol="Area", 
+        axisScale="sn", staggerLab=TRUE,
+        bordGrp="NewYorkBG"
+      )
+
+dev.off()        
+#
+#
+#### End of Examples 11
+
+
+#####
+#   micromapST - Example 12 - A linked micromap of the counties of 
+#      the state of Maryland using the border group "MarylandBG". 
+#      The MarylandPopInc data is shown using two dot glypics - current 
+#       population and average increase per county.
+#      A "maptail" state map is used to show the counties in relationship
+#      to the median county as sorted by the 1970 population.
+#####
+
+data(mdPopData,envir=environment())
+
+# set up 5 column page layout
+
+panelDesc12 = data.frame(
+  type=c("maptail","id","dot","dot","arrow")    
+  ,lab1=c("","","Population", "Population","Change")  
+  ,lab2=c("","","in 1970","in 2000", "from 1970 to 2000") 
+  ,lab3=c("","","","","") 
+  ,col1=c(NA,NA,"X1970","X2010","X1970")
+  ,col2=c(NA,NA,"","","X2010")
+ ) 
+
+ExTitle       <- c("Ex12 - Maryland Population-map",
+                      "1970 and 2010 Pop and Change,stag,sn")
+
+pdf(file="Ex12-MD Pop 1970 and 2010 plus change-map.pdf", width=7.5, height=10.5) 
+
+micromapST(mdPopData, panelDesc12, 
+        sortVar=2, ascend=FALSE, 
+        title=ExTitle,
+        rowNames="full", rowNamesCol='County',
+        bordGrp="MarylandBG", 
+        axisScale="sn", staggerLab=TRUE,
+        plotNames="ab")
+
+dev.off()        
+#
+#
+#### End of Example 12
+
+#####
+#   micromapST - Example 13 - A linked micromap of the provinces, municipalities,
+#      autonomous regions and special administrative regions of China using the 
+#      border group of "ChinaDF". The ChinaPopInc data is shown
+#      using two dot glypics - current population and average increase per area.
+#####
+
+data(cnPopData,envir=environment())
+
+# set up 4 column page layout
+
+panelDesc13 = data.frame(
+  type=c("map","id","dot","bar")    
+  ,lab1=c("","","Population", "Population")  
+  ,lab2=c("","","in 2013","in 2013") 
+  ,lab3=c("","","","") 
+  ,col1=c(NA,NA,"pop2013","pop2013")
+  ) 
+
+ExTitle       <- c("Ex13 - China Population",
+                     "in 2013 by area")
+
+pdf(file="Ex13-China 2013 Population.pdf", width=7.5, height=10.5) 
+
+micromapST(cnPopData, panelDesc13, 
+        sortVar="pop2013", ascend=FALSE, 
+        title=ExTitle,
+        rowNames="full", rowNamesCol='area',
+        bordGrp="ChinaBG",
+        plotNames="full")
+
+dev.off()        
+#
+#
+#### End of Example 13
+
+
+#####
+#   micromapST - Example 14 - A linked micromap of the districts 
+#      of the city Seoul South Korea, using the border group of 
+#      "SeoulSKoreaBG". The included SeoulPopData dataset provides 
+#      population and district area statistics for 2012.  
+#      The micromapST generates two glyphics, a sorted dot
+#      glyphic based on the population and a bar graph based on the area.
+#####
+
+data(SeoulPopData,envir=environment())
+
+# set up 4 column page layout
+
+panelDesc14 = data.frame(
+  type=c("map","id","dot","bar")    
+  ,lab1=c("","","Population", "Area")  
+  ,lab2=c("","","in 2012","in 2012") 
+  ,lab3=c("","","","sqkm") 
+  ,col1=c(NA,NA,"Pop.2012","Area")
+  ) 
+
+ExTitle       <- c("Ex14 - Seoul Population",
+                     "in 2012 by district")
+
+pdf(file="Ex14-Seoul 2012 Population.pdf", width=7.5, height=10.5) 
+
+micromapST(SeoulPopData,panelDesc14,
+        sortVar=3, ascend=FALSE,               # sort based on the population
+        title=ExTitle,
+        rowNames="full", rowNamesCol='District',
+        bordGrp="SeoulSKoreaBG",
+        plotNames="full"
+      )
+
+dev.off()        
+#
+#
+#### End of Example 14
+
+#####
+#   micromapST - Example 15 - A linked micromap of the counties in the 
+#      state of Utah.  The UtahPopData data is shown using two dot glypics
+#      - current population and average increase per area.
+#####
+
+data(UtahPopData,envir=environment())
+
+#
+#  Get population differences from 2011 to 2001 and 1991.
+#   Data contains ",".  The comma's must be removed and values are 
+#     converted to numbers.
+#   If data is factors, need to add "as.character()" function 
+#     to the formula below.
+
+UtahPopData2 <- as.data.frame(sapply(UtahPopData, 
+                        function(x) gsub(",","",x)),stringsAsFactors=FALSE)
+
+UtahPopData2$Del1101 <- as.numeric(UtahPopData2$X2011) - as.numeric(UtahPopData2$X2001)
+UtahPopData2$Del0191 <- as.numeric(UtahPopData2$X2001) - as.numeric(UtahPopData2$X1991)
+
+
+# set up 5 column page layout
+
+panelDesc15 = data.frame(
+  type=c("map","id","dot","arrow","arrow")    
+  ,lab1=c("","","Population", "2001-2011","Chg 1991-2001")  
+  ,lab2=c("","","in 2011","pop change","pop change") 
+  ,lab3=c("","","","","") 
+  ,col1=c(NA,NA,"X2011","X2011","X2001")
+  ,col2=c(NA,NA,NA,"X2001","X1991")
+  ) 
+
+ExTitle       <- c("Ex15 - Utah county population 2011",
+                     " and changes last two decades,sn")
+
+pdf(file="Ex15-Utah Population.pdf",width=7.5,height=10.5) 
+
+micromapST(UtahPopData, panelDesc15, 
+        sortVar="X2011", ascend=FALSE,
+        title=ExTitle,
+        rowNames="full",rowNamesCol='County', 
+        axisScale="sn",
+        bordGrp="UtahBG",
+        plotNames="ab"
+      )
+
+dev.off()        
+#
+#
+#### End of Example 15
+
 ####
-data(statePop2010)
-panelDesc = data.frame(                   
-    type=c("map","id","segbar","normbar"), 
-    lab1=c("","","Stacked Bar","Normalized Stacked Bar"), 
-    lab2=c("","","Counts","Percent"),     
-    col1=c(NA,NA,"Hisp","Hisp"),                     
-    col2=c(NA,NA,"OtherWBH","OtherWBH")		  
-    )
+#
+#  Example 16 - use of state.x77 data table as data source
+#     Data does not contain a row for DC, a missing sub-area.
+#     Example also uses a smaller then 7.5 x 10 graphic space.
+#
 
-pdf(file="EX7-Stkd-Bar-fixedheight-nodot.pdf",width=7.5,height=10)
-micromapST(statePop2010,panelDesc,sortVar=6,ascend=FALSE,
-     title=c("Stacked Bars: 2010 Census Pop by Race, Sorted by Percent Other Race",
-             "Categories Left to Right: Hispanic, non-Hispanic White, Black, Other"),
-     details=list(SNBar.Middle.Dot=FALSE,SNBar.varht=FALSE))  
+data(state,envir=environment())
+
+stateData <- as.data.frame(state.x77)
+
+rownames(stateData) <- state.abb
+
+panelDesc16 <- data.frame(type = c("maptail", "id", "dot"),
+                        lab1 = c("", "", "Murder"),
+                        lab3 = c("", "", "Murders per 100K Population"),
+                        col1 = c(NA, NA, 5))
+
+ExTitle <- c("Ex16 - LM Plot of Murders in the United States",
+                      "No DC row entry.")
+
+pdf(file = "Ex16_state.x77_no_DC.pdf", width = 5, height = 9) 
+
+micromapST(stateData, panelDesc16, 
+           sortVar = 5, ascend = FALSE,
+           title = ExTitle)
+
 dev.off()
 
-## End Example 7
+#
+#  Example 17 - US state map based on data from state.x77 table with
+#     DC row added to complete data.frame, but with missing values (NAs).
+#     The DC row will be sorted to the bottom of the list size 
+#     it does not contain any data.
+#
+#   Used data and the panelDesc data.frames (stateData and panelDesc16) used
+#   in example 16.
+#
 
+# add DC as 51st state with missing data "NA" to stateData.  
+
+stateData <- rbind(stateData, DC = rep(NA, 8))   
+                  # missing values for DC row.
+
+ExTitle <- c("Ex17 - LM Plot of Murders in the United States",
+                  "DC row added with NA, decending.")
+
+pdf(file = "Ex17_state.x77_DCasNA_D.pdf", width = 5, height = 9) 
+
+micromapST(stateData, panelDesc16, 
+           sortVar = 5, ascend = FALSE,
+           title = ExTitle)
+
+dev.off()
+
+#
+#
+##### end of example # 17
+
+####
+#
+#  Example 18 - use of Africa population data as data source
+#      Demonstrates support for vertical oriented geographical areas.
+#
+
+data(AfricaPopData,envir=environment())
+
+panelDesc18 <- data.frame(type = c("map", "id", "dot",      "dot",          "dot"),
+                           lab1 = c("",      "","Population","Percentage Of","Est x2 Time"),
+                           lab3 = c("",      "","People",    "Total",        "Years"),
+                           col1 = c(NA,      NA,"Projection","PercOf",       "Est2Time"))
+
+
+pdf(file = "Ex18_Africa Micromap-11x17.pdf", width = 11, height = 17) 
+
+ExTitle <- c("Ex18-Africa Population Data",
+               "Sorted by Population on 11x17")
+
+micromapST(AfricaPopData, panelDesc18, 
+           sortVar = "Projection", ascend = TRUE,
+           title = ExTitle, 
+           rowNames = "ab", rowNamesCol = "Abbr",
+           bordGrp = "AfricaBG" )
+
+dev.off()
+
+#
+#
+##### End of Example 18
 
 
 
 }
+

@@ -29,7 +29,7 @@ Counts and rates of age-adjusted (2000 U.S. standard) lung cancer mortality data
  standard population and are expressed as the number of deaths per 100,000 person-years.  
  The row names are the 2 character postal codes for the states.   
  The data represents the rates for two periods of time: 2000 to 2004 and 1995 to 1999.
- This dataset is used in the micromapST examples.
+ This dataset is used in the \var{micromapSEER} examples using the border group of "USStatesDF".
 }
 \author{Linda W. Pickle and Jim Pearson of StatNet Consulting, LLC, Gaithersburg, MD}
 \source{Surveillance Research Program, National Cancer Institute 

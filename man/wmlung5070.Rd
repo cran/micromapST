@@ -30,11 +30,9 @@
   (in first decimal place) from the rates provided here 
   due to corrections to the dataset after its first publication.
   The name of each row is the state abbreviation - 2 characters.
-  This dataset is used by the micromapST examples.
+  This dataset is used by the \var{micromapSEER} examples using the border group of "USStatesDF".
 }
 \source{
-  \url{http://www3.cancer.gov/atlasplus}
-
    Surveillance Research Program, National Cancer Institute 
    SEER*Stat software (\url{http://www.seer.cancer.gov/seerstat}), 
    November 2007 data submission, released April 2008. Data 

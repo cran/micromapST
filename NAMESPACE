@@ -1,8 +1,14 @@
-export(micromapST)
-export(micromapSTSetDefaults)
-importFrom("RColorBrewer",brewer.pal)
-importFrom("graphics", arrows, boxplot, axis, points, lines, mtext, par, legend, polygon, rect, strheight, strwidth, symbols, text,
-  plot, plot.default, plot.design, plot.function, plot.new, plot.xy, plot.window,  
-  abline, axTicks, barplot, matplot, matpoints, title)
-importFrom("stats",qnorm)
-importFrom("grDevices",col2rgb,rgb)
+export(micromapST,micromapSEER,micromapST.Version)
+export(micromapGSetDefaults)
+export(micromapGSetPanelDef)
+importFrom("RColorBrewer", "brewer.pal", "brewer.pal.info")
+importFrom("graphics", "arrows", "boxplot", "axis", "points", "lines", 
+   "mtext", "par", "legend", "polygon", "rect", "strheight", "strwidth", 
+   "symbols", "text", "plot", "plot.default", "plot.design", "plot.function",
+   "plot.new", "plot.xy", "plot.window", "abline", "axTicks", "barplot",
+   "matplot", "matpoints", "title", "segments")
+importFrom("stats", "qnorm")
+importFrom("grDevices", "col2rgb", "rgb", "adjustcolor", "grey")
+importFrom("stringr", "str_trim", "str_split", "str_sub", "str_replace_all" ,"str_pad")
+importFrom("labeling","wilkinson","extended")
+importFrom("utils", "capture.output", "data") 
