@@ -1,8 +1,9 @@
 Package: micromapST
 Type: Package
-Version: 1.1.0
-Date: 2016-12-06
-Title: Linked Micromap Plots for General U. S. Geographic Areas
+Version: 1.1.1
+Date: 2016-12-07
+Title: Linked Micromap Plots for General U. S. and Other Geographic
+        Areas
 Author: Jim Pearson <jpearson@statnetconsulting.com> and Dan Carr <dcarr@gmu.edu>, 
      with contributions from Linda Pickle <linda@statnetconsulting.com>.
 Maintainer: Jim Pearson <jpearson@statnetconsulting.com>
@@ -37,6 +38,6 @@ LazyLoad: no
 BuildResaveData: best
 ByteCompile: yes
 NeedsCompilation: no
-Packaged: 2016-12-06 18:40:52 UTC; jpearson
+Packaged: 2016-12-07 16:13:07 UTC; jpearson
 Repository: CRAN
-Date/Publication: 2016-12-06 23:43:44
+Date/Publication: 2016-12-08 01:17:59

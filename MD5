@@ -1,7 +1,7 @@
-beebcb05890b16a5c6737ff78707fd5d *DESCRIPTION
+9f5c79a2d9ca541603a4a47d68c7438c *DESCRIPTION
 36367be72c3e79fa54bcda3dc8203b6e *NAMESPACE
 d968dfc620f0349a0c8ac519ceb50b4c *R/micromapDefSets.r
-9f9398f0f128c0013477124963680dde *R/micromapST.r
+d1313b2c67a0925afcbeeaaf773486d3 *R/micromapST.r
 9e5fa819af10ea3370d40907d8ae31d2 *R/panelFunctions.r
 b72e90ebb8d05eea302d49a8f9e5c36c *build/vignette.rds
 2854059e641717ca0be5dca827229fa0 *data/AfricaBG.rda
@@ -64,7 +64,7 @@ f2dfb7bac4ef25f57c24ec700cb08c39 *man/messages.Rd
 3f84081e80d65e61856c9fef53ae0bfe *man/micromapGSetDefaults.Rd
 12a11b045b6ce6e8d3630fc26afd3db9 *man/micromapGSetPanelDef.Rd
 86e9789cb34393bad7500889d4f61c91 *man/micromapSEER.Rd
-bbf25422f19b2740beb8ef0c4b61d69c *man/micromapST-package.Rd
+6456fe3992ff9eb9d2d4305f8ad40995 *man/micromapST-package.Rd
 7778bff393e0519bc4c7f83b471ff406 *man/micromapST.Rd
 a848a18ae07194fa18d6dcfd7a4d3fa5 *man/nyPopData.Rd
 629f90be140bf1b0aa3b29d45dfada94 *man/panelDesc.Rd

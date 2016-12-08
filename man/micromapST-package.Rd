@@ -15,8 +15,8 @@
     \tabular{ll}{
       Package:  \tab micromapST\cr
       Type:     \tab Package\cr
-      Version:  \tab 1.1.0\cr
-      Date:     \tab 2016-12-06\cr
+      Version:  \tab 1.1.1\cr
+      Date:     \tab 2016-12-07\cr
       License:  \tab GPL-2\cr
       LazyLoad: \tab no\cr
     } 

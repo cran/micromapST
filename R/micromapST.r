@@ -460,6 +460,12 @@
 #         - Fixed correction of washington DC and all of its forms to a pure character
 #           string with no punctuation.  "DC" instead of "D.C." or "DISTRICT OF COLUMBIA".
 #         - Added code to do the washington dc comparisons in all upper case only.
+#     December 7, 2016 (releasing to CRAN)
+#         - Added envir=environment() to all load and data functions
+#         - Hide assign to .GlobalEnv in eval-parse
+#         - Save and restore Sys.getlocale() to compensate for other 
+#           country settings that can interfer with the operation of the 
+#           package.
 #
 #
 #  Used packages: RColorBrewer, stringr, R.rsp, labeling, 
@@ -681,10 +687,9 @@
 
 suppressBindingNotes <- function(variablesMentionedInNotes) {
     for(variable in variablesMentionedInNotes) {
-        wstr <- paste0("assign(",dQuote(variable),",NULL,envir=",".GlobalEnv)")
+        wstr <- paste0("assign(variable,NULL,envir=",".GlobalEnv)")
         eval(parse(text=wstr))
        
-        #cat("assign:",variable," <- NULL in ,GlobalEnv\n")
     }
 }
 
@@ -1579,7 +1584,7 @@ micromapSEER <- function(statsFrame,panelDesc,...) {
 #
 #   Get micromapST Version
 #
-micromapST.Version <- function() { return ("micromapST V1.1.0 built 2016-12-06 1:36pm") }
+micromapST.Version <- function() { return ("micromapST V1.1.1 built 2016-12-07 11:02am") }
 
 #
 ####
@@ -2171,16 +2176,15 @@ data(detailsVariables,envir=environment())    # get validation and translation t
 #
 #####
 
-#
-#####
-
-
 #####
 #
 #  Counter Initialization (Global)  - research code = to be removed.
 #
 #  Variable at the micromapST level.
 #   
+
+#Saved_Locale <- Sys.getlocale(category='LC_CTYPE')  # save existing locale
+#x <- Sys.setlocale('LC_ALL','C')                         # set to 'C'
 
 mstColorNames         <- "black"
 mmSTEnvir             <- environment()
@@ -2195,10 +2199,10 @@ xmsg                  <- capture.output(mmSTEnvir)
 #   create warning and stop counters - must be in .GlobalEnv so the panelXXXX functions can use them.
 #
 var  <- "warnCnt"
-wstr <- paste0("assign(",shQuote(var),",NewCounter(),envir=.GlobalEnv)")
+wstr <- paste0("assign(var,NewCounter(),envir=.GlobalEnv)")
 eval(parse(text=wstr))
 var  <- "stopCnt"
-wstr <- paste0("assign(",shQuote(var),",NewCounter(),envir=.GlobalEnv)")
+wstr <- paste0("assign(var,NewCounter(),envir=.GlobalEnv)")
 eval(parse(text=wstr))
 #
 #   this should get the global variables set up so they can be referenced within all functions.
@@ -2212,16 +2216,16 @@ staggered        <- NULL
 staggering       <- NULL
 
 var  <- "lastLab2Space"
-wstr <- paste0("assign(",shQuote(var),",0,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,0,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 var  <- "lastLab3Space"
-wstr <- paste0("assign(",shQuote(var),",0,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,0,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 var  <- "staggered"
-wstr <- paste0("assign(",shQuote(var),",FALSE,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,FALSE,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 var  <- "staggering"
-wstr <- paste0("assign(",shQuote(var),",FALSE,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,FALSE,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
 #
@@ -2230,7 +2234,7 @@ eval(parse(text=wstr))
 Id.Dot.pch       <- NULL
 
 var  <- "Id.Dot.pch"
-wstr <- paste0("assign(",shQuote(var),",22,envir=.GlobalEnv)")   # assign default of 22.
+wstr <- paste0("assign(var,22,envir=.GlobalEnv)")   # assign default of 22.
 eval(parse(text=wstr))
 
 #cat("envir=warnCnt:", find("warnCnt"),"\n") 
@@ -2257,17 +2261,17 @@ callVL[callVarNames] <- callVar[callVarNames]  # copy the values used in the cal
 
 # save call parameter list and values to .GlobalEnv
 var  <- "callValList"
-wstr <- paste0("assign(",shQuote(var),",callVL,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,callVL,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
 #  Extract the statsDFrame variable name
 var  <- "sDFName"
-wstr <- paste0("assign(",shQuote(var),",callVL$statsDFrame,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,callVL$statsDFrame,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
 #  Extract the panelDesc variable name
 var  <- "pDName"
-wstr <- paste0("assign(",shQuote(var),",callVL$panelDesc,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,callVL$panelDesc,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
 #print(paste0("statsDFrame=",sDFName))
@@ -2375,7 +2379,7 @@ if (!UserBordGrpLoad) {
      
          # Use variable to make message dynamic as more bordGrps are added.
       
-         ymsg      <- paste0(sQuote(PkgBGs),collapse=", ")
+         ymsg      <- paste0(shQuote(PkgBGs),collapse=", ")
       
          xmsg      <- paste0("***0150 BGBD The bordDir call parameter was set to NULL, the bordGrp must be one contain in the package:\n", ymsg, "\n")
          stopCnt()
@@ -2432,7 +2436,7 @@ callVL$bgFile      <- bgFile
 callVL$BordGrpName <- BordGrpName
 
 var  <- "callVarList"
-wstr <- paste0("assign(",shQuote(var),",callVL,envir=.GlobalEnv)")
+wstr <- paste0("assign(var,callVL,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
 #cat("bordDir     = ",bordDir,"\n","bordGrp = ",bordGrp,"\n")
@@ -11495,7 +11499,7 @@ if (missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
 
    callVL$rowNames      <- rowNames
    var  <- "callVarList"  
-   wstr <- paste0("assign(",shQuote(var),",callVL,envir=.GlobalEnv)")
+   wstr <- paste0("assign(var,callVL,envir=.GlobalEnv)")
    eval(parse(text=wstr))
 
    #cat("Initial IndexDFtoNT:",IndexDFtoNT,"\n")
@@ -13323,6 +13327,7 @@ if (is.na(match('lab4',PDUsed))) {
    
    #
    #####
+   #x <- Sys.setlocale('LC_ALL',Saved_Locale)
    
    on.exit(print("micromapST Ends"))
    
