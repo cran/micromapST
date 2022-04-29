@@ -5,7 +5,7 @@
 \description{
    Math Proficiency Survey Results for 8th Graders in 2011 by State
 }
-\usage{Educ8thData}
+\usage{data(Educ8thData)}
 \format{
   A data frame with 51 observations (one per state) on the following 7 variables.
   \describe{
@@ -27,7 +27,6 @@
    The row name is the state abbreviation - 2 characters.
    This dataset is used by the \var{micromapSEER} examples using the "USStatesDF" border group.
 }
-
 \source{
     The National Center for Education Statistics, Department of Education\cr
     http://nces.ed.gov/nationsreportcard/states/

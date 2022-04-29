@@ -88,13 +88,15 @@ and the region for each county, province or metro area in the \var{ChinaBG} bord
   Taiwan\tab TW\tab CN.TW\tab 71\tab Huadong\cr
  }
 
-The \var{ChinaBG} supports two sets of abbreviations for each county (province or metro area).  No consistant source 
-was found when the border group was originally created.  Therefore, the two most common sets
-are included.  The first abbreviation set can be referenced by setting the \option{rowNames} 
-call argument to "ab".  The second (alternate) abbreviation set can be used by setting
-the \option{rowNames} to "alt_ab".
+The \var{ChinaBG} supports two sets of abbreviations for each county 
+(province or metro area). No consistant source was found when the border 
+group was originally created.  Therefore, the two most common sets
+are included.  The first abbreviation set can be referenced by setting 
+the \option{rowNames} call argument to "ab".  The second (alternate) 
+abbreviation set can be used by setting the \option{rowNames} to "alt_ab".
 
-The \option{rowNames} = "alias" features are not supported in the \var{ChinaBG} border group.
+The \option{rowNames} = "alias" features are not supported in the 
+\var{ChinaBG} border group.
 }
 
 \keyword{datasets}

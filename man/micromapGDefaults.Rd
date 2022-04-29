@@ -8,12 +8,13 @@ colors, sizing, font sizes, separation distances, line weights and types, spacin
 required to physically construct the requested micromapST graphic in portrait or 
 landscape modes from a letter size (8.5 x 11) up to a tabloid (11 x 17) page.
 The data.frame is mainly used internal to micromapST, but a copy can 
-be obtained by a user when a large number of changes are required.  This is not recommended.
+be obtained by a user when a large number of changes are required.  
+This is not recommended.
 The primary purpose of this section is to provide a list and description of 
 many of the variables in the details list that can be used to enable or disable
-functions of micromapSEER and it's glyphics.  This variable are identified by a "*" after
-the variable name.  These are the only variables that generally safe to be modified by 
-the user. 
+functions of micromapSEER and it's glyphics.  This variable are identified 
+by a "*" after the variable name.  These are the only variables that generally 
+safe to be modified by the user. 
 }
 \format{The data.frame contains two lists: colors and details.
  \describe{
@@ -39,10 +40,10 @@ the user.
                       below the median row.
        }                  
       }
-      \item{When 7 additional colors are specified, they are used as the translucent colors in
-       the time series glyphics bands.  If only 7 colors are provided, the additional
-       7 translucent colors are generated from the original colors as a 20\% transparent version
-       of the original color e.g., adjustcolors(colors,0.2)
+      \item{When 7 additional colors are specified, they are used as the translucent 
+        colors in the time series glyphics bands.  If only 7 colors are provided, 
+        the additional 7 translucent colors are generated from the original colors 
+        as a 20\% transparent version of the original color e.g., adjustcolors(colors,0.2).
       }
     }
     If colors = "greys" or "grays" or "bw", the entire plot will be done using 
@@ -64,30 +65,36 @@ the user.
        the variables in the \var{details} structure.
        The list of calculated variables is:
        \describe{
-         \item{numRows}{= number of rows (areas) in statsFrame data.frame}
-         \item{maxRows}{= maximum number of rows (areas) supported by micromaps}
-         \item{numGrps}{= number of logic panel groups.  Based on the table lookup by number of rows (areas)}
+         \item{numRows}{= number of rows (areas) in statsFrame data.frame.}
+         \item{maxRows}{= maximum number of rows (areas) supported by micromaps.}
+         \item{numGrps}{= number of logic panel groups.  Based on the table lookup 
+           by number of rows (areas).}
          \cr
-         \item{GrpPattern}{= vector containing the pattern of number of rows per group. Number
-           of rows per group must be in decending order from the outside groups to the median
-           (center) group.}
+         \item{GrpPattern}{= vector containing the pattern of number of rows per 
+           group. Number of rows per group must be in decending order from the 
+           outside groups to the median (center) group.}
          \item{GrpEntry}{= vector of the number of rows per each panel group, 
-           Length of vector equals the number of groups}
-         \item{GrpMedEntry}{= logical vector of number of panel groups with median panel = TRUE.}
+           Length of vector equals the number of groups.}
+         \item{GrpMedEntry}{= logical vector of number of panel groups with median 
+           panel = TRUE.}
          \cr
          \item{rowSep}{= c(0,0,0,0,0,0.1,0.1,0.0.0.0.0), location of row separations in 
-          each column of panels (0.1 around the median row, 0 for others). (inches)  Calculated 
-          based on the table of rows per panel. Length equals the number of panel groups + 1}
+           each column of panels (0.1 around the median row, 0 for others)(inches).  
+           Calculated based on the table of rows per panel. Length equals the number 
+           of panel groups + 1.}
          \item{rowSize}{= c(7,7,7,7,7,1.6,7,7,7,7,7), size of rows in each panel 
-          (1.6 row units for median row, 7 row units for the 5 item groups)  Based on the 
-          lookup table of rows per panel group. Length equals the number of panel groups + 1}
+           (1.6 row units for median row, 7 row units for the 5 item groups).  
+           Based on the lookup table of rows per panel group. Length equals the 
+           number of panel groups + 1.}
          \cr
-         \item{medGrp}{= the index number of the median panel group, if the number of groups is odd. 
-          Otherwise, the value is zero (0).}
-         \item{medRow}{= the index number of the median row (area), if the number of areas is odd. 
-          Otherwise, the value is zero (0).}
-         \item{medGrpSize}{= number of rows in the median group when there is an odd number of groups.}
-         \item{medRowBlw}{= the index number of the row/group below the median group when there is an odd
+         \item{medGrp}{= the index number of the median panel group, if the number 
+           of groups is odd. Otherwise, the value is zero (0).}
+         \item{medRow}{= the index number of the median row (area), if the number 
+           of areas is odd. Otherwise, the value is zero (0).}
+         \item{medGrpSize}{= number of rows in the median group when there is 
+           an odd number of groups.}
+         \item{medRowBlw}{= the index number of the row/group below the median group 
+           when there is an odd
            number of groups.}
          \item{medRowAbv}{= the index number of the row/group above the median group when there is an odd
            number of groups.}
@@ -400,30 +407,33 @@ the user.
         non-active data points.}
         \item{SCD.Bg.pch.size}{= 0.75, * size of point/symbol used as non-active 
         data points.}
-        \item{SCD.Fg.pch}{= 21, * type of point/symbol for active data points}
+        \item{SCD.Fg.pch}{= 21, * type of point/symbol for active data points.}
         \item{SCD.Fg.pch.col}{= "black", * border color for foreground dots.}
         \item{SCD.Fg.pch.lwd}{= 0.6, * Scatter dot symbol outline line weight for 
-        active data points}
+        active data points.}
         \item{SCD.Fg.pch.size}{= 1, * size of point/symbol for active data points 
-        in scatter dot}
+        in scatter dots.}
         \item{SCD.Median.pch}{= 21, * shape of filled symbol for median value - 
-        scatter dots}
-        \item{SCD.Median.pch.col}{= "black", * border color for median symbol - scatter dots}
+        scatter dots.}
+        \item{SCD.Median.pch.col}{= "black", * border color for median symbol - scatter dots.}
         \item{SCD.Median.pch.lwd}{= 0.6, * line width used on the median symbol 
-        - scatter dots}
+        - scatter dots.}
         \item{SCD.Median.pch.size}{= 1, * symbol size median value 
-        - scatter dots}
+        - scatter dots.}
         \item{SCD.Median.pch.fill}{= "black", * color of filled symbol for median value 
-        - scatter dots}
-        \item{SCD.hGrid}{= FALSE, * whether or not to include horizontal grid lines in panel}
+        - scatter dots.}
+        \item{SCD.hGrid}{= FALSE, * whether or not to include horizontal grid lines in panel.}
         \cr
         \item{SCD.xsc}{= 1.08,  x range multiplier to keep dots from being clipped}
         \item{SCD.ysc}{= 1.12, y range multiplier to keep dots from being clipped}
         \cr
         \item{SCD.DiagLine}{= TRUE, * whether or not to include x=y sloped line}
-        \item{SCD.DiagLine.col}{= colGrid, * color of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
-        \item{SCD.DiagLine.lwd}{= 1.25, * line weight of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
-        \item{SCD.DiagLine.lty}{= "solid", * line type of sloped line, default, grid line color.  SCD.DiagLine must be TRUE.}
+        \item{SCD.DiagLine.col}{= colGrid, * color of sloped line, default, grid line color.  
+          SCD.DiagLine must be TRUE.}
+        \item{SCD.DiagLine.lwd}{= 1.25, * line weight of sloped line, default, grid line color.  
+          SCD.DiagLine must be TRUE.}
+        \item{SCD.DiagLine.lty}{= "solid", * line type of sloped line, default, grid line color.  
+          SCD.DiagLine must be TRUE.}
       }
       The following variables are used by the \option{segbar} and \option{normbar} glyphs:
       \describe{

@@ -3,7 +3,7 @@
 \docType{data}
 \title{micromapST panel description data.frame structure }
 \description{
-  The \var{panelDesc} data.frame provides the \var{micromapST} function with 
+  The panelDesc data.frame provides the \var{micromapST} function with 
   the information required to process the \var{statsFrame} data and panelData data.frames
   and to generate the required linked micromap plot.
   \cr
@@ -26,7 +26,7 @@
         refTexts=c(NA,NA,NA,"US Rate"),
         panelData=c("","","","")
      }
-  The \var{panelDesc} data.frame (which does not have to be named "panelDesc", any name will do) 
+  The panelDesc data.frame (which does not have to be named "panelDesc", any name will do) 
   provides the means of defining how many columns to create, the type of glyph per column, 
   where the data required by the glyph is located in the \var{statsFrame} (column number or name) 
   or the name of a supplimental data structure when the glyph is boxplots or time series 
@@ -114,7 +114,7 @@
   
   \bold{Data References}
     
-  Depending on the type of glyphic selected for the column, 1 to 3 data 
+  Depending on the type of glyph selected for the column, 1 to 3 data 
   values for each area may be required:  The \var{col1}, \var{col2} and 
   \var{col3} vectors serve as indexes to columns in the \var{statsFrame} 
   data.frame passed in the arguments of the \var{micromapST} function call.  
@@ -221,12 +221,12 @@
             \tab           \tab               \tab               \tab      \tab            \cr
   }
   
-  The \var{panelData} vector is only used when a glyph requires more data per area than can be
+  The panelData data.frame is only used when a glyph requires more data per area than can be
   provided by the \var{statsFrame} columns. Only glyphs using this vector are boxplots and time series.
   
   In the case of the \option{boxplot} glyph, the boxplot function with plot=F is used to generate 
   the boxplot statistical details for each area. The name of the resulting list of 51 sets of boxplot 
-  statistics (one for each area) is placed in the panelData vector element for the boxplot column.
+  statistics (one for each area) is placed in the panelData data.frame element for the boxplot column.
   
   For the time series and time series with confidence interval, the glyphs require a 3 dimensional 
   array of data.  The first dimension ([\var{area},,]) represents the areas.  
@@ -245,18 +245,17 @@
   reference values in the \var{RefVal=} vector.  A label appearing at the bottom of the column can be 
   specified using the  \var{RefTxt=} vector in the \var{panelDesc} data.frame.
 }
-\usage{panelDesc}
 \format{
   The parameters in the panelDesc data.frame structure are:
   \describe{
     \item{type=}{The types of graphics for each column of panels can 
       be specified by the following keywords in the "type variable": 
       
-      The following are the type of glyphics that can be specified in the type vector:
+      The following are the type of glyphs that can be specified in the type vector:
       
       \describe{
-        \item{Map types:}{"map", "mapcum","maptail","mapmedian",}
-        \item{State ID and/or Name:}{"id",} 
+        \item{Map types:}{"map", "mapcum","maptail","mapmedian"}
+        \item{State ID and/or Name:}{"id"}
         \item{Glyph Type:}{"dot", "dotse","dotconf", "dotsignf", "bar", "arrow", "ts", 
         "tsconf","scatdot", "segbar", "normbar", "ctrbar", "boxplot"}
       }
@@ -438,7 +437,7 @@
      }
      
     \item{\var{lab4=}}{Character vector used as the vertical (y) axis label 
-      for \var{ts}, \var{tsconf}, and \var{scatdot} glyphics.  
+      for \var{ts}, \var{tsconf}, and \var{scatdot} glyphs.  
       If no label is required, use \code{""} for a blank line.
      }
      
@@ -481,7 +480,7 @@
 }
 \note{A descriptor may be omitted if none of the panel plots need it.} 
 \details{
-   The \var{panelDesc} data.frame is used to describe the content of the 
+   The panelDesc data.frame is used to describe the content of the 
    micromapST plot to the function. It contains the index of the data 
    in the \code{statsFrame} data.frame, the types of graphics to be used in
    each column, titles, column headers, reference values and labels, etc.

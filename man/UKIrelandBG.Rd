@@ -157,7 +157,7 @@ Kent\tab            GB.KEN\tab 826047\tab KEN\tab ENG\cr
 Kerry\tab           IE.KY\tab 372008\tab KY\tab IRE\cr 
 Kildare\tab         IE.KE\tab 372009\tab KE\tab IRE\cr 
 Kilkenny\tab        IE.KK\tab 372010\tab KK\tab IRE\cr 
-Kingston upon Hull\tab GB.KHL\tab 826048\tab KHL\tab ENG\cr 
+Kingston upon Hull\tab   GB.KHL\tab 826048\tab KHL\tab ENG\cr 
 Kingston upon Thames\tab GB.KTT\tab 826049\tab KTT\tab ENG\cr 
 Lambeth\tab         GB.LBH\tab 826050\tab LBH\tab ENG\cr 
 Lancashire\tab      GB.LAN\tab 826051\tab LAN\tab ENG\cr 
@@ -191,19 +191,19 @@ Monmouthshire\tab   GB.MON\tab 826183\tab MON\tab WLS\cr
 Moray\tab           GB.MRY\tab 826158\tab MRY\tab SCT\cr 
 Moyle\tab           GB.MYL\tab 826133\tab MYL\tab NIR\cr 
 Neath Port Talbot\tab GB.NTL\tab 826184\tab NTL\tab WLS\cr 
-Newham\tab          GB.NWM\tab 826064\tab NWM\tab ENG\cr 
-Newport\tab         GB.NWP\tab 826185\tab NWP\tab WLS\cr 
-Newry and Mourne\tab GB.NYM\tab 826134\tab NYM\tab NIR\cr 
-Newtownabbey\tab    GB.NTA\tab 826135\tab NTA\tab NIR\cr 
-Norfolk\tab         GB.NFK\tab 826065\tab NFK\tab ENG\cr 
-North Ayrshire\tab  GB.NAY\tab 826159\tab NAY\tab SCT\cr 
-North Down\tab      GB.NDN\tab 826136\tab NDN\tab NIR\cr 
+Newham\tab            GB.NWM\tab 826064\tab NWM\tab ENG\cr 
+Newport\tab           GB.NWP\tab 826185\tab NWP\tab WLS\cr 
+Newry and Mourne\tab  GB.NYM\tab 826134\tab NYM\tab NIR\cr 
+Newtownabbey\tab      GB.NTA\tab 826135\tab NTA\tab NIR\cr 
+Norfolk\tab           GB.NFK\tab 826065\tab NFK\tab ENG\cr 
+North Ayrshire\tab    GB.NAY\tab 826159\tab NAY\tab SCT\cr 
+North Down\tab        GB.NDN\tab 826136\tab NDN\tab NIR\cr 
 North East Lincolnshire\tab GB.NEL\tab 826066\tab NEL\tab ENG\cr 
 North Lanarkshire\tab GB.NLK\tab 826160\tab NLK\tab SCT\cr 
 North Lincolnshire\tab GB.NLN\tab 826067\tab NLN\tab ENG\cr 
-North Somerset\tab  GB.NSM\tab 826068\tab NSM\tab ENG\cr 
-North Yorkshire\tab GB.NYK\tab 826069\tab NYK\tab ENG\cr 
-Northamptonshire\tab GB.NTH\tab 826070\tab NTH\tab ENG\cr 
+North Somerset\tab    GB.NSM\tab 826068\tab NSM\tab ENG\cr 
+North Yorkshire\tab   GB.NYK\tab 826069\tab NYK\tab ENG\cr 
+Northamptonshire\tab  GB.NTH\tab 826070\tab NTH\tab ENG\cr 
 Northumberland\tab  GB.NBL\tab 826071\tab NBL\tab ENG\cr 
 Nottingham\tab      GB.NGM\tab 826072\tab NGM\tab ENG\cr 
 Nottinghamshire\tab GB.NTT\tab 826073\tab NTT\tab ENG\cr 

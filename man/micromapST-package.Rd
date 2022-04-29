@@ -1,4 +1,3 @@
-% File micromapST\man\micromapST-package.Rd
 \name{micromapST-package}
 \alias{micromapST-package}
 \docType{package}
@@ -15,8 +14,8 @@
     \tabular{ll}{
       Package:  \tab micromapST\cr
       Type:     \tab Package\cr
-      Version:  \tab 1.1.1\cr
-      Date:     \tab 2016-12-07\cr
+      Version:  \tab 1.1.3\cr
+      Date:     \tab 2022-04-29\cr
       License:  \tab GPL-2\cr
       LazyLoad: \tab no\cr
     } 
@@ -91,7 +90,8 @@ dots with significant, dots with confidence intervals,
 dots and intervals based on Standard Error, horizontal bars, arrows, 
 time series with or without confidence bands, 
 horizontal stacked (segmented (SEGBAR), normalized (NORMBAR) or centered (CTRBAR)) 
-bar charts, scatter plots and boxplots.
+bar charts, scatter plots and boxplots.  The layout of the linked micromap plot is defined
+by the \var{panelDesc} data.frame that is passed to the \var{micromapST} function.
 
 If the micromap cannot fit on one page, warnings are generated and the function 
 is stopped.  It is suggested the caller increase the size of the page (graphic space)
@@ -105,7 +105,7 @@ while still allowing identification of each area.  At some future time, all
 border groups should have their boundaries characterized to enhance the 
 linked micromap's readability.
 
-One of the biggest enhancements in this version of micromapST, is support 
+One of the biggest enhancements in this version of \var{micromapST}, is support 
 for other geographic areas. This has been added using border groups.  
 Each border group data set contains the unique collection of  
 information, run parameters, names, abbreviations, and boundary 
@@ -118,7 +118,7 @@ abbreviations and ID for each sub-area within the desired geographical area.
 The author is working on a guideline and a step by step procedure 
 to help the user create their own border groups.  
 This release includes border group to re-create the original link micromaps 
-in earlier versions of micromapST for the 50 U. S. States and DC and micromapSEER
+in earlier versions of \var{micromapST} for the 50 U. S. States and DC and micromapSEER
 for the 20 NCI Seer Registries.  Several other test versions of border groups 
 have been included in this release.  The complete list of border groups included are:
 \itemize{
@@ -149,6 +149,17 @@ have been included in this release.  The complete list of border groups included
     micromaps for 52 countries of Africa.  This border group is for a continent 
     with the sub-areas being countries.
  }
+The following datasets have also been included for use in many examples:
+\itemize{
+   \item{\var{Educ8thData}} - Education Data from an 8th grade survey.
+   \item{\var{TSdata}} - Sample time series data.
+   \item{\var{statePop2010}} - State Population data for 2010.
+   \item{\var{wflung00and95}} - White Female Lung cancer data for 2000 and 1995.
+   \item{\var{wflung00and95US}} - White Female Lung cancer data totals for 2000 and 1995.
+   \item{\var{wflung20cnty}} - White Female Lung cancer sample data by county for 2000.
+   \item{\var{wmlung5070}} - White Male Lung cancer sample data for 1950 and 1970.
+   \item{\var{wmlung5070US}} - White Male Lung cancer sample data for 1950 and 1970 totals.
+}
 Refer to the chapter on each border group for definitions on the Names, 
 Abbreviations, and IDs used in the border group to link the user data 
 to the boundary information to draw the micromap maps.
@@ -194,10 +205,10 @@ to use micromapSEER.
 
 \author{
 Daniel B. Carr \email{dcarr@gmu.edu} and 
-James B Pearson, Jr \email{jpearson@statnetconsulting.com}, 
+James B Pearson, Jr \email{jbpearson353@gmail.com}, 
 with contributions from Linda Pickle\cr
-Maintainer: "James B. Pearson Jr." \email{jpearson@statnetconsulting.com}\cr 
-Package compiled by "James B, Pearson, Jr." \email{jpearson@statnetconsulting.com}
+Maintainer: "James B. Pearson Jr." \email{jbpearson353@gmail.com}\cr 
+Package compiled by "James B, Pearson, Jr." \email{jbpearson353@gmail.com}
 }
 
 \references{
@@ -205,7 +216,7 @@ Package compiled by "James B, Pearson, Jr." \email{jpearson@statnetconsulting.co
   Press, 2010\cr
   Linda Williams Pickle, James B. Pearson Jr., Daniel B. Carr (2015), 
   micromapST: Exploring and Communicating Geospatial Patterns in US State Data.,
-  Journal of Statistical Software, 63(3), 1-25., \url{http://www.jstatsoft.org/v63/i03/}
+  Journal of Statistical Software, 63(3), 1-25., \url{https://www.jstatsoft.org/v63/i03/}
 }
 
 \note{

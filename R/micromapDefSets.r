@@ -47,20 +47,20 @@ micromapGSetPanelDef <- function(nRows,rSizeMaj,rSizeMin,rSepGap,MaxRows,UGrpPat
    )
    
  cGrpTabCore5 <- data.frame(p=I(list(
-     c(3),                 #  0-13 rows
-     c(4),                 #  1-14 rows
-     c(5),                 #  2-15 rows -  3 groups
-     c(3,3),               #  3-16 rows + 2"x" times 5  (0,10,20,30,40,50,60,...,300,310,...)
-     c(3,1,3),             #  4-17 rows
-     c(4,4),               #  5-18 rows
-     c(4,1,4),             #  6-19 rows
-     c(5,5),               #  5-20 rows
-     c(5,1,5),             #  6-21 rows 
-     c(4,4,4),             #  7-22 rows
-     c(5,3,5),             #  8-23 rows
-     c(5,4,5)              #  9-24 rows
+     c(3),                 #  3-13 rows
+     c(4),                 #  4-14 rows
+     c(5),                 #  5-15 rows -  3 groups
+     c(3,3),               #  6-16 rows + 2"x" times 5  (0,10,20,30,40,50,60,...,300,310,...)
+     c(3,1,3),             #  7-17 rows
+     c(4,4),               #  8-18 rows
+     c(4,1,4),             #  9-19 rows
+     c(5,5),               #  10-20 rows
+     c(5,1,5),             #  11-21 rows 
+     c(4,4,4),             #  12-22 rows
+     c(5,3,5),             #  13    rows   # used only in the initial round
+     c(5,4,5)              #  14    rows
     ))
-   )
+   )                 # (nr - 3) \ 10 => n5   then (nr - ((n5 * 10) + 2))
 
  cGrpTabCore6 <- data.frame(p=I(list(
      c(1),                 #  0- 1,13 rows
@@ -541,7 +541,9 @@ details = list(
 
     Title.cex                  = 1.0,                    #                                                         # 30  (not used)
     
-    # Title.Line.2x is only used in glyphs that do not have x-axis (the maps and id).
+    # Title.Line.2x.pos is only used in glyphs that do not have x-axis (the maps and id).
+    # The X-axis line is independent.  However, we now want Title.line.1.pos to 
+    # match across the entire page.
   
 # grid line parameters
     Grid.Line.col              = tempOutline.Line.col,   # grid line color                                         # 31

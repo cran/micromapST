@@ -4,14 +4,16 @@
 \title{micromapST Generated Warning and Error Messages}
 
 \description{
-  micromapST verifies as much of its operation and the data provided by the user 
-  to try and identify and document to the user problems before they cause an R warning 
-  or error exception and throw a R like cryptic message. Each message, warning and error message is 
-  documented with the general form of the message and a friendly explanation and advice on what may be wrong and 
-  how to fix the issue identified.  
+  micromapST verifies as much of its operation and the data provided
+  by the user to try and identify and document to the user problems
+  before they cause an R warning or error exception and throw a R
+  like cryptic message. Each message, warning and error message is
+  documented with the general form of the message and a friendly
+  explanation and advice on what may be wrong and how to fix the
+  issue identified.
 
-  The micromapST messages all start with "***" to help quickly find them 
-  in the warnings() logs and general output.
+  The micromapST messages all start with "***" to help quickly find
+  them in the warnings() logs and general output.
 
   The general format of the messages is:
   \preformatted{
@@ -23,144 +25,169 @@
     ***XXXX NNNNNN CC text of message
  
    }
-  where the XXXX is the message alphanumeric identifier, NNNNNN is the name of the function or glyph issuing the message
-  and CC is the glyph graphic column number in the \var{panelDesc} structure.
+  where the XXXX is the message alphanumeric identifier, NNNNNN is
+  the name of the function or glyph issuing the message and CC is
+  the glyph graphic column number in the \var{panelDesc} structure.
 
-  The four alphanumeric message identifier following the "***" is a unique message identifer
-  to help find the explanation in this document and to help discuss problems 
-  over the email more accurately.  
-  It's always best to include the log of the preparation and execution of micromapST 
-  as well as the data used when requesting help.
+  The four alphanumeric message identifier following the "***" is a
+  unique message identifer to help find the explanation in this
+  document and to help discuss problems over the email more
+  accurately. It's always best to include the log of the preparation
+  and execution of micromapST as well as the data used when
+  requesting help.
 
-  The first two digits/characters of the message identifier indicates which logical segment 
-  of the package generated the message:
+  The first two digits/characters of the message identifier
+  indicates which logical segment of the package generated the
+  message:
   \describe{
-    \item{01xx}{Main package initialization, startup, call argument validation, 
-       user data validation and \var{panelDesc} structure and contents validation.
+    \item{01xx}{Main package initialization, startup, call argument
+       validation, user data validation and \var{panelDesc}
+       structure and contents validation. 
       }
-    \item{02xx}{panelDesc and glyph parameters and data validation, processing and graphic generation
+    \item{02xx}{panelDesc and glyph parameters and data validation,
+      processing and graphic generation
       }
-    \item{03xx}{Border Group data and structure validation and setup,
+    \item{03xx}{Border Group data and structure validation and
+      setup,
       }
     \item{04xx}{Internal Operation
       }
     \item{05xx}{Informational Messages
       }
    }
-  The second field of the message contains the name of the section of code 
-  generating the message.  If a glyph generated the message, the name of the 
-  glyph (type=xxx) and the panel column number are displayed to help you focus 
-  on the parameters and data that may need to be inspected.  Each message contains 
-  specific information (like \var{panelDesc} named list, checked value, etc.) to help 
+  The second field of the message contains the name of the section
+  of code generating the message.  If a glyph generated the message,
+  the name of the glyph (type=xxx) and the panel column number are
+  displayed to help you focus on the parameters and data that may
+  need to be inspected.  Each message contains specific information
+  (like \var{panelDesc} named list, checked value, etc.) to help
   identify the cause of the message and help lead the user to a fix.
-  
-  The remainder of the message contain a text explanation of the issue and a list of 
-  parameters: glyph column number/name, data row or column, variable name, 
-  and value related to the issue.
+
+  The remainder of the message contain a text explanation of the
+  issue and a list of parameters: glyph column number/name, data row
+  or column, variable name, and value related to the issue.
 }
-
-
 \details{
-  
-  \bold{Conventions:}
-  
-  The user provides the data.frames for the statsDFrame and panelDesc structures.  In this document, there variables
-  are represented by the generic terms of \var{statsDFrame} and \var{panelDesc}.  In the messages produced by the 
-  package, these values are replaced with the names of the user variables provided in the micromapST call.
-  
-  The following values are also substituted with the real run values at time of execution:
+ \bold{Conventions:}
+    The user provides the data.frames for the statsDFrame and
+  panelDesc structures.  In this document, there variables are
+  represented by the generic terms of \var{statsDFrame} and
+  \var{panelDesc}.  In the messages produced by the package, these
+  values are replaced with the names of the user variables provided
+  in the micromapST call.
+
+  The following values are also substituted with the real run values
+  at time of execution:
   \describe{
-    \item{<sortVarCol>}{List of column names/numbers used in the \option{sortVar} call parameter. Used to identify invalid \var{statsDFrame} column
-      names and numbers used in the \option{sortVar} call parameter.
+    \item{<sortVarCol>}{List of column names/numbers used in the
+      \option{sortVar} call parameter. Used to identify invalid
+      \var{statsDFrame} column names and numbers used in the
+      \option{sortVar} call parameter.
      }
-    \item{<PDvarName>}{panelDesc variable name. The panelDesc variables include \var{lab1}, \var{lab2}, \var{lab3}, 
-      \var{lab4}, \var{refVal}, \var{refTxt}, \var{col1}, \var{col2}, \var{col3}, \var{type}, and \var{panelData}.
+    \item{<PDvarName>}{panelDesc variable name. The panelDesc
+      variables include \var{lab1}, \var{lab2}, \var{lab3},
+      \var{lab4}, \var{refVal}, \var{refTxt}, \var{col1},
+      \var{col2}, \var{col3}, \var{type}, and \var{panelData}. }
+    \item{<PDcol>}{panelDesc glyph column number. This helps
+      identify which graphic column (glyph) is being processing when
+      the error/warning is signaled. The far left column number is
+      1.
      }
-    \item{<PDcol>}{panelDesc glyph column number. This helps identify which graphic column (glyph) is being processing 
-      when the error/warning is signaled. The far left column number is 1.
-     }
-    \item{<PDvarList?}{a list of variables from the panelDesc data.frame. Used in messages to identify one or more \var{panelDesc} 
-      variables that are invalid.
+    \item{<PDvarList?}{a list of variables from the panelDesc
+      data.frame. Used in messages to identify one or more
+      \var{panelDesc} variables that are invalid.
      }
     \item{<detVar>}{detailed list variable name
      }
-    \item{<lastVarName>}{last variable name used.  Used to locate a value or absents of 
-      a value in a list by using the last good variable name.
+    \item{<lastVarName>}{last variable name used.  Used to locate a
+      value or absents of a value in a list by using the last good
+      variable name.
      }
-    \item{<bordGrp>}{a character string of the name of the border group being referenced.
-      The border group names does not include the .RData or .rda extension used on the 
-      data file.
+    \item{<bordGrp>}{a character string of the name of the border
+      group being referenced. The border group names does not
+      include the .RData or .rda extension used on the data file.
      }
     \item{<detVarName>}{detailed list variable name 
      }
-    \item{<method>}{The labeling method requested for generating Axis labels.
+    \item{<method>}{The labeling method requested for generating
+      Axis labels.
      }
-    \item{<list of unused sub-areas>}{A list of the sub-areas (counties, etc.) that
-      did not have data.
+    \item{<list of unused sub-areas>}{A list of the sub-areas
+      (counties, etc.) that did not have data.
      }
     \item{<listRowNames>}{list of row.names (sub-areas)
      }
-    \item{<litrowNamesCol>}{The literal rowNamesCol value submitted by the caller.
+    \item{<litrowNamesCol>}{The literal rowNamesCol value submitted
+      by the caller.
      }
     \item{<class(xxx)>}{The class of the variable names "xxx"
      }
     \item{<number items>}{Number of items in list or vector.
      }
-    \item{<invalid name list>}{List of invalid names that were unexpected.
+    \item{<invalid name list>}{List of invalid names that were
+      unexpected.
      }
     \item{<list>}{a general list of options, variables, or names.
      }
-    \item{<statsDFrame>}{The name of the data.frame used as the first 
-      call parameter.  This data.frame is used for the statsDFrame and 
-      provides the numeric values for the plots.
+    \item{<statsDFrame>}{The name of the data.frame used as the
+      first call parameter.  This data.frame is used for the
+      statsDFrame and provides the numeric values for the plots.
      }
-    \item{<panelDesc>}{The name of the data.frame serving as the panelDesc
-      panel column description.
+    \item{<panelDesc>}{The name of the data.frame serving as the
+      panelDesc panel column description.
      }
     \item{<gName>}{The name of the glyph being drawn.
      }
-    \item{<glyphName>}{The name of the glyh begin drawn.
+    \item{<glyphName>}{The name of the glyhp begin drawn.
      }
-    \item{<sDFName>}{xxxx
+    \item{<sDFName>}{The name of statistics data.frame for the
+      linked micromap.
      }
-    \item{<pdColNum>}{xxxx
+    \item{<pdColNum>}{The panelDesc data.frame column number (glyph
+      column).
      }
-    \item{<dupList>}{xxxx
+    \item{<dupList>}{Is the list of duplicate entries in a list.
      }
-    \item{<rowNumbers>}{xxxx
+    \item{<rowNumbers>}{References the row number in the statsDFrame
+      data.frame. 
      }
-    \item{<list of rows>}{xxxx
+    \item{<list of rows>}{Is a list of rows related to the message.
      }
-    \item{<rowNumbers>}{xxxx
+    \item{<rowNumbers>}{One or more row numbers related to the
+      message.
      }
-    \item{<NotUsedNames>}{xxxx
+    \item{<NotUsedNames>}{Identifies a not used name from name
+      table.
      }
-    \item{xxx}{xxx
+    \item{<future>}{Reserved for future usage.
      }
-
    }
   
   The following is a listing of all micromapST generated messages and a description of possible causes and solutions.
   
 \describe{
-  \item{01yx}{\bold{Initialization, Setup and Call argument validation,} \var{panelDesc} and User data validation.
-     where y indicates the specific argument or area.
+  \item{01yx}{\bold{Initialization, Setup and Call argument
+     validation,} \var{panelDesc} and User data validation. where y
+     indicates the specific argument or area.
      
     \describe{
       \item{01Zx}{\bold{General Operation ("Z"):}
       
         \describe{
-          \item{01Z0}{\bold{CARG Key call arguments are missing, Execution stopped.}
+          \item{01Z0}{\bold{CARG Key call arguments are missing,
+            NULL, wrong type, or NA, Execution stopped.}
           
-             The micromapST function requires the \var{statsDFrame} and \var{panelDesc} data 
-             frames be provided.  This is the minimum set of call parameters required.
-             If either or both parameters are missing (the first two in the function 
-             call), the execution of the function is stopped.
-           }
+             The micromapST function requires the \var{statsDFrame}
+	     and \var{panelDesc} data frames be provided.  This is
+	     the minimum set of call parameters required. If either
+	     or both parameters are missing (the first two in the
+	     function call), the execution of the function is
+	     stopped. }
           \item{01Z1}{\bold{CARG Errors found in call arguments. Execution stopped.}
              
-             Errors are found in the micromapST calling parameters/arugments.  
-             See the log to determine the problem and fix.
+             Errors are found in the micromapST calling
+	     parameters/arugments. See the log to determine the
+	     problem and fix.
            }
           }   
        }  
@@ -171,22 +198,27 @@
         \describe{
           \item{0101}{\bold{CARG-DF First argument (\var{statsDFrame}) is missing or not a data.frame.}
              
-             The first calling argument/parameter must be the \var{statsDFrame} data frame 
-             containing the data to be graphed. If the first argument/parameter is 
-             missing, NULL or NA or not a data frame, the function will stop.  
-             Provide the correctly built \var{statsDFrame} and re-run. ***
+             The first calling argument/parameter must be the
+	     \var{statsDFrame} data frame containing the data to be
+	     graphed. If the first argument/parameter is missing,
+	     NULL or NA or not a data frame, the function will stop.
+	     Provide the correctly built \var{statsDFrame} and re-
+	     run. ***
             }
           \item{0102}{\bold{CARG-DF The following sub-area(s) in the name table were not referenced 
              in the user data> <not Used Sub-Areas> <}
              
-             Each row in the \var{statsDFrame} data frame represents a sub-area (county, 
-             district, etc.) in a border group. The names of the sub-areas in the 
-             \var{statsDFrame} (either in a column or as the row.names) must match the names, 
-             abbreviations or IDs in the border group's name table.  This error message 
-             lists the names in the \var{statsDFrame} that do not match the name table.
-             Correct the sub-area name in the data frame and re-run micromapST.  
-             micromapST will attempt to use the data for matching rows, but 
-             the overall results are un-predicatable and may not provide the 
+             Each row in the \var{statsDFrame} data frame represents
+	     a sub-area (county, district, etc.) in a border group.
+	     The names of the sub-areas in the \var{statsDFrame}
+	     (either in a column or as the row.names) must match the
+	     names, abbreviations or IDs in the border group's name
+	     table.  This error message lists the names in the
+	     \var{statsDFrame} that do not match the name table.
+	     Correct the sub-area name in the data frame and re-run
+	     micromapST. micromapST will attempt to use the data for
+	     matching rows, but the overall results are un-
+	     predicatable and may not provide the
              desired results. ***
             }
           \item{0103}{\bold{CARG-DF The \var{<sDFName>} statsDFrame data.frame has no columns or rows.}
@@ -458,7 +490,6 @@
              must be corrected to provide the appropriate regional boundary information 
              in the RegVisBorders data.frame in the border group.
            }
-
          }
        }
 
@@ -625,7 +656,6 @@
            }
          }
        }
-
        
       \item{01Bx}{\bold{\option{plotNames} call argument:}
       

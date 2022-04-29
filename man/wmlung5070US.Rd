@@ -8,7 +8,7 @@
   Count and age-adjusted rate of lung cancer mortality among white men for the total U.S.,
   aggregated for 1950-69 and 1970-94.
 }
-\usage{wmlung5070US}
+\usage{data(wmlung5070US)}
 \format{
   A data frame with 1 observations on the following 5 variables.
   \describe{

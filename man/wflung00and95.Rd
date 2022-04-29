@@ -5,7 +5,7 @@
 \description{
 Counts and rates of age-adjusted (2000 U.S. standard) lung cancer mortality data among white women, aggregated for 1995-9 and 2000-4.
   }
-\usage{wflung00and95}
+\usage{data(wflung00and95)}
 \format{
   A data frame with 51 observations, 1 for each state + DC, 
   on the following 12 variables.
@@ -33,7 +33,7 @@ Counts and rates of age-adjusted (2000 U.S. standard) lung cancer mortality data
 }
 \author{Linda W. Pickle and Jim Pearson of StatNet Consulting, LLC, Gaithersburg, MD}
 \source{Surveillance Research Program, National Cancer Institute 
-   SEER*Stat software (\url{http://www.seer.cancer.gov/seerstat}), 
+   SEER*Stat software (\url{https://www.seer.cancer.gov/seerstat}), 
    November 2007 data submission, released April 2008. Data 
    originally provided to NCI by the National Center for Health 
    Statistics.

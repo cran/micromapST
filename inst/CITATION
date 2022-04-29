@@ -4,7 +4,7 @@ Visualizing Data Patterns with Micromaps, CRC Press, 2010.")
 
 ## R >= 3.0.0 passes package metadata to citation().
 
-if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapPLUS")
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapST")
        
        year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date)
        vers <- paste("R package version", meta$Version)
@@ -17,7 +17,8 @@ if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapPLUS")
        year = "2010",
        note = "CRC Press",
        textVersion =
-            paste("Daniel B. Carr and Linda Williams Pickle (2010), Visualizing Data Patterns with Micromaps", sep="")
+            paste("Daniel B. Carr and Linda Williams Pickle (2010), ",
+                  "Visualizing Data Patterns with Micromaps", sep="")
        )
 
        citEntry(entry="Manual",
@@ -29,7 +30,8 @@ if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapPLUS")
        year = "2014",
        note = "Journal of Statistical Software",
        textVersion =
-            paste("Linda Williams Pickle, James B. Pearson, Jr. and Daniel B. Carr (2014), micromapST: Exploring and Communicating Geospatial Patterns in U. S. State Data", sep="")
+            paste("Linda Williams Pickle, James B. Pearson, Jr. and Daniel B. Carr (2014), ",
+                  "micromapST: Exploring and Communicating Geospatial Patterns in U. S. State Data", sep="")
        )
 
 

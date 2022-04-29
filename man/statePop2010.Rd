@@ -5,7 +5,7 @@
 \description{
    US State 2010 population data by race and Hispanic ethnicity.
 }
-\usage{statePop2010}
+\usage{data(statePop2010)}
 \format{
   A data frame with 51 observations (one per state) on the following 6 variables per state:
   \describe{

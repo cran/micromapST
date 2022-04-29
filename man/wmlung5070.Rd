@@ -8,7 +8,7 @@
 \description{
    Counts and rates of lung cancer mortality data among white men by state, aggregated for 1950-1969 and 1970-1994
 }
-\usage{wmlung5070}
+\usage{data(wmlung5070)}
 \format{
   A data frame with 51 observations, 1 for each state + DC, 
   on the following 5 variables.
@@ -34,7 +34,7 @@
 }
 \source{
    Surveillance Research Program, National Cancer Institute 
-   SEER*Stat software (\url{http://www.seer.cancer.gov/seerstat}), 
+   SEER*Stat software (\url{https://www.seer.cancer.gov/seerstat}), 
    November 2007 data submission, released April 2008. Data 
    originally provided to NCI by the National Center for Health 
    Statistics.

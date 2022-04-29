@@ -5,12 +5,12 @@
 The \var{micromapSEER} function or the \var{micromapST} function with the \option{bordGrp} set to \var{USSeerBG} 
 can be used to create linked micromaps for the 20 U. S. Seer Registries.  
 }
-\usage{micromapSEER(statsFrame,panelDesc,...)}
+\usage{micromapSEER(statsDFrame,panelDesc,...)}
 \details{
 More details to follow.
 }
 \arguments{
-  \item{statsFrame}{- data frame of the data required for creating the graphical glyphics with one 
+  \item{statsDFrame}{- data frame of the data required for creating the graphical glyphics with one 
   row per Seer Area being mapped.  Each row is linked to the boundary data using a Seer Area abbreviation or name.}
   \item{panelDesc}{- data frame containing information and pointers for each glyphic column to be generated.
   The data frame specifies the type of glyphic and the columns in the \var{statsDFrame} data frame that 

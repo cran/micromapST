@@ -8,7 +8,7 @@ Data for Time Series Examples
 The data are age-adjusted (2000 U.S. standard) female lung cancer mortality rates
 (per 100,000 population) for each year from 1996 to 2010.
 }
-\usage{TSdata}
+\usage{data(TSdata)}
 \format{
   This dataset is an array with dimensions of 51, 15, 4.  The rownames of the array are the
   51 state and DC abbreviations (2 characters). 
@@ -21,10 +21,10 @@ The data are age-adjusted (2000 U.S. standard) female lung cancer mortality rate
   
   The second dimension [,\var{t},] of \var{n} elements in this case are the time periods
   in the time series.  Our example uses the years 1996 to 2010 as the 
-  time period values.  A reasonable number of points is between 200 and 300.
+  time period values.  A reasonable number of points is between 20 and 30.
 
   The third dimension [,,\var{v}] of 2 or 4 elements is the x or y values during the time period.
-  If the no confidence data is provided, the third dimension is 2:
+  If no confidence data is provided, the third dimension is 2:
   \itemize{
   \item data[,,\var{1}] is the X value 
   \item data[,,\var{2}] is the mid-Y value (Y) 
@@ -40,8 +40,8 @@ The data are age-adjusted (2000 U.S. standard) female lung cancer mortality rate
   For example, the x,y coordinates for year=1996 (time period = 1) for the first 
   state (\var{AK}) is TSdata[\var{1},\var{1},c(1,2)].
   
-  This approach was done to allow a data matrix built for the "tsconf" glyphics 
-  to be used for a \var{ts} glyphics.
+  This approach was done to allow a data matrix built for the "tsconf" glyphs 
+  to be used for a \var{ts} glyphs.
   
   This data is used by micromapSEER with the "USStatesDF" border group.
   

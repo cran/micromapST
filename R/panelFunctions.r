@@ -6,9 +6,8 @@
 #     Updated logic to enforce min and max panel sizes.
 #     Allow legal paper sideways.
 #
-# Release Version 150726 build - V1.2 (update for variable columns and maps)
+# Release Version 220417 build - V1.1.2 - replace emails and minor fix.
 #
-
 
 panelFill <- function(col="#D0D0D0",border=NA,...)
 
@@ -17,7 +16,6 @@ panelFill <- function(col="#D0D0D0",border=NA,...)
     xy <- par("usr")               # get usr data with polygon points.  Fil with "col"
     polygon(xy[c(1, 2, 2, 1)], xy[c(3, 3, 4, 4)],col=col,border=border,xpd=TRUE,...)
 }
-
 
 panelGrid <- function(x = NULL, y = NULL, col = 2, lwd = 1, lty = 1)
 {
@@ -30,7 +28,6 @@ panelGrid <- function(x = NULL, y = NULL, col = 2, lwd = 1, lty = 1)
 		abline(h = y, lwd = lwd, lty = lty, col = col)
 }
 
-
 panelInbounds <- function(bnds) {
    #  bnds = min and max of panel boundaries.
    #  times potential pretty to panel limits.
@@ -42,7 +39,6 @@ panelInbounds <- function(bnds) {
                              #                     eps.correct = 0   (0,1,2) 
    return(grid[bnds[1] < grid & grid < bnds[2]])  # grid values must be internal to the range 
 }
-
 
 panelLengthen <- function(x, n=1) {
 
@@ -63,7 +59,6 @@ panelLengthen <- function(x, n=1) {
    length(newx) = n                     # set results to length of n  (trim to "n" length)
    return(newx)
 }
-
 
 panelOutline <- function(col = "black", lwd = 1, lty = 1) {
 

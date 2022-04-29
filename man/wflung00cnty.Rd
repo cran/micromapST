@@ -6,7 +6,7 @@
    Counts and rates of lung cancer mortality data among white women, 
    aggregated for 2000-4 by county.
 }
-\usage{wflung00cnty}
+\usage{data(wflung00cnty)}
 \format{
   A data frame with 2577 observations on the following 6 variables.
   \describe{
