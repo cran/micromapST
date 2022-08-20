@@ -1,7 +1,7 @@
 Package: micromapST
 Type: Package
-Version: 1.1.3
-Date: 2022-04-29
+Version: 2.0.0
+Date: 2022-08-16
 Title: Linked Micromap Plots for U. S. and Other Geographic Areas
 Authors@R: c(person("Jim","Pearson",email="jbpearson353@gmail.com",role=c("aut","cre","cph")),
             person("Dan","Carr",email="dcarr@gmu.edu", role=c("aut","cph")),
@@ -11,9 +11,10 @@ Author: Jim Pearson [aut, cre, cph],
   Dan Carr [aut, cph],
   Linda Pickle [ctb, cph]
 Maintainer: Jim Pearson <jbpearson353@gmail.com>
-Imports: graphics, grDevices, labeling, RColorBrewer, stats, stringr,
-        utils
-Depends: R (>= 3.2.0)
+Imports: utils, methods, tools, graphics, grDevices, stringr, sp,
+        rgdal, rgeos, maptools, spdep, sf, stats, RColorBrewer,
+        labeling, readxl, writexl, rmapshaper, cleangeo, pbapply
+Depends: R (>= 3.6.0)
 Suggests: R.rsp
 VignetteBuilder: R.rsp
 Description: Provides the users with the ability to quickly create
@@ -53,6 +54,6 @@ LazyLoad: no
 BuildResaveData: best
 ByteCompile: yes
 NeedsCompilation: no
-Packaged: 2022-04-29 14:00:50 UTC; jpearson
+Packaged: 2022-08-20 01:38:29 UTC; jpearson
 Repository: CRAN
-Date/Publication: 2022-04-29 23:30:02 UTC
+Date/Publication: 2022-08-20 06:40:02 UTC

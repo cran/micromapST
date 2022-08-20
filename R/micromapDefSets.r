@@ -306,68 +306,76 @@ micromapGSetDefaults = function()
 #  build micromapGDefaults data.frame so it can be exported.
 #
 
-# Candidate colors________________________________________
-colorsRefRgb = matrix(c(
- 1.00,1.00,1.00,  # white            "#FFFFFF"               # borders
-  .95, .95, .95,  # lightest gray    "#F2F2F2" or "gray95"   # L2 area background
-  .92, .92, .92,  # lighter gray     "#EBEBEB" or "gray92"   # changed from .90  # inactive area background
-  .78, .78, .78,  # light gray       "#C7C7C7" or "gray78"   # changed from .80
-  .50, .50, .50,  # middle gray      "#7F7F7F" or "gray50"
-  .30, .30, .30,  # dark gray        "#4D4D4D" or "gray30"  
-  .00, .00, .00,  # black            "#000000" or "black"    # borders
- 
-  .93,1.00, .93,  # light green
-  .00, .50, .00,  # mid green
- 1.00,1.00, .84,  # light yellow foreground  
-  .90, .80,1.00,  # bright yellow foreground 
-  .80, .90,1.00,  # light green blue 
-  .60, .70, .85), # mid green blue
-  ncol=3,byrow=TRUE)
-
-colorsRef = grDevices::rgb(colorsRefRgb[,1],colorsRefRgb[,2],colorsRefRgb[,3])
-names(colorsRef) = c("white","lightest gray","lighter gray","light gray",
-                     "mid gray","dark gray", "black",
-                     "light green","mid green",
-                     "light yellow","bright yellow",
-                     "light green blue","mid green blue")           
-
-# row color table________________________________________________
-
-colorsRgb = matrix(c(                              # the basic 7 (9) colors.
- 1.00, .15, .15,     #region 1: red	            1  #D53E4F - Red
-  .90, .55, .00,     #region 2: orange	            2  #FC8D59 - Brn/Org
-  .00, .65, .00,     #region 3: green	            3  #FEE08B - Pale Brn
-  .20, .50,1.00,     #region 4: greenish blue       4  #99D594 - Pale Green
-  .50, .20, .70,     #region 5: lavendar            5  #3288BD - Blue
-  .88, .20, .59,     #region 6: magenta             6            (Added)
-  .00, .00, .00,     #region 7: black for median    7  #000000 - Black
- 1.00,1.00, .80,     #non-highlighted foreground    8  #E6F598 - Pale Yellow
- 1.00, .9875,0.95,   #upper shade - very pale red   9  #FFFCF2   (Added)
-  .955,.98,1.00,     #lower shade - very pale blue 10  #F4FAFF   (Added)
-  .95, .95, .95,     #lightest gray - not referenced sub-area        11 
-  .92, .92, .92),    #lighter gray  - non-active backgroup sub-area  12
-  ncol=3,byrow=TRUE)
-
+## Candidate colors________________________________________
+#colorsRefRgb = matrix(c(
+# 1.00,1.00,1.00,  # white            "#FFFFFF"               # borders
+#  .95, .95, .95,  # lightest gray    "#F2F2F2" or "gray95"   # L2 area background
+#  .92, .92, .92,  # lighter gray     "#EBEBEB" or "gray92"   # changed from .90  # inactive area background
+#  .78, .78, .78,  # light gray       "#C7C7C7" or "gray78"   # changed from .80
+#  .50, .50, .50,  # middle gray      "#7F7F7F" or "gray50"
+#  .30, .30, .30,  # dark gray        "#4D4D4D" or "gray30"  
+#  .00, .00, .00,  # black            "#000000" or "black"    # borders
+# 
+#  .93,1.00, .93,  # light green
+#  .00, .50, .00,  # mid green
+# 1.00,1.00, .84,  # light yellow foreground  
+#  .90, .80,1.00,  # bright yellow foreground 
+#  .80, .90,1.00,  # light green blue 
+#  .60, .70, .85), # mid green blue
+#  ncol=3,byrow=TRUE)
 #
-#   colors  1 - 6     are sub-area active colors           (unused items = NA)
-#   color   7         is black for median row accent       (7th, item in gsubs list)
-#   colors  8,  9, 10 are fill colors for median features. (8-pale yellow, 9-pale red, 10-pale blue)
-#   colors 11, 12     are background colors for not-referenced and not active.
+#colorsRef = grDevices::rgb(colorsRefRgb[,1],colorsRefRgb[,2],colorsRefRgb[,3])
+#names(colorsRef) = c("white","lightest gray","lighter gray","light gray",
+#                     "mid gray","dark gray", "black",
+#                     "light green","mid green",
+#                     "light yellow","bright yellow",
+#                     "light green blue","mid green blue")           
 #
-#   Need to figure out how to add and what to add as 6th sub-area color.
+## row color table________________________________________________
 #
+#colorsRgb = matrix(c(                              # the basic 7 (9) colors.
+# 1.00, .15, .15,     #region 1: red	            1  #D53E4F - Red
+#  .90, .55, .00,     #region 2: orange	            2  #FC8D59 - Brn/Org
+#  .00, .65, .00,     #region 3: green	            3  #FEE08B - Pale Brn
+#  .20, .50,1.00,     #region 4: greenish blue       4  #99D594 - Pale Green
+#  .50, .20, .70,     #region 5: lavendar            5  #3288BD - Blue
+#  .88, .20, .59,     #region 6: magenta             6            (Added)
+#  .00, .00, .00,     #region 7: black for median    7  #000000 - Black
+# 1.00,1.00, .80,     #non-highlighted foreground    8  #E6F598 - Pale Yellow
+# 1.00, .9875,0.95,   #upper shade - very pale red   9  #FFFCF2   (Added)
+#  .955,.98,1.00,     #lower shade - very pale blue 10  #F4FAFF   (Added)
+#  .95, .95, .95,     #lightest gray - not referenced area        11 
+#  .94, .94, .94),    #lighter gray  - non-active backgroup area  12
+#  ncol=3,byrow=TRUE)
+#
+##
+##   mcolors  1 - 6     are sub-area active colors           (unused items = NA)
+##   mcolor   7         is black for median row accent       (7th, item in gsubs list)
+##   mcolors  8,  9, 10 are fill colors for median features. (8-pale yellow, 9-pale red, 10-pale blue)
+##   mcolors 11, 12     are background colors for not-referenced and not active.
+##
+##   Need to figure out how to add and what to add as 6th sub-area color.
+##
+#
+#mcolors = c( grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3]),           # solid colors (12)        format =>  "#FFFFFFF"
+#            grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],.2))         # translucent colors (12) - 20%.
+#
+#names(mcolors) =c("red","orange","green","greenish blue", "purple","magenta",
+#                 "black","light yellow","light red","light blue",
+#                 "lightest gray","lighter gray",
+#                 "l_red","l_orange","l_green","l_greenish blue", "l_purple","l_magenta",
+#                 "l_black","l_light yellow","l_light red","l_light blue",
+#                 "l_lightest gray", "l_lighter gray"
+#                 )       
 
-colors = c( grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3]),            # solid colors (12)        format =>  "#FFFFFFF"
-            grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],.2))         # translucent colors (12) - 20%.
+XColors      <- GetMColors()
+mcolors      <- XColors$mcolors
+colorsRgb    <- XColors$colorRgb
+colorsRefRgb <- XColors$colorsRefRgb
+colorsRef    <- XColors$colorsRef
 
-names(colors) =c("red","orange","green","greenish blue", "purple","magenta",
-                 "black","light yellow","light red","light blue",
-                 "lightest gray","lighter gray",
-                 "l_red","l_orange","l_green","l_greenish blue", "l_purple","l_magenta",
-                 "l_black","l_light yellow","l_light red","l_light blue",
-                 "l_lightest gray", "l_lighter gray"
-                 )       
-
+#str(XColors)
+#print(colorsRef)
 
 # Details variable list _________________________________________
 
@@ -414,6 +422,9 @@ tempcolSubFill    <- colorsRef["lightest gray"]
 
 tempText.cex      <- 0.75                       # 12 pt default -> 9 pt.
 
+#cat("colors for graphs: ",tempOutline.Line.col,"  tempcolFill:",tempcolFill,
+#        "  tempcolSubFill:",tempcolSubFill,"\n")
+
 
 details = list(
 
@@ -429,6 +440,7 @@ details = list(
     pkgBGList                  = c("USStatesBG"                         # List of border groups included in package
                                    ,"USSeerBG"
                                    ,"KansasBG"
+                                   ,"KYADDBG"
                                    ,"MarylandBG"
                                    ,"NewYorkBG"
                                    ,"UtahBG"
@@ -471,7 +483,7 @@ details = list(
     borderSize                 = 0.5,                 # margin border - at least 0.5 inches.                       #  8
     
     #  height constraints
-    rowSepGap                  = 0.1,                 # Size of the rowSep  (in inches)                            #  9
+    rowSepGap                  = 0.075,                 # Size of the rowSep  (in inches)                            #  9
     
     rowSizeMn                  = 0.5,                 # Minimum Row Size in inches                                 # 11   # overriden by data from BG areaParms (add validation check)  Map.MinH
     rowSizeMx                  = 1.25,                # Maximum Row Size in inches.                                # 10   # overriden by data from BG areaParms     Map.MaxH
@@ -493,6 +505,8 @@ details = list(
     #  See micromapGSetPanelDef -> micromapGPanelDefaults
     
     ### dynamic layout based on number of rows - see micromapGSetPanelDef()
+    #
+    #  Original settings for 51 areas - U. S. States and DC.
     #
     #  if number of rows = "n"
     #
@@ -516,7 +530,13 @@ details = list(
     #
     #medGroupID                = vnumGrpMed,                                                                       # Built/Cal
     #medRowID                  = vnumRowMed,                                                                       # Built/Cal
-
+    
+    #
+    #   This block of variables are now calculated based on the number of areas in the linked micromap.
+    #
+    ####
+    
+    
 # panel scaling
     
     sc                         = 1.08,                   # x and y axis scale expansion factor                     # 19
@@ -644,7 +664,7 @@ details = list(
   
     BoxP.Outlier.BW.col        = colorsRef["dark gray"], # color for outline when using BW mode                    # 76
     BoxP.Outlier.cex           = 0.7,                    # see Dot.pch.size  ## JP decreased dot size  (was .6)    # 77
-    BoxP.Outlier.lwd           = 0.4,                    ## JP decreased dot border line width                     # 78
+    BoxP.Outlier.lwd           = 0.5,                    ## JP decreased dot border line width                     # 78
     BoxP.Outlier.pch           = 20,                     # Outlier symbol                                          # 79
   
     BoxP.Outline.col           = colorsRef["dark gray"], # color for outline when using colors                     # 80
@@ -747,17 +767,17 @@ details = list(
     Map.Bg.col                 = grey(.88),              # map/state/sub-area background fill color                #140
     Map.Bg.Line.col            = tempOutline.Line.col,   # map/state/sub-area background line color (white)        #141
     Map.Bg.Line.lty            = "solid",                # map/state/sub-area background line type                 #142
-    Map.Bg.Line.lwd            = 0.5,                    # map/state/sub-area background line weight               #143
+    Map.Bg.Line.lwd            = 0.3,                    # map/state/sub-area background line weight               #143
     Map.Fg.Line.col            = colorsRef["black"],     # sub-area foreground line color                          #144
     Map.Fg.Line.lty            = "solid",                # sub-area foreground line type                           #145
-    Map.Fg.Line.lwd            = 0.5,                    # sub-area foreground line weight                         #146
+    Map.Fg.Line.lwd            = 0.3,                    # sub-area foreground line weight                         #146
     Map.L2.Fill.col            = tempcolSubFill,         # L2 region fill color                                    #147
     Map.L2.Line.col            = tempOutline.Line.col,   # L2 region line color                     (white)        #148
     Map.L2.Line.lty            = "solid",                # L2 region line type                                     #149
-    Map.L2.Line.lwd            = 0.5,                    # L2 region line weight                                   #150
+    Map.L2.Line.lwd            = 0.35,                    # L2 region line weight                                   #150
     Map.L3.Line.col            = colorsRef["black"],     # L3 area outline line color                              #151
     Map.L3.Line.lty            = "solid",                # L3 area outline line type                               #152
-    Map.L3.Line.lwd            = 0.5,                    # L3 area outline line weight                             #153
+    Map.L3.Line.lwd            = 0.4,                    # L3 area outline line weight                             #153
     Map.Lab.Box.Width          = 0.09,                   # width and height of the title "boxes" (updated from 0.075 to 0.09 - aug, 2015)  #154
     Map.Max.width              = 2.5,                    # map max width                                           #155
     Map.Median.text            = "Median for Sorted Panel", # text for the median single row box.                  #156
@@ -826,7 +846,7 @@ details = list(
 #  Set up variable in the micromapXXXX namespace - used by micromapXXXX and micromapGSetDefaults functions.
 #
 
-     micromapGDefaults = list(colors=colors,details=details)
+     micromapGDefaults = list(colors=mcolors,details=details)
 
      return(micromapGDefaults)
    }

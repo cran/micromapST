@@ -187,9 +187,10 @@
 	  \var{FALSE}, the regions feature is disabled and all
 	  regional information ignored.  \cr
 	  The \var{RegVisBorders} should still exist, but should
-	  be set to equal the \var{L3VisBorders} data.frame. The
-	  \option{regions} call parameter will be ignored. As an
-	  example: In the USStatesBG and USSeerBG border groups,
+	  be set to equal the \var{L3VisBorders} 
+	  data.frame. The \option{regions} call parameter will 
+	  be ignored. As an example: In the USStatesBG and 
+	  USSeerBG border groups,
 	  the regions are set up using the 4 U. S. census regions
 	  of: West, South, Midwest, and NorthEast. If only data
 	  for states in the NorthEast are passed to micromapST,
@@ -393,14 +394,15 @@
        }
      }
     \item{areaVisBorders, L2VisBorders, RegVisBorders, and
-	L3VisBorders}{There are four boundary dataset - The
-	boundaries of the areas being micromapped (counties) are
-	in areaVisBorders. The boundaries of an intermediate
-	level (2) for general orientation are in L2VisBorders.
-	The boundaries of regional areas for highlight overlays
+	L3VisBorders}{There are four boundary \cr
+	dataset - The boundaries of the areas being micromapped 
+	(counties) are in areaVisBorders. The boundaries of 
+	an intermediate	level (2) for general orientation 
+	are in L2VisBorders. The boundaries of regional 
+	areas for highlight overlays
 	and regional only mapping and are in RegVisBorders. The
 	boundaries of the an outline of the entire mapping area
-	is in L3VisBorders.
+	is in L3VisBorders. \cr
 
       These four data.frames contain the boundary point lists for
       the area, regions and sub-areas. The L2VisBorders,

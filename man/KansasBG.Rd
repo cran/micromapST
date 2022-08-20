@@ -12,7 +12,7 @@ in the state of Kansas}
  is set to "KansasBG".  This instructs micromapST to load the area Name, Abbreviation,
  ID and boundaries files for Kansas 105 counties.
  The datasets contained in the border group are areaNamesAbbrsIDs, areaVisBorders,
- L2VisBorders, and L3VisBorders for the counties of the state Kansas.
+ L2VisBorders, and \cr L3VisBorders for the counties of the state Kansas.
  The user's data is then linked to the boundary data via the county's name, 
  abbreviated name or ID based on the table below.
 }

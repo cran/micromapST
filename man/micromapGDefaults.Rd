@@ -444,10 +444,12 @@ safe to be modified by the user.
         \cr
         \item{SNBar.Middle.Dot}{=FALSE, * request a dot be draw in at the mid point in the 
         segmented bars.}
-        \item{SNBar.MDot.pch}{=21, * type of point/symbol used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
-        \item{SNBar.MDot.pch.fill}{="white", * color of the point/symbol used as the 
-        mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
-        \item{SNBar.MDot.pch.size}{=0.3, * size of point/symbol used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
+        \item{SNBar.MDot.pch}{=21, * type of point/symbol used as the mid point dot. 
+          SNBar.Middle.Dot must be TRUE for this parameter to function.}
+        \item{SNBar.MDot.pch.fill}{="white", * color of the point/symbol used 
+          as the mid point dot. \cr SNBar.Middle.Dot must be TRUE for this parameter to function.}
+        \item{SNBar.MDot.pch.size}{=0.3, * size of point/symbol used as the mid 
+          point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}
         \cr
         \item{SNBar.MDot.pch.border.lwd}{=NA, * line width of outline of point/symbol 
         used as the mid point dot. SNBar.Middle.Dot must be TRUE for this parameter to function.}

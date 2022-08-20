@@ -1,0 +1,698 @@
+
+Fixes:
+1) Correct the grpPattern implementation.  Did not allow a c(4,4,4,3,4,4,4) and other
+   patterns of the number of areas per group/row (perceptional group).
+2) Provide the additional documentation required for release:  areaNamesAbbrsID.rd,
+   BuildBorderGroup.rd, KY_ADD_BG.rd. KY_ADD_LungCancer_2006_2010.Rd, and 
+   xxxxVisBorder.rd.
+   
+Enhancements;
+
+1) Inclusion of a new user function - "BuildBorderGroup".  This function helps the 
+   users build their own border groups from shape files and a name table.
+   This allows users to product linked micromaps for any geographical area
+   in the world with minimal effort.  The function provide basic tools to shift, scale,
+   and rotate an area.  If areas are still to small or the map does not look 
+   right, the user can manually modify the original shape file dataset or can manually
+   a checkpointed shape file saved after the BuildBorderGroup function as simplified, 
+   projected and rounded the vector x,y coordinates.  The function can then be 
+   checkPointRestarted to pickup the modified shape file and complete the conversion
+   to the micromapST boundary data format required.  See the documentation on the 
+   BuildBorderGroup function for more information.
+2) Include the Kentucky Administrative Development Districts (ADD) region boundaries
+   and test data to demonstrate how states with a large number of counties (>75) can 
+   still use linked micromaps by aggregating counties into a state's set of 
+   regions/special districts.
+3) Added the error messages caught by the BuildBorderGroup function to the message
+   documentation for the package.
+   
+
+micromapST - Version 1.1.3 - Updates - 2022/04/29
+
+Fixes:
+1) Update the contact information in to package to the current maintainer's email 
+   address.
+2) Update software to meet the current CRAN release CHECK requirements.
+3) Convert the author and maintainer information fields in the DESCRIPTION file to 
+   the newer format as required.
+
+
+micromapST - Version 1.1.1 - Updates - 2016/12/07
+
+1)  Update all of the external calls to use the package::function format as required by 
+    CRAN.
+
+
+
+micromapST - Version 1.1.0 - Version
+
+This release has undergone series of major code clean ups, re-work 
+and enhancements.  The package defaults should allow the package 
+to preform in the same manner as prior to the release without 
+modification to a user's existing R scripts.  The majority of 
+the work has been in the areas of adding the ability to use other 
+geographical areas instead of just the U.S. States and D. C. 
+(border groups), update the most of the code to attempt to scale 
+the panels properly for different border groups, rework the X axis 
+labeling to provide better labels and presentations and provide 
+options to scale and/or stagger the axis labels to provide improved 
+glyphics axis.  
+
+The following fixes and enhancements were also included:
+
+Fixes: 
+
+1) Completed implementation of the Id.Dot.pch variable.  Use of 
+   the variable in the details list allows the user the ability 
+   to specify the type of symbol used in the ID glyphic.  Values 
+   from 1 to 25 are acceptable.  If the pch is not a filled 
+   symbol (21-25), then the entire symbol is color the appropriate 
+   color for the linked-micromap.
+
+2) The requirement that a user must have data in the data data.frame 
+   for each geographic sub-area (state, province or district) has 
+   been removed. If no data is present for a sub-area, the sub-area 
+   is left un-color when the linked micromaps and graphics are 
+   generated.  If the user reference a sub-area that does not exist 
+   in the geographic border group specified by the user, the user 
+   is notified of the problem, the package ignores the data and 
+   continues executing.  If no data is provided for a sub-area in 
+   the border group, the user is notified, it is not included 
+   in the list of sub-areas or the linked micromap graphics, but 
+   is mapped and colored with a very light gray. This allows a 
+   border group to be used with subsets of data. 
+
+3) If a sub-area contains "NA" value in the sort column specified 
+   in the "sortVar" call argument, micromapST will complete the 
+   sub-area ordering and list the sub-areas with the "NA" values 
+   as the last entries in the sort (at the bottom.)
+   This applies to both ascending and descending sorts.
+
+4) The logic to sort the data in the linked-micromaps using the 
+   column names did not properly handle multiple column sorts.  
+   The code was rewritten to fix the problem.
+
+5) The axis labels for the grid lines did not always appear.  
+   In some cases, obvious grid lines that were outside of the data, 
+   did not get labeled at all.  These issues were addressed in the 
+   complete rewrite of the X axis labeling logic in each glyphic. 
+   (see below under Enhancements.)  It still does not overcome the 
+   situations where R chooses to drop an axis label to prevent label 
+   overlapping, within the axis of the graph.  Now that the grid 
+   lines at the edge of the graphic are being labeled, additional 
+   work is needed to control the axis label overlapping between 
+   graphic columns.
+
+6) When a title like "lab2" is not included for a glyphic, a space 
+   below "lab1" is left open.  The other titles should be moved 
+   closer to the axis.  The map... and id glyphics can now make 
+   use of the empty X axis line for there titles.  If the bottom 
+   title, "lab3", is empty, the reference text is also allowed to 
+   move up closer to the X axis.
+   
+7) The user's data.frame passed to the package may contain factors.  
+   The package now recognizes this and converts the factors to 
+   numeric and character as required. 
+
+8) When each glyphic processes the data for a sub-area row in the 
+   linked micromap,  it now checks for missing values (NA).  If 
+   the glyphic finds a missing value, it will not attempt to create 
+   the graphic for that sub-area.  An incomplete graphic could 
+   be misleading, so no graphic for the row/sub-area is created.  
+   For example, if the "dotconf" graphic has missing values for 
+   both the upper or lower confidence interval, the user could
+   not tell if the values are missing or the confidence interval 
+   is very very narrow. 
+
+9) There were duplicate warning messages in the code used to 
+   validate the user provided data.  The validation logic has been 
+   reworked to eliminate the duplication and provide more informative
+   warning messages.
+
+10) The verification that user data is valid numerical data was not
+   correct. The code was corrected.
+   
+11) The main title logic did not handle multiple titles within on
+   call argument properly.  Corrected coding.
+   
+12) Properly centered the map glyphics titles over the column. 
+   Previously only lines were centered that did not contain
+   symbols.  
+   
+13) The refText footnote title under the glyphic column was not 
+   centered.  Problem corrected.
+   
+14) The code to determine the column width requirements for the 
+   map and id glyphics was rewritten to handle the border
+   groups and correct issues with the original map and column
+   titles.
+
+15) The TSConf glyphic does not handle NA values.  Lines are 
+   simply disrupted.  The confidence bands are corrupted when 
+   missing values are present.  Rewrote code to identify missing
+   values and build multiple polygons to compansate.
+
+16) Verification of panelDesc data.frame parameters incorrectly
+   handled col1, col2, and col3 vectors.  Logic corrected to
+   properly check the existance and verify the contents of all
+   panelDesc data.frame parameters (columns).  A new error message
+   added if a parameter is incorrectly speeded, Empty vectors
+   provided when parameters are missing, and each glyphics now
+   properly checks for its required panelDesc information.
+
+Enhancements:
+1) A vignette has been added containing the released JSS paper on 
+   the micromapST package. 
+
+2) All of the logic related to geographical areas and mapping has
+   been re-organized and enhanced to allow micromapST to be used
+   with different geographic areas.  The original U.S. State and
+   D.C. boundary data became the first "border group" data set. The
+   package now has several built-in border groups to support the
+   examples and demonstrate how a the micromapST border group
+   functions.
+
+   The built-in border groups are used in continued testing and
+   tuning of the micromapST package to be able to handle greater
+   than the original 51 sub-areas (states, D.C.) supported in
+   previous micromapST releases.  The current package handles image
+   sizes up to 11" x 17" and up to 75 sub-area and generates usable
+   images.
+
+   This has been a significant task to be able to support multiple
+   geographical boundary data sets and handle the image scaling and
+   generation when the number of sub-areas (rows), can vary between
+   6 and 300 or more.
+
+   A vignette is being written to provide guidance and examples on
+   how to build a private border groups.
+
+3) In support of border groups, the following improvements and
+   extentions have been made:
+
+   a) The number of rows per panel group are now calculated.   The
+      patterns are always the maximum number of columns (5) at the
+      sides decreasing toward the middle. A 25 sub-area border
+      group would have 5,5,5,5,5 rows per group.  The median group
+      would have 5 rows and a map. It is now possible for a border
+      group to have NO median group or median row.
+      
+   b) The user can override the calculated sub-area rows to 
+      panel groups pattern by using the call argument "grpPattern".
+      
+      Example:     grpPattern = c(5,5,3,3,5,5)
+      
+      The pattern is validated to make sure the number of 
+      rows per panel are:
+          i)   not greater than 5
+          ii)  are in decending order toward the median
+          iii) have a sum equal to the number of data rows
+               in the data provided.
+          iv)  check that a single 1 per panel is only 
+               permitted when there is an odd number of 
+               rows (sub-areas) and it's the median 
+               group.
+
+   c) The area mapping logic is re-written to handle panel
+      row/groups from 2 to 5 rows per panel.  If only one row
+      existing in the panel, the original logic of drawing a small
+      row and representing the data for the median sub-area in the
+      panel above and below the median is still done.  A single row
+      group can only occur as the median row.
+
+   d) Since a median group may contain 2 or more rows (sub-areas),
+      the "mapmedian" glyphic was changed to use two new colors for
+      sub-areas above the median and sub-areas below the median.
+      This allows both types of sub-areas to be represented in the
+      median panel.  It also provides a better representation of
+      the above and below median sub-areas in the other "mapmedian"
+      linked micromaps.
+
+   e) Since the border group area (map) may have different aspect
+      ratios and proportions, the desired minimum and maximum
+      heights and the minimum width for the map panel can now be
+      provided in the border group data set. (see definition of
+      border group below.)
+
+   f) Since the map is the one of the key glyphics a design choose
+      was made to use the same height for a panel independent of
+      whether the panel supports 2, 3, 4, and 5 row in that group.
+
+   g) All of the glyphics are updated to work in panels with
+      varying heights and preserving a desired graphic proportion
+      to the dots, bars, etc.  Before the change, if the panel was
+      higher, the graphics would expand proportionally. The sizing
+      had to also be maintained to allow panels with 2 or 3 or 4 or
+      5 rows to look the same.
+
+   h) A common data structure was developed to contain the
+      geographical information needed by micromapST for an area.
+      This was based on all of the data structures for the original
+      U.S. States and D.C..  The original area information was
+      extracted from micromapST and became the first border group.
+      Other border groups were constructed to support testing and
+      expansion of the code to support greater than 51 sub-area.
+
+      A border group data set consists of 5 data.frames:  
+
+         i) areaParms - containing the package parameters setting
+	    specific to it's border group.
+
+         ii) areaNamesAbbrsIDs - is a data.frame of the full names,
+	    name abbreviations, sub-area IDs, name  aliases, and
+	    links to the geographic boundary data in the border
+	    group.  This data.frame allows the user to use a full
+	    name, ID or name abbreviation to link the data to the
+	    geographic boundary for the sub-area and any regional
+	    association.
+
+         iii) areaVisBorders - is a data.frame containing the
+	    boundary points for each sub-area in the border group.
+	    There is one set of points for each row in the
+	    areaNamesAbbrsIDs data.frame.
+
+         iv) L2VisBorders - is a data.frame containing the boundary
+	    points for each region in the border group area.  This
+	    data.frame is optional if no regions have been
+	    identified.  If regions are specified in the boundary
+	    data, micromapST will be able to map only the regions
+	    with data provided as a subset of the area. The regions
+	    boundaries can also be drawn as an overlay to accent
+	    the regional boundaries in an area.
+
+         v) L3VisBorders - This data.frame contains the boundary
+	    points of the entire area in the border group.  It is
+	    used to highlight the outer most boundary of the border
+	    groups area.
+
+      Check the border group documentation for more details on its 
+      data structures and how to build a border group.
+
+   i) The package contain several sample border groups. The border
+      groups include:
+   
+       U. S. States and D.C.  (50 States and D.C.)
+       U. S. Seer Areas       (18 Seer Areas)
+       Counties for the state of Kansas    (105 counties)
+       Counties for the state of New York  (62 counties)
+       Counties for the state of Maryland  (24 counties and city)
+       Counties for the state of Utah      (29 counties)
+       Provinces and Metro area of China   
+           (34 admin areas, provinces, city, etc.)
+       Districts within the city of Seoul, South Korea (25 districts)
+       Counties for the counties of the United Kingdom and Ireland.  
+           (218 admin areas, counties, metro, etc.)
+   
+      United Kingdom and Ireland counties (UKIrelandBG), China's
+      provinces and major areas (ChinaBG), and the City of Seoul
+      North Korea's districts (SeuolKoreaBG) were built to support
+      the development of the border group feature.
+
+   j) The "bordGrp" and "bordDir" call arguments were added to
+      allow the user to select the desired border group to use for
+      his linked micromap. If "bordDir" is empty or null, the name
+      of the "bordGrp" must be one of the built-in border groups:
+
+          USStatesBG
+          USSeerBG
+          KansasBG
+          NewYorkBG
+          MarylandBG
+          UtahBG
+          ChinaBG
+          SeuolKoreaBG
+          UKIrelandBG
+          
+      To support privately built border groups, the "bordDir" call
+      argument must be set to the path containing the border group
+      .rda file.  The "bordGrp" argument can then be set to the
+      name of the border group .rda file.  For example:
+      
+          bordDir="c:/bordgrps", bordGrp="VermontBG"
+         
+   k) The original package used lazydata and lazyloading to speed
+      up data loading for processing.  To be able to support border
+      groups (multiple data sets with the same data.frame
+      structures), the lazydata and lazyloading functions have been
+      disabled.  This causes only a minor impact when the
+      micromapST package is called and has to load the appropriate
+      border group file.
+
+      Warning: Any border group with over 60 sub-area requires the
+      page size be increased proportionally to handle the extra
+      sub-areas (rows). The package will try to reduce the graphics
+      by up to 33% to generate the linked micromaps, but having a
+      larger image area is the best solution.
+
+      At about 105 sub-areas, the linked micromap starts to become
+      to small to be useful. For example UK and Irelands with 218
+      sub-areas (counties, metro area, etc.) is completely
+      unusable.
+
+      Additional work is required to properly handle areas with
+      greater than 100 sub-areas.  Page and image sizes up to 11x17
+      have been tested and work reasonably well.  Scaling
+      adjustments need to be developed to help generate good link
+      micromaps in these situations.
+
+   l) The user is allowed to provide data for a subset of the 
+      sub-areas in the border group.  If the user provides 
+      data for sub-areas NOT in the border group, the micromapST 
+      package will stop executing and alert the user.  
+      To have micromapST ignore the extra data, the user
+      can set the calling argument "ignoreNoMatches" to TRUE.
+      The micromapST package will then discard any 
+      user provided data that does not match up with 
+      boundary data in the border group.
+      
+   m) The map, mapcum, mapmedian, and maptail glyphics were 
+      updated to allow a map to be drawn for the median row/group
+      when the median row existed and contained more than 1 
+      sub-area.
+      
+   n) The mapmedian glyphic shows the group of sub-areas
+      above and below the median sub-area.  When a median group 
+      exists with more than 1 row, the map drawn in the median
+      group does not show this difference.  The mapmedian 
+      glyphic was changed to use two new colors for the above
+      and below median sub-areas.  This allows the drawing of 
+      a median group that shows the above and below sub-areas.
+      The colors initially selected need to be adjusted for 
+      better visualization. (work to be done.)  The colors
+      call argument was expanded 9 to 12 colors. One extra
+      color slot has been reserved to support a possible 6th 
+      row per panel group in the future.
+      
+   o) Since an area may not have abbreviations or ID numbers for
+      sub-areas. the link between the data and the boundary
+      data has been changed from using the sub-area abbreviation
+      to an internal "link string" found in the original boundary
+      shapefile.  The user is still required to use the 
+      names, abbreviations and IDs in the name table 
+      (areaNamesAbbrsIDs).
+      
+   p) The boundary data may contain holes. The mapping code 
+      was updated to handle holes and properly color the 
+      polygons. The boundary data must be properly ordered. 
+      (see border group documentation for more details.)
+      
+
+4) The originally designed boundary data structure has been
+   generalized to handle any geographic region. The boundary data
+   is organized into three groups, the data level boundaries which
+   are linked to the data provided in the micromapST call, and a
+   Level 2 and Level 3 boundary outlines. An example of how the
+   three work together can be seen when creating linked micromaps
+   for the 18 U. S. Seer area.  The data level boundaries outline
+   the Seer Areas, the level 2 boundaries outline each U. S. state,
+   and the level 3 boundary is the outline of the U.S.  The areas
+   at the data level are colored acording to the associated row in
+   the linked micromap glyphics.  The level 2 and 3 boundaries are
+   overlaid on the data level to provide geographic references.
+
+5) All of the enhancements have been implemented in a way to cause
+   minimal disruption to the current users of micromapST.  The
+   required panelDesc setup and micromapST call arguments have not
+   been changed.  Existing R Scripts should continue to work
+   without modification.
+
+6) The "dotsignif" glyphic has been added as an extension to the
+   "dot" glyphic.  Two data columns are required for "dotsignif".
+   The first column is the value for the dot. The second data
+   column is the calculated P_value associated with the dot's
+   value. If the P_value for the dot is <0.05, the dot is overlayed
+   with a symbol. The default symbols is an "X".  The user can use
+   the details' 'Dot.Signif.pch" variable to select a differ
+   overlay symbol. For more details refer to the micromapST
+   documentation on the details list variables.
+
+7) The package now inforces a minimum and maximum glyphic column
+   width. If all of the requested columns will not fit on a page or
+   provided space, the user will receive a warning and the package
+   will try and reduce the graphics by 33%.  If the graphics will
+   still not fit into the space, the package will stop. The user
+   can increase the page/image size or reduce the number of
+   requested columns.
+
+8) The code to position the titles and boxes for the map and id
+   glyphics has been rewritten to better align the boxes with the
+   text and handle variable panel row heights dynamically. The font
+   size is still static and will be looked at for a future
+   enhancement.
+
+9) Added X Axis labeling features to allow: 
+   
+   a) Use of the Wilkinson algorthim vs. the pretty function to
+      generate the X Axis labels and point. Call parameter:
+      axisScale="w".   The Wilkinson algorithm is not the 
+      default method.  
+      
+   b) The original pretty label function can still be requested
+      by setting axisScale="o" in the micromapST call.
+
+   c) Implemented the ability to scale the values on the X Axis 
+      and add a sub-title indicating the scaling units.  
+      (e.g., "in hunderds", "in millions", etc.) The axis 
+      labels and sub-title are then drawn over the top 
+      panel and under the bottom panel. To request this 
+      type of scaling use the micromapST call argument of 
+      axisScale="s".  When this feature is used, the Wilkinson
+      algorithmm is used.
+
+   d) Implemented the ability to scale each number based on 
+      it's size and add a suffix to the label indicating the 
+      new units  (e.g. 10K, 1.43B, etc.) To request this 
+      type of scaling use the micromapST call argument 
+      of axisScale="sn".  When this feature is used, 
+      the Wilkinson algorithm is used.  This scaling uses 
+      the International Standards of symbols code for each
+      number group in the scale.  The algorithm handles from 
+      1,000 trillion (10^12) to 1 femto (10^-15)
+      
+   e) Implemented the ability to stagger the axis labels 
+      (one low and one high) to prevent overlaying neighboring 
+      labels and columns. To request staggered axis labeling 
+      use the micromapSt call argument of staggerLab = TRUE.
+
+10) Enhanced panelDesc verification to be table driven and
+   provide better diagnostic messages.
+   
+11) Added the ability to specify options and variable tuning 
+   on a per glyphic and per column basis in the panelDesc 
+   structure.  This feature will become the new panelDesc
+   structure.  To support current users, both structures 
+   will continue to be supported.
+   
+12) Validation of user provided details variables is starting 
+   to be added.  Initially only Id.Dot.pch is validated.  
+   More to come.
+   
+13) Warnings and messages have been cleaned up. renumbered
+   and tagged with "***" at the start of each message.. 
+   See new vignette on the definition of each message.
+   
+14) All micromapST generated warnings are now counted and a 
+   a report is provided at the end of processing to help 
+   alert the user to possible problems requiring his attention.
+   
+15) Added the ability to change the text in the single row 
+   median group panel buy using the details variable 
+   "Map.Median.text" set to the new string.  The string 
+   must be less than 24 characters.
+   
+   Example:    details=list(Map.Median.text="Median Group")
+   
+16) The lab3 footnote titles are not supported in the 
+   map and id glyphic columns.
+   
+17) Added "alt_ab" option to call parameters and "alt_ab" field 
+   to the name table to support later implementation an 
+   alternate abbreviation.  During the work on the border
+   groups, there are several cases where it is not clear
+   which abbreviation set should be used.  This feature will
+   allow two sets of abbreviations to be included in a border
+   group.
+   
+18) Check for duplicate data rows for the same sub-area have 
+   been added.  If duplicates are found, the user is notified
+   and only the first row is used.
+   
+19) Changed the mapmedian column labels from "Featured above/below"
+   to "above median" and "below median".
+   
+20) All warnings are listed preceeded by the call information 
+   of the routine where the warning is issued.   "call.=FALSE"
+   implemented on all warnings to eliminate this extra information.
+   The warning message contain the information on the 
+   source of the problem and routine.
+   
+21) Added validation of user provided details variables using 
+   table driven logic rather than hard code.  
+   User provided details variables are not validated and 
+   corrected prior to merging with the default set of 
+   details variable.
+   
+22) When columns of data are validated, comma are removed from the 
+   input strings before checking to see if they are numeric.
+   Input data can now contain commas.
+
+23) The call argument "colors" is not optional and works like the
+   details argument allowing replacement when needed.
+
+24) 
+   
+The following functions were created to provide consistant 
+processing across glyphics and improve maintainability:
+
+    NewCounter  - to create global counters 
+    is.Color    - used to verify if a string is a valid color
+    is.between  - check if valid is between a range.
+    Scaler1     - scale axis labels and return modified labels
+                  and appropriate sub-title ("in hunderds", etc.)
+    Scaler2     - scale axis labels and return modified labels
+                  with "K", "M", etc, postfixes indicating scale
+                  factor.
+    AddRefLine  - draw on graph reference line.
+    AliasToIndex - convert user provides strings into name or 
+                  abbreviations using a partial match (alias)
+    BuildSegColors - Build the segment graduated colors for the 
+                  segmented stacked bar glyphics.  This 
+                  function pulls together the common code
+                  from the three glyphics processes.
+    ConvLineToUser - Provides a function to allow all offsets 
+                  and line positions in the margin areas to 
+                  be calculated in "line" units instead inches.
+                  The functions confers the line units into 
+                  user units for placing symbols and text.
+                  Used to position "text" and symbols in 
+                  the margins.
+    DrawBoxAndText - common code from the map glyphics to 
+                  draw the "box" symbol and place the associated
+                  text aligned with it in the column titles.
+    DrawXAxisAndTitles - common code from all glyphics to 
+                  place the column titles, generate the X Axis
+                  labels, scale the labels, and stagger them 
+                  if needed.  It also check to see if it can 
+                  avoid overlaying edge labels.  It handles
+                  the top titles and X axis labels and the 
+                  bottom titles, reference text and X axis labels.
+    MapPolySetup - common code to all glyphics to process the 
+                  map graphics x and y ranges, handle scaling 
+                  and aspect issues.  Returns an adjusted x and 
+                  y range for scaling the map panels.
+    MMVSplit - Used by the TSConf glyphics to logically break
+                  up the confidence band polygons when missing
+                  values are present.  
+    
+Most of Juergen's issues have been addressed - when practical.
+
+
+
+micromapST - Version 1.0.5 - Updates
+
+The following updates were made to the micromapST package for release 1.0.5,
+January 21, 2015.
+
+Enhancements:
+1) The colors call parameter is now optional.  It is only required when you want to override 
+the color scheme used by micromapST.
+
+Fixes & Maintenance:
+1) Verification of panelDesc data.frame parameters incorrectly handled col1, col2, and col3
+vectors.  Logic corrected to properly check the existance and verify the contents of all 
+panelDesc data.frame parameters (columns).  A new error message added if a parameter is
+incorrectly speeded, Empty vectors provided when parameters are missing, and each glyphics
+now properly checks for its required panelDesc information.
+2) Updated the vignettes to contain the publish JSS article on linked micromaps.
+
+
+micromapST - Version 1.0.4 - Updates
+
+The following updates were made to the micromapST package for release 1.0.4,
+July 12, 2014.
+
+Fixes:
+1) Changed code in examples to consistantly use single and double quotes.
+
+
+micromapST - Version 1.0.3 - Updates
+
+The following updates were made to the micromapST package for release 1.0.3,
+March 7, 2014.
+
+Enhancements:
+1) Added new glyphs column to present the numerical ranking of the row from 1 to 51. 
+Ranking 1 is the first state listed and ranking 51 is the last state listed.
+2) Adjusted the stacked bar parameters to set variable height bar feature or 
+the mid-point dot feature to disabled (FALSE) by default.  The user can still enable these
+feature if desired.
+
+Fixes:
+1) The median row line and confidence band graphic for the time series glyph is squeezed 
+when drawn and does not properly represent the data.  The plot of the median data line and 
+confidence band has been added to the panel above and below the median row to present the data 
+in the same manner as the other data.
+
+
+
+micromapST - Version 1.0.2 - Updates
+
+The following updates were made to the micromapST package for release 1.0.2, 
+January 11, 2014.
+
+Enhancements:
+1) Added variable bar heights to the horizontal stacked bar glyphs 
+(segbar, normbar, and ctrbar). The stacked bar now vary in height starting 
+smaller on the left and increasing in size to the right.  This allows better 
+visualization of the stacked bars.  This feature can be disabled is required.
+
+2) Added dot at the mid-point of the horizontal stacked bar glyphs 
+(segbar, normbar)  Not used on the centered horizontal stacked bars, 
+since they are already lined up on the zero value and a vertical dashed line is 
+overlaid on the glyph.  This feature can be disabled is required.
+
+4) Added the ability to specify the stateFrame columns in the col1, col2 and 
+col3 vectors as names or numbers.
+
+5) Added the ability to specify the stateFrame columns in the sortVar call argument
+as names or numbers.
+
+6) Reorganized and renamed the variables in the details list of the micromapSTDefault 
+structure to better identify which glyph used the variable and what the variable effected.
+The documentation has been updated with the new variable names.
+
+7) Changed the processing of the details call argument to not require any value or list.
+The micromapST package internally sets all glyph and operating variables to the 
+default values.  The details call argument can now be used to pass micromapST only the 
+the list of the variable to be modified/changed.  This simplifies the user's task to 
+request minor changes to the colors, symbols, line weights, etc. of the micromapST 
+glyphs.
+
+8) Added a diagonal line to the scatter dot glyphs to serve as a X=Y reference line. 
+Due to space limitations, the scatter dot glyph area cannot have a correct aspect ratio 
+to the range of the X and Y values.  The diagonal line provide a means of relating the 
+scatter dots to a line of equality and overcome this issue.
+
+
+Fixes:
+a) Fixed the logic used by the sortVar call argument to support the specification of multiple 
+columns for the sorting order.  The original code worked when 1 column was specified, but did not
+properly handle multiple columns.  Problem identified and fixed.
+
+b) Correct the Scatter Dot glyph to only highlight the median state's dot in the median
+row and the rows immediately above and below.
+
+
+micromapST - Version 1.0.1 - Updates
+
+1) Horizontal Stacked Bar glyph's (segbar, normbar, and ctrbar) (segments)
+should support a minimum of 2 segments.  Code requires a minimum of 3 segments.
+Fixed code to allow a minimum of 2 segments.
+
+
+micromapST - Version 1.0.0 Original Release
+
+Original Release of code developed for GMU classes on data visualization 
+and support of the publication of "Visualizing Data Patterns with Micromaps", CRC
+Press, 2010, by Daniel B. Carr and Linda Williams Pickle.
+

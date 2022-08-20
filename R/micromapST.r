@@ -501,12 +501,10 @@
 #
 #  functions used from base:       pretty, load, 
 #
-#  functions used from RColorBrewer:   brewer.pal
+#  functions used from RColorBrewer:   brewer.pal*
 #
-#  functions used from graphics:   plot, lines, arrows, polygon, axis, text, mtext, boxplot,
-#                                  points, legend, plot.new, plot.default, plot.design, plot.function,
-#                                  plot.xy, plot.windows, abline, axTicks, barplot, matplot,
-#                                  matpoints, title
+#  functions used from graphics:   plot, lines*, arrows*, polygon*, axis*, text, mtext*, boxplot (greate own),
+#                                  points*, plot.new*, strheight*, strwidth*
 #
 #  functions used from stats:      qnorm
 #
@@ -722,64 +720,6 @@ suppressBindingNotes <- function(variablesMentionedInNotes) {
 
 ######
 #
-#  counter function definition in Global Environment to be accessible from all functions.
-#
-NewCounter <- function() {
-    i <- 0
-    function() {
-       i <<- i + 1
-    }
-}
-
-#
-#
-######
-
-#####
-#
-#  asc and chr
-#  chr(x) returns character value for "x".
-#      if x is a character, x is returned.
-#      if x is numeric, it is converted to character value
-#
-chr <- function(x) {
-        if (is.character(x)) {
-           return(x)
-        } else {
-           if (is.numeric(x)) {
-              as.character(rawToChar(as.raw(x)))     
-           } else {
-              return("\025")
-           }
-        }
-     }
-
-#
-#  asc(x) returns the numerical value for the character "x"
-#    
-#
-asc <- function(x) {
-         wX <- x
-         if (is.numeric(wX))   {
-            # numeric - turn into character
-            wX <- as.character(wX)
-         }
-         if (is.character(wX)) {
-            if (nchar(wX) > 1) {  wX <- substr(wX,1,1)  }   # get only one character
-            
-            strtoi(charToRaw(x),16L)   # convert character to numericstrtoi(charToRaw(x),16L) 
-         } else {
-            NA
-         }
-      }
-
-#
-#
-#### Global functions
-
-
-######
-#
 #   Update  ---  If a variable is used but does not seem to be set, RCMD 
 #                generates an error.  This compensates for the dynamic reference
 #
@@ -788,197 +728,6 @@ gVarList  <-  c("lastLab2Space","lastLab3Space", "staggered")
 
 suppressBindingNotes(gVarList)
 
-#
-# Create key global variable before referenced - These variables are referencable by all subroutines and functions 
-# in this package.
-#
-
-utils::globalVariables(c( 
-          # Call Parameters
-                "sDFName",            "pDName",
-                "wSFName",
-                "callVarList",
-                
-          # panel variables and parameters      
-                "numRows",            "numGrps",         
-                "rowSep",             "rowSepGap",
-	        "rowSize",            "rowSizeMaj",         "rowSizeMin",
-	        "rowSizeMx",          "rowSizeMn",
-
-                "colSepGap",
-                "colSizeMax",         "colSizeMin", 
-                
-                "rcRatioMin",         "rcRatioMax",
-                
-                "groupedRowSize",     "groupedRowSep",
-         
-                "medGrp",             "medGrpSize",         
-                "medRow",             "medRowAbv",         "medRowBlw",
-
-                "ib",                 "ie",         
-  
-                "sc",                 "pad",                "padex",              "padMinus",
-           
-                "topMar",             "botMar",             "botMarLegend",       "botMardif",
-                
-                "borderSize",
-                
-          # System
-                "detailsVariables",   "varName",            "mstColorNames", 
-
-          # Axis adjustments
-                "mgpTop",             "mgpBottom",          "padjBottom",         "mgpLeft",
-
-                "leftMarAxis",        "leftMar",            "rightMar",
-
-          # Axis Lab variables
-
-                "staggered",          
-		"lastLab2Space",      "lastLab3Space",
-                
-          # Call Parameters 
-                "ignoreNoMatch",      
-           
-                "bordGrp",            "bordDir",           "grpPattern",
-          
-          # Counter functions 
-                "warnCnt",            "stopCnt",
-          
-          # glyphs variables
-            # General
-                "Title.Line.1.pos",   "Title.Line.2.pos",   "Title.Line.2x.pos",  
-                "Title.Line.3.pos",   "Title.Line.4.pos",
-                "Title.Line.5.pos",
-                "Title.cex",
-                
-                "Grid.Line.col",      "Grid.Line.lwd",
-                
-                "Panel.Fill.col",     "Panel.Outline.col",
-                
-                "Text.cex",
-                
-                "XAxis.L.mcex",       "XAxis.M.mcex",       "XAxis.S.mcex",       
-                "XAxis.Sp.mcex",
-                "XAxis.offset",       "XAxis.indent",       "XAxis.nGridpIn",          
-                "XAxis.staggered",    "XAxis.gapPC",
-                
-                "YAxis.cex",          "YAxis.offset",       "YAxis.nGridpIn",
-                "YAxis.width",        
-          
-            # Arrow
-                "Arrow.Head.length",  "Arrow.lwd",            "Arrow.cex",
-                "Arrow.Shadow.col",   "Arrow.Shadow.lwd",   
-                "Arrow.Dot.pch",      "Arrow.Dot.pch.size",   "Arrow.Dot.pch.lwd",       
-                "Arrow.Dot.Outline",  "Arrow.Dot.Outline.col","Arrow.Dot.Outline.lwd",
-           
-            # Bar
-                "Bar.barht",          
-                "Bar.Outline.col",    "Bar.Outline.lwd",   "Bar.Outline.lty",
-           
-            # Boxplot
-                "BoxP.thin",          "BoxP.thick",         "BoxP.Use.Black",
-                "BoxP.Median.Line",   "BoxP.Median.col",
-                "BoxP.Median.Dot.col","BoxP.Median.Dot.pch","BoxP.Median.Dot.cex","BoxP.Median.Dot.lwd",
-                "BoxP.Outline.col",   "BoxP.Outlier.BW.col","BoxP.Outlier.lwd",   "BoxP.Outlier.cex",   
-           
-            # Center Stacked Bars
-                "CBar.varht",         "CBar.two.ended",
-                "CBar.Zero.Line.col", "CBar.Zero.Line.lwd", "CBar.Zero.Line.lty",
-           
-            # Center, Segmented, and Normalized Stacked Bars
-                "CSNBar.barht",
-                "CSNBar.Outline.col", "CSNBar.Outline.lwd", "CSNBar.Outline.lty",
-                "CSNBar.First.barht", "CSNBar.Last.barht",
-           
-            # Dot, Dotsignif, Dotconf, Dotse
-                "Dot.pch",            "Dot.pch.size",       "Dot.pch.lwd",       
-                "Dot.Outline",        "Dot.Outline.col",    "Dot.Outline.lwd",
-                
-                "Dot.Conf.pch",       "Dot.Conf.pch.size",  "Dot.Conf.pch.lwd",
-                "Dot.Conf.lwd",
-                "Dot.Conf.Outline",   "Dot.Conf.Outline.lwd","Dot.Conf.Outline.col",
-                
-                "Dot.SE",             
-                "Dot.SE.pch",         "Dot.SE.pch.size",     "Dot.SE.pch.lwd",             
-                "Dot.SE.lwd",      
-                "Dot.SE.Outline",     "Dot.SE.Outline.lwd", "Dot.SE.Outline.col",
-                
-                                      
-            # Dotsignif
-                "Dot.Signif.pch",     "Dot.Signif.pch.size","Dot.Signif.pch.col","Dot.Signif.pch.lwd",
-                
-                "Dot.Signif.Outline", "Dot.Signif.Outline.col","Dot.Signif.Outline.lwd",
-                
-                "Dot.Signif.pvalue",
-                "Dot.Signif.range",
-           
-            # Dotconf, Dotse
-                "Dot.conf.pch",       "Dot.conf.pch.size",
-                "Dot.conf",           "Dot.conf.lwd",       "Dot.conf.size",
-           
-            # Id
-                "Id.Hdr1",            "Id.Hdr2",
-                "Id.Title.1.pos",     "Id.Title.2.pos",
-                "Id.Start",           "Id.Space",           "Id.Cex.mod",
-                "Id.Text.cex",        "Id.Text.adj",
-                "Id.Dot.pch",         "Id.Dot.lwd",         "Id.Dot.cexm",     "Id.Dot.width",
-                "Id.Dot.Outline.col", "Id.Dot.Outline.lwd",
-           
-            # map, mapcum, mapmedian, maptail
-                "Map.Min.width",      # will become dynamic
-                "Map.Max.width",      #
-                
-                "Map.Aspect",         # from areaParms
-                "Map.L2Borders",      "Map.RegBorders",    "Map.L3Borders",
-                "Map.MinH",           "Map.MaxH",
-                "Map.Lab.Box.Width",
-                "Map.Median.text",    "Map.Median.cex",
-                                
-                "Map.Bg.col",
-                "Map.Bg.Line.col",    "Map.Bg.Line.lwd",
-                "Map.Fg.Line.col",    "Map.Fg.Line.lwd",
-                "Map.L2.Fill.col",    "Map.L2.Line.col",   "Map.L2.Line.lwd",
-                "Map.L3.Fill.col",    "Map.L3.Line.col",   "Map.L3.Line.lwd",
-                
-                "Map.Area.Spec.cex",
-
-            # rank
-                "Rank.width",
-           
-            # Support - refVal, refText
-                "Ref.Val.col",        "Ref.Val.BW.col",     "Ref.Val.lwd",        "Ref.Val.lty",        
-                "Ref.Text.col",       "Ref.Text.BW.col",    "Ref.Text.cex",
-
-            # ScatDot
-                "SCD.Bg.pch",         "SCD.Bg.pch.size",    "SCD.Bg.pch.fill",
-                "SCD.Bg.pch.col",     "SCD.Bg.pch.lwd",
-                "SCD.Fg.pch",         "SCD.Fg.pch.size",
-                "SCD.Fg.pch.col",     "SCD.Fg.pch.lwd",     
-                "SCD.Median.pch",     "SCD.Median.pch.size","SCD.Median.pch.fill",
-                "SCD.Median.pch.col", "SCD.Median.pch.lwd", 
-                "SCD.Axis.cex",
-                "SCD.xsc",            "SCD.ysc",            "SCD.hGrid",
-                "SCD.DiagLine",       "SCD.DiagLine.col",   "SCD.DiagLine.lwd",   "SCD.DiagLine.lty",
-
-            # Normalized and Segmented stacked bar                
-                "SNBar.varht",        "SNBar.two.ended",                
-                "SNBar.Middle.Dot",   
-                "SNBar.MDot.pch",     "SNBar.MDot.pch.fill","SNBar.MDot.pch.lwd", "SNBar.MDot.pch.size",
-                "SNBar.MDot.pch.border.col",
-                "SNBar.MDot.pch.border.lwd",
-
-            # TS and TSConf                
-                "TS.lwd",             "TS.Axis.cex",        "TS.hGrid",
-
-            # debug            
-                "MST.Debug"),
-                    
-                "micromapST", add=TRUE)
-
-#
-#   Would rather have these variable in the local "micromapST" environment.
-#
-######
 
 ######
 #
@@ -1123,7 +872,8 @@ is.Color2 <- function(x) {
  
        if (is.character(x)) {
           #   character string, check for palette number or color name.
-          if (!is.na(match(x,c(as.character(c(1:8)),grDevices::colors(),mstColorNames)))) {  # test name and/or number
+          if (!is.na(match(x,c(as.character(c(1:8)),grDevices::colors(),mstColorNames)))) {  
+             # test name and/or number
              TRUE   # good color value.
              
           } else {
@@ -1230,7 +980,7 @@ odd <- function(x) {
 #     make all caps.
 #
 CleanString <- function(wstr) {
-   nstr <- toupper(stringr::str_trim(stringr::str_replace_all(wstr,"[[:space:][:cntrl:][:punct:]]+"," ")))
+   nstr <- stringr::str_to_upper(stringr::str_trim(stringr::str_replace_all(wstr,"[[:space:][:cntrl:][:punct:]]+"," ")))
    return(nstr)
 }
 
@@ -1486,10 +1236,10 @@ Scaler2 <- function(var,lower=FALSE) {
 
 simpleCap <- function (x)
    {
-      s <- strsplit(x,"[ ._]")[[1]]    # split on boundaries " ", "." or "_".
+      s  <- stringr::str_split(x,"[ ._]")[[1]]    # split on boundaries " ", "." or "_".
       s1 <- s[s != ""]                 # skip empty strings
       
-      paste0(toupper(substring(s1,1,1)),tolower(substring(s1,2)),collapse=" ")
+      paste0(stringr::str_to_upper(stringr::str_sub(s1,1,1)),stringr::str_to_lower(stringr::str_sub(s1,2)),collapse=" ")
    }
       
 #
@@ -1520,7 +1270,7 @@ simpleCap <- function (x)
                if (is.character(pchValue)) {
                   # character type value.  Get first character.  assume > 31
                   pchValue <- stringr::str_sub(stringr::str_trim(pchValue),1,1)
-                  points(ppX, ppY, pch=pchValue,
+                  graphics::points(ppX, ppY, pch=pchValue,
                             cex=ppSize,
                             col=ppColor
                         )
@@ -1543,7 +1293,7 @@ simpleCap <- function (x)
                   
                   # normal symbols (numeric) (no border)
                   # > 31 characters
-                  points(ppX,ppY,pch=chrValue,
+                  graphics::points(ppX,ppY,pch=chrValue,
                              cex=ppSize,
                              col=ppColor 
                         )
@@ -1561,7 +1311,7 @@ simpleCap <- function (x)
                      if (ppOutline) {
                         #  19:25 with outline around symbol
                         #cat("19:25 -> filled with borders symbols - outline ON \n")
-                        points(ppX, ppY, pch=chrValue, 
+                        graphics::points(ppX, ppY, pch=chrValue, 
                                  cex=ppSize, 
                                  lwd=ppOutline.lwd, 
                                  col=ppOutline.col, 
@@ -1569,7 +1319,7 @@ simpleCap <- function (x)
                      } else {
                         #  19:25 with no outline (border) 
                         #cat("19:25 -> filled with borders symbols - outline OFF \n")
-                        points(ppX, ppY, pch=chrValue, 
+                        graphics::points(ppX, ppY, pch=chrValue, 
                                  cex=ppSize,
                                  col=NA,
                                  bg=ppColor
@@ -1578,7 +1328,7 @@ simpleCap <- function (x)
                   } else {
                      # 0:18 symbols - line drawings
                      #cat("0:18 symbols - standard print.\n")
-                     points(ppX, ppY, pch=chrValue,
+                     graphics::points(ppX, ppY, pch=chrValue,
                               cex = ppSize,
                               lwd = ppLwd,
                               col = ppColor
@@ -1609,7 +1359,7 @@ micromapSEER <- function(statsDFrame,panelDesc,...) {
 #
 #   Get micromapST Version
 #
-micromapST.Version <- function() { return ("micromapST V1.1.3 built 2022-04-29 10:00am") }
+micromapST.Version <- function() { return ("micromapST V2.0.0 built 2022-08-18 12:05pm") }
 
 #
 ####
@@ -1719,7 +1469,7 @@ micromapST = function(
 #     rowNames    <- "ab"                     # global
 #     sortVar     <- NULL                     # global 
 #     ascend      <- TRUE                     # global
-#     title       <- c("titles")              # global
+#     Title       <- c("titles")              # global
 #     plotNames   <- "full"                   # global and glyph
 #     axisScale   <- "e"                      # new extended method - global and glyph
 #     staggerLab  <- FALSE                    # global and glyph
@@ -2065,7 +1815,7 @@ micromapST = function(
 #
 # ascend    TRUE default sorts in ascending order.  FALSE indicated descending order.
 #
-# title     A vector with one or two character strings to use the title.for the page.
+# Title     A vector with one or two character strings to use the title.for the page.
 #
 #   BORDER GROUPS
 #
@@ -2208,7 +1958,8 @@ micromapST = function(
 #  details variable list
 #
 
-utils::data(detailsVariables,envir=environment())    # get validation and translation table for details variables to panelDesc variables.
+utils::data(detailsVariables,envir=environment())    # get validation and translation table 
+                                                     # for details variables to panelDesc variables.
 
 #
 #####
@@ -2225,7 +1976,7 @@ utils::data(detailsVariables,envir=environment())    # get validation and transl
 
 mstColorNames         <- "black"
 mmSTEnvir             <- environment()
-xmsg                  <- capture.output(mmSTEnvir)
+xmsg                  <- utils::capture.output(mmSTEnvir)
 #cat("micromapST envir:",xmsg,"\n")
 
 #
@@ -2634,12 +2385,23 @@ if (UserBordGrpLoad) {
     #  Set the type of everything to protect against factors on data.frames.
     bordGrp       <- as.character(areaParms$bordGrp)
     Map.Hdr1      <- as.character(areaParms$Map.Hdr1)
+    Map.Hdr1      <- Map.Hdr1[[1]][1]
+    if (any(is.na(Map.Hdr1))) Map.Hdr1 <- ""
+    
     Map.Hdr2      <- as.character(areaParms$Map.Hdr2)
+    Map.Hdr2      <- Map.Hdr2[[1]][1]
+    if (any(is.na(Map.Hdr2))) Map.Hdr2 <- ""
     
     Map.MinH      <- as.numeric(areaParms$Map.MinH)
+    Map.MinH      <- Map.MinH[[1]][1]
+    if (any(is.na(Map.MinH))) Map.MinH <- 0.5
+    
     Map.MaxH      <- as.numeric(areaParms$Map.MaxH)
+    Map.MaxH      <- Map.MaxH[[1]][1]
+    if (any(is.na(Map.MaxH))) Map.MaxH <- 1.5
     
     Map.Aspect    <- as.numeric(areaParms$Map.Aspect)
+    Map.Aspect    <- Map.Aspect[[1]][1]
     
     if (is.null(areaParms$ID.Hdr1)) {
         # New variable names
@@ -2650,7 +2412,11 @@ if (UserBordGrpLoad) {
         Id.Hdr1   <- as.character(areaParms$ID.Hdr1)
         Id.Hdr2   <- as.character(areaParms$ID.Hdr2)
     }
-
+    Id.Hdr1       <- Id.Hdr1[[1]][1]
+    if (any(is.na(Id.Hdr1))) Id.Hdr1 <- ""
+    Id.Hdr2       <- Id.Hdr2[[1]][1]
+    if (any(is.na(Id.Hdr2))) Id.Hdr2 <- ""
+    
     # Map.L2Borders  - draw L2 borders
     if (is.null(areaParms$Map.L2Borders)) {
        Map.L2Borders <- FALSE
@@ -2666,7 +2432,12 @@ if (UserBordGrpLoad) {
     }
 
     areaUSData    <- as.logical(areaParms$areaUSData)
+    areaUSData    <- areaUSData[[1]][1]
+    if (any(is.na(areaUSData)))  areaUSData <- FALSE
+    
     enableAlias   <- as.logical(areaParms$enableAlias)
+    enableAlias   <- enableAlias[[1]][1]
+    if (any(is.na(enableAlias))) enableAlias <- FALSE
     
     #print("areaParms:")
     #print(str(areaParms))
@@ -2697,11 +2468,17 @@ if (UserBordGrpLoad) {
     if (is.null(areaParms$aP_Regions)) {
        areaParms$aP_Regions     <- FALSE         # no regional mapping feature
     }
+    if (is.na(areaParms$aP_Regions[[1]][1])) {
+       areaParms$aP_Regions     <- FALSE
+    }
     
     #  region borders can be drawn or not.   If regions feature enable, default = TRUE.  If not, FALSE 
     #        
     
     if (is.null(areaParms$Map.RegBorders)) {
+       areaParms$Map.RegBorders <- FALSE         # no regional boundaries available
+    }
+    if (is.na(areaParms$Map.RegBorders[[1]][1])) {
        areaParms$Map.RegBorders <- FALSE         # no regional boundaries available
     }
     
@@ -2755,7 +2532,7 @@ if (!is.na(x)) {
     
     if (is.null(areaNamesAbbrsIDs$regID)) {   
        # current name table does not have regional information.
-       areaNamesAbbrsIDs$regID <- "<NA>"
+       areaNamesAbbrsIDs$regID   <- "<NA>"
        areaNamesAbbrsIDs$regName <- "<NONE>"
     }
 
@@ -2872,15 +2649,14 @@ if (!is.na(x)) {
     #cat("dim of areaNamesAbbrsIDs:",dim(areaNamesAbbrsIDs),"\n")
 
     #    Matching strings
-    rlAreaNamesAbbrsIDs$Abbr <- toupper(rlAreaNamesAbbrsIDs$Abbr)   #  Abbr Must be uppercase.
-
+    rlAreaNamesAbbrsIDs$Abbr <- stringr::str_to_upper(rlAreaNamesAbbrsIDs$Abbr)   #  Abbr Must be uppercase.
     areaNTAbbr   <- (rlAreaNamesAbbrsIDs$Abbr)               # Get list of abbrevations. (All CAPS)
 
-    areaNTName   <- (toupper(rlAreaNamesAbbrsIDs$Name))      # get list of full area names in uppercase (All CAPS)
+    areaNTName   <- (stringr::str_to_upper(rlAreaNamesAbbrsIDs$Name))      # get list of full area names in uppercase (All CAPS)
     
-    areaNTAAbbr  <- (toupper(rlAreaNamesAbbrsIDs$Alt_Abbr))  # get list of alternate abbreviations.
+    areaNTAAbbr  <- (stringr::str_to_upper(rlAreaNamesAbbrsIDs$Alt_Abbr))  # get list of alternate abbreviations.
     
-    areaNTKey    <- (toupper(rlAreaNamesAbbrsIDs$Key))       # get key as uppercase. (links into VisBorder files.)
+    areaNTKey    <- (stringr::str_to_upper(rlAreaNamesAbbrsIDs$Key))       # get key as uppercase. (links into VisBorder files.)
     
     #    Presentation strings
     ID.Abbr      <- areaNTAbbr                               #                           (All CAPS)
@@ -2890,13 +2666,13 @@ if (!is.na(x)) {
     areaNTName   <- ClnStr(areaNTName)
     areaNTAbbr   <- ClnStr(areaNTAbbr)
     areaNTAAbbr  <- ClnStr(areaNTAAbbr)
-    areaNTID     <- ClnStr(toupper(rlAreaNamesAbbrsIDs$ID))
+    areaNTID     <- ClnStr(stringr::str_to_upper(rlAreaNamesAbbrsIDs$ID))
  
     # fix up areaVisBorders data frame
     
-    rlAreaVisBorders$Key  <- toupper(rlAreaVisBorders$Key)
-    rlRegVisBorders$Key   <- toupper(rlRegVisBorders$Key)
-    rlL2VisBorders$Key    <- toupper(rlL2VisBorders$Key)
+    rlAreaVisBorders$Key  <- stringr::str_to_upper(rlAreaVisBorders$Key)
+    rlRegVisBorders$Key   <- stringr::str_to_upper(rlRegVisBorders$Key)
+    rlL2VisBorders$Key    <- stringr::str_to_upper(rlL2VisBorders$Key)
  
     # Working vectors for PRINT out.
     
@@ -3126,7 +2902,7 @@ rlAreaArrow = function(j){
       arrLim  <- max(diff(rx)/par("pin")/1000) * 1.05 # diff of range / plot inches / 1000  * 1.05
       
       #  verical grid lines 
-      axis(side=1, tck=1, labels=F, at=atRx,
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # grid lines in panel
  
       # if a refval is provided and in the rx range, then add line.
@@ -3156,7 +2932,7 @@ rlAreaArrow = function(j){
             if (abs(xdat1[m]-xdat2[m])> arrLim){         #  If arrow length is > 1.05/1000 inch do line draw...
            
                # long line/arrow
-               arrows(xdat1[m],laby[k],xdat2[m],laby[k],col=mstColors[pen[k]],
+               graphics::arrows(xdat1[m],laby[k],xdat2[m],laby[k],col=mstColors[pen[k]],
                      length=Arrow.Head.length,lwd=Arrow.lwd)
        
             } else {
@@ -3166,7 +2942,7 @@ rlAreaArrow = function(j){
                          Arrow.Dot.pch, mstColors[pen[k]], Arrow.Dot.pch.size, Arrow.Dot.pch.lwd, 
 	                 Arrow.Dot.Outline, Arrow.Dot.Outline.col, Arrow.Dot.Outline.lwd) 
                
-               #points(xdat1[m],laby[k],pch=20,cex=Dot.pch.size,col=mstColors[pen[k]])
+               #graphics::points(xdat1[m],laby[k],pch=20,cex=Dot.pch.size,col=mstColors[pen[k]])
        
             }
          }  
@@ -3320,7 +3096,7 @@ rlAreaBar = function(j){
       panelFill(col=Panel.Fill.col)
       
       # grid lines for bar
-      axis(side=1, tck=1, labels=F, at=atRx,
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # grids
       
       # if a refval is provided and in the rx range, then add line.
@@ -3345,12 +3121,12 @@ rlAreaBar = function(j){
          if (good[m]){
             # good value - draw bars as polygons.
             val    <- xdat1[m]                       # get value for bar height
-            polygon(c(0, val, val, 0, NA), rep(laby[k], 5) + wpy,
+            graphics::polygon(c(0, val, val, 0, NA), rep(laby[k], 5) + wpy,
                     col=mstColors[pen[k]] )  # fill color 
-            polygon(c(0, val, val, 0, NA), rep(laby[k], 5) + wpy,
+            graphics::polygon(c(0, val, val, 0, NA), rep(laby[k], 5) + wpy,
                     col=Bar.Outline.col, lwd=Bar.Outline.lwd, density=0)            # outline of bar
          }
-         lines(c(0,0), c(1-.5*Bar.barht,ke+.5*Bar.barht), col=1) # re-draw base line of bars   
+         graphics::lines(c(0,0), c(1-.5*Bar.barht,ke+.5*Bar.barht), col=1) # re-draw base line of bars   
       }
       
       #####
@@ -3452,7 +3228,7 @@ rlAreaBoxplot  <- function(j, boxnam){
                  
                  # check on the number of rows/etc.   - the $names list must be present after the last check.
           
-                 boxlist$names <- toupper(boxlist$names)   # force to upper case for match with areaNamesAbbrsIDs table (name table).
+                 boxlist$names <- stringr::str_to_upper(boxlist$names)   # force to upper case for match with areaNamesAbbrsIDs table (name table).
                  goodn         <- !is.na(boxlist$names)
                  nNams         <- length(boxlist$names)    # get number of names in structure
                  
@@ -3513,7 +3289,7 @@ rlAreaBoxplot  <- function(j, boxnam){
                     ErrFnd    <- TRUE
                     warnCnt()
                     lnn       <- paste0(nn[tnn],collapse=" ")
-                    xmsg      <- paste0("***02BD BOXPLOT ", pdColNum, " The sub-area names/abbreviations found in the ", boxnam, " boxplot data $names values do not match the border group names: ",lnn)
+                    xmsg      <- paste0("***02BD BOXPLOT ", pdColNum, " The area names/abbreviations found in the ", boxnam, " boxplot data $names values do not match the border group names: ",lnn)
                     warning(xmsg, call.=FALSE)
                  } # end of missing sub-areas.
               }  # end of look at boxplot lists.
@@ -3709,7 +3485,7 @@ rlAreaBoxplot  <- function(j, boxnam){
       panelFill(col=Panel.Fill.col)           # set fill for panel
      
       #  Grid lines
-      axis(side=1, tck=1, labels=F, at=atRx, 
+      graphics::axis(side=1, tck=1, labels=F, at=atRx, 
                  col=Grid.Line.col, lwd=Grid.Line.lwd) # grid lines
      
       # if a refval is provided and in the rx range, then add line.
@@ -3740,12 +3516,12 @@ rlAreaBoxplot  <- function(j, boxnam){
                #   plot points for outliers (rings)
                vals  <- out[group == m]  # get the list of values.
                if (colFull) {          # full color do the correct color
-                  points(vals, rep(ht,length(vals)), pch=1,
+                  graphics::points(vals, rep(ht,length(vals)), pch=1,
                       col=ifelse(BoxP.Use.Black,"black",mstColors[kp]),
                       cex=BoxP.Outlier.cex, lwd=BoxP.Outlier.lwd)
                } else {
                   # Greys - do the a grey.
-                  points(vals, rep(ht,length(vals)), pch=1,
+                  graphics::points(vals, rep(ht,length(vals)), pch=1,
                       col=BoxP.Outlier.BW.col,
                       cex=BoxP.Outlier.cex, lwd=BoxP.Outlier.lwd)
                }
@@ -3754,14 +3530,14 @@ rlAreaBoxplot  <- function(j, boxnam){
             # Draw thin line for lower to upper confidence values - box (ht high).
          
             wthiny   <- thiny * ksc
-            polygon(thin[,m], rep(ht,4)+ wthiny, col=mstColors[kp], border=NA)
+            graphics::polygon(thin[,m], rep(ht,4)+ wthiny, col=mstColors[kp], border=NA)
                   
             # Draw middle think box  (25% to 75%)
             wthicky  <- thicky * ksc
-            polygon(thick[,m], rep(ht,4)+ wthicky, col=mstColors[kp], border=NA)
+            graphics::polygon(thick[,m], rep(ht,4)+ wthicky, col=mstColors[kp], border=NA)
 
             # Median Bar - Lines looked crooked  (Median verical bar)
-            segments(med[m], ht+medy[1], med[m], ht+medy[2],         # use segment line.
+            graphics::segments(med[m], ht+medy[1], med[m], ht+medy[2],         # use segment line.
                   col=BoxP.Median.col, lwd=BoxP.Median.Dot.lwd)
          }
       }    # end k loop   
@@ -4014,7 +3790,7 @@ rlAreaCtrBar = function(j) {
       x         <- panelScale(rx,c(1-pad,ke+pad)) #   1 to 5/6 are the y values for each bar.
       panelFill(col=Panel.Fill.col)
  
-      axis(side=1, tck=1, labels=F, at=atRx,
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # grid
         
       # if a refval is provided and in the rx range, then add line.
@@ -4054,18 +3830,18 @@ rlAreaCtrBar = function(j) {
                wXP         <- c(val0,val1,val1,val0,NA)
                  
                # good value - draw bars are polygons.  (why to polygon)
-               polygon(wXP, wYP2, col=baseColRgb[pen[k],ik], 
+               graphics::polygon(wXP, wYP2, col=baseColRgb[pen[k],ik], 
                                   lwd=CSNBar.Outline.lwd, border=CSNBar.Outline.col,
                                   lty=CSNBar.Outline.lty) 
 
-               #polygon(wXP, wYP2, col=CSNBar.Outline.col, density=0)
+               #graphics::polygon(wXP, wYP2, col=CSNBar.Outline.col, density=0)
             }
          }
       }   # end of k loop   
       # finish up panel
        
       # draw vertical line at zero.
-      lines(rep(0,2), c(1-padMinus,ke+padMinus),
+      graphics::lines(rep(0,2), c(1-padMinus,ke+padMinus),
                lty=CBar.Zero.Line.lty, lwd=CBar.Zero.Line.lwd, 
                col=CBar.Zero.Line.col)
        
@@ -4267,7 +4043,7 @@ rlAreaDot = function(j,dSignif=FALSE){
       panelFill(col=Panel.Fill.col)
      
       # grid lines    
-      axis(side=1, tck=1,labels=F, at=atRx, 
+      graphics::axis(side=1, tck=1,labels=F, at=atRx, 
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # grid   # updated 7/24/15 to include at=
      
       # if a refval is provided and in the rx range, then add line.
@@ -4424,7 +4200,7 @@ rlAreaDotConf <-  function(j){
    #
    #  dealing with a dot, so padding should be 1/2 width of dot in rx units.
    #wP         <- par("pin")[1]  # width of panel
-   #wD         <- strwidth(" ",cex=Dot.Conf.pch.size)/2        # get 1/2 of character width 
+   #wD         <- graphics::strwidth(" ",cex=Dot.Conf.pch.size)/2        # get 1/2 of character width 
    #rwD        <- (wD/wP) * diff(rx)  # dot width as percentage of panel width  "times"   number of x units to graph
    
    #rx         <- rx + c(-rwD,rwD)    # make room for dot and no more.
@@ -4487,7 +4263,7 @@ rlAreaDotConf <-  function(j){
   
       panelFill(col=Panel.Fill.col)
   
-      axis(side=1, tck=1, labels=F, at=atRx,             # change 7/24/15 - add at= to get grids at the same points as the ticks
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,             # change 7/24/15 - add at= to get grids at the same points as the ticks
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # vertical grid lines
      
       # if a refval is provided and in the rx range, then add line.
@@ -4501,7 +4277,7 @@ rlAreaDotConf <-  function(j){
          if (goodrow[m]) { # if valid upper value.    # 7/25/15 changed to goodrow and covered all plotting.
         
             # draw confidence line.
-            lines(c(lower[m],upper[m]), rep(laby[k],2),
+            graphics::lines(c(lower[m],upper[m]), rep(laby[k],2),
                    col=mstColors[pen[k]], lwd=Dot.Conf.lwd)
             
             # plot dot.
@@ -4663,7 +4439,7 @@ rlAreaDotSe = function(j){
 
       panelFill(col=Panel.Fill.col)
 
-      axis(side=1, tck=1, labels=F, at=atRx,
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,
                col=Grid.Line.col, lwd=Grid.Line.lwd) # grid lines - 7/24/15 add at=atRx to force Grid line to match ticks.
      
       # if a refval is provided and in the rx range, then add line.
@@ -4678,7 +4454,7 @@ rlAreaDotSe = function(j){
          #   change 7/24/15 - only plot glyph if both data column are not NA.
          if (goodrow[m]) { # if all values are good
             # confidence interval based on SE - line .
-            lines(c(lower[m],upper[m]), rep(laby[k], 2),
+            graphics::lines(c(lower[m],upper[m]), rep(laby[k], 2),
                     col=mstColors[pen[k]],lwd=Dot.SE.lwd)
             
             plotPoint(xdat1[m], laby[k], 
@@ -4753,13 +4529,13 @@ rlAreaID = function(j){
   
    # column titles
    if (xLab1 != "") {
-      mtext(xLab1,side=3,line=Id.Title.1.pos,cex=Text.cex)
+      graphics::mtext(xLab1,side=3,line=Id.Title.1.pos,cex=Text.cex)
    }
-   mtext(xLab2,side=3,line=Id.Title.2.pos,cex=Text.cex)
+   graphics::mtext(xLab2,side=3,line=Id.Title.2.pos,cex=Text.cex)
    
    widthPanel    <- xpin[1]   # inches
 
-   widthxLab2    <- strwidth(xLab2,units="inch",cex=Text.cex)
+   widthxLab2    <- graphics::strwidth(xLab2,units="inch",cex=Text.cex)
    
    #  one label for ID column.  It's centered, so use 1/2 of the width. 
    lastLab2Space <<- ( widthPanel + colSepGap - widthxLab2 ) / 2  # pos - space (have), neg - overhang (need).
@@ -4776,9 +4552,9 @@ rlAreaID = function(j){
       x <- panelScale(rx,ry)
   
       # bottom of column footnote (title)
-      mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)                      # bottom labels.
+      graphics::mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)                      # bottom labels.
   
-      widthxLab3    <- strwidth(lab3[j],units="inch", cex=Text.cex)
+      widthxLab3    <- graphics::strwidth(lab3[j],units="inch", cex=Text.cex)
       lastLab3Space <<- ( widthPanel + colSepGap - widthxLab3  ) / 2
    }
 
@@ -4790,7 +4566,7 @@ rlAreaID = function(j){
 
    #### idstart = 0.137    # inches from base line  (not relative)  (appears to be replaced below..)
 
-   TextH2  <- max(strheight(areaDatIDNames,units="inch",cex=(Id.Text.cex * IDcex.mod) )) / 2  # maximum length value /2
+   TextH2  <- max(graphics::strheight(areaDatIDNames,units="inch",cex=(Id.Text.cex * IDcex.mod) )) / 2  # maximum length value /2
 
    par(pch = Id.Dot.pch)   # set up the character.
   
@@ -4829,7 +4605,7 @@ rlAreaID = function(j){
    
       xHalfSym      <- ((Id.Dot.width * Id.Cex.mod) + Id.Space)/2  * xUnitsPerInch
       xStartu       <- xHalfSym                                # ID offset in units.   (a little more than 1/2 width of symbole
-      xSymWu        <- xHalfSym - 0.25*Id.Space       # ID symbol now in units.
+      xSymWu        <- xHalfSym - 0.15*Id.Space       # ID symbol now in units.
       
       #cat("xStartu:",xStartu,"  xHalfSym:",xHalfSym,"\n")
       
@@ -4845,7 +4621,7 @@ rlAreaID = function(j){
       
       #cat("Id.Text.cex:",Id.Text.cex,"  IDcex.mod:",IDcex.mod,"  prod:",(Id.Text.cex * IDcex.mod),"\n")
       
-      text(xPos2u, yPos2u, gnams,  cex=(Id.Text.cex * IDcex.mod ), xpd=T, pos=4)
+      graphics::text(xPos2u, yPos2u, gnams,  cex=(Id.Text.cex * IDcex.mod ), xpd=T, pos=4)
       
           
       #  Note: the xPosu and yPosu coordinates is the center of the point not the starting edge of a character.
@@ -4870,9 +4646,9 @@ rlAreaID = function(j){
       
       # ______Bottom Label/Title - Lab3 ______
 
-      mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles
+      graphics::mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles
       
-      lastLab3Space <<- ( xpin[1] - strwidth(lab3[j], units="inch", cex=Text.cex) ) / 2
+      lastLab3Space <<- ( xpin[1] - graphics::strwidth(lab3[j], units="inch", cex=Text.cex) ) / 2
    }
 
 }
@@ -4926,7 +4702,7 @@ rlAreaID = function(j){
 #
 # 1)                    Cummulative Maps             Median Based Contours 
 # 2)    Highlighted    b zzzzz Above Featured Rows    b zzzzz Featured Above        Two Ended Cumulative Maps                           
-# 3)    States         b zzzzz Below Featured Rows    b zzzzz Featured Below           zzzzz Highlighted      
+# 3)    xxxxx          b zzzzz Below Featured Rows    b zzzzz Featured Below           zzzzz Highlighted      
 # 
 #     Map.Hdr2     Map.Hdr2, X "Above Featured Rows"  Map.Hdr2  X "Featured Above"  Map.Hdr2 "Highlighted"
 #                  Map.Hdr2, X "Below Featured Rows"  Map.Hdr2  X "Featured Below"
@@ -4996,10 +4772,10 @@ rlAreaMap = function(j) {
        xLab1 <- ""
   }
   
-  if (xLab1 != "") mtext(xLab1,side=3,line=Title.Line.2.pos,cex=Text.cex)
-  mtext(xLab2,side=3,line=Title.Line.2x.pos,cex=Text.cex)           
+  if (xLab1 != "") graphics::mtext(xLab1,side=3,line=Title.Line.2.pos,cex=Text.cex)
+  graphics::mtext(xLab2,side=3,line=Title.Line.2x.pos,cex=Text.cex)           
 
-  lastLab2Space  <<- - ( xpin[1] - strwidth(xLab2,units="inch",cex=Text.cex) ) / 2
+  lastLab2Space  <<- - ( xpin[1] - graphics::strwidth(xLab2,units="inch",cex=Text.cex) ) / 2
   
   # Put the initial colors for all sub-areas into a vector.
 
@@ -5025,7 +4801,7 @@ rlAreaMap = function(j) {
   
   #cat("map - areaDatKey:",areaDatKey,"\n")
 
-  # Drawing Loop
+  # Drawing Loop   # down the page - each group/row
   for (i in 1:numGrps) {
 
     if ( i == medGrp & medGrpSize == 1 ){                   # line break in maps.   Group n/2 - middle group of n (odd)
@@ -5159,10 +4935,10 @@ rlAreaMap = function(j) {
     #
     if (Map.L2Borders) {    # area area overlay
         # map fill sub-areas
-      polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+      graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
               density=-1, col=Map.L2.Fill.col, border=FALSE)
         # map borders of sub-areas
-      polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+      graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
               density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)  # white
       #cat("Drew L2 Borders\n")
     }
@@ -5176,13 +4952,13 @@ rlAreaMap = function(j) {
     #
     #  Draw the colors for all active sub-areas.
     #
-    polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
+    graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
                   density=-1, col=VisCol2, border=FALSE)
     
     #cat("Drew active sub-area colors.\n")
     
     #
-    #  setup each group of sub-areas and draw polygons.
+    #  setup each group of sub-areas and draw polygons.  (boundaries)
     #    Not Referenced sub-areas  
     
     if (NotUsedFlag) {
@@ -5190,7 +4966,7 @@ rlAreaMap = function(j) {
        wVisBorders   <- rlAreaVisBorders[NotUsed,]
      
        # map sub-areas without data (not used)
-       polygon(wVisBorders$x,wVisBorders$y,
+       graphics::polygon(wVisBorders$x,wVisBorders$y,
                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)   # white
        #cat("Drew not used sub-areas borders.\n")
     }
@@ -5201,7 +4977,7 @@ rlAreaMap = function(j) {
     if (backFlag) {
        wVisBorders   <- NULL
        wVisBorders   <- rlAreaVisBorders[back,]
-       polygon(wVisBorders$x,wVisBorders$y,
+       graphics::polygon(wVisBorders$x,wVisBorders$y,
                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)    # white
        #cat("Drew not-active sub-areas borders.\n")
     }
@@ -5212,7 +4988,7 @@ rlAreaMap = function(j) {
     if (highFlag) {
        wVisBorders   <- NULL
        wVisBorders   <- rlAreaVisBorders[high,]
-       polygon(wVisBorders$x,wVisBorders$y,
+       graphics::polygon(wVisBorders$x,wVisBorders$y,
                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
        #cat("Drew highlighted sub-areas borders.\n")
     }
@@ -5223,7 +4999,7 @@ rlAreaMap = function(j) {
     if (foreFlag) {
        wVisBorders   <- NULL
        wVisBorders   <- rlAreaVisBorders[fore,]
-       polygon(wVisBorders$x,wVisBorders$y,
+       graphics::polygon(wVisBorders$x,wVisBorders$y,
                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
        #cat("Drew Active sub-areas borders.\n")
     }
@@ -5234,7 +5010,7 @@ rlAreaMap = function(j) {
     #
     
     if (Map.RegBorders && regionsB) {       # regions boundaries overlay
-       polygon(rlRegVisBorders$x, rlRegVisBorders$y,
+       graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)     # black
        #cat("Drew Region Borders\n")
     }
@@ -5246,7 +5022,7 @@ rlAreaMap = function(j) {
     #    Outline L3 (total) area (complete area boundary)
     #
     if (Map.L3Borders) {
-       polygon(rlL3VisBorders$x, rlL3VisBorders$y,
+       graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
            density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside US boundary
        #
        #  If U. S. map, add extra labels for sub-areas moved.
@@ -5254,9 +5030,9 @@ rlAreaMap = function(j) {
        if (areaUSData) {                                             ##### replace with feature based code.
           if (i == 1) {
              # if first map in column
-             text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
-             text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
-             text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
+             graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
+             graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
+             graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
           }
        }
     } 
@@ -5274,9 +5050,9 @@ rlAreaMap = function(j) {
      #x <- panelScale(rxpoly2,rypoly2)
      
      # ______Bottom Label/Title - Lab3 ______
-     mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
+     graphics::mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
  
-     lastLab3Space <<- (xpin[1] - strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
+     lastLab3Space <<- (xpin[1] - graphics::strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
   }
   
 }
@@ -5335,14 +5111,14 @@ rlAreaMapCum = function(j) {
   #
   
   # line 1 - title, no boxes.
-  mtext(banner["mapcum","H1"],side=3,line=Title.Line.1.pos,cex=Text.cex)   # use line position..
+  graphics::mtext(banner["mapcum","H1"],side=3,line=Title.Line.1.pos,cex=Text.cex)   # use line position..
 
   # Line 2 - box and title
   DrawBoxAndText(banner["mapcum","H2"], Text.cex, Map.Lab.Box.Width, mstColors[8],  "black", Title.Line.2.pos)
   
   DrawBoxAndText(banner["mapcum","H3"], Text.cex, Map.Lab.Box.Width, Map.Bg.col, "black", Title.Line.2x.pos)
 
-  lastLab2Space  <<- - ( xpin[1] - ( strwidth(banner["mapcum","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
+  lastLab2Space  <<- - ( xpin[1] - ( graphics::strwidth(banner["mapcum","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
   
   VisNodes       <- is.na(rlAreaVisBorders$x)
   VisKeys        <- rlAreaVisBorders$Key[VisNodes]
@@ -5405,10 +5181,10 @@ rlAreaMapCum = function(j) {
      #
      if (Map.L2Borders) {    # area area overlay
          # map fill areas
-       polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+       graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
                density=-1, col=Map.L2.Fill.col, border=FALSE)
          # map borders
-       polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+       graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
                density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)   # white
      }
      #
@@ -5420,7 +5196,7 @@ rlAreaMapCum = function(j) {
      #
      
      if (Map.RegBorders && regionsB) {       # regions boundary overlay
-        polygon(rlRegVisBorders$x, rlRegVisBorders$y,
+        graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                 density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)
      }
      #
@@ -5460,32 +5236,32 @@ rlAreaMapCum = function(j) {
     
      VisCol[VisHoles] <- Map.Bg.col
           
-     polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
+     graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
                  density=-1, col=VisCol, border=FALSE)
      
      #  setup each group of sub-areas and draw polygons.
      #    Not Referenced sub-areas  
      if (NotUsedFlag) {
         wVisBorders   <- rlAreaVisBorders[NotUsed,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)    # white
      }
      #    Background (not-active) sub-areas
      if (backFlag) {
         wVisBorders   <- rlAreaVisBorders[back,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)    # white
      }
      #    Highlighted sub-areas
      if (highFlag) {
         wVisBorders   <- rlAreaVisBorders[high,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
      }
      #    Foreground (active) sub-areas
      if (foreFlag) {
         wVisBorders   <- rlAreaVisBorders[fore,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
      }
      
@@ -5495,7 +5271,7 @@ rlAreaMapCum = function(j) {
      #
      
      if (Map.RegBorders && regionsB) {       # regions boundaries overlay
-        polygon(rlRegVisBorders$x, rlRegVisBorders$y,
+        graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                 density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)     # black
      }
      #
@@ -5506,13 +5282,13 @@ rlAreaMapCum = function(j) {
      # Outline Country area (total area).
      #
      if (Map.L3Borders) {
-        polygon(rlL3VisBorders$x, rlL3VisBorders$y,
+        graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
             density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside US boundary
         if (areaUSData) {
            if (i == 1) {
-              text(135,31,'DC',cex=Map.Area.Spec.cex,adj=.5, col=1)
-              text(22, 17,'AK',cex=Map.Area.Spec.cex,adj=.5, col=1)
-              text(47, 8, 'HI',cex=Map.Area.Spec.cex,adj=.5, col=1)
+              graphics::text(135,31,'DC',cex=Map.Area.Spec.cex,adj=.5, col=1)
+              graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex,adj=.5, col=1)
+              graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex,adj=.5, col=1)
            }
         } 
      }
@@ -5530,9 +5306,9 @@ rlAreaMapCum = function(j) {
      #x <- panelScale(rxpoly2,rypoly2)
      
      # ______Bottom Label/Title - Lab3 ______
-     mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
+     graphics::mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
   
-     lastLab3Space <<- (xpin[1] - strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
+     lastLab3Space <<- (xpin[1] - graphics::strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
   }
   
 }
@@ -5580,14 +5356,14 @@ rlAreaMapMedian = function(j){
    #
    
    # line 1 - title, no boxes.
-   mtext(banner["mapmed","H1"],side=3,line=Title.Line.1.pos,cex=Text.cex)   # use line position..
+   graphics::mtext(banner["mapmed","H1"],side=3,line=Title.Line.1.pos,cex=Text.cex)   # use line position..
 
    # Line 2 - box and title
    DrawBoxAndText(banner["mapmed","H2"], Text.cex, Map.Lab.Box.Width, mstColors[9],  "black", Title.Line.2.pos)
    
    DrawBoxAndText(banner["mapmed","H3"], Text.cex, Map.Lab.Box.Width, mstColors[10], "black", Title.Line.2x.pos)
    
-   lastLab2Space  <<- - ( xpin[1] - ( strwidth(banner["mapmed","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
+   lastLab2Space  <<- - ( xpin[1] - ( graphics::strwidth(banner["mapmed","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
    
    #cat("mapmed - areaDatKey:",areaDatKey,"\n")
 
@@ -5674,10 +5450,10 @@ rlAreaMapMedian = function(j){
       #
       if (Map.L2Borders) {    # area area overlay
           # map fill areas
-        polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
                 density=-1, col=Map.L2.Fill.col, border=FALSE)
           # map borders
-        polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
                 density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)   # white
       }
       #
@@ -5732,39 +5508,39 @@ rlAreaMapMedian = function(j){
      
       VisCol[VisHoles] <- Map.Bg.col
            
-      polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
+      graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
                   density=-1, col=VisCol, border=FALSE)
 
       #  setup each group of sub-areas and draw polygons.
       #    Not Referenced sub-areas  
       if (NotUsedFlag) {
          wVisBorders   <- rlAreaVisBorders[NotUsed,]
-         polygon(wVisBorders$x,wVisBorders$y,
+         graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)  # white
       }
       #    Background (not-active) sub-areas
       if (backFlag) {
          wVisBorders   <- rlAreaVisBorders[back,]
-         polygon(wVisBorders$x,wVisBorders$y,
+         graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)  # white
       }
 
       #    Highlighted sub-areas (2)
       if (highUbdr) {
          wVisBorders   <- rlAreaVisBorders[highU,]
-         polygon(wVisBorders$x,wVisBorders$y,
+         graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)  # black
       }
       if (highLbdr) {
          wVisBorders   <- rlAreaVisBorders[highL,]
-         polygon(wVisBorders$x,wVisBorders$y,
+         graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)  # black
       }
    
       #    Foreground (active) sub-areas
       if (foreFlag) {
          wVisBorders   <- rlAreaVisBorders[fore,]
-         polygon(wVisBorders$x,wVisBorders$y,
+         graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)  # black
       }
    
@@ -5774,7 +5550,7 @@ rlAreaMapMedian = function(j){
       #
       
       if (Map.RegBorders && regionsB) {       # regions boundaries overlay
-         polygon(rlRegVisBorders$x, rlRegVisBorders$y,
+         graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                  density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)   # black
       }
       #
@@ -5785,14 +5561,14 @@ rlAreaMapMedian = function(j){
       # Outline Country area (total area).
       #
       if (Map.L3Borders) {
-         polygon(rlL3VisBorders$x, rlL3VisBorders$y,
+         graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
              density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside US boundary
        
          if (areaUSData) {
             if (i == 1) {
-               text(135,31,'DC',cex=Map.Area.Spec.cex,adj=.5, col=1)
-               text(22, 17,'AK',cex=Map.Area.Spec.cex,adj=.5, col=1)
-               text(47, 8, 'HI',cex=Map.Area.Spec.cex,adj=.5, col=1)
+               graphics::text(135,31,'DC',cex=Map.Area.Spec.cex,adj=.5, col=1)
+               graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex,adj=.5, col=1)
+               graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex,adj=.5, col=1)
             }
          }
       }
@@ -5810,9 +5586,9 @@ rlAreaMapMedian = function(j){
       #x <- panelScale(rxpoly2,rypoly2)
       
       # ______Bottom Label/Title - Lab3 ______
-      mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
+      graphics::mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
    
-      lastLab3Space <<- (xpin[1] - strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
+      lastLab3Space <<- (xpin[1] - graphics::strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
    }
 
 }
@@ -5864,17 +5640,17 @@ rlAreaMapTail = function(j){
    # Line 1 - Not used
    
    # line 2 - title, no boxes.
-   mtext(banner["maptail","H2"],side=3,line=Title.Line.2.pos,cex=Text.cex)   # use line position..
+   graphics::mtext(banner["maptail","H2"],side=3,line=Title.Line.2.pos,cex=Text.cex)   # use line position..
  
    # Line 3 - box and title
    DrawBoxAndText(banner["maptail","H3"], Text.cex, Map.Lab.Box.Width, mstColors[8],  "black", Title.Line.2x.pos)
  
-   lastLab2Space  <<- - ( xpin[1] - ( strwidth(banner["maptail","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
+   lastLab2Space  <<- - ( xpin[1] - ( graphics::strwidth(banner["maptail","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
  
    #  If needed this work be the place for Panel # N - Trailer code.
    
    #  JP - removed - temp
-   #  mtext('Further From Median',side=3,line=Title.Line.2x.pos,at=.15,cex=Text.cex,adj=0)
+   #  graphics::mtext('Further From Median',side=3,line=Title.Line.2x.pos,at=.15,cex=Text.cex,adj=0)
    
    # need a median group point for calculations on the two tailed maps
    if (medGrp > 0 ) {
@@ -5935,10 +5711,10 @@ rlAreaMapTail = function(j){
      #
      if (Map.L2Borders) {    # area area overlay
          # map fill areas
-       polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+       graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
                density=-1, col=Map.L2.Fill.col, border=FALSE)
          # map borders
-       polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+       graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
                density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)  # white
      }
      #
@@ -5988,7 +5764,7 @@ rlAreaMapTail = function(j){
            
      # draw the combined fill colors in VisBorder file order.
       
-     polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,                    # plot all polygons
+     graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,                    # plot all polygons
                   density=-1, col = VisCol, border = FALSE)            # fill in all areas. (1 to 6, 7, hole)
      
      #  setup each group of sub-areas and draw polygons.
@@ -5996,25 +5772,25 @@ rlAreaMapTail = function(j){
      
      if (NotUsedFlag) {
         wVisBorders   <- rlAreaVisBorders[NotUsed,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)   # white
      }
      #    Background (not-active) sub-areas
      if (backFlag) {
         wVisBorders   <- rlAreaVisBorders[back,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)   # white
      }
      #    Highlighted sub-areas 
      if (highFlag) {
         wVisBorders   <- rlAreaVisBorders[high,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)   # black
      }
      #    Foreground (active) sub-areas
      if (foreFlag) {
         wVisBorders   <- rlAreaVisBorders[fore,]
-        polygon(wVisBorders$x,wVisBorders$y,
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)   # black
      }
    
@@ -6024,7 +5800,7 @@ rlAreaMapTail = function(j){
      #
      
      if (Map.RegBorders && regionsB) {       # regions boundaries overlay
-        polygon(rlRegVisBorders$x, rlRegVisBorders$y,
+        graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                 density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)    #  black
      }
      #
@@ -6035,13 +5811,13 @@ rlAreaMapTail = function(j){
      # Outline Country area (total area).
      #
      if (Map.L3Borders) {
-        polygon(rlL3VisBorders$x, rlL3VisBorders$y,
+        graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
              density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside US boundary
         if (areaUSData) {
            if (i == 1) {
-              text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
-              text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
-              text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
+              graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
+              graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
+              graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
            }
         }
      }
@@ -6059,9 +5835,9 @@ rlAreaMapTail = function(j){
      #x <- panelScale(rxpoly2,rypoly2)
      
      # ______Bottom Label/Title - Lab3 ______
-     mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
+     graphics::mtext(side=1,lab3[j],line=Title.Line.3.pos,cex=Text.cex)   # bottom column titles   
   
-     lastLab3Space <<- (xpin[1] - strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
+     lastLab3Space <<- (xpin[1] - graphics::strwidth(lab3[j], cex=Text.cex, units="inch")) / 2
   }
 
 }  
@@ -6097,8 +5873,8 @@ rlAreaRank = function(j){
 
   panelSelect(panels,1,j)
   panelScale(rx,ry)
-  mtext('Area Rank',side=3,line=Title.Line.1.pos,cex=Text.cex)
-  # mtext('areas',side=3,line=Title.Line.2.pos,cex=Text.cex)
+  graphics::mtext('Area Rank',side=3,line=Title.Line.1.pos,cex=Text.cex)
+  # graphics::mtext('areas',side=3,line=Title.Line.2.pos,cex=Text.cex)
  
   for (i in 1:numGrps){
      gsubs <- ib[i]:ie[i]
@@ -6113,7 +5889,7 @@ rlAreaRank = function(j){
      x <- panelScale(rx, c(1-pad, ke+pad))
     
      Fgsubs <- formatC(rsubs, format="f", width=3, digits=0)
-     text(rep(rankstart, ke), laby+.1, Fgsubs, adj=0, cex=Text.cex)
+     graphics::text(rep(rankstart, ke), laby+.1, Fgsubs, adj=0, cex=Text.cex)
   }
 
   #  No reference values for this type of column.
@@ -6238,8 +6014,8 @@ rlAreaScatDot = function(j){
    # Y axis & text - can do once for all  
    YAxis_cex <- TS.Axis.cex * 0.75
    xPs       <- par("ps")
-   xHPsLU    <- strheight("00000",cex=1,units="user")
-   xHDesPsLU <- strheight("00000",cex=YAxis_cex,units="user")
+   xHPsLU    <- graphics::strheight("00000",cex=1,units="user")
+   xHDesPsLU <- graphics::strheight("00000",cex=YAxis_cex,units="user")
    xDifHLU   <- xHPsLU - xHDesPsLU
    YAxis_adj <- xDifHLU / xHPsLU
    #cat("YAxis adjustment - YAxis_adj:",YAxis_adj,"  YAxis_cex:",YAxis_cex,"\n")
@@ -6289,7 +6065,7 @@ rlAreaScatDot = function(j){
       panelFill(col=Panel.Fill.col)            # set fill for panel
        
       # vertical grid lines.
-      axis(side=1, tck=1, labels=F, at=atRx,
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # grid lines
   
       # y axis labels
@@ -6301,16 +6077,16 @@ rlAreaScatDot = function(j){
       }
       # optional horizontal grid.
       if (SCD.hGrid) {
-         axis(side=2,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd, at=atRy) # Grid lines
+         graphics::axis(side=2,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd, at=atRy) # Grid lines
       }
        
       # parameters and variable setup outside of loop.
       
-      axis(side=2, tick=F, cex.axis=YAxis_cex, 
+      graphics::axis(side=2, tick=F, cex.axis=YAxis_cex, 
              mgp=mgpLeft, line= -YAxis_adj*0.3,
              at=atRy, 
              labels=as.character(atRy))
-      mtext(lab4[j],side=2,
+      graphics::mtext(lab4[j],side=2,
              line=Title.Line.5.pos,
              cex=TS.Axis.cex)
       
@@ -6325,7 +6101,7 @@ rlAreaScatDot = function(j){
           # draw symetric line if within box range.
           dx    <- c(diagr[1],diagr[2])
           dy    <- c(diagr[1],diagr[2])
-          lines(dx,dy, col=SCD.DiagLine.col, lwd=SCD.DiagLine.lwd, lty=SCD.DiagLine.lty)  # place a diagonal line on plot.
+          graphics::lines(dx,dy, col=SCD.DiagLine.col, lwd=SCD.DiagLine.lwd, lty=SCD.DiagLine.lty)  # place a diagonal line on plot.
           
           #  print out the statistics for the line
           if (MST.Debug == 1) {
@@ -6363,7 +6139,7 @@ rlAreaScatDot = function(j){
       #  only the graphic points  19:25 are supported. 
       #
        
-      points(wS$x, wS$y, pch=wS$pch, col=wS$col, bg=wS$bg, cex=wS$cex, lwd=wS$lwd)  # removed 
+      graphics::points(wS$x, wS$y, pch=wS$pch, col=wS$col, bg=wS$bg, cex=wS$cex, lwd=wS$lwd)  # removed 
       #     col = border of symbol,  bg = background color of symbol.
     
       #   related to NA processing, points will just not draw a symbol if one of the x,y coordinates is NA.
@@ -6624,7 +6400,7 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
         x <- panelScale(rx,c(1-pad,ke+pad)) #   1 to 5 are the y values for each bar.
         panelFill(col=Panel.Fill.col)
  
-        axis(side=1, tck=1, labels=F, at=atRx,
+        graphics::axis(side=1, tck=1, labels=F, at=atRx,
                      col=Grid.Line.col, lwd=Grid.Line.lwd) # grid
         
         # if a refval is provided and in the rx range, then add line.
@@ -6675,9 +6451,9 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
                  
                  # good value - draw bars are polygons.  (why to polygon)
        
-                 polygon(wXP,wYP2,col=baseColRgb[pen[k],ik],lwd=CSNBar.Outline.lwd,border=CSNBar.Outline.col,lty=CSNBar.Outline.lty) 
+                 graphics::polygon(wXP,wYP2,col=baseColRgb[pen[k],ik],lwd=CSNBar.Outline.lwd,border=CSNBar.Outline.col,lty=CSNBar.Outline.lty) 
                  
-                 #polygon(wXP,wYP2,col=CSNBar.Outline.col,density=0)
+                 #graphics::polygon(wXP,wYP2,col=CSNBar.Outline.col,density=0)
              
               } # end of ik loop (plotting Segments)
               #
@@ -6700,13 +6476,13 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
                     #  with non-filled, fill is col, lwd deals with border using col.
                     #   filled symbol
                     
-                    points(mX,mY,pch=SNBar.MDot.pch, cex=SNBar.MDot.pch.size, 
+                    graphics::points(mX,mY,pch=SNBar.MDot.pch, cex=SNBar.MDot.pch.size, 
                              bg=SNBar.MDot.pch.fill,      # fill color  
                              col = SNBar.MDot.pch.border.col,    # border color 
                              lwd = SNBar.MDot.pch.border.lwd)
                  } else {
                     # non filled symbol
-                    points(mX,mY,pch=SNBar.MDot.pch, cex=SNBar.MDot.pch.size, 
+                    graphics::points(mX,mY,pch=SNBar.MDot.pch, cex=SNBar.MDot.pch.size, 
                              col = SNBar.MDot.pch.fill,   # fill and border color 
                              lwd = SNBar.MDot.pch.border.lwd)
                  }
@@ -6937,8 +6713,8 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    #####  Can be done once for all interations of loop.
    YAxis_cex <- TS.Axis.cex * 0.75
    xPs       <- par("ps")
-   xHPsLU    <- strheight("00000",cex=1,units="user")
-   xHDesPsLU <- strheight("00000",cex=YAxis_cex,units="user")
+   xHPsLU    <- graphics::strheight("00000",cex=1,units="user")
+   xHDesPsLU <- graphics::strheight("00000",cex=YAxis_cex,units="user")
    xDifHLU   <- xHPsLU - xHDesPsLU
    YAxis_adj <- xDifHLU / xHPsLU
    #cat("YAxis adjustment - YAxis_adj:",YAxis_adj,"  YAxis_cex:",YAxis_cex,"\n")
@@ -6985,7 +6761,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
       panelFill(col=Panel.Fill.col)     # set fill for panel
       
       # draw grid lines in panel - vertical (x axis)
-      axis(side=1, tck=1, labels=F, at=atRx,
+      graphics::axis(side=1, tck=1, labels=F, at=atRx,
                    col=Grid.Line.col, lwd=Grid.Line.lwd) # grid lines (x axis)
       
       if (i == medGrp & medGrpSize == 1 ) {  # median panel
@@ -7000,20 +6776,20 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
      
       }
       if (TS.hGrid) {   # horizontal grids on Y axis
-           axis(side=2,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd, at=atRy) # Grid lines
+           graphics::axis(side=2,tck=1,labels=F,col=Grid.Line.col,lwd=Grid.Line.lwd, at=atRy) # Grid lines
       }
      
       ## Y axis values and labels
-      #axis(side=2, tick=F, mgp=mgpLeft, cex.axis= TS.Axis.cex*.75 , 
+      #graphics::axis(side=2, tick=F, mgp=mgpLeft, cex.axis= TS.Axis.cex*.75 , 
       #       at=atRy, labels=as.character(atRy)) # Y axis labels
-      #mtext(lab4[j],side=2,line=Title.Line.5.pos,cex=TS.Axis.cex)  # Y axis title
+      #graphics::mtext(lab4[j],side=2,line=Title.Line.5.pos,cex=TS.Axis.cex)  # Y axis title
       #
        
         
-      axis(side=2, tick=F, cex.axis=YAxis_cex, mgp=mgpLeft, line= -YAxis_adj*0.3,
+      graphics::axis(side=2, tick=F, cex.axis=YAxis_cex, mgp=mgpLeft, line= -YAxis_adj*0.3,
              at=atRy, 
              labels=as.character(atRy))
-      mtext(lab4[j],side=2,
+      graphics::mtext(lab4[j],side=2,
              line=Title.Line.5.pos,
              cex=TS.Axis.cex)
 
@@ -7091,7 +6867,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
                   #print(wPoly)
                   #cat("colors:", mstColors[kp+12],"  kp+12:", kp+12,"\n")
                    
-                  polygon(wPoly, col=mstColors[kp+12], border=NA)
+                  graphics::polygon(wPoly, col=mstColors[kp+12], border=NA)
                }
             }
          
@@ -7116,7 +6892,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
      	 wLine = wDArr[,2]    #  Get Y values for mid line 
               
          #  Plot mid Line
-         lines(wX,wLine,col=mstColors[kp],lwd=TS.lwd)
+         graphics::lines(wX,wLine,col=mstColors[kp],lwd=TS.lwd)
          
          #   NA processing,  in the lines call, the missing point (x,y) is just not drawn or other points connected to it.
          #    a gap is generated.
@@ -7159,7 +6935,7 @@ AddRefLine <- function (wRefVal, wKe, wRx) {
      if (!is.na(wRefVal))  {
         if(is.between.r(wRefVal,wRx)) {
            # reference line
-           lines(rep(wRefVal,2),c(1-padMinus,wKe+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
+           graphics::lines(rep(wRefVal,2),c(1-padMinus,wKe+padMinus),lty=Ref.Val.lty,lwd=Ref.Val.lwd,col=iRef.Val.col)
         }
      }
   }
@@ -7223,7 +6999,7 @@ AliasToKey <- function(xR,aNAI) {
    # x --> a vector of the registry names from SeerStat output
    ErrFnd     <- FALSE
    
-   wReg       <- toupper(xR)
+   wReg       <- stringr::str_to_upper(xR)
    wIndex     <- rep(NA,length(wReg))                  # NA results of keys
    wKey       <- rep(NA,length(wReg))                  # NA results of keys
    xout1      <- sapply(c(1:length(aNAI$Alias)), function (x) grep(aNAI$Alias[x], wReg, ignore.case=TRUE))
@@ -8699,9 +8475,9 @@ DrawBoxAndText <- function(wTxt, wTxt.cex, sq.width, sq.col, sq.border.col, ypos
  
    #   may need to add logic to change number of leading blanks based on point size.
    
-   wLeni    <- strwidth(paste0("    ",wTxt),units="in", cex=wTxt.cex)
+   wLeni    <- graphics::strwidth(paste0("    ",wTxt),units="in", cex=wTxt.cex)
    
-   #wLenu   <- strwidth(paste0("    ",wTxt),units="us", cex=wTxt.cex)
+   #wLenu   <- graphics::strwidth(paste0("    ",wTxt),units="us", cex=wTxt.cex)
    #cat("len i:", wLeni, "  len u:",wLenu,"  ratio:",wLenu/wLeni,"\n")
    
    nStr1i   <- (xpin[1]/2) - (wLeni/2)
@@ -8748,11 +8524,11 @@ DrawBoxAndText <- function(wTxt, wTxt.cex, sq.width, sq.col, sq.border.col, ypos
    # line one.  (four blanks for box padding. May have to vary as font size changes.
    
    # write text (centered)
-   mtext(paste0("    ",wTxt),line=yposl,side=3, cex=wTxt.cex)   # pos = below centered.
+   graphics::mtext(paste0("    ",wTxt),line=yposl,side=3, cex=wTxt.cex)   # pos = below centered.
   
    # draw square over the blanks in the title on the left.
-   polygon(box.xu, box.yu, col=sq.col, border=sq.border.col)
-   #polygon(bpx/xu, box.yu, col="black",density = 0)  # draw borders if needed.
+   graphics::polygon(box.xu, box.yu, col=sq.col, border=sq.border.col)
+   #graphics::polygon(bpx/xu, box.yu, col="black",density = 0)  # draw borders if needed.
    
 }
 
@@ -8851,11 +8627,11 @@ CleanXLabels2 <- function(rx, atRx) {
 TestOverlap <- function(Acex, atLab, atRx, nSp) {    
     
      lAtLab      <- length(atLab)
-     widthSp     <- strwidth("0",cex=Acex,units="user")        
+     widthSp     <- graphics::strwidth("0",cex=Acex,units="user")        
      widthSpN    <- widthSp * nSp
      #cat("TestOverlap-cex:",Acex," nSp:",nSp,"  widthSpN:",widthSpN," len(atLab):",lAtLab,"\n")
      
-     widthAtLabH <- strwidth(atLab,cex=Acex,units="user")/2
+     widthAtLabH <- graphics::strwidth(atLab,cex=Acex,units="user")/2
      SrtLab      <- atRx - widthAtLabH
      EndLab      <- atRx + widthAtLabH
      
@@ -8866,10 +8642,10 @@ TestOverlap <- function(Acex, atLab, atRx, nSp) {
      OverLapFnd <- FALSE
      #  Check to see if any labels would overlap each other based on width and grid point location.
      for (ind in c(1:(lAtLab-1)) )  {
-        wX <- SrtLab[ind+1] - EndLab[ind] 
+        wX <- SrtLab[ind+1] - EndLab[ind]  # get space between two labels (ind and ind+1)
         #cat("ind:",ind,"  wX:",wX,"\n")
-        if (wX < widthSpN) {
-           OverLapFnd <- TRUE
+        if (wX < widthSpN) {               # 
+           OverLapFnd <- TRUE              # LABEL IN X-AXIS WILL OVERLAP
         }
      }
      #cat("OverLapFnd:",OverLapFnd,"\n")
@@ -8892,7 +8668,7 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
 	#cat(" TestLabAtEdge - xusr:",xusr,"  xpin:",xpin,"  xupi:",xupi,"\n")
  
         #  width of each label.
-        WidthOfLabs       <- strwidth(atLab,cex=lineAxisSizes["Ax1"],units="user")
+        WidthOfLabs       <- graphics::strwidth(atLab,cex=lineAxisSizes["Ax1"],units="user")
         #  half of the width of each label
         HalfWidthOfLabs   <- WidthOfLabs/2
         #  starting "x" position of each label
@@ -9036,6 +8812,9 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
 #   If they don't fit, warn user, do scaling first ("sn") and try again.  If 
 #   unsuccessful, then force staggering of labels.
 #
+#   Modification - keep titles and axis centered on the lines assigned, Even if smaller.
+#                - fix refTxt to have space between simple and words.
+#
 #   Other options to consider:
 #          Force Zero to be gridded.
 #          Optional edge grid line labels.
@@ -9050,6 +8829,21 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
 #   Since the type of axis labeling impacts the lab1, lab2, lab3, and reftxt titles, this function also 
 #   handles the placement and drawing of the column titles and footnotes.
 #
+#   The labels and components of the headers and x-Axis are:
+#     L1
+#     L2
+#     AST
+#     Ax1
+#     Ax2
+#
+#    The separators between each line are:
+#     between L1 and L2 => SP
+#     between L1/L2 and subTitle (SPT)
+#     between L1/L2 and xAxis    (???)
+#     between subTitle and xAxis
+#     between Ax1 and Ax2
+#
+#
 #   Subdivide into X-Axis and Title processing.  Let X-Axis find out how much space it needs, fill it
 #   and pass to Titles, where to pick up the labeling.  If no X-Axis, then a known spacing will be passed
 #   to the titles.  
@@ -9057,7 +8851,7 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
 #   Basically start at 0 off the axis (panel) line.  
 #        Simple X-Axis is font "9" and takes up 1-line of space.
 #        Staggered X-Axis is font "9" * 0.65(?) and takes up 1.5-lines of space.
-#        Scaled with subtitel X-Axis is font "9" * 0.75 font and takes up 0.8 lines of space.
+#        Scaled with subtitle X-Axis is font "9" * 0.75 font and takes up 0.8 lines of space.
 #
 #        Combinations are (on top of title labels (1 or 2):
 #
@@ -9068,9 +8862,14 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
 #               one or two labels   --  2.0 lines
 #
 #        So header can range from 1 line (no X-Axis) to 2 lines X-Axis with 1 label or 3 lines X-Axis and 2 labels
-#           to a complex X-Axis > 1 to 2.05 lines plue the 1 or 2 lines of title.
-#        
-#        Need space for 1 to 4.05 lines with gaps.
+#           to a complex X-Axis > 1 to 2.05 lines plus the 1 or 2 lines of title.
+#        Simple X (1 line)    = 1 line        
+#        Staggered X (1 line) = 1.5 lines (1 line each, but overlap by .5 lines.)
+#        Scaled X (1.5 lines - axis and subtitle(0.5)) = 1.5
+#        Headers 1, 2, or 3   = 1, 2, 3 lines.
+#        Staggered & Scaled   = 2.0 (1.5 + subtitle(0.5))
+#
+#        Need space for 1 to 4.05 lines with gaps.   (actually up to 5 lines.)
 #
 #        The same applies to the bottom labels.  Lab3 is a title, and refText is the other title.
 #
@@ -9083,6 +8882,8 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
 #        5) If size of labels (all) do not fit, will staggering help?
 #        6) How to keep key values like "0" always labeled?  What does the Axis algorithm use to omit labels.
 #
+#
+#  When font reduced, keep the height the same and center line in old position.
 #
 
 DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, rightPad=TRUE, YAxisPad=FALSE ) {
@@ -9175,7 +8976,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #       
      #
      
-     axisSubTitle   <- ""             # starts empty.
+     axisSubTitle   <- ""             # starts empty.   (units on scaling)
                                       
                                       # everything is based on a starting pointsize of 12.
                                                             
@@ -9197,24 +8998,24 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      lineNLabSize   <-  Text.cex    # par("ps") - 3 points                                
                     # 0.75  -> 0.75   %  1 line    (0.75% of point size)   (9 pt)
      
-     lineNSpLabSize <-  lineNLabSize * XAxis.Sp.mcex   # PS * 15%         
+     lineNSpLabSize <-  lineNLabSize * XAxis.Sp.mcex   # PS * 15%            * spacing   N=normal size (9 pt)  (1.00000)
                     # 0.75 * 0.2   -> 0.15  ->  20% of title line (1.8 pt)
      
-     axisNLabSize   <-  lineNLabSize - (lppt)       # - 1 pt delta / alternate ->  XAxis.S.mcex = 0.666667       
+     axisNLabSize   <-  lineNLabSize - (lppt)       # - 1 pt delta / alternate ->  XAxis.S.mcex = 0.666667      (0.890000) 
                     # 0.75 (9pt) - 1 pt  -> 0.6667 %  89% line   (8 pt)
      
-     axisMLabSize   <-  lineNLabSize - (2 * lppt )  # - 2 pt delta
+     axisMLabSize   <-  lineNLabSize - (2 * lppt )  # - 2 pt delta           * sizing    M=medium size (7pt) (0.780000)
                     # 0.75 (9pt) - 2 pt -> 0.5833 %  78% line   (7 pt)
          
      axisSLabSize   <-  lineNLabSize - (3 * lppt )  # - 3 pt delta    
-                    # 0.75 (9pt) - 3 pt -> 0.5 %     66.7% line (6 pt)
+                    # 0.75 (9pt) - 3 pt -> 0.5 %     66.7% line (6 pt)       * sizing    S=small size (6pt) (0.666667)
                     
-     axisLowestSize <-  lineNLabSize - (4 * lppt )  # - 4 pt delta (lowest limit.) (5 pt)
+     axisLowestSize <-  lineNLabSize - (4 * lppt )  # - 4 pt delta (lowest limit.) (5 pt)   * smallest size (5pt)
                     # 0.75 (9pt) - 4 pt -> 0.4167 %  55.5% line (5 pt)
                     
-     axisSubTSize   <-  axisSLabSize    
+     axisSubTSize   <-  axisSLabSize                                        #  * scaling subtitle = 5 pt (0.555)
      
-     lineSSpLabSize <-  lineNSpLabSize * 0.5   #  0.15 * 0.5 ->  0.075   %   10% line 
+     lineSSpLabSize <-  lineNSpLabSize * 0.5   #  0.15 * 0.5 ->  0.075   %   10% line  * small spacing = 0.075 (10%)
      
                     # calculations are dynamic - using ratios and percentages.
                     
@@ -9223,7 +9024,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                               
      #
      #  Two labels and Axis = 0.66667 + 0.15 + 0.75 + 0.75 => 2.316667  + line height.
+     #                         Axis     LNsp   L1     L2 
      #  Axis Stag, Title, two labels = 0.5 + 0.5 + 0.075 + 0.75 + 0.75 -> 2.575 + line height.
+     #                                 Ax1   Ax2     SSp     L1     L2
      #      must have at least 3.25 lines available.
      #
      #cat("lineNLabSize  :",lineNLabSize,"\n")
@@ -9254,8 +9057,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #                         Lab2   Lab1    
      lineBotSizes         <- c(0,     0)
      #                         Lab3   refText    
-     lineAxisSizes        <- c(0,  0,  0,  0,  0)
-     #                         Ax2 Ax1 SP  AST`SP
+     lineAxisSizes        <- c(0,  0,  0,  0,  0)    # ax1, ax2, StSep, Subt, Sep 
+     #                         Ax2 Ax1 SPT AST SP
      names(lineAxisSizes) <- c("Ax2","Ax1","SPT","AST","SP")   # Axis spacing
      
      names(lineTopSizes)  <- c("L2","L1")  
@@ -9266,11 +9069,17 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      xAxisDo              <- FALSE
      xAxisDoOverlap       <- TRUE
 
+     #   Top headers and axis
      lineMultiT        <- c(1,    0.9,  0.9,  0.9,  1,   1,    1,   1)  # size multiplier for proper spacing.
      names(lineMultiT) <- c("srt","Ax2","Ax1","SPT","AST","SP","L2", "L1")
 
+     #   Bottom headers and axis
      lineMultiB        <- c(1,    0.9,  0.9,  0.9,  1,   1,    1,   1)  # size multiplier for proper spacing.
      names(lineMultiB) <- c("srt","Ax2","Ax1","SPT","AST","SP","L3", "L4")
+
+     #   srt =	                       Ax2 = secondary line of axis (staggered),  Ax1 = primary line of axis,
+     #   SPT =                         AST = Axis Scaling SubTitle
+     #   SP  =  Sep title and xAxis    L2/L3 (closest) =             L1/L4 =
 
      
      # as of 8/17/16, we always print double axis labels to get them all printed. 
@@ -9415,7 +9224,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         # Scaling Methods :    None,  Scale range,  Scale individual number.
      
         switch (axisMethod,  
-              { # method 1 - pretty - the "original"           "o"
+              { # method 1 - pretty - the "original"           "o"   # Basic X-Axis - one line.
                 #cat("Method 1-atRx:",atRx,"\n")
 
 		# get reference points.
@@ -9429,7 +9238,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 atLab        <- as.character(atRx)
               },
               
-              { # method 2 - scale range with subtitle         "s"
+              { # method 2 - scale range with subtitle         "s"     # scaled range - 1 line X-Axis, 1 line sub-title (units)
                 #    scaling range - may have subtitle to include
                 #cat("Method 2-atRx:",atRx,"\n")
                 
@@ -9520,7 +9329,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 #  Future Coding - place holder.
                 #
                 # Do each scaling and see which creates the smallest set of labels.
-                #  Which way to do:  1) number of characters, 2) strwidth each summed,
+                #  Which way to do:  1) number of characters, 2) graphics::strwidth each summed,
                 #  3) concat. labels with 1, 2 spaces?
                 #
                 
@@ -9579,8 +9388,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #cat("  par(usr):",par('usr'),"  par(pin):",par('pin'),"  xupi:",xupi,"\n")
         #cat("staggered :",staggered,"  staggerLab:",staggerLab,"  staggering:",staggering,"\n")
         
-        FndFit   <- FALSE
-        MakeStag <- FALSE
+        FndFit      <- FALSE
+        MakeStag    <- FALSE
        
         #
         # at this point we have:
@@ -9635,7 +9444,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               # leave parameters as set.
               FndFit    <- TRUE
            } else {
-              # did not fit single line normal point size.
+              # did not fit single line normal point size.    #### change X-Axis size.
               wX        <- wX - lppt     #   back up 1 point    # orig font - 1 pt
               res       <- TestOverlap(wX,atLab, atRx, 1)
               #cat("test2 - ces=wX:",wX,"  res:",res,"\n")
@@ -9826,7 +9635,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #cat("lastLab2Space  :",lastLab2Space," in.\n")
      
      # check the column overlap:
-     xW   <- strwidth("0",cex=lineAxisSizes["Ax1"],units="inch")  # get size of a digit in inches.
+     xW   <- graphics::strwidth("0",cex=lineAxisSizes["Ax1"],units="inch")  # get size of a digit in inches.
      xW   <- xW  * XAxis.gapPC    # 75% of the width.
      #cat("sum column overlap:",(w1stLabOverI+lastLab2Space)," in.  Size Digit:",xW," in.\n")
                 
@@ -10100,7 +9909,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      
      #####
      #
-     #  Bottom margin titles/axis
+     #  Bottom margin titles/axis                  (N <> src)
      #
      lineSizesB      <- c(0,lineAxisSizes,lineBotSizes)     # combine axis and bottom title spacings.
      names(lineSizesB) <- c("N","Ax2","Ax1","SPT","AST","SP","L3","L4")
@@ -10166,30 +9975,30 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
      #  column titles
      #     
-     if (lineDo["L1"]) mtext(lab1[j],side=3,
+     if (lineDo["L1"]) graphics::mtext(lab1[j],side=3,
                              line=linePosT["L1"], cex=lineTopSizes["L1"])
      
-     if (lineDo["L2"]) mtext(lab2[j], side=3,
+     if (lineDo["L2"]) graphics::mtext(lab2[j], side=3,
                              line=linePosT["L2"], cex=lineTopSizes["L2"])
     
      #
-     # axis sub-title
+     # axis sub-title   on scaled X-Axis
      #
      if (lineDo["AST"])  {
-         mtext(axisSubTitle, side=3, 
+         graphics::mtext(axisSubTitle, side=3, 
               line=linePosT["AST"], cex=lineAxisSizes["AST"])      # line 2 or 3
      }
 
      #    
      # column top axis(es)
      #
-     if (lineDo["Ax1"]) {                                                             # line 1 or 2 (above axis # 2)
+     if (lineDo["Ax1"]) {                    # line 1 or 2 (above axis # 2)
    
          #cat("Top-axis calls -   atLab1:",atLab1,"  atRx1:",atRx1,"\n")
          #cat("  mgp:linePosT['Ax1']:",linePosT["Ax1"],"\n",
          #    "  lineAxisSizes['Ax1']:",lineAxisSizes["Ax1"],"\n")
         
-         axis(side=3,  tick=F, at=atRx1, labels=atLab1,
+         graphics::axis(side=3,  tick=F, at=atRx1, labels=atLab1,
               mgp=c(3.2,linePosT["Ax1"],0), 
               cex.axis=lineSizesT["Ax1"] ) 
      }
@@ -10199,7 +10008,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
          #cat("  mgp:linePosT['Ax2']:",linePosT["Ax2"],"\n",
          #    "  lineAxisSizes['Ax1']:",lineAxisSizes["Ax1"],"\n")
         
-         axis(side=3,  tick=F, at=atRx2,  labels=atLab2, 
+         graphics::axis(side=3,  tick=F, at=atRx2,  labels=atLab2, 
               mgp=c(3.2,linePosT["Ax2"],0), 
               cex.axis=lineAxisSizes["Ax1"])   # this is not an error, Ax2 is always printed the same size as Ax1
     
@@ -10250,8 +10059,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
      desiredCex    <- lineAxisSizes["Ax1"]
      xPs           <- par("ps")    # get current system base point size being used.  Everything is based on this value.
-     xHPsLU        <- strheight("00000",cex=1,units="user")
-     xHDesPsLU     <- strheight("00000",cex=desiredCex,units="user")
+     xHPsLU        <- graphics::strheight("00000",cex=1,units="user")
+     xHDesPsLU     <- graphics::strheight("00000",cex=desiredCex,units="user")
      xDifHU        <- xHPsLU - xHDesPsLU       # different between system line and our line
      xBotAdj       <- xDifHU / xHPsLU          # ratio of dif (not used) and full line. % percent of line.
      
@@ -10269,7 +10078,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #    "  botAxisBAdj:",botAxisBAdj,"\n")
         #cat("  atRx1:",atRx1,"  atLab1:",atLab1,"\n")
    
-        axis(side=1, tick=F, at=atRx1, labels=atLab1, line=botAxisBAdj, 
+        graphics::axis(side=1, tick=F, at=atRx1, labels=atLab1, line=botAxisBAdj, 
                 mgp=c(3.2, linePosB["Ax1"],0), 
                 cex.axis=lineAxisSizes["Ax1"])
      }
@@ -10281,7 +10090,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #    "  botAxisBase:",botAxisBase,"\n")
         #cat("  atRx2:",atRx2,"  atLab2:",atLab2,"\n")
 
-        axis(side=1, tick=F, at=atRx2, labels=atLab2, line=botAxisBAdj, 
+        graphics::axis(side=1, tick=F, at=atRx2, labels=atLab2, line=botAxisBAdj, 
                 mgp=c(3.2, linePosB["Ax2"],0), 
                 cex.axis=lineAxisSizes["Ax1"])
      }
@@ -10296,7 +10105,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #    "  botAxisBase:",botAxisBase,"\n")
         #cat("  line=wAST:",wAST,"\n")
         
-        mtext(axisSubTitle, side=1, line = wAST, 
+        graphics::mtext(axisSubTitle, side=1, line = wAST, 
                   cex=lineAxisSizes["AST"])
      }
      # ______Bottom Label/Title - Lab3 ______
@@ -10311,7 +10120,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #    #"  botLAdj   :",botLAdj,"\n",
         #    "  line=titleLab3:",titleLab3,"\n")
  
-        mtext(side=1,lab3[j], line=titleLab3, cex=lineBotSizes["L3"])  # bottom labels.
+        graphics::mtext(side=1,lab3[j], line=titleLab3, cex=lineBotSizes["L3"])  # bottom labels.
      }  
      # _______Reference Value Legend
  
@@ -10366,24 +10175,38 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               xTxt          <- stringr::str_trim(reftxt)            # get refText and trim side blanks.
               
               # length of texts in units
-              xTxtLenU      <- strwidth(xTxt,units="user", cex=lineSizesB["L4"]) #* fpc  # length text
+              xTxtLenU      <- graphics::strwidth(xTxt,units="user", cex=lineSizesB["L4"]) #* fpc  # length refTxt (width)
               
               # 
-              xHalfFreeLenU     <- ((xWidthU - xTxtLenU) / 2 ) #* fpc    # half space left for line 
+              #xHalfFreeLenU     <- ((xWidthU - xTxtLenU) / 2 )       #* fpc    # half space left for line 
               #cat("xTxtLenU:", xTxtLenU,"  half free avail-xHalfFreeLenU:",xHalfFreeLenU,"\n")
               
-              xLineLenU <- xHalfFreeLenU
+              xLineLenU  <- xTxtLenU * .75     # make line the same length as test reduced to 90%
+              xLineSpU   <- (xTxtLenU - xLineLenU) * 0.66
+              xTotLenU   <- (xTxtLenU+xLineSpU+xLineLenU)  # get size of entire image.
               
-              #  see if room for half inche line, if not use shorter value.
-              if (xLineLenU > xHalfInchU)  xLineLenU <- xHalfInchU    # get length of line to 1/2 inch
+              xFreeLenU      <- xWidthU - xTotLenU         # unused space.
+              xLineStartu    <- xFreeLenU/2                # line starts at the left end of the free space / 2
+              xLineEndu      <- xLineStartu + xLineLenU    # end of line is start + length
+              xTxtStartu     <- xLineEndu+xLineSpU         # start of text
+              
+              #xLineLenU <- (xHalfFreeLenU * 0.8)  # not all of the space, a little shorter (2022-08-15)
+              
+              # space to center is ( xLineLenU + xTxtLenU + (xTxtLenU-xLineLenU) ) --> refTLen
+              # the distrance from left is refTLen / 2.
+              
+              #  see if room for half line, if not use shorter value.
+              #if (xLineLenU > xHalfInchU)  xLineLenU <- xHalfInchU    # get length of line to 1/2 inch
               
               # calculate start of line.
                             
-              xLineStartu   <- xCenterU - (xLineLenU + xTxtLenU) / 2   # center - half (text length + line length)
-              
-              xTxtStartu    <- xLineStartu + xLineLenU
-          
-              #cat("xLineStartu:",xLineStartu," xTxtStartu:",xTxtStartu,"\n")
+              #xLineStartu   <- xCenterU - (xHalfFreeLenU + xTxtLenU) / 2   # center - half (2 * text length)
+              #xTxtStartu    <- xLineStartu + xLineLenU
+              #xLineStartu    <- xCenterU - xTxtLenU       # starting x coordinates for line
+              #xLineEndu      <- xLineStartu + xLineLenU   # ending x coordinates
+              #xTxtStartu     <- xCenterU                  # starting x for text.
+                           
+              #cat("xLineStartu:",xLineStartu," xLineEndu:",xLineEndu," xTxtStartu:",xTxtStartu,"\n")
       
               #
               #  Calculate the Y positions for the line and text in the margin for the refText.
@@ -10394,7 +10217,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               #cat("ConvLineToUser call-xTitleLab4:",xTitleLab4,"\n")
               
               yTextPosu     <- ConvLineToUser(1, xTitleLab4)      # position text position in user units.
-              yTextHu       <- strheight(xTxt, units="user", cex=lineSizesB["L4"])  # find height of text in user units.
+              yTextHu       <- graphics::strheight(xTxt, units="user", cex=lineSizesB["L4"])  # find height of text in user units.
               #cat("yTextPosu:",yTextPosu,"  yTextHu:",yTextHu,"\n")
               
               #  position of line based on Text position(user) - 60% of the text height.
@@ -10407,16 +10230,17 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               #     "   lineSizesB['L4']:",lineSizesB["L4"],"\n",
               #     "   botAxisAdj      :",botAxisAdj,"  botLAdj:",botLAdj,"\n")
               
-              # way to find graphic length of string --> sw <- strwidth(reftxt,cex=Text.cex)
+              # way to find graphic length of string --> sw <- graphics::strwidth(reftxt,cex=Text.cex)
                
-              # add text definition for legend.   (5/21/13 - added color to line)
-              # draw line.    
-              lines(c(xLineStartu, xTxtStartu), rep(yLinePosu, 2), 
+              # add text reference line to bottom header   (5/21/13 - added color to line)
+              
+              # draw ref line in header.    
+              graphics::lines(c(xLineStartu, xLineEndu), rep(yLinePosu, 2), 
                      lty=Ref.Val.lty, lwd=Ref.Val.lwd, col=iRef.Val.col)      # draw length line up to 1/2 inch.
               
               # mtext does not let you set the X position of the text, so the old text function must be used with x, y coordinates.
-              
-              text(xTxtStartu, y=yLinePosu, labels=xTxt, 
+              # draw ref line txt in header.
+              graphics::text(xTxtStartu, y=yLinePosu, labels=xTxt, 
                       cex=lineBotSizes["L4"], col=iRef.Text.col, 
                       offset=0, adj=c(0,NA))                       # text starting at line end.
 
@@ -10453,14 +10277,14 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         
         if (wEntry$Borders==1) {   # L2 borders
           #  Map background - Layer 2 borders   (regional areas  (US -> states))
-            polygon(wL2VisBorders$x, wL2VisBorders$y,
+            graphics::polygon(wL2VisBorders$x, wL2VisBorders$y,
                     density=-1, col=wEntry$Fill.col, border=FALSE)
-            polygon(wL2VisBorders$x, wL2VisBorders$y,
+            graphics::polygon(wL2VisBorders$x, wL2VisBorders$y,
                     density=0, col=wEntry$Line.col, lwd=wEntry$Line.lwd)
         }
         if (wEntry$Borders==2) {   # L1 colors
 
-            polygon(wAreaVisBorders$x,wAreaVisBorders$y,
+            graphics::polygon(wAreaVisBorders$x,wAreaVisBorders$y,
                     density=-1, col=wEntry$Fill.col, border=FALSE)
      
         }
@@ -10469,14 +10293,14 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
            #  setup each group of sub-areas and draw polygons.
            #    Not Referenced sub-areas  
            wVisBorders   <- wAreaVisBorders[wEntry$Selected,]
-           polygon(wVisBorders$x,wVisBorders$y,
+           graphics::polygon(wVisBorders$x,wVisBorders$y,
                     density=0, col= wEntry$Line.col, lwd=wEntry$Line.lwd)
         } 
          
         if (wEntry$Borders==4) {   # L3 borders 
              # Outline Country area (total area).
  
-           polygon(wL3VisBorders$x, wL3VisBorders$y,
+           graphics::polygon(wL3VisBorders$x, wL3VisBorders$y,
                     density=0, col=wEntry$Line.col, lwd=wEntry$Line.lwd)      # outside US boundary
         }
      }
@@ -10627,7 +10451,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      # aNAI --> a vector of abbr and alias values from the name table $Abbr and $Alias 
      ErrFnd  <- FALSE
    
-     wReg    <- toupper(xR)
+     wReg    <- stringr::str_to_upper(xR)
      wAbbr   <- rep(NA,length(wReg))
      xout1   <- sapply(c(1:length(aNAI$Alias)), function (x) grep(aNAI$Alias[x], wReg, ignore.case=TRUE))
      xout1a  <- unlist(xout1)
@@ -10964,7 +10788,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    }
    
    statsDFrame$rawRN      <- statsDFrame$RN           # save raw format of row name.
-   statsDFrame$RN         <- toupper(statsDFrame$RN)  # upper case for comparisons.
+   statsDFrame$RN         <- stringr::str_to_upper(statsDFrame$RN)  # upper case for comparisons.
    row.names(statsDFrame) <- statsDFrame$RN           # save in statsDFrame$RN as the row.names 
       
    #
@@ -11018,7 +10842,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #
 
    par(fin = par("din"))   # safety value to get moving.
-   plot.new()
+   graphics::plot.new()
 
    #
    # ________________Load Colors and Details defaults_______________________________
@@ -11050,7 +10874,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    NoErrs       <- TRUE
    doDotOutline <- FALSE
    
-   mstColors     <- colors               # Multiple values none should be an NA.
+   mstColors    <- colors                # Multiple values none should be an NA.
    
    if ( missing(colors) || is.null(mstColors) || is.na(mstColors[[1]][1]) ) {
  
@@ -11066,7 +10890,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
           
                # we have the basic 12 colors. Expand to the list of 24.
                colorlab      <- names(mstColors)
-               TransColors   <- adjustcolor(mstColors,0.2)
+               TransColors   <- grDevices::adjustcolor(mstColors,0.2)
                mtColors      <- c(mstColors, TransColors)
             
                if (!is.null(colorlab)) { names(mstColors) <- c(colorlab,paste0("l_",colorlab)) }
@@ -11074,7 +10898,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
             } else {
       
                if (length(mstColors) == 1) {
-                  wStr <- toupper(mstColors)
+                  wStr <- stringr::str_to_upper(mstColors)
              
                   if ( wStr == "BW" || wStr == "GRAYS"  ||  wStr == "GREYS" ) {
               
@@ -11086,7 +10910,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                      greyColors   <- c(xbw[c(3:8)],"#000000","#E8E8E8")
                    
                      #  Build the transparent colors for the segmented bar charts.
-                     TransColors  <- adjustcolor(greyColors,0.2)
+                     TransColors  <- grDevices::adjustcolor(greyColors,0.2)
                   
                      #  Set up the grey color vector as requested.
                      mstColors       <- c(greyColors,TransColors)
@@ -11365,7 +11189,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     
     for (iH in c(1:4)) {
        for (iT in c(1:5))  {
-          banner.w[iT,iH] <- strwidth(banner[iT,iH],units="inches",cex=banner.tc[iH])
+          banner.w[iT,iH] <- graphics::strwidth(banner[iT,iH],units="inches",cex=banner.tc[iH])
        }
     }
     
@@ -11378,7 +11202,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     #print(banner.w)
     
     banner.max <- as.data.frame(sapply(c(1:5), function(x)  max(banner.w[x,]+banner.adj[x,])))
-    colnames(banner.max) <- "width"
+    colnames(banner.max)  <- "width"
     row.names(banner.max) <- brn
 
     #cat("maximum widths for each type of header - banner.max:\n")
@@ -11386,8 +11210,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    
     #  Make subroutine to be able to do again later.
 
-    ID.Abbr.width       <- max(strwidth(ID.Abbr,units="inches",cex=(Id.Text.cex * Id.Cex.mod)))
-    ID.Name.width       <- max(strwidth(ID.Name,units="inches",cex=(Id.Text.cex * Id.Cex.mod)))
+    ID.Abbr.width       <- max(graphics::strwidth(ID.Abbr,units="inches",cex=(Id.Text.cex * Id.Cex.mod)))
+    ID.Name.width       <- max(graphics::strwidth(ID.Name,units="inches",cex=(Id.Text.cex * Id.Cex.mod)))
 
     #cat("ID.Abbr.width:",ID.Abbr.width,"\n ")
     #cat("ID.Name.width:",ID.Name.width,"\n\n")
@@ -11467,7 +11291,7 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    
       #  Compare against common "DC" names and replace with "DC"
       if (rowNames == "full") {
-         AD.Test <- toupper(AD.link)   # get capitalized version for the DC conversion.
+         AD.Test <- stringr::str_to_upper(AD.link)   # get capitalized version for the DC conversion.
          #  Build DC name table (all caps)
          DCnames = c("WASHINGTON, D. C.", "WASHINGTON D. C.", 
                      "WASHINGTON, D C",   "WASHINGTON D C",
@@ -12060,10 +11884,10 @@ if (length(mstTitle) == 1) {
       mstTitle <- c("")
   }
 }
-if ( ( typeof(mstTitle) != "character" ) || ( class(mstTitle) != "character") ) {
+if ( !is(mstTitle,"character") ) {
    mstTitle   <- as.character(unlist(mstTitle))
    warnCnt()
-   xmsg    <- paste0("***01A1 CARG-TL The typeof/class of the title parameter is not character. ","Only character vectors are supported. The 'title' argument is ignored.")
+   xmsg    <- paste0("***01A1 CARG-TL The title parameter is not character. ","Only character vectors are supported. The 'title' argument is ignored.")
    warning(xmsg,call.=FALSE)
 }
 if (length(mstTitle) > 2) {
@@ -13191,9 +13015,11 @@ if (is.na(match('lab4',PDUsed))) {
    #
    #  KansasBG      set up - 105 rows -> 21 groups - median - 5 rows/group (11 groups)
    #
-   #  NewYorkBG     set up - 62 rows -> 13 groups (5..5,4,4,4,5...5)   
+   #  KYADDBG       set up - 15 rows -> 3 groups (5 each)
    #
    #  MarylandBG    set up - 24 rows (counties + 1 city) -> 5 groups (5,5,4,5,5)
+   #
+   #  NewYorkBG     set up - 62 rows -> 13 groups (5..5,4,4,4,5...5)   
    #
    #  UtahBG        set up - 29 rows -> (5.5.4.1.4.5.5) -> 7 groups
    #
@@ -13375,11 +13201,11 @@ if (is.na(match('lab4',PDUsed))) {
    x <- panelScale()
 
    if (length(mstTitle)==1){
-       text(.5,.77,mstTitle,cex=Title.cex)
+       graphics::text(.5,.77,mstTitle,cex=Title.cex)
    } else {
        # only use the first two title character strings
-       text(0.5, 0.9, mstTitle[1],cex=Title.cex)
-       text(0.5, 0.65,mstTitle[2],cex=Title.cex)
+       graphics::text(0.5, 0.9, mstTitle[1],cex=Title.cex)
+       graphics::text(0.5, 0.65,mstTitle[2],cex=Title.cex)
    }
  
    #

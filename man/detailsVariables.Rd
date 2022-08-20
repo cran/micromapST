@@ -20,16 +20,19 @@
        colors, integer, numeric, logical, and vector3}
     \item{v1}{first variable for the "test" for this variable.}
     \item{v2}{second variable (if needed) for the "test" for this
-      variable.} \item{usedBy}{a vector of character string listing
-      the glyphics that use this variable. For Example:
+      variable.} 
+    \item{usedBy}{a vector of character string listing
+      the glyphics that use this variable. \cr For Example:
       c('ts','tsconf')}
     \item{newVarName}{the new variable name to be used within a
       glyphic.  The glyphic name and variable name must be unique.
       This eliminates having to include the glyphic name in the
-      variable name.} \item{d_range}{defines the range of the
+      variable name.} 
+    \item{d_range}{defines the range of the
       dependency for the dependent relationship.}
     \item{dependent}{indicates this variable is dependent on another
-      variable and it's name.} \item{default}{the default values or
+      variable and it's name.} 
+    \item{default}{the default values or
       the variable.}
     \item{comments}{operational comments on the variable.}
   }

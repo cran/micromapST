@@ -69,6 +69,7 @@ The data are age-adjusted (2000 U.S. standard) female lung cancer mortality rate
 \source{Surveillance, Epidemiology, and End Results (SEER) Program (www.seer.cancer.gov) 
 SEER*Stat Database: Mortality - All COD, Aggregated With State, Total U.S. (1969-2010) 
 (Katrina/Rita Population Adjustment), National Cancer Institute, DCCPS, Surveillance Research Program,
-Surveillance Systems Branch, released April 2013.  Underlying mortality data provided by NCHS (www.cdc.gov/nchs). 
+Surveillance Systems Branch, released April 2013.  \cr
+Underlying mortality data provided by NCHS (www.cdc.gov/nchs). 
 }
 \keyword{datasets}

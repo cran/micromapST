@@ -24,6 +24,7 @@ information for the following::
  the U. S. 50 states and the District of Columbia.
  \item \var{USSeerBG}     - data for the 21 U. S. Seer Areas.
  \item \var{KansasBG}     - data for the 105 counties in the state of Kansas.
+ \item \var{KY_ADD_BG}    - data for the 15 area development districts in Kentucky.
  \item \var{NewYorkBG}    - data for the 62 counties in the state of New York.
  \item \var{MarylandBG}   - data for the 24 counties in the state of Maryland.
  \item \var{UtahBG}       = data for the 29 counties in the state of Utah
@@ -39,7 +40,7 @@ of the user's data.
 \cr
 For linked micromaps, the primary columns are a MAP type, 
 ID (sub-area name) and one or more glyphics.  The statistical data is presented in the glyphics columns 
-as one of the following graphics (glyphics):
+as one of the following glyph types:
 \itemize{
    \item arrows,
    \item bars,
@@ -371,7 +372,8 @@ Consulting, LLC, Gaithersburg, MD
 #     the default border group of "USStatesBG", with default symbols.
 ####
 # load sample data, compute boxplot
-TDir <- paste0(tempdir(),"/")   # get a temp directory for the output 
+TDir<-"c:/projects/statnet/"  # my private test PDF directory exist, don't use temp.
+if (!dir.exists(TDir)) {TDir <- paste0(tempdir(),"/") }  # get a temp directory for the output 
                                 # PDF files for the example.
 cat("TempDir:",TDir,"\n")
 
@@ -391,8 +393,8 @@ panelDesc01 <- data.frame(
   lab2=c("","","and 95\% CI","(suppressed if 1-9 deaths)"), 
   lab3=c("","","Deaths per 100,000","Deaths per 100,000"), 
   col1=c(NA,NA,1,NA),col2=c(NA,NA,3,NA),col3=c(NA,NA,4,NA),     
-  refVals=c(NA,NA,wflung00and95US[1,1],NA),   
-  refTexts=c(NA,NA,"US Rate 2000-4",NA),       
+  refVals=c(NA,NA,NA,wflung00and95US[1,1]),   
+  refTexts=c(NA,NA,NA,"US Rate 2000-4"),       
   panelData= c("","","","wfboxlist")          
   ) 
 panelDesc <- panelDesc01
@@ -1078,9 +1080,6 @@ str(wmlung5070US)
 #####
 
 unlink(TDir)
-
-
-
 
 }
 

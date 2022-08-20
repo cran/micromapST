@@ -1,7 +1,7 @@
-\name{messages}
-\alias{messages}
+\name{messages-MM}
+\alias{messages-MM}
 \docType{data}
-\title{micromapST Generated Warning and Error Messages}
+\title{micromapST Generated Warning and Error Messages-micromapST}
 
 \description{
   micromapST verifies as much of its operation and the data provided
@@ -23,8 +23,7 @@
       or
     
     ***XXXX NNNNNN CC text of message
- 
-   }
+    }
   where the XXXX is the message alphanumeric identifier, NNNNNN is
   the name of the function or glyph issuing the message and CC is
   the glyph graphic column number in the \var{panelDesc} structure.
@@ -1615,12 +1614,7 @@
      }
    }
  } 
-
-  Back to the details section - Rest of the details dection 
-
- 
-     End of details section.
- }
-
+}
+\keyword{messages}
 \keyword{datasets}
 
