@@ -1,3 +1,4 @@
+micromapST - Version 2.0.0 and Version 2.0.1
 
 Fixes:
 1) Correct the grpPattern implementation.  Did not allow a c(4,4,4,3,4,4,4) and other
@@ -24,7 +25,10 @@ Enhancements;
    still use linked micromaps by aggregating counties into a state's set of 
    regions/special districts.
 3) Added the error messages caught by the BuildBorderGroup function to the message
-   documentation for the package.
+   documentation for the package. Continuing to update the description of the
+   BuildBorderGroup messages.
+5) Continue to update the descriptions of the micromapST function messages.
+6) 
    
 
 micromapST - Version 1.1.3 - Updates - 2022/04/29

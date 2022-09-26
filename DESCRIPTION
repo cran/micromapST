@@ -1,7 +1,7 @@
 Package: micromapST
 Type: Package
-Version: 2.0.0
-Date: 2022-08-16
+Version: 2.0.1
+Date: 2022-09-26
 Title: Linked Micromap Plots for U. S. and Other Geographic Areas
 Authors@R: c(person("Jim","Pearson",email="jbpearson353@gmail.com",role=c("aut","cre","cph")),
             person("Dan","Carr",email="dcarr@gmu.edu", role=c("aut","cph")),
@@ -11,9 +11,9 @@ Author: Jim Pearson [aut, cre, cph],
   Dan Carr [aut, cph],
   Linda Pickle [ctb, cph]
 Maintainer: Jim Pearson <jbpearson353@gmail.com>
-Imports: utils, methods, tools, graphics, grDevices, stringr, sp,
-        rgdal, rgeos, maptools, spdep, sf, stats, RColorBrewer,
-        labeling, readxl, writexl, rmapshaper, cleangeo, pbapply
+Imports: utils, methods, tools, graphics, grDevices, stats,
+        RColorBrewer, stringr, labeling, readxl, writexl, sp, rgdal,
+        rgeos, sf, maptools, spdep, rmapshaper, cleangeo, pbapply
 Depends: R (>= 3.6.0)
 Suggests: R.rsp
 VignetteBuilder: R.rsp
@@ -54,6 +54,6 @@ LazyLoad: no
 BuildResaveData: best
 ByteCompile: yes
 NeedsCompilation: no
-Packaged: 2022-08-20 01:38:29 UTC; jpearson
+Packaged: 2022-09-26 15:20:37 UTC; jpearson
 Repository: CRAN
-Date/Publication: 2022-08-20 06:40:02 UTC
+Date/Publication: 2022-09-26 16:20:05 UTC

@@ -277,12 +277,13 @@ GetMColors <- function() {
      .30, .30, .30,  # dark gray        "#4D4D4D" or "gray30"  
      .00, .00, .00,  # black            "#000000" or "black"    # borders
     
-     .93,1.00, .93,  # light green
-     .00, .50, .00,  # mid green
-    1.00,1.00, .84,  # light yellow foreground  
-     .90, .80,1.00,  # bright yellow foreground 
-     .80, .90,1.00,  # light green blue 
-     .60, .70, .85), # mid green blue
+     .93,1.00, .93,  # light green              #EDFFED
+     .00, .50, .00,  # mid green                #007F00
+    1.00,1.00, .84,  # light yellow foreground  #FFFFD6
+     .90, .80,1.00,  # bright yellow foreground #E5CCFF  
+     .80, .90,1.00,  # light green blue         #CCE5FF
+     .60, .70, .85), # mid green blue           #99B2D8
+
      ncol=3,byrow=TRUE)
    
    colorsRef = grDevices::rgb(colorsRefRgb[,1],colorsRefRgb[,2],colorsRefRgb[,3])
@@ -298,19 +299,23 @@ GetMColors <- function() {
    # colors copies from the micromapST defaults. Copies from micromapST.
 
    colorsRgb = matrix(c(                              # the basic 7 (9) colors.
-    1.00, .15, .15,     #region 1: red	            1  #D53E4F - Red
+    1.00, .15, .15,     #region 1: red	               1  #D53E4F - Red
      .90, .55, .00,     #region 2: orange	       2  #FC8D59 - Brn/Org
      .00, .65, .00,     #region 3: green	       3  #FEE08B - Pale Brn
      .20, .50,1.00,     #region 4: greenish blue       4  #99D594 - Pale Green
      .50, .20, .70,     #region 5: lavendar            5  #3288BD - Blue
      .88, .20, .59,     #region 6: magenta             6            (Added)
      .00, .00, .00,     #region 7: black for median    7  #000000 - Black
-    1.00,1.00, .80,     #non-highlighted foreground    8  #E6F598 - Pale Yellow
-    1.00, .9875,0.95,   #upper shade - very pale red   9  #FFFCF2   (Added)
-     .955,.98,1.00,     #lower shade - very pale blue 10  #F4FAFF   (Added)
+    1.00,1.00, .80,     #non-highlighted foreground    8  #FFFFCC  ?#E6F598 - Pale Yellow
+#    1.00, .9875,0.95,   #upper shade - very pale red   9  #FFFFB2   (Added)
+   0.7843137,1,0.8784314,  #lower shade - very Ylw/Grn  9  #C8FFE0  (highlighted above median)  #c8ffe0
+#     .955,.98,1.00,     #lower shade - very pale blue 10  #F4FAFF   (Added)
+   1.00,0.7843134,0.8784314,   #upper shade - very Ylw/rd 10 #FFC8D0  (highlighted below median)  #ffc8e0
      .95, .95, .95,     #lightest gray - not referenced sub-area        11 
      .92, .92, .92),    #lighter gray  - non-active backgroup sub-area  12
      ncol=3,byrow=TRUE)
+
+
 
    #
    #   mcolors  1 - 6     are sub-area active colors           (unused items = NA)
@@ -323,6 +328,10 @@ GetMColors <- function() {
 
    mcolors = c( grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3]),           # solid mcolors (12)        format =>  "#FFFFFFF"
                grDevices::rgb(colorsRgb[,1],colorsRgb[,2],colorsRgb[,3],.2))         # translucent mcolors (12) - 20%.
+   # adjust colors 9 and 10
+   mcolors[9] <- paste0(str_sub(mcolors[9],1,7),"60")
+   mcolors[10] <- paste0(str_sub(mcolors[10],1,7),"60")
+   
    names(mcolors) =c("red","orange","green","greenish blue", "purple","magenta",
                     "black","light yellow","light red","light blue",
                     "lightest gray","lighter gray",
@@ -414,7 +423,7 @@ PlotVis <- function(VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
     # to KEYs, then call polygon with the adjusted color list.
       
     # Start an empty plot to get the limits and graphic space set.
-    plot(1,1,type="n", xlim=xLim, ylim=yLim, 
+    plot(1,1,type="n", xlim=xLim, ylim=yLim, asp=1,
                        axes=xAxes, lwd=xLwd,
                        xlab="", ylab="", 
                        main=xTitle)
@@ -496,7 +505,7 @@ PlotSPDF <- function(xSp, xCol, xTitle=NULL, xAxes=FALSE, xLwd=0.5) {
     # to KEYs, then call polygon with the adjusted color list.
       
     # Once the par(pin) is set, draw the map.
-    plot(xSp,col=xCol, xlim=xLim,ylim=yLim,axes=xAxes,lwd=xLwd,
+    plot(xSp,col=xCol, xlim=xLim,ylim=yLim,axes=xAxes,lwd=xLwd, asp=1, 
                        xlab="",ylab="",main=xTitle)
  }
 #

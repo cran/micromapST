@@ -14,8 +14,8 @@
     \tabular{ll}{
       Package:  \tab micromapST\cr
       Type:     \tab Package\cr
-      Version:  \tab 2.0.0\cr
-      Date:     \tab 2022-08-18\cr
+      Version:  \tab 2.0.1\cr
+      Date:     \tab 2022-09-26\cr
       License:  \tab GPL-2\cr
       LazyLoad: \tab no\cr
     } 
@@ -46,7 +46,6 @@ contain in this package are:
   \item \var{USStatesBG} - The 50 U.S. states and the District of Columbia
   \item \var{USSeerBG} - The 20 U.S. Seer Areas within the U.S.
   \item \var{KansasBG} - The 105 counties in the state of Kansas  
-  \item \var{KY_ADD_BG} - The 15 administrative development districts of Kentucky
   \item \var{MarylandBG} - The 24 counties of Maryland 
   \item \var{NewYorkBG} - The 62 counties in the state of New York  
   \item \var{UtahBG} - The 29 counties of Utah
@@ -130,8 +129,6 @@ have been included in this release.  The complete list of border groups included
     This function automatically pulls in the USSeerBG border group.
    \item{\var{KansasBG}} - a border group to support the generation of 
     linked micromaps for the 105 counties in the state of Kansas.  
-   \item{\var{KY_ADD_BG}} - a border group to support the generation of 
-    linked micromaps for the 15 area development districts in the state of Kentucky.
    \item{\var{MarylandBG}} - a border group to support the generation of 
     linked micromaps for the 23 counties and the city of Baltimore in 
     the state of Maryland.
@@ -154,7 +151,6 @@ have been included in this release.  The complete list of border groups included
  }
 The following datasets have also been included for use in many examples:
 \itemize{
-   \item{\var{KY_ADD}} - Kentucky conversion table from counties to area development districts.
    \item{\var{Educ8thData}} - Education Data from an 8th grade survey.
    \item{\var{TSdata}} - Sample time series data.
    \item{\var{statePop2010}} - State Population data for 2010.
@@ -206,13 +202,27 @@ The package contains a set of examples of how to produce linked area micromaps.
 The datasets used in each example are provided to help you learn how 
 to use micromapSEER.
 
-As of release 2.0.0 of the package, a new function has been added.  The \var{BuildBorderGroup}
+As of release 2.0.1 of the package, a new function has been added.  The \var{BuildBorderGroup}
 function provide assistance to the user in building their own border groups from shape file
 and a name table as needed for geographic areas not covered by areas included in the 
 package.   Review the documentation on the \var{BuildBorderGroup} function for 
 more detail.
 
-}  
+There are four primary sources for boundary data:  
+\itemize{
+ \item{U. S. Census Bureau} for U. S. states and territories (\url{http://www.census.gov}) 
+   (2021 - Cartographic Boundary Files) ;
+ \item{GADM (Global Administrative area Database)} for all of the countries and sub-divisions 
+   in the world (\url{https://gadm.org}) (V4.1, July 16, 2022 release, older versions are available.);
+ \item{DIVA-GIS (\url{https://diva-gis.org})} (January 2012); and 
+ \item{local governments}.
+} 
+All of the boundary data (shape files or json format) are free for public use.  Care must be taken
+to ensure your data matches the boundary areas available in each collection.  
+Data location IDs and boundaries change over time as areas are split, merged, added, or eliminated. 
+The BuildBorderGroup function tries to clean up and repair the boundary data as best as it can. 
+Always inspect the boundary data and make sure its usable for your application and is valid.
+}
 
 \author{
 Daniel B. Carr \email{dcarr@gmu.edu} and 

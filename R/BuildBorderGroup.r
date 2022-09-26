@@ -1,61 +1,52 @@
 ######
 #
-#  date: June 27, 2022
+#  date: Sept 23, 2022
 #
 #  packages used by BuildBorderGroup function
 #
-#library<base>                     # bitwise function; 
+#  base		bitwise functions; plot; load; and more.
+#  tools	CRAN_check_xxxx; file_ext; file_path_sans_ext; file_exists; dir_exists
+#  stringr	str_trim; str_split; str_to_upper; str_pad; str_locate; str_replace;
+#               str_sub; str_to_lower
+#  graphics	plot; plot.new; par
+#  graphicsR	
+#  cleangeo	<all functions>
+#  RColorBrewer	brewer_pal
+#  utils	read.csv; read.table; data; capture.output; globalVariables; object.size;
+#               head; tail; str; 
+#  logger	<due to cleangeo change> 
+#  rmapshaper   ms_simplify
+#  readxl	read_xls; read_xlsx
+#  writexl	write_xlsx
+#  
+####  
 #
+# Retired packages used the need programming changes by December 2023: 
 #
-#library(tools)			   #  tools: CRAN_check_xxx; file_ext; file_path_sans_ext; 
-#
-#
-#library(stringr)	           #  stringr: str_trim; str_split; str_to_upper; str_pad; str_locate; str_replace;
-#                                  #           str_sub;  str_to_upper; str_to_lower
-#
-#library(graphics)
-#                                  # plot, plot.new, 
-#
-#library(graphicR)
-#
-#
-#library(utils)			   #  utils:
-#
-#
-#library(RColorBrewer)             #  RColorBrewer: brewer_pal
-#
-#
-#library(readxl)                   #  readxl: read_xls; read_xlsx
-#
-#
-#library(writexl)		   #  writexl: write_xlsx
-#
-#
-#library(cleangeo)                 #  cleangeo:  <entire collection>
-#
-#
-#
-#   Retired
-#library(rgdal)                    #  rgdal: *readOGR, *showWKT, *projInfo, *writeOGR, spTransform,
+#library(rgdal)                    #  rgdal: *readOGR, *writeOGR, spTransform,
 #                                  #         CRS-class, CRS; *CRSargs; 
 #                                  #         rgdal_extSoftVersion;
 #                                  #         set_rgdal_show_exportToProj4_warnings; set_thin_PROJ6_warnings;
 #
 #                       Replacements:
-#       projInfo()			sf::st_proj_info()
-#       readOGR()			sf::st_read  or  sf::read_sf
-#       writeOGR()   			sf::st_write  or  sf::write_sf
-#       showWKT()			sf::st_as_text(crs)
+#       readOGR()		sf::st_read  or  sf::read_sf
+#       writeOGR()   		sf::st_write  or  sf::write_sf
 #       
+#	CRS-class
+#	CRS
+#	CRSargs
+#	spTransform
 #
-#               
 #
-#                                  #         
 #library(maptools)                 #  maptools: getinfo.shape, lineLabel, pointLabel, readShapePoly, sp2tmap, spCbind-methods,
 #                                  #            spRbind, unionSpatialPolygons, checkPolygonsHoles, spCbind
 #	unionSpatialPolygons		sf::st_union
-#       
-#
+#       getinfo.shape
+#	lineLabel
+#  	pointLabel
+# 	spRbind
+#	spCbind and -method
+#	checkPolygonsHoles
 #
 #
 #library(sp)		           #  sp: *spTransform; sp::plot(?)
@@ -63,62 +54,58 @@
 #                                  #      *bbox; *CRS; *wkt(?)
 #                                  #      SpatialPolygons; SpatialPolygonsDataFrame; Polygons; Polygon
 #
-#            sp::spTransform(x, CRSobj) sf::st_transform(x, crs)
-#            sp::coordinates()		sf::st_coordinates()
-#            sp::coordinates()= ~x+y    sf::st_as_sf(x, coords=("x","y"))
-#            sp::bbox(x)		sf::st_bbox(x) or matrix(sf::st_box(x),2)
-#            sp::x@data                 sf::st_geometry(x, NULL)  or  sf::st_drop_geometry(x)
-#            sp::proj4string(x)   	sf::st_crs(x)   or slot()
-#            sp::proj4string(x)<-	sf::st_crs(x)<-
-#	     sp::CRS(projargs)          sf::st_crs(proj4string)
-#            sp::aggregate(x,by,mean,areaWeighted=TRUE)  sf::st_interpolate_aw(x,by,mean)  More research
-#            sp::Polygon()		sf::st_polygon, sf::st_multipolygon
-#            sp::polygons		sf::st_geometry
-#            sp::polygons<-		sf::st_set_geometry
-#            sp::Polygons() 		???
-#            sp::SpatialPoints		sf::st_sfc...
-#            sp::SpatialPointsDataFrame sf::st_sf
-#            sp::SpatialPolygons        sf::st_sfc...
-#            sp::SpatialPolygonsDataFrame  sf::st_sf
+#     	sp::spTransform(x, CRSobj) sf::st_transform(x, crs)
+#       sp::coordinates()	   sf::st_coordinates()
+#       sp::coordinates()= ~x+y    sf::st_as_sf(x, coords=("x","y"))
+#       sp::bbox(x)		   sf::st_bbox(x) or matrix(sf::st_box(x),2)
+#   	sp::x@data                 sf::st_geometry(x, NULL)  or  sf::st_drop_geometry(x)
+#   	sp::proj4string(x)   	   sf::st_crs(x)   or slot()
+#      	sp::proj4string(x)<-	   sf::st_crs(x)<-
+#	sp::CRS(projargs)          sf::st_crs(proj4string)
+#       sp::aggregate(x,by,mean,areaWeighted=TRUE)  sf::st_interpolate_aw(x,by,mean)  More research
+#       sp::Polygon()		   sf::st_polygon, sf::st_multipolygon
+#       sp::polygons		   sf::st_geometry
+#       sp::polygons<-		   sf::st_set_geometry
+#       sp::Polygons() 		   ???
+#       sp::SpatialPoints	   sf::st_sfc...
+#       sp::SpatialPointsDataFrame sf::st_sf
+#       sp::SpatialPolygons        sf::st_sfc...
+#       sp::SpatialPolygonsDataFrame  sf::st_sf
 #            
+#	slot(..., "proj4string")   ???
+#       CRSargs                    ???
 #
 #   Basics:	data.frame, cbind, rbind; row.names; as.data.frame;
 #
 #library(rgeos)                    #  rgeos: gIsValid, gCentroid, gUnion; gUnaryUnion?; gWithin
+#	gWithin (?)
+#	gContain (?)
+#	gContain???  (?)
 #
-#          rgeos::gArea			sf::st_area
-#          rgeos::gBoundary		sf::st_boundary
-#          rgeos::gBuffer		sf::st_buffer
-#          rgeos::gCentroid		sf::st_centroid
-#          rgeos::gDifference		sf::st_difference
-#          rgeos::gIsValid		sf::st_is_valid
-#          rgeos::gPolygonize		sf::st_polygonize
-#          rgeos::gSimplify		sf::st_simplify
-#          rgeos::gTouches		sf::st_touches
-#          rgeos::UnaryUnion		sf::aggregate
-#          rgeos::gUnion		sf::st_union
-#          rgeos::readWKT		sf::st_as_sf
-#          rgeos::writeWKT		sf::st_as_text
+#       rgeos::gArea		sf::st_area
+#       rgeos::gBoundary	sf::st_boundary
+#       rgeos::gBuffer		sf::st_buffer
+#       rgeos::gCentroid	sf::st_centroid
+#       rgeos::gDifference	sf::st_difference
+#       rgeos::gIsValid		sf::st_is_valid
+#       rgeos::gPolygonize	sf::st_polygonize
+#       rgeos::gSimplify	sf::st_simplify
+#       rgeos::gTouches		sf::st_touches
+#       rgeos::UnaryUnion	sf::aggregate
+#       rgeos::gUnion		sf::st_union
+#       rgeos::readWKT		sf::st_as_sf
+#       rgeos::writeWKT		sf::st_as_text
 #
+#####
 #
-#
-#
-#
-##library(devtools)                #
-##library(proj4)	           #  proj4:
-##library(dplyr)		   #  dplyr:
-#library(futile.logger)
-#library(futile.options)
-#library(MazamaCoreUtils)          #  ???
-
 
 ######
 #
 #   BuildBorderGroup  function to support micromapST.
-#   Updated: 2021-1024,  2022-0316 (Testing and demo data)
+#   Updated: 2021-1024,  2022-0316 (Testing and demo data), 2022-0920 (clean up and testing.)
 #
 #   This function takes a shapefile and name table (CSV or Excel format)
-#   and creates a border group ".RD" of the geographic 
+#   and creates a border group dataset ".RDA" of the geographic 
 #   areas in the shape file for use as boundary data and location 
 #   ids for micromapST. The micromapST package default border
 #   group is a characterized US State map.  Several examples
@@ -126,25 +113,34 @@
 #   country (China, UK), and city (Seoul , S. Korea) are 
 #   included in the micromapST package.
 #
-#   Several features of micromapST border groups are not supported
+#   Several features of micromapST border groups are partially supported
 #   by this build script:
 #
-#      1) Level 2 regional boundaries.
+#      1) Level 2 super-area boundaries.
 #           If L2 boundaries differ from the area and regional 
 #           boundaries, L2 is enabled and the VisBorders data.frame built.
-#      2) Regional mapping based on areas containing data.
-#           In this case, only regions in the border group data
-#           containing data are mapped.
-#           If the reg boundaries are different from the area boundaries
-#           then regions is enabled and a regions VisBorders data.frame
-#           is included in the BG.
-#      3) The L2 boundaries must be a subset of the Regional boundaries. 
-#           The hierarchy is always area, L2, regional, L3.  
-#           All must be subsets of the higher level.
+#           Their super-areas can be specified in the Name Table provided
+#           by the user, but must consist of aggregations of the areas.
+#
+#      2) Regional mapping based on areas containing data is supported
+#           when the regions are based on the areas in the map.  If regions 
+#           are discovered in the name table provided, the control flags to 
+#           micromapST will be enabled in the border group dataset.
+#           The user still must enable the feature when calling micromapST,
+#           by setting dataRegionsOnly=TRUE in the micromapST call.
+#
+#      3) The L2 and Regional boundaries must be a subset of the area boundaries
+#           in the border group. The hierarchy is always area, L2, regional, L3.  
+#           If dataRegionsOnly=TRUE, the L3 boundary data is not used.
+#
+#   Functions not supported:
 #      4) Characterization of the boundary data to ensure 
 #           all areas are visible as clear or colored in the 
 #           drawn micro map.  The areas must be manually adjusted
-#           prior to calling this function.
+#           prior to calling this function. Simple tools for shifting 
+#           areas, scaling, and rotating are provided, but may not
+#           provide enough manipulation to ensure the visibility of the
+#           area.
 #      
 #
 #  Change List:
@@ -245,7 +241,7 @@
 #               MapX (X value of coordinates), MapY (Y value coordinates.)
 #             - Processing of the MapLabel coordinates and all of the area modifiers was
 #               changed to handle these values in the same "coordinates" system as the  
-#               original shapefile - so that would be long/lat or a projection's +units.
+#               original shapefile - so that would be long/lat or a projections +units.
 #               The modifier values are not needed after the build of the border group but are
 #               keep as a record of what was done or if the name table is reused to 
 #               build another border group.
@@ -279,13 +275,13 @@
 #               +units parameter is +units=m (the default.); 3) If the shapefile
 #               does not contain a proj4string or wkt, it will be set to a long/lag
 #               projection; 4) If the shapefile contains a non-long/lat 
-#               projection it will be inspected and it's +units= parameter 
+#               projection it will be inspected and its +units= parameter 
 #               changed to meter. The actual map transformation is done at the end 
 #               of the process before the micromapST border group is created. 
-#               5) The proj4 calling parameter will override the shapefile's projection.
+#               5) The proj4 calling parameter will override the shapefiles projection.
 #               6) If after processing the transformations for the Shapefile and/or
 #               the proj4 calling parameter, the SPDF is still a long/lat projection,
-#               the build function will create a AEA projection based on the map's 
+#               the build function will create a AEA projection based on the maps 
 #               centroid with a lat_1 and lat_2 lines at 25% and 75%;  
 #               7) The coordinates used by the MapLabel feature are used to 
 #               create a SpatialPoint structure.  
@@ -407,45 +403,102 @@
 #             - Added call parameter to specify the size of the Labels when used.
 #               This variable is also added to the areaParms data.frame
 #             - Updated logic to enable Region feature in micromapST when regID column exists.
-#  2022-0630  - Add Global address space - can't use micromapST's
-#
-#             
-#             
-#
-# 
-#
+#  2022-0630  - Add Global address space - can't use micromapSTs
+#  2022-0831  - Made adjustments in all plot calls for SPDF structures to add sp:: to the calls.
+#             - When problems are reported inserted gBuffer with 0 width to do the clean up of the 
+#               structure.  Continued to expand this.
+#             - Found the mai, mar parameters were being reset after a graphic file was being opened.
+#               This caused the figure to be to large in the image.  Changed the placement of these
+#               par settings to after the opens.  Also increased the mar to allow two lines for the 
+#               title area and increased the size of the plot by 0.4 inches to accomodate the titles.
+#               This seems to have removed all of the plot error messages that could not be traced
+#               to any other source.
+#             - Changed the debug flag implementation to guide the creation of intermediate plots of the 
+#               map for documentation and visualizing how the map may look in the linked micromap.
+#               The debug field is tried as a series of bits.  Each bit is assigned to an operation or 
+#               extra function in the process.
+#               Bit  1 =   1 - Used for line by line debugging.
+#               Bit  2 =   2 - Outputs information to trace the process of the function.
+#               Bit  3 =   4 - Display Information related to projection processing and variable.
+#               Bit  4 =   8 - Plot intermediate Shape file and SPDF (not the same as 256 or 512).
+#               Bit  5 =  16 - Display processing and variable related to the SPDF
+#               Bit  6 =  32 - Display processing and variable related to the Name Table.
+#               Bit  7 =  64 - Display internal variable on processing
+#               Bit  8 = 128 - 0 = set output file type for the 512 option to PDF (default)
+#                              1 = set output file type for the 512 option to PNG
+#               Bit  9 = 254 - Generate a multiple plot graphic of the map in small format 
+#                              with each plot having only 5 areas shaped.  Number of images = Areas/5 + 1
+#               Bit 10 = 512 - Generate a 4" x 4" plot of the area at key states in the processing:
+#                               RAW, After rmapshaping, After Name Table modifications, and 
+#                               after transformation and converstion to the micromapST VisBorder
+#                               format.
+#               Bit 11 =1024 - Same as 512, but only generates plots for the RAW and Final images.
+#               Bit 12 =2048 - Display the final BorderGroup layers on the screen:  Areas, Level 2,
+#                              Regions, Map Outline (level 3).  Each is display in a separate window.
+#               Bit 13 =4096 - NA
+#               Bit 14 =8192 - Write to disk PDF file of multiple plots of the map from the areaVisBorder
+#                              boundaries - one map per 5 colors as done for the 256 option.
+#               Bit 15 =16384 - Future
+#               Bit 16 =32768 - Future
+#             - Changed the minimum map height to .5
+#             - Resolved issues with multipel globalVariables calls.
+#  2022-09-05 - Removed documentation on MapHdr call parameter.  Set default of Map.Hdr2 to "Areas".
+#               Variable will still be set in the areaParms table in the border group.
+#               Will still allow the map headers to be specified in the micromapST call.
+#             - Changed the maptail colors to a pale yellow/green for above and a pale yellow/red
+#               for below colors. 
+#             - Tested regionsB and onlyDataRegions opens for border groups with regional boundary sets (like
+#               the US and the UK & Ireland border groups.
+#             - Corrected the location the "line" and refTxt are printed below the glyph.
+#             - Verify all location ids are mapped to upper case for comparison to cover a lot of issues with 
+#               the users data files and privately build border groups.
+#             - Updated the version string from micromapST.Version.
+#             - Modified the onlyDataRegions logic to turn on the regionsB option to replace the L3 outline of the map when 
+#               only part of the map is draw.
+#  2022-09-08 - Updated logic to enable regional feature when regID columns are present.
+#             - Disabled MapHdr and made the default c("","Areas")
+#  2022-09-20 - Correct typos in check point file names (,rda instead of .rda).
+#             - Remove $area and other processing and test fields in the name table.
+#  2022-09-22 - Added call parameter to allow the specification of a unique directory to write any 
+#               intermediate plots or text output for the user.  Required by CRAN to support any 
+#               any output via examples in the BuildBorderGroup documention.
+#  
 #  Operation Sequence:
 #
-#       0) (development) Load support libraries
-#		maptools, stringer, foreign, sp, rgdal, cleangeo,
-#               dev tools, rHub, cleangeo, 
-# 	1) Verify all call parameters and referenced data structures.
-#       2) Read shape file and convert into Spatial Polygon (sp) structure.
-#       3) Validate and clean SP image of all boundaries
-#       4) Read Name Table, verify columns, and verify content of columns.
+#       1) Load support libraries
+#		maptools, stringer, sp, rgdal, rgeos, cleangeo,
+#               tools, utils 
+# 	2) Verify all call parameters and referenced data structures (panelDesc).
+#	3) Read in initial name table and validate required columns and content.
+#       4) Read shape file and convert into Spatial Polygon data.frame (spdf) structure.
 #       5) Convert MapLabel columns into MapL, MapX, and MapY columns.
-#       6) Process LINK between Name Table and Shape file and 
-#          assign the "key" to use in micromapST.
+#       6) Validate and clean SP image of all boundaries
 #       7) Simplify SP data with rmapshaper. Reduce to 2 to 0.6
-#       8) Union all polygons of areas under the area in the SPDF
-#       9) Build areaParm data.frame
-#       10) Clean up Name Table - remove work columns
-#       11) Check Point Name Table and Shapefile to disk for possible 
-#           processing.
-#       12) Reload for check point restart (checkPointReStart = TRUE)
-#       13) Plot to validate boundary data images.
-#       14) Convert shape file data into VisBorder format for micromapST.
-#       15) Create L2, Reg, and L3 boundary datasets
-#       16) Bundle all border group dataset and write as one R dataset to
-#           .rda compressed file.
+#       8) Union all polygons of areas under the area "Polygons" in the SPDF
+#       9) Process LINK between Name Table and Shape file and 
+#          assign the "key" to use in micromapST.
+#       10) Build areaParm data.frame
+#       11) Clean up Name Table - remove work columns
+#       12) Check Point Name Table and Shapefile to disk for possible 
+#           manual processing.
+#       13) if checkPointReStart = TRUE bypass duplicate work above and restart at this
+#           point.
+#       14) Reload for check point files and continue.
+#       15) Plot to validation boundary data images if requested (debug=1024).
+#	16) Create SPDF versions of the L2, Regional and L3 boundaries.
+#       17) Convert associated SPDFs into the associated VisBorders format 
+#           data.frames for micromapST.
+#       18) Create L2, Reg, and L3 boundary datasets
+#       19) Bundle all VisBorders data.frames (area, L2, Regional, L3) and the name 
+#           table into the single border group dataset and write to
+#           a compressed .rda file.
 #
-#  Steps to build a new Border Group for micromapST from a shape file.
-#
-#  This routine accepts a shape file and creates a Boundary Group for 
+#  This routine accepts standard ESRI shape file format boundary data,
+#  a user provided name table and creates a Boundary Group for 
 #  use by the micromapST package.
 #
 #  Author:  James Pearson, StatNet Consulting
-#  Updated: Auguar 13, 2022
+#  Updated: August 20, 2022
 #
 #  Version:  1.00 - beta
 #
@@ -453,114 +506,19 @@
 #  to a function and released as a package, the list of library packages
 #  will be converted into a set of "required" packages.
 #
-#  Packages used in this function are:
-#  sp:		spTransform
-# 		Polygons
-#		Polygon
-#		slot(..., "proj4string")
-#               bbox
-#               cbind, rbind,
-#               CRS
-#               SpatialPolygons
-#               SpatialPolygonsDataFrame
-#               coordinates
-#               aggregate
-#               plot of sp
-# 		wkt
-#
-#               CRSargs
-#               readOGR
-#  tools	CRAN_check_xxxx
-#  		file_ext
-#		file_path_sans_ext
-#  stringr	str_trim
-#               str_split
-#               str_to_upper
-#               str_sub
-# 		str_pad
-#		str_locate
-# 		str_replace
-#  <base>	bitwise functions
-#               plot
-#  readxl	read.xls
-# 		read.slsx
-#  writexl	write.xlsx
-#  utils
-#  RColorBrewer	brewer_pal
-#  cleangeo     <entry collection of function>
-#  logger	<due to cleangeo> 
-#  graphicR	???
-#  rmapshaper   ms_simplify
-#  graphic
-#  
-##  proj4
-##  devtools
-##  dplyr
-##  
-# Retired packages used the need programming changes in the near future:
-#  rgdal	readOGR    # done
-#		writeOGR   # done
-#		showWKT
-#		CRS-class
-#		CRS
-#		CRSargs
-#		projInfo
-#               rgdal_extSoftVersion
-#               set_rgdal_show_exportToProj4_warnings=none
-#		set_thin_PROJ6_warnings
-#		spTransform
-#  maptools	getinfo.shape
-#		lineLabel
-#  		pointLabel
-# 		spRbind
-#		unionSpatialPolygons
-#		spCbind and -method
-#		checkPolygonsHoles
-#               readShapePoly (?)
-#		sp2tmap (?)
-#  rgeos	gArea
-# 		gUnion
-#		gDifference
-#		gIsValid
-#		gCentroid
-#		gWithin (?)
-#		gContain (?)
-#		gContain???  (?)
-#		gUnaryUnion (?)
-#
 #		
-#		
-#   Retired
-#library(rgdal)                    #                                
-#library(maptools)                 #           
-#library(rgeos)                    # 
 #
-#library(sp)		           #  General: as.data.frame;
-#                                  #      data.frame; row.names; 
-#library(cleangeo)                 #
-#library(logger)                   # 
-#
-#library(sf)
-#library(terra)
-#library(stars)
-#
-##library(proj4)		   # 
-##library(dplyr)		   #  
-##library(devtools)                #
-
-#
-
+#####
 
 #####
 #  Initialize the definition of Global variable outside of the BuildBorderGroup function name space.
    #
    utils::globalVariables(c(
-    
-	"warnCnt",         "stopCnt",        "errCnt",          "callVL", 
-	"BorderGroupName", "BorderGroupDir", "BorderGroupPath", "callVarNames",
+	"warnCnt",         "stopCnt",        "errCnt",          "callVL",        "callVarNames",
 	"ShapeFile",       "ShapeFileDir",   "ShapeFilePath",   "ShapeLinkName",
 	"NameTableFile",   "NameTableDir",   "NameTablePath",   "NameExt",       "NameTableLink",
-	"debug",           "proj4",          "ReducePC",        
+	"BorderGroupName", "BorderGroupDir", "BorderGroupPath", 
+	"debug",           "proj4",          "ReducePC",       
 	"MapHdr",          "MapMinH",        "MapMaxH",         "IDHdr",        
 	"LabelCex",        "convertPROJ4",   "AdjPolygons",     "clgeo_Clean2" 
       ),add=TRUE)
@@ -581,25 +539,48 @@
 #  Main Code
 #
 
-BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape file without extension for SPDF name
-                             ShapeFileDir    = NULL,		# Directory containing Shape file 
-                             ShapeLinkName   = NULL,		# Variable in @data data .frame containing link to NameTable
-                             NameTableDir    = NULL,		# Directory containing the NameTable (.CS, .axils, .axils, or .RDA)
-                             NameTableFile   = NULL,		# The filename with extension of the NameTable
-                             NameTableLink   = NULL,            # The column in the NameTable to use to link the SPDF to the Name Table.
-			     BorderGroupName = NULL, 		# Name of the Border Group (BordGrp)
-			     BorderGroupDir  = NULL,		# Directory to write the Border Group data set into.
-			     MapHdr          = NULL,		# One or two header lines for the Map Glyph column (Max 16 characters each)
-			     MapMinH         = NULL,            # Minimum Height for micromap drawing (inches)
-			     MapMaxH         = NULL,            # Maximum Height for micromap drawing (inches)
-			     IDHdr           = NULL,		# One of two header lines for the ID Glyph column (Max 12 characters each)
-			     LabelCex        = NULL,            # cex value for the Map Labels (Optional)
-			     ReducePC        = 1.25, 		# The percentage of vertex to be kept by rmapshaper
-			     proj4           = NULL,		# Callers requested micromap image final projection (string, not CRS)
-			                # may be changed to not do AEA transform if projection is specified in shapefile.  
-			     checkPointReStart = NULL,          # default = FALSE, True for restart.
-			     debug           = 0		# Debug flag = 0 to 65535.
-			     ) 
+BuildBorderGroup <- function(
+			   # Base filename of Shape file without extension for SPDF name
+			ShapeFile       = NULL,		
+			   # Directory containing Shape file 
+                        ShapeFileDir    = NULL,	
+                           # Variable in @data data .frame containing link to NameTable
+                        ShapeLinkName   = NULL,	
+                           # Directory containing the NameTable (.CS, .xlsx, .xls, or .RDA)
+                        NameTableDir    = NULL,	
+                           # The filename with extension of the NameTable
+                        NameTableFile   = NULL,	
+                           # The column in the NameTable to use to link the SPDF 
+                           #    to the Name Table.
+                        NameTableLink   = NULL,   
+                           # Name of the Border Group (BordGrp)
+			BorderGroupName = NULL, 	
+			   # Directory to write the Border Group data set into.
+			BorderGroupDir  = NULL,	
+			   # One or two header lines for the Map Glyph column 
+			   #       (Max 16 characters each) (optional)
+			MapHdr          = NULL,		
+			   # Minimum Height for micromap drawing (inches)
+			MapMinH         = NULL,    
+			   # Maximum Height for micromap drawing (inches)
+			MapMaxH         = NULL,      
+			   # One of two header lines for the ID Glyph column 
+			   #      (Max 12 characters each)
+			IDHdr           = NULL,	
+			   # cex value for the Map Labels (Optional)
+			LabelCex        = NULL,           
+			   # The percentage of vertex to be kept by rmapshaper
+			ReducePC        = 1.25, 		
+			   # Callers requested micromap image final projection 
+			   #     (string, not CRS)
+			proj4           = NULL,		
+	                   # may be changed to not do AEA transform if projection 
+	                   # is specified in shapefile.
+	                   # default = FALSE, True for restart.
+			checkPointReStart = NULL,       
+			   # Debug flag = 0 to 65535.
+			debug           = 0		
+                   ) 
    {
    
    # 
@@ -685,10 +666,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #                      the usual width of the micro map. If the strings are too long, they will
    #                      be truncated.  The border group builder can specify 1 or two 
    #                      header labels for the map glyph.  For Example:  MapHdr=c("Header1","Header2")
-   #                      If no values are provided for this parameter the BorderGroupName will be used.
+   #                      If no values are provided for this parameter the c("","Areas") will be used.
    #
    #   MapMinH          - is a numeric value used to specify the minimum amount of space to allocate 
-   #                      in the output graphic for the micromap drawing in the row group.  The default is 1".
+   #                      in the output graphic for the micromap drawing in the row group.  The default is 0.5".
    #
    #   MapMaxH          - is a numeric value used to specify the maximum amount of space to allocate
    #                      in the output graphic for the micromap drawing in the row group.  The default is 1.5".
@@ -698,8 +679,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #
    #   IDHdr            - is a character vector with 1 or two elements - 
    #                      the character vector provides the header labels 
-   #                      for the ID glyph column containing the area names.  The names can be
-   #                      the full name ("Name") or the abbreviation 
+   #                      for the ID glyph column containing the area names.  The names 
+   #                      can be the full name ("Name") or the abbreviation 
    #                      ("Abbr") for the area.  It is recommended the 
    #                      headers be no longer than 12 characters or the 
    #                      the maximum width of the area names.  If the 
@@ -716,7 +697,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #   ReducePC         - is a numeric value (1 element in a vectex) - the 
    #                      numeric is the goal reduction by rmapshaper to 
    #                      the shape file. The range of the value is from 
-   #                      0.5 to 95 percent. A value of 1.5 indicates 
+   #                      0.01 to 100 percent. A value of 1.5 indicates 
    #                      rmapshaper will keep 1.5% of the original vectex
    #                      in the map areas. The default value is 1.5%.
    #
@@ -728,10 +709,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #                      equal-area projection based on the center of 
    #                      the area and using Lat1 and Lat2 values 1/4 
    #                      of the height below and 1/4 the height above 
-   #                      the center the shape file with un its =meters.  If the caller desires a different 
-   #                      micro map projection, they can specify the projection using the "proj4" 
-   #                      call parameter.  The function will scan the provided string and insure
-   #                      the +units= parameter is set to meters.
+   #                      the center the shape file with un its =meters.  If the caller 
+   #                      desires a different micro map projection,
+   #                      they can specify the projection using the "proj4" 
+   #                      call parameter.  The function will scan the provided string 
+   #                      and insure the +units= parameter is set to meters.
    #                      It is suggested, the caller use the border group 
    #                      without this call parameters and seeing if it meets 
    #                      their needs before specifying it. Recommended usage 
@@ -761,21 +743,24 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #                      to printout debug information based on this value when 
    #                      it is TRUE or > 0.  The valid range is 0 to 255.  
    #                      The default value is FALSE or 0.  The Values of 
-   #                      1 = running stand-a-long not as a call, 2 = trace 
-   #                      program flow, 4 = display projection processing and variable,
-   #                      8 = Plot intermediate shape files and SPDF, 16
-   #                      16 = SPDF processing and Variables, 32 = Name Table 
-   #                      processing and variable, 64 = Display internal variuables 
-   #                      related to SPDF and Shape File, 128 = 0:PDF, 1:PNG,
-   #                      256 = write to a file a set of images of the map at each stage 
-   #                      of processing, 512 = write to a file a single PNG or PDF 
+   #                  	1 = running stand-a-long not as a call, 
+   #			2 = trace program flow, 
+   #			4 = display projection processing and variable,
+   #          	    	8 = Plot intermediate shape files and SPDF,
+   #                    16 = SPDF processing and Variables, 
+   #			32 = Name Table processing and variable, 
+   #			64 = Display internal variuables related to SPDF and Shape File, 
+   # 			128 = 0:PDF, 1:PNG,
+   #                  	256 = write to a file a set of images of the map at each stage 
+   #                      of processing, 
+   #   			512 = write to a file a single PNG or PDF format (bit 128) 
    #                      image of the map at each stage of processing, 
-   #                      1024 = write a PNG as requested in code, 
-   #                      2048 = display the final VisBorders images in windows at 
-   #                      the end of processing, 4096 = write final image of 
-   #                      areaVisBorders File to PNG or PDF file, 8196 = write
-   #                      a PDF file containing multiple samples of the map scales 
-   #                      to the size the may appear in a linked micromap.
+   #                  	1024 = write a PNG as requested of final map, 
+   #                    2048 = display the final VisBorders images in windows at 
+   #                      the end of processing, 
+   #			4096 = NA,
+   #			8192 = write a PDF file containing multiple samples of the  
+   #                      map scales to the size the may appear in a linked micromap.
    #
    #
    #  Name Table Requirements:
@@ -807,7 +792,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #      The use definition of each of these rows are: 
    #         - Name (full name length name of an area), 
    #         - Abbr (an commonly accepted abbreviation for the area), or 
-   #         - a numeric ID for the area.
+   #         - ID   (a numeric ID for the area).
    #      It is highly recommended that all three columns be included in the NameTable.
    #
    #      Additional columns may be specified:  
@@ -822,30 +807,31 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #      The initial NameTable must contain a "Link" column containing the values 
    #      used to link the NameTable row to an area in the SPDF.
    #
-   #      Other information and values contained in the NameTable to support other features are:
+   #      Other information and values contained in the NameTable to support other
+   #      features are:
    #         - L2_ID - a value to identify which Level 2 space the area belongs 
    #              (a matching L2_ID_Name should also be provided), and  
-   #         - Reg_ID - a value to identify which region in the geological space the area 
-   #              belongs (a matching Reg_Name should also be provided), this supports the 
-   #              micromapST feature of only matching regions within a BordGrp in the micro map 
-   #              drawing.  
+   #         - Reg_ID - a value to identify which region in the geological space the 
+   #              area belongs (a matching Reg_Name should also be provided), 
+   #              this supports the micromapST feature of only matching regions within 
+   #              a BordGrp in the micro map drawing.  
    #
    #      More information on the NameTable s provided later.
    #
-   #  Checkpoint restart:  At the checkpoint after the SPDF modifications and Name Table
-   #   has been completed, copies of the Name Table (as .rda) and the SPDF as a 
-   #   shape file are written out.  The Shape File can then be used to do custom
+   #  Checkpoint restart:  At the checkpoint after the SPDF modifications and 
+   #   Name Table has been completed, copies of the Name Table (as .rda) and the SPDF 
+   #   as a Shape File are written out.  The Shape File can then be used to do custom
    #   modifications to the boundaries.
    #   To restart the processing, the Name Table .RDA and the Shape file are 
-   #   retreived from the CheckPoint space in the Name Table directory.  The fact that 
-   #   they are both read from the "CheckPoint" directory and the Name Table is an .rda file
-   #   indicates this is a checkpoint restart of the process.  One the minimal information 
-   #   is verified, the data is read in and processing is continued.  A copy of the 
-   #   areaParm data.frame is also written to the checkpoint to save handling the areaParm
-   #   data again.  The Name Table directory points to the area containing the checkpoint
-   #   subdirectory.  The Checkpoint call parameter tell the function to add the 
-   #   "checkpoint" directory to the path, read the three files, and then pickup at the end 
-   #   part of the process.
+   #   retreived from the CheckPoint space in the Name Table directory.  
+   #   The fact that they are both read from the "CheckPoint" directory and the 
+   #   Name Table is an .rda file indicates this is a checkpoint restart of the process. 
+   #   One the minimal information is verified, the data is read in and processing is 
+   #   continued.  A copy of the areaParm data.frame is also written to the checkpoint 
+   #   to save handling the areaParm data again.  The Name Table directory points 
+   #   to the area containing the checkpoint subdirectory.  The Checkpoint call 
+   #   parameter tell the function to add the "checkpoint" directory to the path, 
+   #   read the three files, and then pickup at the end part of the process.
    
    #########
    #######
@@ -862,6 +848,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    wstr  <- paste0("assign(var,NewCounter(),envir=.GlobalEnv)")
    eval(parse(text=wstr))
    #
+   
+   ####
+   #  attempt to reduce warning messages on Proj6
    set_rgdal_show_exportToProj4_warnings(FALSE)
    rgdal::set_thin_PROJ6_warnings(TRUE)
    rgdal::set_P6_datum_hard_fail(FALSE)
@@ -870,13 +859,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    r3=rgdal::new_proj_and_gdal()
    r4=options("rgdal_show_exportToProj4_warnings"="none")
 
+   ####
+   # Initialize colors from external function (GetMColors)
    xColors      <- GetMColors()
    mcolors      <- xColors$mcolors
-   colorsRgb    <- xColors$colorsRgb
-   colorsRef    <- xColors$colorsRef
-   colorsRefRgb <- xColors$colorsRefRgb
+      
+   options(warn=1)   # enable warning at the time of occurance
    
-   #######
+   #######  398x
    #
    #  Common Functions
    #
@@ -907,7 +897,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       if (x == 0)    return(NA_character_)
       if (!is.character(x)) {
          # not a character vector - error
-         ErrFnd      <- errCntMsg(paste0("***3718 The proj4 value character vector.  Must be a valid proj4 argument character string to be converted."))
+         ErrFnd      <- errCntMsg(paste0("***3980 The proj4 value character vector.  Must be a valid proj4 argument character string to be converted."))
          return(FALSE)     
       } else {
          # character vector - OK try the convert
@@ -933,7 +923,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             bres[2]      <- sp::wkt(res)
             return(bres) # return CRS class version.
          } else {
-            # its not a CRS..  It's and error is FALSE...Most likely an error. Should be character.
+            # it is not a CRS..  Its an error if FALSE...Most likely a non-character.
             return(FALSE)         
    
           
@@ -953,6 +943,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #   Input: SPDF structure
    #
    #   Output: proj4string for the created AEA projection
+   #   UPDATE
    #
   AEAProjection <- function(wShp) { 
         #
@@ -960,7 +951,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
         #
         #  The basic AEA for the continental US is:
         #
-        #  Set the center based on the shape file's centroid.  
+        #  Set the center based on the shape files centroid.  
         #  If shape file is long/lat, then centroid should be in long/lat.
         #  If shape file is long/lat, then proj4string should be present or NULL and 
         #  I can use the lab point for the entire shape file to get the center.
@@ -1013,7 +1004,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
         # Build new AEA projections.
         #
         # Find center Long of area
-        wLong0 = round(xCtr[1],3)    # centroid's X coordinate in LL, rounded to 3
+        wLong0 = round(xCtr[1],3)    # centroids X coordinate in LL, rounded to 3
         if (wLong0 < 0) {
            wLong0 <- as.character(paste0(abs(wLong0),"w"))
         }
@@ -1027,7 +1018,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
         wLat2     <-  round(wLat0 + DLat4th,3)  # is the upper lat half way between middle and top edge
        
         #  calculated AEA projection for transform.
-        AEAProj4  <- paste0("+proj=aea +units=m +datum=NAD83 +lat_1=",wLat1," +lat_2=",wLat2," +lat_0=",wLat0," +lon_0=",wLong0," +no_defs")
+        AEAProj4  <- paste0("+proj=aea +units=m +datum=NAD83 +lat_1=",wLat1," +lat_2=",wLat2,
+                            " +lat_0=",wLat0," +lon_0=",wLong0," +no_defs")
         #cat("AEAProjection: Calculated Proj4string for transform:",AEAProj4,"\n")
         return(AEAProj4)     
     }     
@@ -1041,11 +1033,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #
    #
    #   Calls:   MakeVisPolygon, 
+   #   UPDATE
    
-   BuildVisBorder <- function(wSPDF, PlOrd) {
+   BuildVisBorder <- function(wSPDF, PlOrd, TypeVis) {
       #
       #    wSPDF - spatialPolygonsDataFrame or spatialPolygons of polygons in a map.
       #    PlOrd   - list of the names or IDs of the areas in the wSPDF for the map.
+      #            PlOrd has been sorted by order, so the Keys are ready for use.
+      #             $Key  and   $Ord, but data.frame sorted into order.
       #
       # This function takes a SPDF and converts it into a VisBorder structure and returns
       # the VisBorder image.
@@ -1062,8 +1057,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          
          #  This code pulls off the polygons@Polygons level associated with an area.
          
-         areaSPDF    <- wSPDF[xKey,]          # pull off each areas SPDF structure by name.   
-         areaRN      <- row.names(areaSPDF)      # should get only one.  Should be the same as xKey
+         areaSPDF    <- wSPDF[xKey,]          # pull off each areas SPDF structure by name (Key).   
+         areaRN      <- row.names(areaSPDF)   # should get only one.  Should be the same as xKey
          #cat("Areas Row.name:",areaRN,"\n")
          
          # debug plot of area for graphic check.
@@ -1088,7 +1083,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
          VisPolygons <- sapply(slot(areaSPDF,"polygons"), 
                                 function(x) {  # get the list of Polygons
-                                  sapply(slot(x,"Polygons"), function(y) MakeVisPolygon(y), simplify=FALSE) # pull off a single Polygon
+                                    sapply(slot(x,"Polygons"), 
+                                        # pull off a single Polygon
+                                        function(y) MakeVisPolygon(y), simplify=FALSE) 
                                 }
                            )
                         
@@ -1101,7 +1098,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
         
          VisArea        <- as.data.frame(VisArea)       # convert data structure to data frame (matrix to DF)
          names(VisArea) <- c("x","y","hole")            # change the column headers
-         VisArea$Key    <- areaRN                       # Add the Key column
+         VisArea$Key    <- areaRN                       # Add the Key column - to all vectors.
          
          #
          #   VisArea is a matrix of the x,y,hole,key 
@@ -1121,11 +1118,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          VisBorders      <- rbind(VisBorders,VisArea)
          
       } # end of loop through all areas in plot order.
-         
+      
+      #  Done - add sequence numbers
+      VisBorders$seq <- seq(1:dim(VisBorders)[1])   # add sequence number for a check.
+      #print(VisBorders[250:400,])
       #
       #  Remove duplicate x,y points in VisBorders data.frame
       #
-      VisBorders  <- RemoveDups(VisBorders)
+      VisBorders  <- RemoveDups(VisBorders, TypeVis)
       
       return(VisBorders)
    }
@@ -1148,9 +1148,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #cat("Entering MakeVisPolygon.\n")
          #str(wPolygon)
          
+         # Get coordinates and hole indicator for polygon.
          xcoords     <- wPolygon@coords
          xhole       <- wPolygon@hole
-      
          #print(xcoords)
          #print(xhole)
          
@@ -1173,24 +1173,28 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          xR        <- range(xcoords[,1],xcoords[,2])
          if (abs(xR[2]) <= 360) RScale = 3   # if x,y are long/lat (-360 to 360), the round to .0001 (3)
          
-         # must be enhanced to allow for the rounding for large or small areas. ???
+         # Must be enhanced to allow for the rounding for large or small areas. ???
          
-         NewCoords <- xcoords
+         NewCoords <- xcoords                   # get coordinates from polygon - one at a time.
          
          # simple rounding  and complete loop   (round to 100s of meters.)
          
-         NewCoords <- round(NewCoords, RScale)      # round to 100 meters or 64 feet (.0001 degrees).
+               # round to 100 meters or 64 feet (.0001 degrees).
+         NewCoords <- round(NewCoords, RScale)      
          
-         NewCoords <- rbind(NewCoords, NewCoords[1,])  # end to start  - at start to the end for POLYGON function later
-               
-         NewCoords <- rbind(NewCoords, c(NA,NA))     # add NA, NA to end of the list to indicate end of polygon.
+         #  Removed adding first point to last - seems like SPDF are built with closed polygons.
+               # end to start  - at start to the end for POLYGON function later
+         #NewCoords <- rbind(NewCoords, NewCoords[1,]) 
+        
+               # add NA, NA to end of the list to indicate end of polygon.
+         NewCoords <- rbind(NewCoords, c(NA,NA))     
        
          #cat("NewCoords Results:\n")
          #print(str(NewCoords))
          
          # set up data.frame to return
          ODF       <- as.matrix(NewCoords)
-         ODF       <- cbind(ODF,rep(xhole,dim(ODF)[1]))   # put hole indicator in all rows.
+         ODF       <- cbind(ODF,rep(xhole,dim(ODF)[1]))   # put hole column indicator in all rows.
          
          #cat("MakeVisPolygon-Completed - resulting list of coordinates.\n")
          #cat("ODF return - class:",class(ODF),"  dim:",dim(ODF),"\n")
@@ -1200,9 +1204,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       }
    #
    ######
-   
-   
-   
+      
    ######
    #
    #  RemoveDups - Remove duplicate points in a VisBorder matrix x,y point structure.
@@ -1217,47 +1219,69 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  When two neighboring point sets are identical, one is erased. 
    #
    
-   RemoveDups <- function(VisB) {
+   RemoveDups <- function(VisB, TypeVis) {
       #  VisB is a VisBorder matrix if x, y values for any set of spaces or areas.
       #  Remove duplicate x,y points in a matrix.
-      
+      VisB2 <- VisB
       #  Get the number of points in the matrix
       lenVis     <- dim(VisB)[1]   # Get number of rows in the matrix/data.frame
       #cat("RemoveDups -lenVis:",lenVis,"\n")
       
       #  Initial the first "previous" x,y points.
-      oldX     <- VisB$x[1]
-      oldY     <- VisB$y[1]
-      #cat("Initial X,Y:",oldX, " ",oldY,"\n")
+      oldX      <- VisB[1,"x"]
+      oldY      <- VisB[1,"y"]
+      #oldKey   <- VisB[1,"Key"]
+      oldVal    <- 1
+      #cat("Initial X,Y,Key:",oldX, " ",oldY," ",oldKey,"\n")
       #  Create a list of T/F matching each entry in the data.frame.  
       #  Any duplicates will be marked with a "FALSE" to indicate the row should be deleted.
+      
       KeepList <- rep(TRUE,lenVis) 
       
       #  Scan the rest of the points to the end of the data.frame
-      for (ind in c(2:lenVis))  {       # loop through all of the points from 2 to the end.
-         
-         if ( !is.na(VisB$x[ind]) && !is.na(VisB$y[ind]) ) {
-            if ((oldX == VisB$x[ind]) && (oldY == VisB$y[ind])) {
+      ind <- 2
+      while (ind < lenVis) {  # for does not allow us to alter the index. Must use while.
+      
+      #for (ind in c(2:lenVis))  {       # loop through all of the points from 2 to the end.
+      
+         #cat("ind:",ind,"\n")
+         if ( !is.na(VisB[ind,"x"]) && !is.na(VisB[ind,"y"]) ) {
+            # we have coordinates.
+            if ((oldX == VisB[ind,"x"]) && (oldY == VisB[ind,"y"])) {
                #  both equal  - we have a match of non-NA oxy points  Set keepInd = FALSE to delete it.
                KeepList[ind] <- FALSE        # indicate this point should be deleted.
+               #cat("Marking ",row.names(VisB[ind,])," at ",ind," as duplicate to ",oldVal," ",oldX,"=",VisB[ind,"x"]," & ",oldY,"=",VisB[ind,"y"]," type:",TypeVis,"\n")
                # move on to check next x,y point set.   
-            }
-            oldX <- VisB$x[ind]
-            oldY <- VisB$y[ind]
+            }  #  Dup or no dup advance the saved items.
+            
+            oldX   <- VisB[ind,"x"]
+            oldY   <- VisB[ind,"y"]
+            oldVal <- ind
          } else {
+            #cat("Found NA coord at :",row.names(VisB[ind,]),"\n")
             # Found NA at ind.
-            oldX <- VisB$x[ind+1]  # save the next one after the NA.
-            oldY <- VisB$y[ind+1]
-            ind  <- ind + 1        # set ind to the next after the NA.
+            #cat("found NA at ",ind," save new ",ind+1," Skipping to ",ind+2,"\n")
+            oldX   <- VisB[ind+1,"x"]  # save the next one after the NA.
+            oldY   <- VisB[ind+1,"y"]
+            oldVal <- ind + 1 
+            ind    <- ind + 1        # set ind to the next after the NA.
          }
          # Move Forward.
+         
+         ind       <- ind + 1
+         #cat("Stepped ind to ",ind,"\n")
       }
       # Done with scan.  KeepList tell me what entries to keep.
-      
-      VisB2      <- VisB[KeepList,]   # keep the good entries 
-      #  Report on the accomplishment
-      lenVis2    <- dim(VisB2)[1]     
-      #cat("RemoveDups Completed-Original Length: ",lenVis," Final Length: ",lenVis2,"\n")
+     
+      if (any(!KeepList)) {
+           # we have a vector to delete.
+         DupList    <- row.names(VisB)[!KeepList]  # get row names then collect the deleted names.
+         cat("Duplicate vectors removed in ",TypeVis," file:",paste0(DupList,collapse=", ",sep=""),"\n")
+         VisB2      <- VisB[KeepList,]   # keep the good entries 
+           #  Report on the accomplishment
+         lenVis2    <- dim(VisB2)[1]     
+         #cat("RemoveDups Completed-Original Length: ",lenVis," Final Length: ",lenVis2,"\n")
+      }
       return(VisB2)
    }
    #
@@ -1265,7 +1289,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    
    
    
-   ######
+   ###### 398x
    #
    #  AdjPolygons - Primary function in sapply to setting up the shift and scaling of a Polygons structure.
    #                The function sapplys the next level and passes Polygon structures
@@ -1321,9 +1345,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
     
          if (!is(wPolygons,"Polygons")) {
             # polygon not the right format - "Polygons" structure.
-            xmsg <- paste0("***4010 AdjPolygons - wPolygons value is not",
+            xmsg <- paste0("***3985 AdjPolygons - Polygons level value is not",
                            " a 'Polygons' structure.")
-            StopFlag = stopCntMsg(xmsg)
+            StopFlag = stopCntMsg(xmsg)   # stop process.
          }
          
          #
@@ -1429,14 +1453,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #  polygons in the area should also be scaled in the same 
          #  process.
        
-         Nxcoords    <- xcoords2 # save copy of original coordinates 
-         modCoord    <- FALSE
-         
+         Nxcoords      <- xcoords2 # save copy of original coordinates 
+         modCoord      <- FALSE
+          
          #  Normalize all coords to the centroid values so centroid 
          #  is 0,0 for scaling, shifting, and rotation
          
-         saved_xCtr  <- xCtr
-         xAdjCtr     <- -xCtr
+         saved_xCtr    <- xCtr
+         xAdjCtr       <- -xCtr
            
          # normalize polygon points around 0,0 area center
 	 #    coordinates save to reset the centroid later
@@ -1452,7 +1476,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             
             # apply the scaling percentage (.5 = smaller, 1.5 = larger)
             xScale        <- as.numeric(xParm$Scale)
-            Nxcoords2     <- Nxcoords1
+            #Nxcoords2     <- Nxcoords1            # save a copy
             Nxcoords3     <- Nxcoords1
             Nxcoords3[,1] <- Nxcoords1[,1] * xScale
             Nxcoords3[,2] <- Nxcoords1[,2] * xScale
@@ -1460,7 +1484,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             modCoord <- TRUE
          }
          if (!is.na(xParm$Rotate) && xParm$Rotate != 0) {
-            Nxcoords4     <- Nxcoords1
+            #Nxcoords4     <- Nxcoords1           # save a copy
             Nxcoords5     <- Nxcoords1
             # rotation about the centroid at the rotate degrees.
             # (x',y') <- (x cos<a> + y sin<a> , -x sin<a> + y cos<a>)
@@ -1474,7 +1498,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          }
          if (!is.na(xParm$Xoffset) && xParm$Xoffset != 0) {
             # ahift X coordinate
-            Nxcoords6      <- Nxcoords1
+            #Nxcoords6      <- Nxcoords1
             Nxcoords7      <- Nxcoords1
             Nxcoords7[,1]  <- Nxcoords1[,1] + xParm$Xoffset
             Nxcoords1      <- Nxcoords7    # put results in Nxcoods1
@@ -1482,7 +1506,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          }
          if (!is.na(xParm$Yoffset) && xParm$Xoffset != 0) {
             # shift Y coordinate
-            Nxcoords8      <- Nxcoords1
+            #Nxcoords8      <- Nxcoords1
             Nxcoords9      <- Nxcoords1
             Nxcoords9[,2]  <- Nxcoords1[,2] + xParm$Yoffset
             Nxcoords1      <- Nxcoords9    # put results in Nxcoords1
@@ -1538,8 +1562,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  Strip out the other stuff (modifactions, etc.) to leave the 
       #  LL East/West Hemisphere adjustment code.
       #
-      MapCtr        <- as.data.frame(rgeos::gCentroid(spdf))
-      AreaList      <- row.names(spdf)
+      MapCtr        <- as.data.frame(rgeos::gCentroid(spdf))   # UPDATE
+      AreaList      <- row.names(spdf)                         # list of areas in SPDF
       spdfData      <- spdf@data
       areaSign      <- sign(MapCtr[[1]])
       
@@ -1560,14 +1584,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #  The @data space must be preserved.
          
          # Get polygons sub-SPDF from full map.
-         areaSPDF <- spdf[xKey,]  
+         areaSPDF <- spdf[xKey,]     # get one area
          # pull off each polygons of the SPDF structure by id.
          AName    <- paste0(areaSPDF@data$NAME,"-",xKey)
          areaBBox <- sp::bbox(areaSPDF)      # get bbox of area.
          xR       <- areaBBox[1,]            # get X range
-         x1 <- (areaSign == sign(xR[1]))
-         x2 <- (areaSign == sign(xR[2]))
-         x3 <- abs(diff(xR))
+         x1       <- (areaSign == sign(xR[1]))
+         x2       <- (areaSign == sign(xR[2]))
+         x3       <- abs(diff(xR))
          
          if (bitwAnd(debug,64) != 0) {
             cat("Area/Poly ID:",xKey,"\n")
@@ -1605,6 +1629,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             
             if (bitwAnd(debug,64) != 0) 
                cat("area deleted and added:",xKey,"\n")   
+            
             #   Delete the original area Polygons LIST from the SPDF
            
             xm          <- (xKey == row.names(spdf))  
@@ -1737,7 +1762,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #
    stopCntMsg <- function(msg) {
       stopCnt()
-      warning(msg, call.=FALSE)
+      stop(msg, call.=FALSE)
       return(TRUE)
    }
    #
@@ -1887,7 +1912,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
                  slot(polygon, "ID") <- ID
               } else {
                  if (verbose) {
-                    #cat("logger Code: 1883 verbose:",verbose,"\n")
+                    #cat("logger Code: 1921 verbose:",verbose,"\n")
                     #logger.info(sprintf("Removing false polygon at index %s", x))
                     cat(sprintf("Removing false polygon at index %s", x))
                  }
@@ -1934,37 +1959,50 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #   
    #  Area color selection - to avoid neighbors having the same colour.
    #
-   #  Credit: Stack Overflow - R
+   #  Credit: Stack Overflow - R - Spacedman - Feb 28, 2015 - Lancaster, UK, research fellow Lancaster Univ.
+   #                Prof. Barry Rowlingson
+   #  Adopted and modified version.
    #  Uses   spdep::poly2nb, 
+   #  Value: vector of colors for the SPDF  in order of polygons.
    #
    nacol <- function(spdf) {
-       resample   <- function(x, ...) x[sample.int(length(x), ...)]
-       nunique    <- function(x){ unique(x[!is.na(x)]) }
+       resample   <- function(x, ...) x[sample.int(length(x), ...)]   # returns value from X randomly chosen from 1:length(x)
+       nunique    <- function(x){ unique(x[!is.na(x)]) }    # returns list of unique non-na values in "x"
        #    This only works if you have an SPDF passed to you
        #np         =  nrow(spdf)           # number of polygons in SPDF
+       
        #    The following will work on SP and SPDF structures
-       np         =  length(spdf@polygons)
-       if (np > 1) {
+       np         =  length(spdf@polygons)   # modification to correct code. 
+       
+       if (np > 1) {                         # check to see if more than 1 polygon exists in SPDF
+       
           adjl       =  spdep::poly2nb(spdf) # get the adjacency list for each area.
-          cols       =  rep(NA, np)          # vector of colors
-          cols[1]    =  1
-          nextColour =  2
+          cols       =  rep(NA, np)          # vector of colors (one per area)
+          cols[1]    =  1                    # first polygon is set to index # 1
+          nextColour =  2                    # next color variable set to 2.
    
-          for (k in 2:np) {
+          for (k in 2:np) {                  # step through all of the polygons in the SPDF.
+             #  Get vector of colors assigned to adjacent areas to "k".
              adjcolours = nunique(cols[adjl[[k]]])
+             #  If vector is empty, no colors have been assigned to neighbors. 
              if (length(adjcolours) == 0) {
-                cols[k] = resample(cols[!is.na(cols)],1)
+                # you can have any color - choose one that has been used.
+                cols[k] = resample(cols[!is.na(cols)],1)  # sample from list of colors used (non-na), 1 color.
              } else {
+                # have neighboring colors, find colors available from vectors
                 avail   = setdiff(nunique(cols), nunique(adjcolours))
+                # if none are avaiable use next color index.  (new color)
                 if (length(avail)==0) {
                    cols[k]    = nextColour
                    nextColour = nextColour+1
                 } else {
+                   # list of colors available - random same one that can be used from vector.
                    cols[k]    = resample(avail,size=1)
                 }
              }
           }
        } else {
+          # only one polygon - return one color index.
           cols = 1
        }
        return(cols)
@@ -1976,7 +2014,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
   
    #####
    #
-   #  Draw text with black outline - shadow
+   #  Draw text with black outline - shadow  - NOT USED
    #
    
    shadowtext <- function (x, y=NULL, labels, col="white", bg="black", 
@@ -2013,7 +2051,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  Used to graphically show how the map areas will looked shaped.
    #  Dependes on debug set to 256 and/or 512..
    #  1024 is used to signal to the caller, the first and last map should
-   #  be displayed via the 512 value.
+   #  be displayed via the 512 value.   The caller uses the debug=1024 to temp force debug=513
+   #  on the first and last full image.
    #
    #  This print sample routine must handle two situations:
    #   a) the SPDF contains polygons not grouped by area. Thus
@@ -2023,47 +2062,103 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #      under the entry for each area.
    #  Color are assigned by area identifiers.
    #
+   #  Adjust code to handle 5 areas and less.
+   #
    
    SamplePrts <- function(PPSp, PPTitle, PPMfrow, debug, NTLink, NTKey, MAvgH=NULL, NCol = 5) {
+    
+      # PPMfrow = Parameter for the Mfrow graphics call for the multiple map display 
+      #           for debug=256 bit
+      # NTLink  = Name Table $ Link column. List of the name table to shape file 
+      #           polygons via the "link" established earlier.
+      #           This is used to make sure all of the polygons related to the same area are
+      #           colored the same and colored at the same time.
+      #        ** Have to match the links, the keys are not set yet and the polygons have not be collected under 
+      #        ** name.  Therefore, the row.names are not right.
+      # NTKey   = Name Table $ Key column.
+      # MAvgH   = size of the average map range, attempt to estimate the Group/Row height that 
+      #           may be encountered.  (Initial attempt to print the small sizes failed.  More
+      #           coding required, but not at this time. Changed the size to about 4 x 4.
+      # PPTitle = string used for the title of the graphic and as part of the output filename.
+      #
+      #           PPTitle is used as part of the output filename, but the " " are replaced with "_".
+      #
+      # Remove Titles from plots.
+      
       # Color list setup.
       #cat("length of PPSp:", length(PPSp),"\n")
-      # set up for 5 colors.
-      BaseColors   <- c(mcolors[1],mcolors[2],mcolors[3],mcolors[4],mcolors[5])
-      BlankColors  <- c(NA,NA,NA,NA,NA)
+      #cat("SamplePrts - debug:",as.hexmode(debug),"  title:",PPTitle,"\n")
+      #cat("Areas:",length(NTLink),"  NumColors:",NCol,"  NTKey:",length(NTKey),"\n")
+      #cat("NTLink & NTKey:\n")
+      #print(NTLink)
+      #print(NTKey)
       
-      NNN          <- 5
-      if (NCol != 5) {
-         # if number of colors is not 5, then use 6
-         BaseColors  <- c(BaseColors,mcolors[6])
-         BlankColors <- c(NA,NA,NA,NA,NA,NA)
-         NNN         <- 6
+      if (length(NTLink) < 2) {
+         xmsg <- paste0("***3997 The number of areas in the map is 1 or less. A border group can not be made.\n")
+         StopFlag <- stopCntMsg(xmsg)
+         stop
       }
+      
+      # Edit title string to replace " " with "_" for filenames.
+      FTitle <- gsub(" ","_",PPTitle)
+      
+      NNN          <- 5   # number of colors and areas per group/row.
+      if (NCol != 5) {
+         NNN       <- 6
+      }
+ 
+      #  PP SPDF data.
+      PPSpData         <- PPSp@data
+      #print(PPSpData)
+      
+      PLinkList        <- PPSpData[,"X__Link"]    # use link to pull it all together
+      #print(PLinkList)
+      
+      PLinkListSize    <- length(PLinkList)   # length of SPDF
+      
+      UniPLinkList     <- unique(PLinkList)   # unique number of areas & names.
+      UniPLinkListSize <- length(UniPLinkList)
+      
+      if(NNN > UniPLinkListSize ) NNN <- UniPLinkListSize   # keep NNN at or below the number of areas.
+           # NNN is normally 5, but could be down to 2
+      
+      xNNN             <- UniPLinkListSize - NNN   # used by both map plotters. for DE or RI = 0
+      
+      # if NNN <= 5/6, then xNNN will start being zero.
+      
+      #cat("UniPLink:",UniPLinkListSize," NNN:",NNN,"  xNNN:", xNNN,"\n")  
+      # if number of colors is not 5, then use 6
+      BaseColors  <- NULL
+      BaseColors  <- c(BaseColors,mcolors[1:NNN])      # basic set of "x" colors.
+      BlankColors <- c(rep(NA,NNN))                    # blank set of "x" colors.
   
       if (missing(MAvgH) || is.null(MAvgH)) {
          MAvgH = 1.3
       }
-     
-      PPSpData         <- PPSp@data
-      PLinkList        <- PPSpData$X__Link  # use link to pull it all together
-      PLinkListSize    <- length(PLinkList)
+ 
+      # match SPDF to NT.   Keys not available yet.
+      #print(NTLink)
       
-      Poly2Area        <- match(PLinkList,NTLink)  # match polygon to NTable.
+      Poly2Area        <- match(PLinkList,NTLink)  # match each polygon to a NTable entry.
+               # multiple polygons can be associated with one Name Table entry.
+      #cat("Poly2Area - SamplePrt:\n")
+      #print(Poly2Area)
       
-      #cat("length of Shape file List:", length(PLinkList),"\n"," Shapefile List:\n")
-       
-      UniPLinkList     <- unique(PLinkList)   # unique number of areas & names.
+      #cat("SPDF data area:\n")
+      #print(PPSpData)
       
-      UniPLinkListSize <- length(UniPLinkList)
-      
-      xNNN             <- UniPLinkListSize - NNN
+      # initialize NTLinkCol table.  this table maps the colors to the polygon LINKS or KEYS
       NTLinkCol        <- data.frame(NTLink=NTLink,Key=NTKey,Col=NA)  
-     
+              # NTLink should match SPDF Link, Keys should also match.
+      #print(NTLinkCol)
+ 
       if (bitwAnd(debug,256) != 0) {
+         # draw a set of maps (about 9 to 12 per page) to see the relative size of the micromaps.
+         # The colors are rotated through 5 at a time to allow the user to check the 
+         # visibility of each areas
+         
          #cat("Generate scaled example of test maps - ",PPTitle,".\n")
          # only writes PDF.
-         
-         # display multiple maps with 5 colored/shaded areas per map 
-         # and draw on one sheet at the approximate scale
          
          #cat("UniPLinkListSize:",UniPLinkListSize,"  NNN:",NNN,"  xNNN:",xNNN,"\n")
          # Table - area -> color
@@ -2071,101 +2166,128 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
           
          NumPanels        <- (length(NTLink)-1)/NNN + 1       # calculate number of panels.
          NumPanels        <- as.integer(NumPanels)
+         #cat("SamplePrt - bit 256 - Number of areas:",UniPLinkListSize,"  Number of Panels:",NumPanels,"\n")
          
          # This printout is only done to PDF.
          #   Build PDF filename and title.
-         PDFTest          <- paste0(BGDir,BGBase,"_TestChart_",PPTitle,".pdf")
+         PDFTest          <- paste0(BGDir,BGBase,"_TestChart_",FTitle,".pdf")
          Title            <- paste0("Test Chart - ",PPTitle)
          
          # open PDF file for output 
-         grDevices::pdf(PDFTest,width=10.5,height=7.75)
+         grDevices::pdf(PDFTest,width=10.5,height=7.75)   # open destination PDF file.
+         
          # set up for multiple images.
          #  outside and inside margins.
-         par(mai=c(0.125,0.125,0.125,0.125))  #  1/8" around
-         par(mar=c(1,1,2,1))
-         par(oma=c(.5,.5,.5,.5))
+         par(mai=c(0.125,0.125,0.125,0.125))  #  1/8" around - inside margins
+         par(mar=c(1,1,2,1))                  # in lines
+         par(oma=c(.5,.5,.5,.5))              # outside margins = 0.5"
          
-         #cat("par('din')",par('din'),"  par('fin'):",par('fin'),"  par('pin'):",par('pin'),"\n")
          
          par(mfrow=PPMfrow)   # setup to provide about the same space as a micromap
+         #cat("PPMfrow:", PPMfrow,"\n")
          
          # initialize the color pattern (one per area)
          VColors       <- c(BaseColors, rep(NA,xNNN))    # moving vector(areas) as we draw.
     
          #cat("xNNN:",xNNN,"  NumPanels:",NumPanels,"  length of VColors:",length(VColors),"\n")
-           
+         
+         # plot "n" number of maps (number of areas/5 maps) in a matrix of windows.
          for (inx in c(seq(1,NumPanels))) {
             # find the multiple polygons per area.
-       
+   
+            #cat("D256Loop: din:",par('din'),"  fin:",par('fin'),"  pin:",par('pin'),"\n")
+   
             NTLinkCol$Col <- VColors
             #cat("VColors:",paste0(VColors,collapse=", ",sep=""),"\n") 
             ColList       <- NTLinkCol[Poly2Area,"Col"]  # get color per polygon
-             
+               
             # now match the polygon list KeyCol list and pick up the color
-            xm            <- !is.na(NTLinkCol$Col)
+            xm            <- !is.na(NTLinkCol$Col)   # no color
             
             NTLinkLeg     <- NTLinkCol$Key[xm]
             NTLinkLegCol  <- NTLinkCol$Col[xm]
             #cat("NTLinkCol with colors.\n")
             #print(NTLinkCol)
+            #print(ColList) 
+          
          
             #  Plot one map - 5 colors/areas
             sp::plot(PPSp, col=ColList,lwd=0.2)     # micromapST defaults lwd=0.5
-            par(new=TRUE)
-            graphics::title(main=Title)
+            par(new=TRUE)  # for the next plot.
+            #graphics::title(main=Title)
             
-            #legend("right", KeyLeg, text.col = "black", cex=0.5, bty="n",
+            #legend("right", KeyLeg, text.col = "black", cex=0.6, bty="n",
             #       pch=NA, xpd=TRUE, vfont=c("san serif"), inset=-0.05)
             graphics::legend("right", NTLinkLeg, text.col = NTLinkLegCol, 
-                   cex=0.5, bty="n", pch=NA, xpd=TRUE, inset=-0.05)
+                   cex=0.9, bty="n", pch=NA, xpd=TRUE, inset=-0.05)
          
             #  slide colors over for the next set.
             VColors      <- c(BlankColors,VColors)[1:UniPLinkListSize]
          }
          
          # end of page, close file.
-         grDevices::dev.off()
+         x <- grDevices::dev.off()            # close the PDF
+         
       }  #  done with panels of multiple scaled maps with shapings.
       
+      #  the debug=256 code seems to work.
+      
       #  Generate single image of map pdf or png based on debug = 128
+      
+      #  its the debug=512 that doesn't...
       if (bitwAnd(debug,512) != 0) {
-      	 # Starting point for mcolors.
+      
+         # Starting point for mcolors.
       	 # This printout is done to png or pdf
       	 # get aspect and scale right.
-         xBBox        <- sp::bbox(PPSp)
-      	 xAsp         <- diff(xBBox[2,])/diff(xBBox[1,])  # y/x
-      	 PngH         <- MAvgH                       # y = 1.25
-      	 PngW         <- MAvgH / xAsp                # x = 2.2? 
+         xBBox        <- sp::bbox(PPSp)       # dimensions in "meters" or "degrees" 
+         # initial attempt was to create small micromap images, but the margins interferred.
+         # The image were also hard to work with.  So, they were all scaled up to about 4 x 4.
+      	 #xAsp         <- diff(xBBox[2,])/diff(xBBox[1,])  # y/x - aspect ratio of y/x
+      	 PngH         <- 4                       # y = 4"
+      	 PngW         <- 4                       # x = 4 / (y/x)
+      	 #
+      	 #  To accomodate the title line, the PngH is increased by .2 inches
+      	 PngH         <- PngH + 0.4
       	 #cat(" xAsp:",xAsp,"  PngW:",PngW,"  PngH:",PngH,"\n")
-      	
-      	 OutTestSm    <- paste0(BGDir,BGBase,"_CP_",PPTitle,OType)
-      	
+      
+         # objective is to print one map boundary image at approximate the correct scale.
+            	   
          # initialize the color pattern (one per area)
          VColors       <- c(BaseColors, rep(NA,xNNN))    # moving vector(areas) as we draw.
-   
          NTLinkCol$Col <- VColors
-         PCol          <- NTLinkCol[Poly2Area,"Col"]         
-         # disable all users of space around the map.
-         par(mai=c(0,0,0,0))
-         par(mar=c(0,0,0,0))
-         par(omi=c(0,0,0,0))
-         par(oma=c(0,0,0,0))
-         #cat("par pin:",par("pin"),"  fin:", par("fin"),"\n")
-         
+        
+         #cat("Poly2Area & PCol:\n")
+         #print(Poly2Area)
+        
+         PCol          <- NTLinkCol[Poly2Area,"Col"]   # one entry per polygon in shapefile.
+         #print(PCol)
+              
          #  we have two debug flag numbers.  512 prints these images at each processing step of the SPDF,  
          #      1024 only prints the RAW and the FINISHED images.  If 1024 is set, when the first and 
          #      final maps are being processed, the 512 setting will be asserted.
       
+         OutTestSm    <- paste0(BGDir,BGBase,"_SM_",FTitle,OType)
+         #cat("debug=512 output filename:",OutTestSm,"\n")
+
          if ( OType == ".png" ) {
-            grDevices::png(OutTestSm,res=300,width=PngW, height=PngH, units="in")
+            grDevices::png(OutTestSm,res=300,width=PngW, height=PngH
+                   , units="in")
          } else {
             grDevices::pdf(OutTestSm, width=PngW, height=PngH)
          }
+         par(mai=c(0,0,0,0))
+         par(mar=c(0,0,2,0))  # one line for title.
+         par(omi=c(0,0,0,0))
+         par(oma=c(0,0,0,0))
+         #cat("after-pars: din:",par("din")," fin:",par("fin")," fig:",par("fig"),"\n")
+         #cat("             pin:", par("pin"),"  plt:",par("plt"),"  usr:",par("usr"),"\n")
+         #cat("             mai:",par("mai"),"  mar:",par("mar"),"  omi:",par("omi"),"  oma:",par("oma"),"\n")
            
-         sp::plot(PPSp,col=PCol,lwd=0.05)
-         graphics::title(main=PPTitle,cex.main=0.1)
+         sp::plot(PPSp,col=PCol,lwd=0.05,asp=1)
+         #graphics::title(main=PPTitle,cex.main=0.75)
          
-         grDevices::dev.off()
+         x <- grDevices::dev.off()
        
       }
   
@@ -2188,7 +2310,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #   Part 1.0 - BuildBorderGroup Initial Call Parameter check logic.
    #     validates the color and order.
    #
-   ##### 010x
+   ##### 310x
    
    ErrorFlag <- FALSE
    StopFlag  <- FALSE
@@ -2300,20 +2422,23 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #print(callVL)    # list of call parameters and function defined parameters.
    parmNames <- callVarNames
    
-   ##### 010x
+   ##### 310x
    #
    # Initialize Variables  0.1
    #
   
+   # reduce PROJ6 messages.
    r1=rgdal::set_thin_PROJ6_warnings(TRUE)
    r2=rgdal::rgdal_extSoftVersion()
    r3=rgdal::new_proj_and_gdal()
    r4=options("rgdal_show_exportToProj4_warnings"="none")
    
    ReqCParms    = c("ShapeFile", 
-                    "NameTableFile", "BorderGroupName", 
-                    "MapHdr", "IDHdr") 
+                    "NameTableFile", "BorderGroupName") 
+                    
    ReqCkptParms = c("NameTableDir", "BorderGroupName")
+   
+   #  MapHdr is now optional.
    
    # List of required call parameters
    # Everything else we can make up.  
@@ -2325,6 +2450,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    OrigLongLat    <- "+proj=longlat +datum=NAD83 +no_defs"
    OrigCRSLongLat <- sp::CRS(OrigLongLat)
    #
+   
    DoUserProj4   <- FALSE  # user provided proj4 for final projection
    DoModproj4    <- FALSE  # have modified shapefile proj4 with meters 
                            #(only if shapefile projection was modified to Meters.)
@@ -2334,11 +2460,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    OType    <- ".pdf"
    if (bitwAnd(debug,128) !=0)  OType  <- ".png"
    
-   sf::sf_use_s2(FALSE)   # disable use of S2 functions.
-       
+   sf::sf_use_s2(FALSE)   # disable use of S2 functions.  (Try this and see if it works.)
+   on.exit(sf::sf_use_s2(TRUE))
    
-   if (bitwAnd(debug,2) != 0) 
-         cat(" Code: 2301 \n")
    if (bitwAnd(debug,4) != 0) 
          cat("Proj Flags - ShpProjLL:",ShpProjLL,
              "  DoUserProj4:",DoUserProj4,
@@ -2354,22 +2478,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  Center E to W is Central Meridian
    #
    
-   
- 
    #
    # Call parameters and specified parameters are now saved in a structure (Named List)
    #     real test is if they have NULL or NA values.
    #
    #####
    
-   #####
-   #
-   #
-   #
-   #####
-   
-   
-   #####  011x
+    
+   #####  311x
    #
    #  Part 1.1 - checkPointReStart call parameter and logic wrapper.
    #
@@ -2379,23 +2495,26 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  Then we can continue or bypass the other checks.
    #
    #  Required for normal run:  
-   #       ShapeFile, NameTableFile, BorderGroupName, 
-   #       MapHdr, IDHdr
+   #       ShapeFile, NameTableDir, NameTableFile, BorderGroupName, 
+   #       
    #    Optional:
-   #       ShapeFileDir, NameTableDir, NameTableLink, BorderGroupDir, ReducePC, debug, proj4, 
-   #       MapMinH, MapMaxH, ShapeLinkName
+   #       ShapeFileDir, NameTableLink, NameTableDir, BorderGroupDir, ReducePC, debug, proj4, 
+   #       MapMinH, MapMaxH, ShapeLinkName,  MapHdr, IDHdr
    #
    #  Required for checkPointReStart run:
-   #       NameTableDir*, BorderGroupName*, checkPointReStart
+   #       NameTableDir*, BorderGroupName*, checkPointReStart=TRUE
    #    Optional:
    #       BorderGroupDir, debug
    #	Not Used:
    #       ShapeFile, ShapeFileDir, ShapeLinkName, NameTableFile, NameTableLink, 
    #       MapHdr, IDHdr, MapMinH, MapMaxH, proj4, ReducePC
+   #       areaParms contains most of the information and the checkpoint files are
+   #       saved under the border group name.  The re-projection of the shape file
+   #       has already been done.
    #    * must be the same value as used in original run.
    #
    
-   ##### 012x
+   ##### 312x
    #
    #  Part 1.2 - validate checkPointReStart
    #
@@ -2412,7 +2531,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          StopFlag <- stopCntMsg(xmsg)
       } else {
          if (checkPointReStart) {
-            if (bitwAnd(debug,2048) != 0) {
+            if (bitwAnd(debug,2) != 0) {
                cat("***3122 Check Point Restart has been requested.  Check point files will be read\n")
                cat("***3122 from folder:",NameTableDir,"/Checkpoint","  directory.")
             }
@@ -2423,7 +2542,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #
    #####
    
-   #####  013x
+   #####  313x
    # 
    #  Part 1.3 - Require calling parameters  (normal or restart)  
    #
@@ -2450,23 +2569,24 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #print(paste0(callVarNames,collapse=", ", sep=""))
    
    if (StopFlag) {
-   	xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
    	stop(xmsg)
    }
    #
    #####
       
-   #####  020x
+   #####  320x
    #
    #  Part 1.4 - NameTable dir (#1) 
-   #                (required may be the backup dir for BorderGroupDir.)
+   #                (required may be the backup dir for BorderGroupDir)
    #
    NTDir  <- NULL
+   NameTableDir <- NameTableDir[[1]][1]  # get single value
     
    if (is.null(NameTableDir) || is.na(NameTableDir) ) {
    
        # make sure its NULL
-       NameTableDir <- NULL    # no directory provided.
+       NameTableDir <- NULL    # no directory provided. Use current working directory
    
    } else {
        # validate the directory exists and is reference.
@@ -2490,8 +2610,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    callVL$NTDir        <- NTDir		    # with /
    #
    #####
-   
-   #####   015x
+
+   #####   315x
    #
    #  Part 1.5 - BorderGroup Name and Directory & Restart Directory.
    #
@@ -2500,6 +2620,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       BorderGroupDir <- NameTableDir
       BGDir          <- paste0(NameTableDir,"/")     # with /
    } else {
+      BorderGroupDir <- BorderGroupDir[[1]][1]  # get single item
       if ( is.na(BorderGroupDir) ) {
          # BorderGroupDir set to NA - use working directory
          BorderGroupDir <- NULL    # no directory provided.
@@ -2525,6 +2646,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    }      
    callVL$BorderGroupDir <- BorderGroupDir
    callVL$BGDir          <- BGDir		  # with /
+   
+   BorderGroupName   <- BorderGroupName[[1]][1]
    
    if (is.null(BorderGroupName)  || is.na(BorderGroupName) ) {
       StopFlag <- stopCntMsg(paste0("***3152 The required BorderGroupName call parameter is missing."))
@@ -2580,14 +2703,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #  Start validating and processing the calling parameters.
       #
-      if (bitwAnd(debug,2) != 0) cat("Code: 2535 \n")     #    pick up testing....
        
-      ##### 020x
+      ##### 320x
       #
       #  Part 2.0 - Name Table filename.
       #
       def_NameTableType  <- 1          #   default .csv
       def_NameExt        <- ".csv"     #   default extension
+     
       NameTableFile      <- NameTableFile[[1]][1]
       
       if (is.null(NameTableFile) || is.na(NameTableFile) ) {
@@ -2602,7 +2725,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          
          if (is.null(fnSplit[2]) || is.na(fnSplit[2])) {
             # if no extension (missing) - then add .csv
-            ErrorFlag <- errCntMsg(paste0("***3205 File extension on name table filename is missing - .csv added."))
+            ErrorFlag      <- errCntMsg(paste0("***3205 File extension on name table filename is missing - .csv added."))
             NameExt        <- def_NameExt         #  "csv"
             NameTableFile  <- paste0(NameTableFileBase,".",NameExt)    # make it a CSV file
             NameTableType  <- def_NameTableType   # 1   (CSV)
@@ -2633,7 +2756,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      ##### 020x
+      ##### 320x
       #
       #   NameTableLink call parameter
       def_NameTableLink <- "Link"
@@ -2641,6 +2764,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       if (missing(NameTableLink) || is.null(NameTableLink)) {
          NameTableLink <- def_NameTableLink   # if not there assign the default
       } else {
+         NameTableLink <- NameTableLink[[1]][1]
          if (!is.character(NameTableLink)) {
             xmsg <- paste0("***3208 The NameTableLink call parameter is not a character string. Fix and rerun.\n")
             stopCntMsg(xmsg)
@@ -2652,7 +2776,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
 
-      ######  021x messages
+      ######  321x messages
       #
       #  Part 2.1 - ShapeFile - simple character string, filename with no extensions or SPDF structure for the shapefile.
       #	       Directory should be provided in ShapeFileDir parameter if filename.
@@ -2663,9 +2787,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       ShapeFilePath <- NULL
       ShapeFileExt  <- NULL
       
-      if (is.null(ShapeFile) || is.na(ShapeFile) ) {
+      if (is.null(ShapeFile)) {
       
-         StopFlag <- stopCntMsg(paste0("***3212 Shape File parameter has not been provided. "))
+         StopFlag <- stopCntMsg(paste0("***3212 ShapeFile parameter has not been provided. "))
            
       } else {
          # see if character string or SPDF.
@@ -2675,8 +2799,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             WorkSp01   <- ShapeFile       # save the passed Shape File into the SPDF
 
          } else {
-            if (!is.character(ShapeFile)) {
-               StopFlag <- stopCntMsg(paste0("***3213 The Shape File call parameter is not a SPDF or character variable."))
+            ShapeFile     <- ShapeFile[[1]][1]
+    
+            if (is.na(ShapeFile) || !is.character(ShapeFile)) {
+               StopFlag <- stopCntMsg(paste0("***3213 The ShapeFile call parameter is not a SPDF or character variable."))
             } else {
                # validate the directory exists and is reference.
                ShapeFile    <- stringr::str_trim(ShapeFile[[1]][1])           # trim spaces.
@@ -2761,13 +2887,15 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       ######
       
-      ######   022x
+      ######   322x
       #
       #  Part 2.2 - ShapeLinkName
       #
+      def_ShapeLinkName <- "NAME"
       ShapeLinkName <- ShapeLinkName[[1]][1]
+      
       if (missing(ShapeLinkName) || is.null(ShapeLinkName)  || is.na(ShapeLinkName) ) {
-         ShapeLinkName = "NAME"   # the default.
+         ShapeLinkName = def_ShapeLinkName   # the default.
          ErrorFlag  <- errCntMsg(paste0("***3220 The ShapeLinkName call parameter is missing. The default value of 'NAME' will be used."))
       } else {
          # ShapeLinkName is present
@@ -2784,65 +2912,82 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #######
       
       if (StopFlag) {
-        xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
       	stop(xmsg)
       }
-      if (bitwAnd(debug,2) != 0) cat("Code: 2874 \n")
-       
+     
       #
       #  Done Checking the require parameters 
       #
       ######
       
      
-      ###### 023x
+      ###### 323x
       #
       #  Part 2.3 - MapHdr
       #
-      def_MapHdr <- c("",BGBase)
+      def_MapHdr <- c("","Areas")
+      def_MapHdr_v <- TRUE
       #
      
-      if (is.null(MapHdr) || (length(MapHdr)==1 && is.na(MapHdr)) ) {
-         # empty parameter - use BGBase (BorderGroupName minus the BG) as header # 1
-         MapHdr <- def_MapHdr
+      if (is.null(MapHdr) ){
+         MapHdr <- c("","Areas")
+         
       } else {
          if (!is.character(MapHdr)) {
             # MapHdr strings are not characters
             ErrorFlag <- errCntMsg(paste0("***3230 The MapHdr parameter does not contain character ",
                                  "strings for use as the column headers. MapHdr is ignored."))
-            MapHdr    <- def_MapHdr    # Use default of a blank line and border group name
          } else {
             # MapHdr is characters, check length
             if (!is.vector(MapHdr)) {
                errCntMsg(paste0("***3232 The MapHdr parameter must be a simple vector type.  ",
                                      "MapHdr is ignored."))
                ErrorFlag <- FALSE
-               MapHdr    <- def_MapHdr
             } else {
-               if (length(MapHdr) > 2 || length(MapHdr) == 0 ) {
-                  ErrorFlag <- errCntMsg(paste0("***3234 The MapHdr parameter has zero or more than 2 elements. Only the first 2 will be used."))
-                  warning(xmsg,call.=FALSE)
+         
+               if (length(MapHdr) == 1) {
+                  if (!is.na(MapHdr)) {
+                     # character = length = 1
+                     MapHdr <- c("",MapHdr)
+                     def_MapHdr_v <- FALSE
+                  }
                } else {
-                  if (max(nchar(MapHdr)) > 16) {
-                     warning(paste0("***3236 It is suggested the max length of the MapHdr strings be ",
-                                    "16 characters."),call.=FALSE)
+                  if (length(MapHdr) > 2) {
+                     ErrorFlag <- errCntMsg(paste0("***3234 The MapHdr parameter has zero or more than 2 elements. Only the first 2 will be used."))
+                     warning(xmsg,call.=FALSE)
+                     MapHdr <- MapHdr[1:2]
+                     def_MapHdr_v <- FALSE
+                  } else {
+                     # We have MapHdr - length of 2 and character.  
+                     if (max(nchar(MapHdr)) > 16) {
+                        warning(paste0("***3236 It is suggested the max length of the MapHdr strings be ",
+                                       "16 characters."),call.=FALSE)
+                     }
+                     def_MapHdr_v <- FALSE
                   }
                }
             }
-         }
-      }
+         }   
+         # empty parameter - it now optional, fill with default of c("","Areas")  MapHdr[1] is not currently used.
+         if (def_MapHdr_v) MapHdr <- def_MapHdr  # if still TRUE, set MapHdr to def value.
+         # Optional - NOW
+      } 
       callVL$MapHdr <- MapHdr
-      cat("MapHdr Header Labels used : ",paste0(MapHdr,collapse=", ",sep=""),"\n") 
+      if (def_MapHdr_v == FALSE) cat("MapHdr Header Labels used : ",paste0(MapHdr,collapse=", ",sep=""),"\n") 
       #
       ######
       
-      ###### 024x
+      ###### 324x
       #
       #  Part 2.4.1 - MapMinH - minimum height for the micromap
       #
-      def_MapMinH <- 0.5
+      def_MapMinH <- 1.0
+      MapMinMin   <- 0.4
+      MapMinMax   <- 2.5
       #
       MapMinH <- MapMinH[[1]][1]
+      
       if (is.null(MapMinH) || is.na(MapMinH)) {
          # empty parameter - use default 
          MapMinH         <- def_MapMinH
@@ -2855,8 +3000,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             # Numeric -> Pick only the first element of MapMinH
             MapMinH      <- MapMinH[[1]][1]
             # Check to make sure its within range.
-            if (MapMinH < def_MapMinH || MapMinH > 2.5 ) {
-               ErrorFlag <- errCntMsg(paste0("***3244 The MapMinH minimum height value is out of range (0.4 to 2 inch). The default will be used."))
+            if (MapMinH < MapMinMin || MapMinH > MapMinMax ) {
+               ErrorFlag <- errCntMsg(paste0("***3244 The MapMinH minimum height value is out of range (0.4 to 2.5 inch). The default will be used."))
                MapMinH   <- def_MapMinH
             }
          }     
@@ -2865,11 +3010,13 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       ######
       
-      ######  024x
+      ######  324x
       #
       #  Part 2.4.2 - MapMaxH - Maximum height for the micromap
       #
-      def_MapMaxH <- 1.5
+      def_MapMaxH <- 1.75
+      MapMaxMin   <- 1
+      MapMaxMax   <- 2.5
       #
       MapMaxH <- MapMaxH[[1]][1]
       
@@ -2885,8 +3032,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             # Pick up only the first element of the variable
             MapMaxH      <- MapMaxH[[1]][1]
             # Make sure within range.
-            if (MapMaxH > 2.5 || MapMaxH < def_MapMinH ) {
-               ErrorFlag <- errCntMsg(paste0("***3248 The MapMaxH maximum height value is out of range (0.4 to 2 inches). The default will be used."))
+            if (MapMaxH > MapMaxMax || MapMaxH < MapMaxMin ) {
+               ErrorFlag <- errCntMsg(paste0("***3248 The MapMaxH maximum height value is out of range (1 to 2.5 inches). The default will be used."))
                MapMaxH   <- def_MapMaxH
             }
          }
@@ -2899,42 +3046,41 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       if (MapMinH > MapMaxH) {
         ErrorFlag <- errCntMsg(paste0("***3249 The MapMinH value must be less than the MapMaxH value. Will swap values."))
-        x <- MapMinH
-        MapMaxH <- MapMinH
-        MapMinH <- x
+        x         <- MapMinH
+        MapMaxH   <- MapMinH
+        MapMinH   <- x
       }
-      MapAvgH <- mean(c(MapMinH,MapMaxH))
+      MapAvgH   <- mean(c(MapMinH,MapMaxH))
       #
       ######
       
-      cat("The Map's minimum and maximum height will be:",MapMinH,
-          " & ",MapMaxH,"\n")
+      cat("The Maps minimum and maximum height will be:",MapMinH," & ",MapMaxH,"\n")
       
       if (StopFlag) {
-         xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+         xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
          stop(xmsg)
       }
-      if (bitwAnd(debug,2) != 0) cat("Code: 2869  \n")
          
-      ######  025x
+      ######  325x
       #
       #  Part 2.5 - IDHdr
       #
-      def_IDHdr <- MapHdr   # use the MapHdr as the default
+      def_IDHdr <- c(BGBase,"Areas")   # use the MapHdr as the default
       #
+      
       if (is.null(IDHdr) || (length(IDHdr)==1 && is.na(IDHdr)) ) {
-         # empty parameter - use MapHdr values.)
+         # empty parameter - use the default values.)
          IDHdr     <- def_IDHdr
       } else {
          if (!is.character(IDHdr)) {
             # IDHdr strings are not characters
             ErrorFlag <- errCntMsg(paste0("***3250 The IDHdr parameter does not contain character strings for use ",
-                               "as the column headers. The MapHdr values will be used."))
+                               "as the column headers. "))
             IDHdr     <- def_IDHdr
          } else {
             # IDHdr is characters, check length
             if (!is.vector(IDHdr)) {
-               ErrorFlag <- errCntMsg(paste0("***3252 The IDHdr parameter must be a simple vector type. The MapHdr values will be used."))
+               ErrorFlag <- errCntMsg(paste0("***3252 The IDHdr parameter must be a simple vector type."))
                IDHdr       <- def_IDHdr
                
             } else {
@@ -2955,59 +3101,60 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       ######
       
-      if (bitwAnd(debug,2) != 0) cat("Code: 2910 \n")
-      
-      ######   026x
+      ######   326x
       #
-      #  Part 2.6 - Reduce PC    (Range:  .1 to 100 percent)
+      #  Part 2.6 - Reduce PC    (Range:  .01 to 100 percent)
+      #    It is not a decimal, but a percent ranging from 0.01 to 100 %
       #
-      def_ReducePC   <- 2.0     # Value is remaining vectors precentage of original.
+      def_ReducePC   <- 1.25     # Value is remaining vectors precentage of original.
       #
       ReducePC <- ReducePC[[1]][1]
       
       if (is.null(ReducePC) || is.na(ReducePC)) {
-         # empty parameter - use default of 2 % keep value
+         # empty parameter - use default of 1.25 % keep value
          ReducePC   <- def_ReducePC
       } else {
          ReducePC <- as.numeric(ReducePC)   # if not numeric, will become NA
          if (is.na(ReducePC)) {   # after conversion, if = NA, its was not numeric to start.
             # ReducePC value must be a numeric
-            ErrorFlag <- errCntMsg(paste0("***3266 The ReducePC parameter must be a numeric value. The default of 10% will be used."))
+            ErrorFlag <- errCntMsg(paste0("***3266 The ReducePC parameter must be a numeric value. The default of 1.25 % will be used."))
             ReducePC  <- def_ReducePC
          } else {
             # ReducePC is a numeric, check length
             if (!is.vector(ReducePC) ) {
-               ErrorFlag   <- errCntMsg(paste0("***3267 The ReducePC parameter must be a simple vector. The default value of 10% will be used."))
+               # never happen...
+               ErrorFlag   <- errCntMsg(paste0("***3267 The ReducePC parameter is not simple vector. The default value of 1.25 % will be used."))
                ReducePC    <- def_ReducePC 
             } else {
                if (length(ReducePC) > 1) {
+                  #  never happen...
                   ReducePC    <- ReducePC[1]
                   ErrorFlag   <- errCntMsg(paste0("***3268 The ReducePC parameter has more than one value. Only the first value will be used."))
                } else {
-                  if (ReducePC < .1 || ReducePC > 100) {  # out of range  (percentage to keep)
-                       ErrorFlag   <- errCntMsg(paste0("***3269 The value of ReducePC is out of range (0.75 to 95 %). The default value of 10% will be used."))
+                  if (ReducePC < .01 || ReducePC > 100) {  # out of range  (percentage to keep - .0001 TO 100 %)
+                       ErrorFlag   <- errCntMsg(paste0("***3269 The value of ReducePC is out of range (0.01 to 100 %). The default value of 1.25 % will be used."))
                        ReducePC  <- def_ReducePC
                   }
+                  #  The ms_minize call parameter is in ratio from 0 to 1, need to convert
                }
             }
          }
       }
       callVL$ReducePC <- ReducePC
-      cat("Map simplification keep value:",ReducePC," (% or decimal).\n")
+      cat("Map simplification keep value used is:",ReducePC," %.\n")
       #
       ######
       
       if (StopFlag) {
-         xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	 xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
          stop(xmsg)
       }
-      if (bitwAnd(debug,2) != 0) cat("Code: 2956 \n")
-       
-      ######   029x
+        
+      ######   329x
       #
       #  Part 2.9 - LabelCex (Range:  .01 to 10 )
       #
-      def_LabelCex   <- .25     # Value is remaining vectors precentage of original.
+      def_LabelCex   <- .4    # Value is remaining vectors precentage of original.
       #
       LabelCex <- LabelCex[[1]][1]
       
@@ -3039,17 +3186,16 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          }
       }
       callVL$LabelCex <- LabelCex
-      cat("Map Labels Cex value:", LabelCex," multiplier.\n")
+      cat("The font multiplier for the map labels is set to ",LabelCex," through the LabelCex call parameter.\n")
       #
       ######
       
       if (StopFlag) {
-         xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	 xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
          stop(xmsg)
       }
-      if (bitwAnd(debug,2) != 0) cat("Code: 3002 \n")
       
-      ######  027x
+      ######  327x
       #
       #  Part 2.7 - proj4 parameter - micromap projection.  For all of the map.
       #
@@ -3226,7 +3372,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #   processing the Name Table.
       #
       
-      #######   03xx - 030x   (3154)
+      #######   33xx - 330x   (3154)
       #
       #  Part 3.0 - Setup to process ShapeFile and find shapefile 
       #     for areas to use.
@@ -3263,8 +3409,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             SFName    <- ShapeFile
          }
          #
-         #  Read shapfile from:
-         cat("Read shape file from\n",
+         #  Reading shapfile from:
+         cat("***3301 Reading shape file from\n",
              "   dir: ",SFDir,"\n",
              "   file:",SFName,"\n")
         
@@ -3272,15 +3418,16 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #  Read shapefile into SPDF <>  Look at readShapePoly instead.
          #
          WorkSp01     <- rgdal::readOGR(SFDir, SFName, 
-                          verbose=TRUE, 
+                          verbose=FALSE, 
                           stringsAsFactors=FALSE,
                           dropNULLGeometries=TRUE)
       } else {
-        cat("***3300 The Shape file SPDF strucure was passed to the function in the call.\n")
+        cat("***3300 The shape file SPDF strucure was passed to the function in the call.\n")
         WorkSp01 <- ShapeFile
       }
         
       StopFlag     <- FALSE
+      ErrorFlag    <- FALSE
       
       WorkSp01Data <- WorkSp01@data
       #str(WorkSp01)
@@ -3289,7 +3436,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
             
-      #####  031x
+      #####  331x
       #
       #  Part 3.1 - Inspect and set projection on shapefile.
       #
@@ -3304,7 +3451,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       if (is.null(WorkSp01Proj4) || is.na(WorkSp01Proj4) || WorkSp01Proj4 == "") {
          # no projection supplied in ShapeFile.  
          # Set to generic longlat projection.
-         cat("***3310 The proj4string field in the Shape File is empty, set to \n",
+         cat("***3310 The proj4string field in the shapefile is empty, set to \n",
              "***3310    ",OrigLongLat,"\n")
       
          slot(WorkSp01,"proj4string") <- sp::CRS(OrigLongLat)   # generic Long/Lat
@@ -3325,21 +3472,21 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          ShpProjLL                    <- TRUE
          DoBldAEAProj                 <- TRUE
       }
-      cat("proj4string check: ",slot(WorkSp01,'proj4string')@projargs,"\n")
+      #cat("proj4string check: ",slot(WorkSp01,'proj4string')@projargs,"\n")
       if (bitwAnd(debug,4) != 0) cat("Proj Flags -ShpProjLL:",ShpProjLL,
                                      "  DoUserProj4:",DoUserProj4,
                                      "  DoModproj4:",DoModproj4,
                                      "  DoBldAEAProj:",DoBldAEAProj,"\n")
 
-      ##### 032x
+      ##### 332x
       #
       #  Part 3.2 - Handle Link column in Shape File ; put it away.
       #
-      cat("Handle Shape Link Name Column:",ShapeLinkName,"\n")
+      cat("***3321 Checking Shape Link Name Column:",ShapeLinkName,"\n")
       
       WorkSp01Names <- names(WorkSp01Data)  # get names of shape file data columns
       if (bitwAnd(debug,64) != 0) 
-         cat("Shape File @data variable names:",paste0(WorkSp01Names,collapse=", ",sep=""),"\n")
+         cat("Shape file @data variable names:",paste0(WorkSp01Names,collapse=", ",sep=""),"\n")
       
       #   Make sure "LinkName" exists in the @data data.frame
       if (!any(ShapeLinkName == WorkSp01Names)) {     # is ShapeLinkName is valid?
@@ -3347,26 +3494,25 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          StopFlag <- stopCntMsg(paste0("***3324 The ShapeLinkName provided: ",ShapeLinkName," does not exist in the shapefile data."))
       } else {
          # column present
-         cat("Have good column name - trim, make character and store in column and X__Link.\n")
+         cat("***3325 Shape file link variable name is valid, values will be clean up and stored in variable X__Link.\n")
          shpLinkData <- stringr::str_trim(as.character(WorkSp01@data[,ShapeLinkName]))
          WorkSp01@data[,ShapeLinkName] <- shpLinkData   # put it back into the source column, cleaned up.
          WorkSp01@data[,"X__Link"]     <- shpLinkData
       }
-      if(StopFlag) stop("***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry.")
+      if(StopFlag) stop("***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry.")
           
       if (bitwAnd(debug,8) != 0){
-         grDevices::pdf("BBG-Raw Shape File Image",width=10,height=7)
+         grDevices::pdf("BBG_Raw_shapefile_image",width=10,height=7)
          sp::plot(WorkSp01)
-         graphics::title("Shape File - Original data")
-         dev.off()
+         graphics::title("Shape file - Original raw data")
+         x <- grDevices::dev.off()
       }  # now done via Sample Prts
       
       #  fill empty proj4string in SPDF
       
       #  The SPDF is in WorkSp01  is RAW no modifications.
       #
-      #
-      cat("End of section 3.2 - 3321\n")
+      #cat("End of section 3.2 - 3490 \n")
       #####
       #######
       #########
@@ -3382,9 +3528,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  shape file
       #
       
-      cat("Name Table Link is:",NameTableLink,"\n")
+      cat("***3500 Name Table Link column is:",NameTableLink,"\n")
       
-      ##### 05xx and 06xx
+      ##### 35xx and 36xx
       #
       #  Part 5 - read excel or .csv file and verify it. (columns and data)
       #              Set up of variables
@@ -3485,10 +3631,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  for each area under one "polygon" slot in the SPDF.
       #  
       #  Name Table "Key" column value is assigned each areas' 
-      #  collection of polygons in the SPDF and it's row.name.  
+      #  collection of polygons in the SPDF and its row.name.  
       #  If a "Key" value is provided by the caller in the .csv
       #  Name Table, it is used as the "Key" value for the Name Table
-      #  and the Shape file and Visborder data (later).
+      #  and the shape file and Visborder data (later).
       #  If no is provided, the "Abbr" value is used, followed by 
       #  the "ID" value, "Alt_Abbr", and finally the "Name" column. 
       #  The row.names ("Key") of the Name Table will be used to set
@@ -3508,7 +3654,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #     present and uses their value as the "Name", "Abbr", 
       #     "Alt_Abbr", "Alias", "ID", 
       #
-      #  If the Shape file contains more areas then listed 
+      #  If the shape file contains more areas then listed 
       #     in the Name Table, the extra areas will be ignored 
       #     and processing continued.  A list of the omitted areas 
       #     will be outputted to notify the caller.
@@ -3596,7 +3742,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #    
       #    The MapLabel information can be provided in the Name Table 
       #    using the "MapL", "MapX", and "MapY" columns. The use of the 
-      #    MapLabel column is being retired.
+      #    MapLabel column is being retired.  Once the MapL, MapX, and MapY
+      #    columns are constructed, the MapLabel column is deleted.
       #
       #  The following optional columns are supported to help manipulate 
       #  the boundary data for an area. The offset moves are applied after 
@@ -3624,7 +3771,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #  When inspected, the following columns were added to complete 
       #  the NameTable:
-      #      Key, Link, MapLabel.
+      #      Key and Link
       #  The "Key" is always set to the content of the Abbrev field.  
       #  If the "Abbr" field is empty, the "Name" field will be used. 
       #  If the "Name" field is empty, the "ID" field will be used.  
@@ -3632,12 +3779,15 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  The "Link" field is set to values that allow the function 
       #  to associate each Name Table row with an area in the Shape file.
       #
-      #  The "MapL", "MapX", and "MapY" ("MapLabel) is a custom reserved 
+      #  The "MapL", "MapX", and "MapY" columns may be created by the 
+      #  user or translated from the older "MapLabel" column and are custom reserved 
       #  field. It is used in rare cases, when a label is required for 
       #  a moved area. It is only drawn on the first micromap in the graphic.
       #
-      #     The MapLabel c(L,X,Y) triplet is broken up into three columns in 
-      #     the name table:  MapL, MapX, and MapY to make it easier to handle later.
+      #  The format of the defunct "MapLabel" field is "L,X,Y" where L is the label
+      #  and X and Y are the numerical values for the labels draw coordinates. 
+      #  After processing, the "MapLabel" field is deleted leaving the "MapL", "MapX",
+      #  and "MapY" fields.
       #
       #  A good tools for editing and building the NameTable prior to running 
       #  this function is a spreadsheet. The finished worksheet representing
@@ -3685,7 +3835,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  Required Columns in csv / xlsw file  (NameTable)
       #
       
-      ##### 050x
+      ##### 350x
       #
       #  Variable Setup
       #
@@ -3718,15 +3868,13 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #cat("List of all columns that may be used for the KEY link to the shapefile:\n")
       #print(KeyCol)
         
-      ######  051x
+      ######  351x
       #
       # Part 5.1 - read nametable .csv and validate   (or excel spreadsheet)
       #     The type of the NameTable file is determined in the call parameter check.
       #
        
       # select correct code to read name table
-      cat("The Name Table was read from:\n",
-          "   ",NameTableType," ",NameTablePath,"\n")
         
       NTable <- NULL
       NTable <- switch(NameTableType,
@@ -3735,6 +3883,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
                       readxl::read_xlsx(NameTablePath),   # .xlsm 
                       load(NameTablePath)         # .rda
                      )
+      
+      cat("***3510 The Name Table was read from:\n",
+                "   ",NameTableType," ",NameTablePath,"\n")
+      
       # NameTable stored as .rda file.
       if (NameTableType == 4) {  #  a .rda file has been loaded and may contain multiple data.frame.
          # the value of NTable is a list of objects loaded from the load.
@@ -3764,13 +3916,13 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       # All readings of the Name Table are equal and unknown at this time - equally.
       
       if (StopFlag) {
-          stop("***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry.", call.=FALSE)
+          stop("***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry.", call.=FALSE)
          
       }
       StopFlag = FALSE
-      #cat("End of Name Table Read - 3721 \n")
+      #cat("End of Name Table Read - Code: 3923 \n")
      
-      ##### 052x
+      ##### 352x
       #
       #  Part 5.2 - Validate Name Table 
       #
@@ -3795,7 +3947,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       NTNames[xmna] <- NTNamesOrig[xmna]   # restore entires that did not match
       
       if (bitwAnd(debug,64) != 0) { 
-         cat("Updated Name Table column names:  Code: 3747 \n")
+         cat("Updated Name Table column names:  Code: 3921 \n")
          print(data.frame(o=NTNamesOrig, n=NTNames))   # if one is wrong it remains upper cast.
       }
       
@@ -3811,7 +3963,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          StopFlag <- stopCntMsg(xmsg)
       }
       if (StopFlag) {
-         xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	 xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
          stop(xmsg)
       }
       
@@ -3823,12 +3975,12 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #      "Alias" is a special identifier to be used as needed.
       #
       
-      ##### 053x
+      ##### 353x
       #
       #  Part 5.3 is the Link column still in the table?  (required columns)
       #
       # check "link" column name (provided by user or default)
-      #cat("Part 5.3 - 3781 \n")
+      #cat("Part 5.3 - Code: 3958 \n")
       
       NTable03    <- NTable
       
@@ -3852,8 +4004,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
       #cat("Checking name table for required minimum columns.\n")
       
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag," \n")
-      ###### 054x 
+      ###### 354x 
       #
       #  Part 5.4 - In forming the name table, the shapefiles have 
       #      data columns that may have clues as to which could be 
@@ -3877,15 +4028,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          StopFlag <- TRUE
       }
       
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
-      
-      ###### 055x
+      ###### 355x
       #
       #  Part 5.5 - Remove any columns not in our acceptable list  (can delete the user named link - NOW!
       #
-      #cat("Part 5.5 - 3836 \n")
-      
-      NTable04 <- NTable
+      #cat("Part 5.5 - 4010 \n")
       
       xmM          <- TotCol %in% NTNames          # identify good columns
       KeepList     <- TotCol[xmM]
@@ -3898,9 +4045,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
       NTNames      <- names(NTable)
        
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
-     
-      ###### 056x
+      ###### 356x
       #
       #         Columns that should have values and no duplicates.
       #
@@ -3908,7 +4053,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #            Check for NA or "" Values
       #            Check for duplicate Values
       #
-      #cat("Part 5.6 - 3861 \n")
+      #cat("Part 5.6 - 4033 \n")
       
       NoDupCol   <- c(LinkCol, OneCol, OptCol1, OptCol3)   # list of columns that cant have duplicate entries.
       NoDupList  <- NTNames[NTNames %in% NoDupCol]
@@ -3932,10 +4077,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          }
       }
       
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
-      
       if (StopFlag) {
-         xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	 xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
          stop(xmsg)
       }
       #
@@ -3946,23 +4089,21 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  Now work on cleaning up the contents of the columns and back fill 
       #  important columns 
       # 
-      #
-      NTable05   <- NTable
       
-      ###### 057x
+      ###### 357x
       #
       #  Part 5.7 - Backfill to create "Abbr" -> "Name" ->  "ID"  (Location IDs)
       #
       
       #cat("Part 5.7 - Name Table Backfill:  If Abbr is missing, can use Name, ID, Alt-Abbr or Alias VALUES.\n")
       
-      ######  055x & 057x
+      ######  355x & 357x
       #
       #  Part 5.7.1 - Abbr - field (# 1)
       #
       xm1     <-  any("Abbr" == NTNames)
       if (!xm1) {
-         warning("***3571 The Addr column in the Name Table is not included. Will attempt to backfill it from other information.",call.=FALSE)
+         warning("***3572 The Abbr column in the Name Table is not included. Will attempt to backfill it from other information.",call.=FALSE)
          #  What can we use as a replacement
          
          xm1    <- any("Alt_Abbr" ==  NTNames)   # is the alternate abbr column present ???
@@ -4002,7 +4143,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          	             # the Alias column is not present. 
          	             # Nothing left to backfill with.
          	             # This can not happen.  STOP
-         	             xmsg <- paste0("***3558 None of the columns needed are present.  \n",
+         	             xmsg <- paste0("***3576 None of the columns needed are present.  \n",
          	                     "      The Link and one of the Name, Abbr, and ID column should have been there.\n",
          	                     "      This should never happen withthe previous checks.\n")
          	             stop(xmsg,call.=FALSE)
@@ -4027,7 +4168,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
       #  Abbr field is now setup no matter what.
       
-      ######  057x
+      ######  357x
       #
       #  Part 5.7.2 - Name
       #  
@@ -4084,7 +4225,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #   or was backfilled.
       #
         
-      ###### 057x
+      ###### 357x
       #
       #  Part 5.7.3 - backfill Alt_Abbr 
       #
@@ -4106,7 +4247,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  Reset NameTable name lists - could have added one.
       NTNames      <- names(NTable)  # refresh the name list
       
-      ###### 057x
+      ###### 357x
       #
       #  Part 5.7.4 - backfill Alias
       #cat("Part 5.7.4 - backfill Alias \n")
@@ -4134,12 +4275,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      ###### 058x
+      ###### 358x
       #
       #  Part 5.8 ID column
       #
-      cat("***3582 Checking ID column in the name table to make sure the values\n",
-          "***3582 are numeric with leading zeros.\n")
+      cat("***3582 Checking ID column in the name table to make sure the values are numeric with leading zeros.\n")
       
       xm1    <- any("ID" == NTNames) 
       if (!xm1) {
@@ -4147,9 +4287,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #  a numerical sequence 1 to n.
          #  Since it must be a numeric field, must fill it in with a 
          #  sequence of numbers.
-         xmsg  <- paste0("***3584 The ID column is not present.",
-                  " A numerical sequence number has been used to",
-                  " fill the column.")
+         xmsg  <- paste0("***3584 The ID column is not present. A numerical sequence number has been used to fill the column.")
          warning(xmsg,call.=FALSE)
        
          xlen      <- dim(NTable)[1]
@@ -4161,7 +4299,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             # some numeric values did not convert.
             # get list of invalid ID
             xmna      <- is.na(NTable$ID)      
-            # get row.names for the ID's with problems.
+            # get row.names for the IDs with problems.
             BadList   <- NTable$Name[xmna]     
             ErrorFlag <- 
                errCntMsg(paste0("***3586 The ID data column is not all",
@@ -4188,7 +4326,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      ##### 059x
+      ##### 359x
       #
       #  Part 5.9 - validate and fill in L2_ID and L2_ID_Name 
       #
@@ -4196,6 +4334,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       # 
       #cat("Clean up L2_ID and L2_ID_Name columns if needed.\n")
       #cat("Part 5.9 - L2_ID and Name.\n")
+      
+      L2Feature = TRUE
       
       xm2          <- any("L2_ID" == NTNames)
       if (!xm2) {
@@ -4230,13 +4370,18 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          } else {
             # Both exist - leave them along.
             NTable$L2_ID_Name <- stringr::str_trim(NTable$L2_ID_Name)
-         } 
+         }
+         L2Num  <- length(NTable$L2_ID)
+         UL2Num <- length(unique(NTable$L2_ID))
+         if (UL2Num == L2Num |  UL2Num == 1 ) {
+            L2Feature = FALSE
+         }
       }
        
       #  Reset NameTable name lists - could have added one.
       NTNames <- names(NTable)  # refresh the name list
 
-      ###### 059x
+      ###### 359x
       #
       #   Part 5.9 - Validate RegID and RegName
       #
@@ -4285,8 +4430,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       if (any("regID" == NTNames)) {
          # we have a regID column.  Are they all the same?
-         x <- unique(NTable$regID)
-         if (length(x) > 1)  RegionFeature=TRUE
+         RegNum <- length(NTable$regID)
+         x <- length(unique(NTable$regID))
+         if (x > 1 & x < RegNum) RegionFeature=TRUE
       }
       #
       #####
@@ -4295,9 +4441,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #  Assorted columns
       #
-      NTable06 <- NTable
-            
-      ##### 061x   #####
+             
+      ##### 361x   #####
       #
       #  Part 6.1 - Validate Key and Set Correctly.
       #
@@ -4313,7 +4458,6 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       row.names(NTable) <- NTable$Key
       
       if (bitwAnd(debug, 4) != 0) {
-         cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag," \n")
          cat("Proj Flags - ShpProjLL:",ShpProjLL,
               "  DoUserProj4:",DoUserProj4,
               "  DoModproj4:",DoModproj4,
@@ -4323,7 +4467,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #####
       
          
-      ##### 062x
+      ##### 362x
       #
       #  Part 6.2 - Modification Column Checks and builds 
       #           (Valid Parmeters) MUST WAIT.
@@ -4335,19 +4479,18 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       # Should we allow these columns to be miss cased and forced to 
       # UPPER case to process.
       #
-      NTable07 <- NTable
-      
+        
       ManCol    <- c("Xoffset","Yoffset","Scale","Rotate")
       
       WorkSp01BBox  <- sp::bbox(WorkSp01)
       if (diff(WorkSp01BBox[1,]) <= 360 ) {
-         #  best guess is it's longlat.
+         #  best guess is it is longlat.
          ModCols <- data.frame(n=ManCol, 
               low = c(-360, -360,0.01,-360), 
               high=c(360,360,5,360), 
               def=c(0,0,1,0))
       } else {
-         # Otherwise it's meters, km, etc.
+         # Otherwise it is meters, km, etc.
          ModCols <- data.frame(n=ManCol, 
               low = c(-24000000, -24000000,0.01,-360), 
               high=c(24000000,24000000,5,360), 
@@ -4361,9 +4504,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       # As a coding safety measure, if a modification column does 
       # not exist, one will be created and filled with NA.
       
-      xm         <- !(ManCol %in% NTNames)
+      xm         <- !(ManCol %in% NTNames)    # which modify columns don't exist
       
-      NTable[,ManCol[xm]] <- NA
+      NTable[,ManCol[xm]] <- NA               # add the missing ones.
       xm         <- !xm
       
       # list of columns to check-The others were just added.
@@ -4421,11 +4564,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             WrkVal2     <- as.numeric(WrkVal)
             #cat("inxRN:",inxRN,"  inx:",inx,"  WrkVal:",WrkVal2,"\n")
  
-            if (is.na(WrkVal2)) { #3 it's not a numeric value.
+            if (is.na(WrkVal2)) { #3 it is not a numeric value.
                xmsg <- paste0("***3592 The Name Table in the ",inxRN,
-                            " area row and in the ",inx,"column\n",
-                         "***3622 is not numeric and has a bad value of: ",WrkVal,
-                            " Value set to zero. Fix and retry.")
+                            " area row and in the ",inx," column\n",
+                         "***3592 is not numeric and has a bad value of: ",WrkVal,
+                            ".   Value set to zero. Fix and retry.")
                ErrorFlag <- errCntMsg(xmsg)
                WrkVal2 <- 0
             } else { #3
@@ -4452,38 +4595,33 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       } #1 loop through each row (area)
       
       #
-      NTNames  <- names(NTable) ###  Line Code: 4396 - Point a
+      NTNames  <- names(NTable) ###  Code: 4573 - Point a
       
       #
       #####
       
       if (bitwAnd(debug,4) != 0) {
-         cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
          cat("Proj Flags - ShpProjLL:",ShpProjLL,
              "  DoUserProj4:",DoUserProj4,
              "  DoModproj4:",DoModproj4,
              "  DoBldAEAProj:",DoBldAEAProj,"\n")
       }
       if (StopFlag) {
-         xmsg <- "***3999 Errors have been found and noted.  Execution must be stop. Fix problems and retry."
+   	 xmsg <- "***3999 Errors have been found and noted above.  Execution stopped. Please fix problem(s) and retry."
          stopCntMsg(xmsg)
          stop()
       }
       #
       #####
        
-      NTable08 <- NTable
-      cat("Save NTable into NTable08 \n")
-      
       ##### 363x
       #
       #  Part 6.3 - MapLabel validation - two formats
-      #      MapLabel=c(AK,1,2)   or MapL="AK", MapX=1, MapY=2
+      #      MapLabel="AK,1,2"   or MapL="AK", MapX=1, MapY=2
       #
       #  Check for the MapL,MapX,and MapY format and columns first.
       #
       
-      ###### 363x
       #
       #  Part 6.3.1 - MapL, MapX, and MapY Name Table columns
       #
@@ -4494,9 +4632,12 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  and then validation
       #
       MapLData <- FALSE
-      xMapL    <- NA
-      xMapX    <- NA
-      xMapY    <- NA
+       
+      nrNT     <- dim(NTable)[1]
+      
+      xMapL    <- rep(NA,nrNT)
+      xMapX    <- xMapL
+      xMapY    <- xMapL
       
       #
       #  Do we have MapL columns?
@@ -4507,77 +4648,78 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          # MapL present, validate MapL, MapX, and MapY.  
          # If good, ignore MapLabel.
          # remove head and tail white space.
-         MapL    <- stringr::str_trim(MapL)       
-         if (all(is.na(MapL)) | MapL=="") {
-            # MapL column is empty  - don't have to check MapX and MapY
+         MapL    <- stringr::str_trim(NTable$MapL)   # get a copy for processing.
+         
+         if (all(is.na(MapL) | MapL=="")) {
+            # MapL column is empty  - don't have to check MapX and MapY   
             # - go check for MapLabel.
+            MapL <- NA   #  set all to <NA>
          } else {
-            # Validate the MapL
-            xm    <- !is.character(MapL)
-            xmMap <- !xm   # the list of rows with MapL labels.
-            if (xm) {
-               # error-MapL is not a character string.
-               xmsg <- 
-                  paste0("***3630 A value in MapL is not a character",
-                               " variable in the following rows:\n",
-                    "***3630    ",paste0(NTable$Name[xm],collapse=", ",sep=""),
-                         "\n",
-                    "***3630    Please correct and rerun.\n")
-               ErrorFlag <- errCntMsg(xmsg)
+            # Validate the MapL  - at least one is present
+            # is.character is against the entire column, not entry.
+            
+            xmNoNA    <- !is.na(MapL)          # not an <NA>  * (old MapLs) have label?
+            if (!is.character(MapL)) {  # the column is character..  step 1
+              # column not character - logic or numeric
+              xmsg <- paste0("***3630 The MAPL column in the name table is not character data. Labeling will not be done.") 
+              ErrorFlag <- errCntMsg(xmsg)
+              MapL <- NA
             } else {
-               im9 <- (any("MapX" == NTNames) && any("MapY" == NTNames) ) 
-               if (!im9) {
-                  # one of the companion columns is missing.
-                  xmsg <- paste0("***3631 If the MapL column is present with",
-                           " a label, then MapX and MapY must be present.",
-                           " Correct and rerun,\n")
-                  ErrorFlag <- errCntMsg(xmsg)
-                  NTable$MapX  <- NA
-                  NTable$MapY  <- NA
-               } else {
-                  # have both needed x,y coordinates columns
-                  NTable$MapX <- as.numeric(NTable$MapX)
-                  NTable$MapY <- as.numeric(NTable$MapY)
-                  if (all(is.na(NTable$MapX))) {
-                     # the MapX values are all missing
-                     xmsg <- paste0("***3632 MapL is present and there are no",
-                          " MapX coordinates. Correct and rerun.")
-                     ErrorFlag <- errCntMsg(xmsg)
-                  } else {
-                     # we have MapX
-                     if (all(is.na(NTable$MapY))) {
-                        # The MapY values are all missing
-                        xmsg <- paste0("***3633 MapL is present and",
-                               " there are no MapY coordinates. Correct and rerun.")
-                        ErrorFlag <- errCntMsg(xmsg)
-                     } else {
-                        # step through the values for final validation
-                        # xmMap has TRUE set for each row with MapL
-                        MapList <- seq(1,length(NTable$MapL))[xmMap]
-                        #MapList
+              # possible labels are in rows xmNoNA = TRUE
+              im9 <- (any("MapX" == NTNames) && any("MapY" == NTNames) ) 
+              if (!im9) {    # do we have MapX and MapY columns - no one or the other is missing.
+                 # one of the companion columns is missing.
+                 xmsg   <- paste0("***3631 If the MapL column is present with",
+                           " label(s), then MapX and MapY must be present.\n",
+                           "   One or the other is missing. Labeling is not done.\n")
+                 ErrorFlag    <- errCntMsg(xmsg)
+                 NTable$MapX  <- NA
+                 NTable$MapY  <- NA
+                 MapL         <- NA   # fix it later.
+              } else {
+                 # have both needed x,y coordinates columns
+                 suppressWarnings(NTable$MapX  <- as.numeric(NTable$MapX))
+                 suppressWarnings(NTable$MapY  <- as.numeric(NTable$MapY))
+                 if (all(is.na(NTable$MapX))) {
+                    # the MapX values are all missing or invalid.
+                    xmsg <- paste0("***3632 MapL value is present and there are no valid",
+                         " MapX coordinates. Labeling will not be done.")
+                    ErrorFlag <- errCntMsg(xmsg)
+                 } else {
+                    # we have MapX
+                    if (all(is.na(NTable$MapY))) {
+                       # The MapY values are all missing
+                       xmsg <- paste0("***3633 MapL is present and",
+                               " there are no valid MapY coordinates. Labeling will not be done.")
+                       ErrorFlag <- errCntMsg(xmsg)
+                    } else {
+                       # We do have MapX and MapY
+                       # step through the values for final validation
+                       # xmMap has TRUE set for each row with MapL
+                       MapList  <- seq(1,length(NTable$MapL))[xmNoNA]   # get list of rows with MapL labels.
+                       #MapList
                         
-                        for (inx in MapList) { 
-                           # Get the row index and check it out
-                           # label for error messages
-                           NTN <- NTable[inx,"Name"]   
-                           if (nchar(NTable[inx,"MapL"]) > 3) {
-                              # too long a label
-                              xmsg <- 
-                                 paste0("***3634 The MapL label for ",
-                                   NTN," should be 3 or less characters.",
-                                   "  Please correct and rerun.")
-                              ErrorFlag <- errCntMsg(xmsg)
-                           }
-                           # build table of just the MapL labels.
-                           MapLData <- TRUE
-                        }
-                        # it is all stored in the Name Table - validate 
-                        # later.
-                     }
-                  }
-               }
+                       for (inx in MapList) { 
+                          # Step through list of row index and check it out
+                          # label for error messages
+                          NTN <- NTable[inx,"Name"]        # get name field for message.
+                          if (nchar(NTable[inx,"MapL"]) > 3) {
+                             # too long a label > 3 chars
+                             xmsg <- 
+                                paste0("***3634 The MapL label for area ",
+                                    NTN," should be 3 or less characters to be usable.")
+                                ErrorFlag <- errCntMsg(xmsg)
+                          }
+                          # build table of just the MapL labels.
+                          MapLData <- TRUE   # have good MapL, X, and Y.
+                       }
+                       # it is all stored in the Name Table - validate later.
+                    }
+                }
+              }
             }
          }
+         NTable$MapL <- MapL   # restore MapL values to Name Table
       }
       #
       #  End of MapL processing
@@ -4585,7 +4727,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
     
-      ##### 063x
+      ##### 363x
       #
       #  Part 6.3.2 - MapLabel - and break it up into three fields 
       #        (MapL, MapX, MapY)
@@ -4608,12 +4750,15 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  
       
       if (!MapLData) {
+         # if TRUE, then we already built MapL, X, and Y. Skip checking for MapLabel.
+         #
          # No MapL, MapX, MapY columns present.  Thus no MapLData 
          # processed.  Can have one or the other, but not both.
            
          # is the MapLabel column present?  
          xm8 <-  any("MapLabel" == NTNames)  
      
+         # Clear out result columns.
          NTable$MapL     <- NA
          NTable$MapX     <- NA
          NTable$MapY     <- NA
@@ -4622,9 +4767,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
             # no MapLabel field (column)  create the column and 
             # fill with NA
             
-            #cat("no MapLabel, fill with NA\n")
-            # use name field or backfill
-            NTable$MapLabel <- NA   
+            #cat("no MapLabel, Do not build column\n")
+            NTable$MapLabel <- NULL  # make sure it is removed.
             # no MapLabel parameters in Name Table..
         
          } else {
@@ -4707,6 +4851,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
 	          }
 	       }  # end of for loop
 	    }
+	    NTable$MapLabel <- NULL    # MapLabel converted, delete.
          } 
          NTNames <- names(NTable)  # refresh the name list
       }   
@@ -4715,7 +4860,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      ##### 063x
+      ##### 363x
       #
       #  Part 6.3.3 - data converted into MapL/MapX/MapY format.
       #    Now validate the data format and ranges.
@@ -4724,9 +4869,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  then we need to validate it NOW
       #
             
-      if (MapLData) {   
-         # we have MapLabel data, now is the time to validate 
-         # the MapLabel or MapL/MapX/MapY data.
+      if (MapLData) { 
+         # if we had MapLabel data, it was converted into MapL, X, and Y
+         # or we had MapL, X, and Y and MapLabel was ignored.
+         # Now is the time to validate MapL/MapX/MapY data.
          
          # find all rows with MapL information
          xmMap    <- !is.na(NTable$MapL)          
@@ -4735,9 +4881,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          MapRN    <- row.names(NTable)
          MapRN    <- MapRN[xmMap]        
          #  multiplier
-         MapMul   <- matrix(c(.66,.66,1.5,1.5),ncol=2)
+         MapMul   <- matrix(c(.66,.66,1.5,1.5),ncol=2)   # AGAINST the bbox numbers
          # increase the values.
-         MapBox2  <- MapBox * MapMul   
+         MapBox2  <- MapBox * MapMul      # MapBox is from WorkSp01 when it was loaded.
                  
          for (inxRN in MapRN) {
             # the variables for this area
@@ -4814,18 +4960,16 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #####
       #######
       #########
-      #cat("End of Name Table Processing - 4767 \n")
+      #cat("End of Name Table Processing - 4937 \n")
       
       #  End of Name Table Processing and setup.
  
-      if (bitwAnd(debug,4) != 0) 
-                  cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
-            
       #########
       #######
       #####
       #
-      #  BuildBorderGroup_Part 7 <- Read and validate shapefile into SPDF
+      #  BuildBorderGroup_Part 7 <- Shape file has been read, but not inspected or cleaned up.
+      #    
       #
       
       if (bitwAnd(debug,64) != 0) cat("ShapeFile Current Proj4 String:",WorkSp01Proj4,"\n")    #     String
@@ -4834,7 +4978,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #  Later this code will be turned into a function
       #
-      #  Part 7 - Read, process, simplify shapefile and get initial
+      #  Part 7 - process, simplify shapefile and get initial
       #      data for nametable
       #
       #    Build SFdsn and SFlayer to specify the path to the shapefile
@@ -4862,7 +5006,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #     If one is present from the shapefile, it is checked to see if 
       #     it is a long/lat projection.
       #     If the projection is long/lat the ShpProjLL and DoBldAEAProj flags
-      #       are set.  Otherwise it's not a long/lat projection and the flags
+      #       are set.  Otherwise it is not a long/lat projection and the flags
       #       are set to FALSE.
       #     WorkSp01Proj4 carries the slot(xxx, "proj4string")@projarg image.
       #
@@ -4891,10 +5035,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       # If user proj4 parameter is Long/lat, it is ignore with error message.]
       #
       # Is proj4string in shapefile a longlat projection? 
-      #cat("Process shape file's projectsion - 4844 \n")
+      #cat("Process shape files projection - 4844 \n")
       
-      if (!ShpProjLL) {
-         #cat("Check non-long/lat projection in shapefile to see if it's +units are meters.\n")
+     if (!ShpProjLL) {
+         #cat("Check non-long/lat projection in shapefile to see if its +units are meters.\n")
          
          # Is not longlat, need to check for +units=m or not?
          if (is.na(stringr::str_locate(WorkSp01Proj4,"\\+units=m |\\+units=m$"))[1]) {  
@@ -4939,7 +5083,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #    and the parameter is ignored.  Having the final projection LL does not
       #    make any sense.
       #
-      #  If the shapefile's projections is non-long/lat and +units=m, then ModProj4 will be
+      #  If the shapefiles projections is non-long/lat and +units=m, then ModProj4 will be
       #    set to NA and DoModProj4 to FALSE to correct the +units.
       #
       #  Since all adjustments are in native units, no transformation can be done until
@@ -4949,20 +5093,16 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #    DoBldAEAProj are set to TRUE. 
       #
       #  If DoUserProj4 is set, then DoModProj4 and ModProj4 value will be ignored.
-      #    They would be overriden by the user's proj4 request.
+      #    They would be overriden by the users proj4 request.
       #
                
       WorkSp02     <- WorkSp01        # advance the SPDF for the next phase of this process.
       WorkSp02Data <- WorkSp02@data   # save for later if need to restore.
-      NTable09     <- NTable
-      cat("Save NTable to NTable09 - 4908 \n")
+      #cat("Save NTable to NTable09 - 5049 \n")
       
       #
       #####
       
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag,
-                                     " ErrorFlag:",ErrorFlag,"\n")
-     
       #####  372x
       #
       #  Part 7.2 - BuildBorderGroup - inspect and clean the SPDF 
@@ -4970,7 +5110,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #      Execute Cleangeo on the shapefile.
       #
-      cat("CleanGeo Section - 4923 \n")
+      #cat("CleanGeo Section - 5088 \n")
       
       if (bitwAnd(debug,16) != 0) {
              cat("Shape file - Cleaning up polygons: cleangeo, gIsValid,",
@@ -4994,10 +5134,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       CGsummary2     <- cleangeo::clgeo_SummaryReport(CGreport_clean)
              
       if (bitwAnd(debug,8) != 0) {
-         grDevices::pdf("BBG-Cleaned Shape File Image.",width=10, height=7)
+         grDevices::pdf("BBG-Cleaned_shape_file_image.",width=10, height=7)
          sp::plot(WorkSp03)
          graphics::title("Shape File after cleangeo")
-         dev.off()
+         x <- grDevices::dev.off()
       }
       
       #
@@ -5006,9 +5146,6 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #####
       #######
       #########
-      
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag,
-                                       " ErrorFlag:",ErrorFlag,"\n")
       
       #########
       #######
@@ -5035,12 +5172,12 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #   keys are selected in the Name Table. This is after the 
       #   polygon union.
       #
-      #cat("Part 7.4 - 4987 - shape file LINK \n")
-      ##### 374x
+      #cat("Part 7.4 - Code: 5167 - shape file LINK \n")
+
       #
       #  7.4 - Set Up Shape Link and Name Table Link for match:
       #
-      #  Whatever the links are - numberic or character.  It's best to 
+      #  Whatever the links are - numberic or character.  It is best to 
       #  pad all of the links to the same length with leading "0"s.  
       #  So trim, get max length and pad with "0". It works best 
       #  with numbers, and should not really impact character strings.
@@ -5049,7 +5186,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  link first.  Same goes for the ShapeFile@data
       #
       # Build the matching strings from EACH link column.   
-      #    (always paded to the left with "0" in case it's FIPS codes.)
+      #    (always paded to the left with "0" in case its FIPS codes.)
       #
       #  The SPDF link name is valid, get the data.   (We are assuming 
       #    the link is a numeric and need leading 0 padding.)
@@ -5062,19 +5199,21 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
          
       NTable10     <- NTable
+      
       # Name Table is re-ordered bsaed on "name" field.
-      xst         <- order(NTable$Name)
-      NTable      <- NTable[xst,]
+      xst          <- order(NTable$Name)
+      NTable       <- NTable[xst,]
       row.names(NTable) <- NTable$Key
                       
       NTable       <- as.data.frame(NTable,sringsAsFactors=FALSE)
       NTNames      <- names(NTable) # reset Name Table column names.
     
-      #print("Name Table - Code: 5007 ")
+      #print("Name Table - Code: 5203 ")
       #print(NTable)
       #
-      # WorkSp @ data DF
+      # WorkSp @ data DF   - get shape file link variable
       WorkSp03Data <- WorkSp03@data
+     
       #print("Shape file - WorkSp03")
       #print(WorkSp03@data)
       
@@ -5119,15 +5258,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #  7.5 - Compare ShapeFile links to the Name Table links
       #
-      #cat("Part 7.5 - 5071 - compare Name Table and Shape File links \n")
+      cat("***3750 Comparing shape file to name table links \n")
       xm          <- match(WorkSp03LMatch, NTableLMatch) # check is all of the areas in the SPDF have name table rows?
-      #print("xm index for matching SP to NT.")
-      #print(xm)
-      
+       
       MS_SP_m     <- is.na(xm)      #  NA values for any ShapeFile Link that does not have a Name Table entry.
-      if (bitwAnd(debug,16) != 0) 
-         cat("Compare ShapeFile Link to Name Table Link values.\n")
-      
+          
       if (any(MS_SP_m)) {
          # have entries in ShapeFile that are not in NTable.
          
@@ -5148,9 +5283,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
                           "***3752 The areas will be dropped."))
          #
          ShpDelList     <- (WorkSp03Link %in% MS_SP_List)  # find which polygons get deleted. (could be multiple polygons)
-         #cat("***3754 Deleting the following polygons from the shape file:\n")
-         #cat("***3754 ",paste0(WorkSp03Link[ShpDelList],collapse=", ",sep=""),"\n")
-         #
+            #cat("***3754 Deleting the following polygons from the shape file:\n")
+            #cat("***3754 ",paste0(WorkSp03Link[ShpDelList],collapse=", ",sep=""),"\n")
+            #
          #  Do the deletes from the WorkSp03 SPDF
          WorkSp03x      <- WorkSp03[!ShpDelList,]    # keep the rest.
          
@@ -5165,19 +5300,18 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      NTable11 <- NTable
-      
       ##### 376x
       #
       #   7.6 - Compare Name Table to the ShapeFile Link Values
       #
       
       #  WARNING: This logic may delete a polygon or get messed up on a name table row 
-      #    due to a misspelling or typo.  That's why there are warning alerts for both checks.
+      #    due to a misspelling or typo.  That is why there are warning alerts for both checks.
       
       #  Compare --> 
       xm       <- match(NTableLMatch,WorkSp03LMatch)  # test Name table link against ShapeFile.
-      cat("***3760 Comparing the link values to tie the Name Table to the shape file.\n")
+      
+      cat("***3760 Comparing the link values to tie the name table to the shape file.\n")
       #print(NTableLMatch)
       #print(WorkSp03LMatch)
       
@@ -5186,12 +5320,13 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
       if (any(MS_NT_m)) {
          # Found entries in Name Table that have no polygons to map.
+         #   Have to stop... Name Table must have polygons.
          if (bitwAnd(debug,16) != 0) cat("Compare Name Table Link values to ShapeFile Link Values.\n")
          
          MS_NT_List <- NTableLink[MS_NT_m]    # get list of name table entries.
-         StopFlag <- stopCntMsg(paste0("***3762 The following Name Table areas do not have boundaries in the ShapeFile:\n ",
-                                       "***3762  List of Abbr:",paste0(MS_NT_List,collapse=', ',sep=""),".\n",
-                                       "***3762 Correct and retry."))
+         StopFlag   <- stopCntMsg(paste0("***3762 The following Name Table areas do not have boundaries in the ShapeFile:\n ",
+                                         "***3762  List of Abbr:",paste0(MS_NT_List,collapse=', ',sep=""),".\n",
+                                         "***3762 Correct and retry."))
          # In this case stop, can't draw all of the areas of the map.
          
       } else {
@@ -5221,50 +5356,47 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #   Check for long/lat and the East/West Hemisphere crossing -
       #   If found - correct to help with plots while building.
       #
-      WorkSp03x <- WorkSp03   #  (RAW)
+      WorkSp03x <- WorkSp03   #  (RAW - first image)
       
       vDebug <- debug 
-      if (bitwAnd(debug,1024) != 0)  vDebug <- vDebug+512
+      ##  if debug bits 256, 512, or 1024 are set - plot map for inspection.
+      if (bitwAnd(debug,1024) != 0)  vDebug <- bitwOr(vDebug,512)    # requested to print first image.
       
       if (bitwAnd(vDebug,256+512) !=0) {
-         # check point image
+         # check point image - RAW
          if (ShpProjLL) {
             # we have a long/lat projections
             # check is possible East-West crossing problem
             bboxPP    <- sp::bbox(WorkSp03)     
             xDif      <- diff(bboxPP[1,])   # range of x (lat) degrees
             if (abs(xDif) > 180) {
-               cat("Called FixIDLMain for WorkSp03\n")
+               #cat("Called FixIDLMain for WorkSp03\n")
                #####
                #
                # Main loop to process areas in the "other" hemisphere and adjustment
                #
                #  Replace temp image if modified.
-               WorkSp03x <- FixIDLMain(WorkSp03, debug) 
+               WorkSp03x <- FixIDLMain(WorkSp03, debug)   # correct for +- 180 cross over.
          
             }# end of matrix box check 180 degrees
          }  # is shape file LL and need inspection for East/West hemisphere crossing.
          #
-         # EWH - Proceeds
-         # the people with hose and workers with faucet.
-         # Printer works - validate you - please keep quite.
-         #
          # Don't keep WorkSp03x - only for check point images.
          #
          # lattice print of series of small images.
-         cat("SamplePrts - WorkSp03\n")
+         #cat("SamplePrts - WorkSp03\n")
       
          PPSp         <- WorkSp03x
          PPTitle      <- "RAW"
          PPMfrow      <- c(3,3)
          #cat("length of link table:",length(NTable$Link),"\n")
-         cat("Call SamplePrts - WorkSp03 image.\n")
-         SamplePrts(PPSp,PPTitle,PPMfrow,debug,NTable$Link,NTable$Key,MapAvgH)
+         #cat("Call SamplePrts - WorkSp03 image.\n")
+         #cat("SamplePrts - Debug:",vDebug,"\n")
+         SamplePrts(PPSp,PPTitle,PPMfrow,vDebug,NTable$Link,NTable$Key,MapAvgH)   # first sample maps.
       }
       #
       
       if (bitwAnd(debug,4) != 0) {
-         cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
          cat("Proj Flags - ShpProjLL:",ShpProjLL,
              "  DoUserProj4:",DoUserProj4,
              "  DoModproj4:",DoModproj4,
@@ -5279,13 +5411,13 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #######
       #####
       #
-      #####  378x
+      #####  377x
       #   
       #   Part 7.8 - BuildBorderGroup - simplify, generalize SPDF
       #
       #   WorkSp03 carries the boundary information for all areas.
       #
-      cat("Simplifying the shape file boundary data with rmapshaper.\n")
+      cat("***3770 Simplifying the shape file boundary data with rmapshaper.\n")
       
       #   Part 7.8.1 - Simplify
       #          Run the shapefile through rmapshaper to reduce the 
@@ -5313,19 +5445,19 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  Snap shoot of data before smoothing and simplification
       #
       
-      ##### 341x
+      ##### 377x
       #
       if (bitwAnd(debug,64) != 0) 
           cat("Shape file before simplification by rmapshaper.\n")
       #
-      MS_Keep      <- ReducePC/100   # convert from dec to percentage
+      MS_Keep      <- ReducePC/100   # convert from percentage (0 to 100) to decimal (0 to 1)
       MS_Weighting <- 0.9
       #cat("Rmapshaper parameters before simplification : Keep=",MS_Keep,
       #    "  Weight=",MS_Weighting,"\n")
       #
       
       #SizeSp03 <- utils::object.size(WorkSp03)    # Size of structure before
-      #cat("SPDF size before:",SizeSp03," (03)\n")
+      #cat("SPDF size before ms_simplify:",SizeSp03," (03)\n")
          
         
       if (bitwAnd(debug,64) != 0) {
@@ -5335,12 +5467,12 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  rmapshaper call for ms_simplify   (affine - simplification)
       suppressWarnings(
       WorkSp04 <- rmapshaper::ms_simplify( WorkSp03,
-                            keep        = MS_Keep,         # def = 0.02
+                            keep        = MS_Keep,         # def = 1.25 %  or 0.0125 units.
                             method      = "vis",  
                             weighting   = MS_Weighting,    # def = 0.925
                             keep_shapes = TRUE, # OK to lose if not the last one in a group 
                             no_repair   = FALSE,# do repairs
-                            snap        = TRUE, # corrrect vertixes
+                            snap        = TRUE, # correct vertixes
                             explode     = TRUE,
                             force_FC    = TRUE,
                             drop_null_geometries = TRUE,
@@ -5348,14 +5480,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
                             sys         = FALSE)
       )
       #SizeSp04  <- utils::object.size(WorkSp04)
-      #cat("SPDF size after:",SizeSp04," (04)\n")
+      #cat("SPDF size after ms_simplify:",SizeSp04," (04)\n")
       
-      # The rmapshaper in it's simplification, places two polygons very 
+      # The rmapshaper in its simplification, places two polygons very 
       # close to each other - almost touching.
       # The projection is LL for Alaska and the point is near Jueanu.
       # When this point is projected to AEA or other projections,
       # these two polygons intersect and "overlap" causing an 
-      # invalid map.  (gIsValid = FALSE)  This impact all of the 
+      # invalid map.  (gIsValid = FALSE)  This impacts all of the 
       # rest of the spatial operations once the map is actually 
       # transformed after the modifications and before the VisBorder
       # conversions.
@@ -5370,17 +5502,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          print(WorkSp04@data)
       }
        if (bitwAnd(debug,8) != 0) {
-         grDevices::pdf("BBG-Shape File after rmapshaper simpl.pdf",width=10, height=7)
+         grDevices::pdf("BBG-Shape_file_after_rmapshaper_simpl.pdf",width=10, height=7)
          sp::plot(WorkSp04)
          graphics::title("Shape File after rmapshaper simplification.")
-         dev.off()
+         x <- grDevices::dev.off()
       }
       
       #
       ######
-      
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag,
-                                     " ErrorFlag:",ErrorFlag,"\n")
       
       ###### 378x
       #
@@ -5399,7 +5528,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #cat("Length of WorkSp04:",length(WorkSp04),"\n")
       
       # combine  (upgrade)
+      
       WorkSp05        <- maptools::unionSpatialPolygons(WorkSp04,LinkArea)  
+      
       #cat("Length of WorkSp05:",length(WorkSp05),"\n")
       
       if (bitwAnd(debug,64) != 0) {
@@ -5412,7 +5543,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
              "                   04:",utils::object.size(WorkSp04),
              "                   05:",utils::object.size(WorkSp05),"\n")
          cat("ShapeFile combination completed. ",WorkSp04len," now ",
-                length(WorkSp05)," areas. Code: 5344 \n")
+                length(WorkSp05)," areas. Code: 5493 \n")
       }
       #
       #####
@@ -5420,28 +5551,6 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       WorkSp05a <- WorkSp05  # save image
       suppressWarnings(WorkSp05  <- rgeos::gBuffer(WorkSp05,width=0,byid=TRUE))
       
-      # Fix for invalid geometry seen at this point that will
-      # not survive a transform. Solution appears to be do a 
-      # gBuffer with width = 0 and byid=TRUE.
-      #
-      # only one extra message from s2 routines.
-        
-      #
-      #  At this point, the SpatialPolygonsDataFrame can no longer
-      #  be transformed.  reason= self-intersection at or near point
-      #  -2643559.7558800224, 2761086.9448261256  
-      #                   due to the simplification & transform
-      #  -1943728.0079966546 -1159032.9801981568
-      # 
-      #
-      #pdf("c:/projects/statnet/r code/BuildBG/badpoint.pdf",
-      #      width=10.5, height=8)
-      #xy <- c(  -2643559.7558800224, 2761086.9448261256 )
-      #sp::plot(xsp05,lwd=0.05)
-      #par(new=TRUE)
-      ##graphics::points(xy[1],xy[2],pch=19,col="blue",type="p",lwd=0.1)
-      #grDevices::dev.off()
-        
       ###### 378x
       #
       #   Part 7.8.3 - Finish union on the SpatialPolygon by rebuilding 
@@ -5487,6 +5596,8 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       # Once SPDF build, change row.names to the Keys.
       row.names(WorkSp06) <- WorkSp06@data$X__Key
       
+      # we are not KEY powered and not LINK powered.
+      
       #cat("WorkSp06 - length:",length(WorkSp06),"\n")
       #str(WorkSp06@data)
       
@@ -5498,20 +5609,19 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       ErrorFlag  <- FALSE
       
       if (bitwAnd(debug,4) !=0) {
-         cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"\n")
          cat("Proj Flags - ShpProjLL:",ShpProjLL,
               "  DoUserProj4:",DoUserProj4,
               "  DoModproj4:",DoModproj4,
               "  DoBldAEAProj:",DoBldAEAProj,"\n")
       }
       if (bitwAnd(debug,8) !=0) {
-         grDevices::pdf("BBG-Shape File after unionSpatialPolygons.pdf",width=10, height=7)
+         grDevices::pdf("BBG-Shape_file_after_unionSpatialPolygons.pdf",width=10, height=7)
          sp::plot(WorkSp06)
          graphics::title("ShapeFile after unionSpatialPloygons to get the areas organized")
-         dev.off()
+         x <- grDevices::dev.off()
       }   
       if (bitwAnd(debug,64) !=0) {
-         cat("New ShapeFile@Data information: Code: 5443 \n")
+         cat("New ShapeFile@Data information: Code: 5569 \n")
          cat("WorkSp06@data:\n")
          print(WorkSp06@data)
        }
@@ -5520,7 +5630,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
       ##### 378x
       #
-      #  Part 7.8.4 - check point plot of map after smoothing.
+      #  Part 7.8.4 - check point plot of map after smoothing  (rmapshaper).
       #
       #  Call Parameters: SPDF, Legend Pos, Colors(T/F), Lattice DIM, Colors
       #
@@ -5546,6 +5656,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          PPSp         <- WorkSp06x
          PPTitle      <- "After rmapshaper"
          PPMfrow      <- c(3,3)
+         
+         #cat("NTLink and NTKey:\n")
+         #print(NTable$Link)
+         #print(NTable$Key)
+         
          SamplePrts(PPSp,PPTitle,PPMfrow,debug,NTable$Link,NTable$Key,MapAvgH)
 
       }
@@ -5561,22 +5676,32 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #      Build table of the merged Polygons by plot order.
       #         Key=ShapeLinkName;  SPDF$plotOrder;     SPDF$RN (SPDF row.names)
       #
+      #      Get from SPDF - @data$X__Key link to NTable  (Key)
+      #                    - @plotOrder for each area     (Ord)
+      #                    - row.names of SPDF
+      #
+      #      Used to draw areas onto the map in the correct order - pull by order, lookup by Key
+      #
+      #      Plot Order is only needed to orderly convert SPDF into VisBorders.  The Visborders
+      #      data.frame should then be in the plot order.  It should not be changed to draw.
+      #      Areas should be selected by T/F and not pulling it out of the list.
+      #
+      #      code uses xm, but it is not defined for this section.
        
-      PlotOrd       <- data.frame(Key=WorkSp06@data$X__Key,
-                                  Ord=WorkSp06@plotOrder, 
-                                  RN=row.names(WorkSp06), 
+      PlotOrd       <- data.frame(Key=WorkSp06@data$X__Key,     # key for area / polygons
+                                  Ord=WorkSp06@plotOrder,       # plot order
+                                  RN=row.names(WorkSp06),       # row.names SPDF
                                   stringsAsFactors=FALSE)
       
       #  Complete assembly of PlotOrd DF.
       
-      NTable$Ord        <- PlotOrd$Ord[xm]   # put order in to Name Table
-      PlotOrd$Key[xm]   <- NTable$Key        # put key into the PlotOrd table
-      PlotOrd           <- PlotOrd[order(PlotOrd$Ord),]   # put plot order table in plot order - use order later.
-      #  PlotOrd DF is not in order of 1 to 52(n)
-           
-      if (bitwAnd(debug,4) != 0) cat("StopFlag:",StopFlag,
-                   " ErrorFlag:",ErrorFlag,"\n")
-     
+      # Adjust tables order by the plot order from SPDF   
+      PlotOrd            <- PlotOrd[order(PlotOrd$Ord),]   # based on SPDF
+      
+      # Need to do for each areas polygons when pulling them out of the SPDF.
+      #cat("PlotOrd:\n")
+      #print(PlotOrd)
+                 
       ###
       #
       #  ShapeFile simplification and process is done.  
@@ -5585,7 +5710,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #######
       
-      ##### 381x
+      ##### 379x
       #
       #  Part 8.1 - Add Neighbor relationships - shape file has been simplified,
       #   the polygons gathered under area names, @data should remain 
@@ -5601,21 +5726,22 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
      
       xmm            <- match(NTable$Key, WorkSp06@data$X__Key)
       NTable[,"NB"]  <- NA
-      NTable[,"NB"]  <- list(NBList[xmm])
+      NTable[,"NB"]  <- list(NBList[xmm])   # get list of neighbors for each area by "Key"
       
+      #  Information needed to do modifications and replacment 
       #
       ##
       #####
       
       if (bitwAnd(debug,4) != 0) {
          cat("ShapeFile & Name Table Processing done.\n")
-         cat("StopFlag:",StopFlag," ErrorFlag:",ErrorFlag,"  End of Simplification \n")
+         cat("  End of Simplification \n")
          cat("Proj Flags-ShpProjLL:",ShpProjLL,
              "  DoUserProj4:",DoUserProj4,
              "  DoModproj4:",DoModproj4,
              "  DoBldAEAProj:",DoBldAEAProj,"\n")
       }
-         if (bitwAnd(debug,64) != 0) {
+      if (bitwAnd(debug,64) != 0) {
          cat("ShapeFile Data:\n")
          print(WorkSp06@data)
       }
@@ -5623,9 +5749,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      NTable12 <- NTable
-      
-      ##### 382x
+      ##### 379x
       #
       #  Step 8.2 - Get area sq. ft (ll or m) to predict too small areas.
       #  Temporary Projections  to be able to get real area values for each
@@ -5646,7 +5770,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       names(Sp06Area) <- c("area","Key")
       Sp06Tot         <- sum(Sp06Area$area)
       Sp06Area$pc     <- Sp06Area$area/Sp06Tot
-      NTable[RNList,"area"] <- Sp06Area[,"area"]  # save area size in Name Table
+      #NTable[RNList,"area"] <- Sp06Area[,"area"]  # save area size in Name Table
       
       RepDF   <- data.frame(RN = RNList, Area=Sp06Area[RNList,"area"],stringsAsFactors=FALSE)
       #print(RepDF)
@@ -5672,14 +5796,16 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       cat("Coverage of 0.03 % of the total surface is:",(Sp06Tot * 0.0003),"\n")
       xm     <- Sp06Area$pc < 0.0003
       if (any(xm)) {
-         cat("***3823 The following areas may be too small (<-0.03%):\n",
-             "***3823   ",paste0(Sp06Area$Key[xm],collapse=", ",sep=""),"\n" )
+         cat("***3793 The following areas may be too small (<-0.03%):\n",
+             "***3793   ",paste0(Sp06Area$Key[xm],collapse=", ",sep=""),"\n" )
       }
       #
       #
+      # End of area inspection
+      #
       #####
       
-      ##### 383x
+      ##### 379x
       #
       #   Step  8.3 
       #
@@ -5691,7 +5817,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #   How to use maps coverage and determine what the lowend 
       #   value should be based on % of map plotting area.
-      #   Thought it would be 1/8 sq, but looks like it's more like 1/32 sq.
+      #   Thought it would be 1/8 sq, but looks like it is more like 1/32 sq.
       #   If I assume map is only 50% of plot space, then .03% become 1/48 sq.
       #   If in the middle at 75% of plot spqce, then 0.03% becomes 1/38 sq,
       #
@@ -5711,7 +5837,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       
       ##### 384x
       #
-      #  Step  8.4 - Adjustments To ShapeFile.
+      #  Step  8.4 - Name Table Adjustments To ShapeFile.
       #
       #  Previously - the neighborship relations are calculated and 
       #    saved into the Name Table for this processing. (Sp06.nb)
@@ -5724,7 +5850,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #      long/lat and forced to long/lat for later transformations.
       #
       #    The scaling (percentage) and rotation (degrees) are not in the 
-      #      shape file's original metric, the X and Y offsets (shifts) are. 
+      #      shape files original metric, the X and Y offsets (shifts) are. 
       #      So, their processing must occur before any transformation.
       #      In the long/lat projection, the problem of the E-W crossing 
       #      can complicate the X and Y adjustments since the 
@@ -5780,11 +5906,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #      8) Once shifting, scaling and rotation is completed, the polygons 
       #         are adjusted by the centroid back to their normal projection.
       #
-      #      9) Since the area's polygons may not fit back into the map in the 
+      #      9) Since the areas polygons may not fit back into the map in the 
       #         same way. If the area overlays neighbors, must Spatial functions,
       #         will complain and may not function.  Attempts to simply repair
       #         the map have not worked.  So, the code uses the gDiff function
-      #         of the modified area's polygons and it's neighbors to cut 
+      #         of the modified areas polygons and its neighbors to cut 
       #         out a space in the map to put the modified area back into 
       #         the map.  It is possible to adversely impact the layout of 
       #         the other neighbors, so all modification must be visually
@@ -5811,7 +5937,6 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       
       WorkSp07   <- WorkSp06
-      NTable13   <- NTable
       
       #options(warn=1)
       if (any(NTable$DoAdj)) { 
@@ -5836,7 +5961,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
 	       #
 	       WorkSp07 <- FixIDLMain(WorkSp06, debug)  # Replace temp image if modified.
 	 
-	    }# end of matrix box check 180 degrees
+	    }   # end of matrix box check 180 degrees
 	 }
 	 #  Hopefully, in most cases, the modifications will pull an area
          #  that crosses from the East-West Hemisphere to one side or another.
@@ -5846,6 +5971,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #  functions.
          #
          
+         ##### 379x
          #
          #  The Name Table holds the modification columns:  Xoffset Yoffset, Scale and Rotate.
          #
@@ -5866,7 +5992,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #
          #  The Name Table DoAdj column provides a quick way to determine if an 
          #  area needs adjustments/scaling/rotation.  Only areas with DoAdj=TRUE 
-         #  will be processed along with it's neighbors. If the areas' polygons have
+         #  will be processed along with its neighbors. If the areas' polygons have
          #  changed, then the area is deleted from the SPDF and re-added.
          #  
                  
@@ -5876,15 +6002,15 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          x <- rgdal::new_proj_and_gdal()
          
          #cat("Name Table Columns:",paste0(names(NTable),collapse=", ",sep=""),"\n")
-         #cat("Modification setup Code: 5813 - PlotOrd:\n")
+         #cat("Modification setup Code: 6003 - PlotOrd:\n")
          #print(PlotOrd)
               
          # we have shifting, scaling and rotating to do, but which areas?
-         # Think it's best to do them in their plot order in the SPDF.
+         # Think it is best to do them in their plot order in the SPDF.
          # The map is in WorkSp07.
          #
          #   Pick up next Key in the plot order, step through them.
-         for (xKey in PlotOrd$Key) {	           #  Pull Out each area's polygons.
+         for (xKey in PlotOrd$Key) {	           #  Pull Out each areas polygons.
                                                    #  in their plot order
             #  Got the plot order -> go to NTable and get flags.
             
@@ -5903,7 +6029,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
                #cat("Area:",xKey," will be adjusted - Xoffset, Yoffset, Scaled, or Rotate\n")
                
                # get sub-SPDF for area.
-                 # pull off each area's SPDF structure by name.
+                 # pull off each areas SPDF structure by name.
                areaSPDF <- WorkSp07[xKey,]   
                  # should get only one.  Should be the same as xKey
                areaRN   <- row.names(areaSPDF)  
@@ -5992,35 +6118,38 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          # Do we have any work to adjust.
       } else {
         x <- 1
-        #cat("***3840 Info:No modifications are required to map.\n")
+        #cat("***3798 Info:No modifications are required to map.\n")
       }
       # Results in WorkSp07 with modifications and East-West Crossing issue. 
       # corrected.
       # Areas are modified and neighbors clipped to have the space is needed.
       #
+      #cat("Delete NTable$NB.\n")
+      NTable$NB <- NULL   # clean up finished with them.
+      #
       #####
       #######
       #########
       
       #########
       #######
-      ##### 384x
+      ##### 380x
       #
       #  Step 8.4.b - Sample maps after modification and gDiff to neighbors.
       #
       if (bitwAnd(debug,512) != 0) {
-         # caller wants sample maps after the modifications - one map
-         
+         # caller wants sample maps after the name table modifications - one map
+         vDebug <- bitwAnd(debug,bitwNot(256+1024))   # remove 1024 and 256
          # There should not be any areas spanning the East and West hempispheres
          #  between the US/South America and Asia at this point. 
          #  The LL coordinates were resolved to do the modifications.
          PPSp         <- WorkSp07
-         PPTitle      <- "After modifications and LL East-West Hem."
+         PPTitle      <- "After Name Table modifications"
          PPMfrow      <- c(3,3)
-	 SamplePrts(PPSp,PPTitle,PPMfrow,debug,NTable$Link,NTable$Key, MapAvgH)
+	 SamplePrts(PPSp,PPTitle,PPMfrow,vDebug,NTable$Link,NTable$Key, MapAvgH)
       }
       #
-      #cat("Shape file - modification and adjustments-Done\n")
+      #cat("Shape file - Name Table modifications are Done\n")
       
       #####
       #######
@@ -6029,7 +6158,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #########
       #######
       #
-      ##### 386x
+      ##### 380x
       #
       #  Step 8.6 - transform projection
       #
@@ -6059,7 +6188,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #####
       
-      #######  386x
+      #######  380x
       #
       #  Step 8.6 - Build Border Group - 6 - transform SPDF if needed
       #
@@ -6077,22 +6206,20 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  Last step if transform did occur, is to check for Map Labels.
       #  If present, then transform the label points.
       #
-      cat("Transforming projection of Shape file and label points.\n")
+      cat("***3800 Transforming projection of Shape file and label points.\n")
       
-      ##### 386x
+      ##### 381x
       #
       #    Step 8.6.1 - Do projection 
       #
-      WorkSp07z  <- WorkSp07
       WorkSp08   <- WorkSp07   # Map Bounderies Setup incase no transform.
-      NTable14   <- NTable
       Tproj      <- NA
       
       ##### Option 1 - User provided PROJ4 on call.
         
       if (DoUserProj4) {   # execute the projection in the call parameters (it has been adjusted to meters)
          Tproj      <- sp::CRS(proj4)
-         cat("Using user provided projection:\n",proj4,"\n")
+         cat("***3811 Using user provided projection:\n",proj4,"\n")
          WorkSp08   <- sp::spTransform(WorkSp07,Tproj)
          
          # If a proj4 general transformation is being requested by the caller, 
@@ -6105,145 +6232,158 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #  No calling parameter PROJ4.
          ##### Option 2 - ShapeFile has non-longlat proj4
          if (DoModproj4) {
-            cat("Re-transforming shape file using original projection, with +unit= changed to meters.\n")
+            cat("***3812 Re-transforming shape file using original projection, with +unit= changed to meters.\n")
         	  #  BUT the +units are not Meters.  Modproj4 is the 
          	  #  proj4string character string with +units=m added.
          	  Tproj    <- sp::CRS(ModProj4)
          	  WorkSp08 <- sp::spTransform(WorkSp07,Tproj)
-             #  This will preserve the user's projection, gives 
+             #  This will preserve the users projection, gives 
              #  me the units in meters, but MapLabels SPDF must be converted.
          } else {
             ##### No Proj4 on call, ShapeFile has a longlat projection
             #  Need to build a AEA about the centroid of the map.
             if (DoBldAEAProj) {
-               cat("Projecting shape file using created AEA projection.\n")
+               cat("***3813 Projecting shape file using created AEA projection.\n")   ###
                AEAProj4   <- AEAProjection(WorkSp07)
                Tproj      <- sp::CRS(AEAProj4)
                #  Do gross transformation to the map.  (NewProj4, if needed???)
                WorkSp08     <- sp::spTransform(WorkSp07,Tproj)
+  	       cat("Completed Transform of SPDF.\n")
   	    }
          }
       }
       #
-      #   Transform MapLabels if present
+      #   Transform MapL's MapX and MapY if present
       #
-      NTable15 <- NTable
-      
+
       if (is.na(Tproj)) {
          x <- 1
-         #cat("***3866 Info:No transformation was done to the map.\n")
+         #cat("***3816 Info:No transformation was done to the map.\n")
          
       } else {
-         #cat("***3867 Info:Transform Map Label points.\n")
-         if (any(!is.na(NTable$MapL))) {
+         #cat("***3817 Info:Transform Map Label points.\n")
+         xmna <- !(is.na(NTable$MapL) | str_trim(NTable$MapL) == "" )
+         if (any(xmna)) {
+            # we have some valid Map Labels.
+            #print(NTable[xmna,])
             # We have at least one label to draw on map.l
-            xm        <- !is.na(NTable$MapL)   # get list of labels and X,Y Coordinates
-            MapRn     <- row.names(NTable)[xm]
+            # get list of labels and X,Y Coordinates
+            MapRn     <- row.names(NTable)[xmna]
             MapDF     <- data.frame(R=MapRn,
-                                L=NTable[xm,"MapL"],
-                                X=NTable[xm,"MapX"],
-                                Y=NTable[xm,"MapY"], stringsAsFactors=FALSE, row.names=MapRn)
+                                L=NTable[xmna,"MapL"],
+                                X=NTable[xmna,"MapX"],
+                                Y=NTable[xmna,"MapY"], stringsAsFactors=FALSE, row.names=MapRn)
             #str(MapDF)
+            #print(MapDF)
             suppressWarnings(MapSP     <- sp::SpatialPoints(MapDF[,c("X","Y")],proj4=slot(WorkSp07,"proj4string")))
-            MapSPDF   <- sp::SpatialPointsDataFrame(MapSP,MapDF[,c("R","L")])
+            MapSPDF       <- sp::SpatialPointsDataFrame(MapSP,MapDF[,c("R","L")])
+            #cat("Starting transform of label points.\n")
             suppressWarnings(MapSPDF08 <- sp::spTransform(MapSPDF,CRS=Tproj))
-            MapDF08   <- as.data.frame(MapSPDF08)
+            #cat("Completed transform of label points.\n")
+            MapDF08       <- as.data.frame(MapSPDF08)
             NTable[MapDF08$R,"MapL"] <- MapDF08$L
             NTable[MapDF08$R,"MapX"] <- MapDF08$X
             NTable[MapDF08$R,"MapY"] <- MapDF08$Y
             #cat("After MapL transformed.\n")
             #str(MapSPDF)
             #print(MapDF08)
-            #cat("***3868 Info:Transformation of MapLabel completed.\n")
+            cat("***3818 Info:Transformation of MapL completed.\n")
+         }
+         if (any(!xmna) == TRUE) {
+            # clean up name table for unuse MapL entries.
+            NTable[!xmna,"MapL"] <- NA
+            NTable[!xmna,"MapX"] <- NA
+            NTable[!xmna,"MapY"] <- NA
          }
       }
       #
+      #####
+      
+      #####
+      #
+      #   8.6.2
+      #
       #  Add Area Color Index 
-      #    get the neighbor relationship from nacol. Since that is based
-      #    on the SPDF, translate the values to the positions in the 
-      #    Name Table.
+      #    get the neighbor relationship from nacol and the non-shared color index. 
+      #    Also place in Name Table for later use after checkpoint.
+      #    Take the position in the SPDF and translate it to the Name Table for 
+      #    that area.
       #
       xNTCC           <- nacol(WorkSp08)
       xNTCC           <- as.data.frame(xNTCC,stringsAsFactors=FALSE)
-      row.names(xNTCC)<- row.names(WorkSp08)
-      
-      NTable$CCode    <- xNTCC[row.names(NTable),1]
+      row.names(xNTCC)<- row.names(WorkSp08)                # save xNTCC table for later use. ? check point.
+                                                            # can't recreate after conversion to VisBorders.
+      NTable$CCode    <- xNTCC[row.names(NTable),1]         # save the color index for the area.
+                                            # CCode ranges from 1 to "n" - that is the number of colors required.
       
       #
-      if (bitwAnd(debug,4) != 0) 
-           cat("Proj Flags - ShpProjLL:",ShpProjLL,
-               "  DoUserProj4:",DoUserProj4,
-               "  DoModproj4:",DoModproj4,
-               "  DoBldAEAProj:",DoBldAEAProj,"\n")
-               
-               
+      #   Final SPDF Test Plot of Map before convertion, full color. 
+      
       if (bitwAnd(debug,512+8) != 0) {
-         # Do final test map    
-         BCol      <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999")
-         BCol2     <- c(BCol,BCol,BCol,BCol,BCol)[1:52]
-         BColList  <- BCol[NTable$CCode]
+         # Do final test map  
+         
+         BCol      <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999", "green")
+         #cat("BCol:\n")
+         #print(BCol) 
+         #cat("NTable$CCode:\n")
+         #print(NTable[,"CCode"])
+         #cat("WorkSp08@data$X__Key:\n")
+         #print(WorkSp08@data[,"X__Key"])       
+         
          if (length(WorkSp08) != length(NTable$CCode)) {
-            cat("***3868 The length of Name Table and the number of areas in the shape file are different.\n")
+            cat("***3819 The length of Name Table and the number of areas in the shape file are different.\n")
             stop()
          }
          
-         PDFTest   <- paste0(BGDir,BGBase,"_TC_Ready for VisBorder.pdf")
-         Title     <- "Test Chart - After Mod's before VisBorder."
-         grDevices::pdf(PDFTest,width=10,height=7)
-          
-         sp::plot(WorkSp08,col=BCol2[NTable$CCode[WorkSp08@data$Key]])
+         PPTitle    <- "_TC_Ready for VisBorders"
+         FTitle     <- gsub(" ","_",PPTitle)
+         OutFileN   <- paste0(BGDir,BGBase,FTitle,OType)
+         #cat("BGBase:",BGBase,"  OutFileN:",OutFileN,"\n")
+        
+         if (OType == ".PNG") {
+            grDevices::png(OutFileN,width=10,height=7,units="in",res=300)
+         } else { 
+            grDevices::pdf(OutFileN,width=10,height=7)
+         }
+         Title     <- "Test Chart - After Mods before VisBorder."
+         NTCol   <- NTable[WorkSp08@data$X__Key,"CCode"]
+         #print(NTCol)
+         colList <- BCol[NTCol]
+         #cat("colList:\n")
+         #print(colList)
+         
+         sp::plot(WorkSp08,col=colList)
          graphics::text(NTable$MapX, NTable$MapY, NTable$MapL,cex=LabelCex)
-         graphics::title("Shape File - final version before conversion.")
+         #graphics::title("Shape File - final version before conversion.")
          #graphics::title("BBG-Test Area Map with Labels.")
 
-         grDevices::dev.off()
+         x <- grDevices::dev.off()
+         
+         #cat("Color Code:\n")
+         #print(NTable[,c("Key","CCode")])
       }
+      #
+      #####
       
-      #####  387x
+      #####
       #
-      #  Step 8.7 - correct MapLabel
+      #   8.6.3
       #
-      #  Now that the shifts, scales and rotations are done.
-      #  We need to gather the information to make the adjustments to the 
-      #  MapLabel x,y coordinates.   They are the native coordinates of 
-      #  the shapefile.  Now that is about to change (transform) to the 
-      #  new projection and to "meters".
+      #   Clean up Name Table variables
+      
+      NTable$CCode <- NULL
+      NTable$NB    <- NULL
+      NTable$MapLabel <- NULL
+      NTable$area  <- NULL
+      NTable$Link  <- NULL     # $Key exists and will cover later.
+      
       #
-      #  When the old MapLabel was valided at the start of the function,
-      #  the three values were check and placed in the MapL, MapX, and MapY
-      #  Name Table columns. 
       #
-      #  We have the bbox from the original graphics.
-     
+      #####
+    
+    
+      ##### 390x
       #
-               
-      if (bitwAnd(debug,4) != 0) cat("Proj Flags - ShpProjLL:",ShpProjLL,
-                                     "  DoUserProj4:",DoUserProj4,
-                                     "  DoModproj4:",DoModproj4,
-                                     "  DoBldAEAProj:",DoBldAEAProj,"\n")
-   
-      ####### 390x
-      #
-      #  Step 9.0 = Convert SPDF to VisBorder Data.frames and round vectex
-      #
-      #  User now has a usable SPDF for micromapST conversion and the start
-      #  of the NameTable structure to enhance.
-      #
-      #  Rounding smoothing.  For lat/long rounding of 2 is approprivate (xxx.xx)
-      #     However, this must be changed for other units of measure:
-      #       Lat/Long  = round(x,3)     x.xxx   = 1/1000 of degree or 0-364 feet
-      #       meters    = round(x,-2)    x,x00   = 100 meters or 369 feet.
-      #       kilometer = round(x,0)
-      #
-      #       1 mile = 1609.34 meters    (720 degrees around the world)
-      #
-      #       circumference of earth = 24901 miles  or 40,075,000 meters.
-      #  
-      #   The width and height of the map should also be taken into account.
-      #   If the map covers a small area, rounding of the vectex x,y values
-      #   may have to be changed to preserve the areas.
-      #   At this time, the +units will always be "m".   
-      #   Right now the rounding is at about the 364 to 369 feet increments.
       #
       # Modifications Needed - Alternate method to create border group.
       #
@@ -6257,7 +6397,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  boundaries to the trace paper, scan the trace paper into a image file, 
       #  make the boundaries to be characterized with a medium weight pen or marker.
       
-      #####
+      #####  390x
       #
       #  Set up for build VisBorder data.frames.
       #  but need some of the information earlier.
@@ -6276,7 +6416,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       bbdy         <- diff(xBBoxBG[2,])
       VisAsp       <- bbdy/bbdx            # must keep.
       
-      #cat("Step 9.0 Code: 6212 - VisAsp:",VisAsp,"  bbdx:",bbdx,"  bbdy:",bbdy,"\n")   #  get here
+      #cat("Step 9.0 Code: 6334 - VisAsp:",VisAsp,"  bbdx:",bbdx,"  bbdy:",bbdy,"\n")   #  get here
      
       WorkSpMaster <- WorkSp08
       
@@ -6285,7 +6425,9 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       if (bitwAnd(debug,64) !=0) 
            cat("MapMinH:",MapMinH,"  MapMaxH:",MapMaxH,"  mean:",mean(c(MapMinH,MapMaxH)),"\n")
-            
+           
+      # check name table to see if L2 or Reg are all the same or completely unique.
+           
       #
       #  The areaParms data.frame must contain everything needed to pickup
       #  and continue the border group build after a checkpoint restart.
@@ -6308,23 +6450,23 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       areaParms$LabelCex      <- LabelCex             # the cex multiplier for the Map Labels 
       areaParms$Map.Aspect    <- VisAsp               # The micromaps aspect ratio :  width/height
       
-      areaParms$Map.L2Borders <- TRUE                 # Are L2 boundards to be drawn where appropriate.
+      areaParms$Map.L2Borders <- L2Feature            # Are L2 boundards to be drawn where appropriate.
       
-      if (is.na(MapHdr[1]))  MapHdr[1] = ""
+      if (is.na(MapHdr[1]))  MapHdr[1] = BGBase
       areaParms$Map.Hdr1      <- MapHdr[1]            # The first line of the Map Glyphic header
-      if (is.na(MapHdr[2]))  MapHdr[2] = ""
+      if (is.na(MapHdr[2]))  MapHdr[2] = "Areas"
       areaParms$Map.Hdr2      <- MapHdr[2]            # The second line of the Map Glyphic heade
                                                       # if only one header is present, it is placed in the lower line.
-      if (is.na(IDHdr[1]))   IDHdr[1] = ""
+      if (is.na(IDHdr[1]))   IDHdr[1] = BGBase
       areaParms$Id.Hdr1       <- IDHdr[1]             # The first line of the ID Glyphic header
-      if (is.na(IDHdr[2]))   IDHdr[2] = ""
+      if (is.na(IDHdr[2]))   IDHdr[2] = "Areas"
       areaParms$Id.Hdr2       <- IDHdr[2]             # The second line of the ID Glyphic header
                                                         # if only one header is present, it is placed in the lower line.
       areaParms$aP_Regions    <- RegionFeature        # set based on presents of regID and multiple values.
       areaParms$aP_Units      <- "meters"             # Coordinates units - should always be meters.
       areaParms$aP_Proj       <- ProjUsed             # The final projection used, should be equal-area or user defined.
       
-      areaParms     <- as.data.frame(areaParms, stringsAsFactors=FALSE)   # Make Sure it's a good DF
+      areaParms     <- as.data.frame(areaParms, stringsAsFactors=FALSE)   # Make Sure it is a good DF
       
       #cat("areaParms table - Ckpt version\n")
       #str(areaParms)
@@ -6341,7 +6483,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #  with /
       
       CkptPath <- paste0(BGDir,"CheckPoint")
-      cat("The Checkpoint - Folder:\n",
+      cat("***3910 The Checkpoint - Folder:\n",
           "   ",CkptPath,"\n")
       if (!dir.exists(CkptPath)) {
          # create if it does not exist.
@@ -6352,67 +6494,73 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       #
       #  Build file names and path for the checkpoint datasets
       #
+      #   9.1.1 Name Table
+      #
       #  Name Table check points
       #
       NTCkpt     <- paste0("/",BGBase,"_NT_Ckpt.RDA")
       NTCkptcsv  <- paste0("/",BGBase,"_NT_Ckpt.CSV")
       NTPCkpt    <- paste0(CkptPath,NTCkpt)
       NTPCkptcsv <- paste0(CkptPath,NTCkptcsv)
-      cat("Checkpoint - Name Table:",NTCkpt,"\n",
+      cat("***3912 Checkpoint - Name Table:",NTCkpt,"\n",
           "              NTCkptcsv:",NTCkptcsv,"\n")
       
-      areaNamesAbbrsIDs    <- as.data.frame(NTable)
-         
-      areaParms$CP_NTPath  <- NTPCkpt
+      areaNamesAbbrsIDs      <- as.data.frame(NTable)
+                
+      areaParms$CP_NTPath    <- NTPCkpt
       # save everything here.
       save(areaNamesAbbrsIDs, file=NTPCkpt, compress="xz")  
       # reduced Name Table - no neighbor list
       
-      ANAInames <- names(areaNamesAbbrsIDs)
-      ANAIkeep  <- !("NB" == ANAInames)
-      ANAI <- areaNamesAbbrsIDs[,ANAIkeep]
-      # cannot write NB list
-      utils::write.csv(ANAI, file=NTPCkptcsv, row.names=FALSE)        
+      utils::write.csv(areaNamesAbbrsIDs, file=NTPCkptcsv, row.names=FALSE)        
+      #
+      #   9.1.2 Shape File
       #
       #   Shape File Image
       #
       # writeOGR layer - no extension and no "/" - put on by writeOGR
-      SFCkpt     <- paste0(BGBase,"_SF_Ckpt")  
+      SFCkpt       <- paste0(BGBase,"_SF_Ckpt")  
       # writeOGR DSN
-      SFPCkpt    <- paste0(CkptPath)           
+      SFPCkpt      <- paste0(CkptPath)     
+      
+      # Clean Up SPDF
+      WorkSpMaster@data$X__Link <- NULL
       
       # no extension and no "/" - put on by writeOGR
-      SFCkptRDA  <- paste0(BGBase,"_SF_Ckpt.rda")  
-      SFPCkptRDA <- paste0(CkptPath,"/",SFCkptRDA)
+      SFCkptRDA    <- paste0(BGBase,"_SF_Ckpt.rda")  
+      SFPCkptRDA   <- paste0(CkptPath,"/",SFCkptRDA)
       
-      areaParms$CP_ShpDSN  <- SFPCkpt
-      areaParms$CP_ShpLayer <- SFCkpt
-      cat("Checkpoint - Shape File:",SFCkpt,"\n",
-          "              SFCkptRDA:",SFCkptRDA,"\n")
+      areaParms$CP_ShpDSN     <- SFPCkpt
+      areaParms$CP_ShpLayer   <- SFCkpt
+      
+      cat("***3913 Checkpoint - Shape File:",SFCkpt,"  SFCkptRDA:",SFCkptRDA,"\n")
       save(WorkSpMaster, file=SFPCkptRDA, compress="xz")
       rgdal::writeOGR(WorkSpMaster, dsn=SFPCkpt, layer=SFCkpt, 
           driver="ESRI Shapefile",overwrite_layer=TRUE)
       
       #
-      #   areaParm image
+      #   9.1.3 areaParms
       #
-      APCkpt    <- paste0("/",BGBase,"_AP_Ckpt.RDA")
-      APPCkpt   <- paste0(CkptPath,APCkpt)
-      cat("Checkpoint - areaParms: ",APCkpt,"\n")
+      #   areaParms image  - contains all of the variables to check point and restart.
+      #
+      APCkpt       <- paste0("/",BGBase,"_AP_Ckpt.RDA")
+      APPCkpt      <- paste0(CkptPath,APCkpt)
+      cat("***3917 Checkpoint - areaParms image: ",APCkpt,"\n")
       save(areaParms,file=APPCkpt,compress="xz")
       
       #
       # After doing the check point, we continue to build 
       # the border group dataset.
       #
-      cat("***3914 BuildBorderGroup has completed write the check point files for possible editing\n",
-          "***3914 and restart.  They are located in the following directory: \n")
+      cat("***3914 BuildBorderGroup has completed the write of the check point files to disk \n",
+          "***3914 for possible editing and restart.  They are located in the following directory: \n")
       cat("***3914 ",CkptPath,"\n")
       cat("***3915 The check point Shape File for the border group is saved to:\n",
           "***3915 ",SFCkpt,"\n")
-      cat("***3916 After editing, the results must be save back to the same directory and filename.\n")
+      cat("***3916 After editing, the results must be saved back to the same directory and filename.\n")
       
       WorkSpMst <- WorkSpMaster
+      
       #
       #####
       #######
@@ -6425,9 +6573,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       ##### 392x 
       #
       #   Part 10.0 - Pull Data in for checkPointReStart
-      #cat("Check Point Restart Process Initiated.\n")
-      #
-      # 
+      cat("***3920 Check Point Restart Process Initiated.\n")
       #
       #  We are doing a checkPointReStart.  Build the directory and path
       #  strings and reload the:  ShapeFile, NameTable, areaParm table.
@@ -6443,11 +6589,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          # no border group dir - use name table dir
          if (missing(NameTableDir) || is.null(NameTableDir) ) {
             # no Name Table Dir - ERROR
-            xmsg <- paste0("***3920 No Border Group or Name Table directory provides. Cannot find restart files. STOP.\n")
+            xmsg <- paste0("***3921 No Border Group or Name Table directory provides. Cannot find restart files. STOP.\n")
             stopCntMsg(xmsg)
          } else {
             # have Name Table Dir
-            cat("NameTable:",NameTableDir,"\n")
+            cat("***3922 NameTable directory:",NameTableDir,"\n")
             RecoveryDir <- NameTableDir
          }
       } else {
@@ -6456,42 +6602,99 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       }
       RecoveryBase <- paste0(RecoveryDir,"/CheckPoint/",BGBase)
       cat("RecoveryBase:\n",
-          "   ",RecoveryBase,"\n")
+         "   ",RecoveryBase,"\n")
       
       load(file=paste0(RecoveryBase,"_AP_Ckpt.RDA"))  # areaParmsUS
       
-      SFChpt        <- areaParms$CP_ShpLayer
+      SFCkpt        <- areaParms$CP_ShpLayer
       SFPCkpt       <- areaParms$CP_ShpDSN
-      cat("ShapeFile recovery:\n",
-          "   ",SFCkpt,"\n")
+      #cat("ShapeFile recovery:\n",
+      #   "   ",SFCkpt,"\n")
       WorkSpMaster  <- rgdal::readOGR(dsn=SFPCkpt,layer=SFCkpt)
       # The write and read OGR to a shapefile, does not preserve
       # and return the key set as the row.names.  You have to 
       # reset it to procede.
       row.names(WorkSpMaster) <- WorkSpMaster@data$X__Key
+      
       WorkSpMst     <- WorkSpMaster
       WorkSpMst     <- rgeos::gBuffer(WorkSpMaster,width=0,byid=TRUE)  # clean map
+      
       WorkSpMstData <- WorkSpMst@data
+      #  Shape file is loaded.
       
-      
-      NTCkpt  <- areaParms$CP_NTPath
+      NTCkpt       <- areaParms$CP_NTPath
       #cat("NameTable Recovery:\n","   ",NTCkpt,"\n")
       load(file=NTCkpt)
-          
-      NTable <- areaNamesAbbrsIDs
+      areaNamesAbbrsIDs <- as.data.frame(areaNamesAbbrsIDs,stringsAsFactors=FALSE)    
+      NTable       <- areaNamesAbbrsIDs
+      #   Name Table is loaded.
       
       #  Shape File restored to WorkSpMst
       #  Name Table restored to NTable
       #  areaParms table restored to areaParms
+      
+      #  reload variables stored in the areaParms data.frame
+      
+      OrigProjFull <- areaParms$OrigProjFull
+      CurProjFull  <- areaParms$CurProjFull
+      
+      BGDir        <- areaParms$BGDir
+      BGBase       <- areaParms$BGBase
+      bordGrp      <- areaParms$bordGrp
+      areaUSData   <- areaParms$areaUSData
+      enableAlias  <- areaParms$enableAlias
+      MapMinH      <- areaParms$Map.MinH
+      MapMaxH      <- areaParms$Map.MaxH
+      MapLData     <- areaParms$MapLData
+      LabelCex     <- areaParms$LabelCex
+      VisAsp       <- areaParms$Map.Aspect
+      L2Feature    <- areaParms$Map.L2Borders
+      MapHdr       <- NULL
+      MapHdr[1]    <- areaParms$Map.Hdr1
+      MapHdr[2]    <- areaParms$Map.Hdr2
+      IDHdr        <- NULL
+      IDHdr[1]     <- areaParms$ID.Hdr1
+      IDHdr[2]     <- areaParms$ID.Hdr2
+      RegionFeature<- areaParms$aP_Regions
+      aP_Regions   <- RegionFeature
+      aP_Units     <- areaParms$aP_Units
+      aP_Proj      <- areaParms$aP_Proj
+      ProjUsed     <- aP_Proj
+      
    }  
+   
+   #####
+   #
+   #  Unload some information from the areaParms data.frame
+   #
+   
+   #
+   #####
    
    #####
    #
    # Make sure SPDF if OK.
    #
-   WorkSpMst <- rgeos::gBuffer(WorkSpMst,width=0,byid=TRUE)
+   WorkSpMst       <- rgeos::gBuffer(WorkSpMst,width=0,byid=TRUE)
    
-   #####
+   WorkSpMst@data$X__Link <- WorkSpMst@data$X__Key
+   #print(WorkSpMst@data)
+   WorkSpMstData  <- WorkSpMst@data
+   
+   NTable$Link     <- NTable$Key
+   
+   # use the keys as the links for the rest of the code.
+   
+   # Rebuild the CCode variable for final plots.
+   
+   xNTCC           <- nacol(WorkSpMst)
+   xNTCC           <- as.data.frame(xNTCC,stringsAsFactors=FALSE)
+   row.names(xNTCC)<- row.names(WorkSpMst)                # save xNTCC table for later use. ? check point.
+                                                          # can't recreate after conversion to VisBorders.
+   NTable$CCode    <- xNTCC[row.names(NTable),1]          # save the color index for the area.
+                                  # CCode ranges from 1 to "n" - that is the number of colors required.
+   #print(NTable)
+   
    #
    #  Hopefully we will not need anything else (variable) except what is in
    #  the recovery files.
@@ -6500,7 +6703,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #
    #####
      
-   ##### 0Axx
+   ##### 393x
    #
    #  Since projections have been done, no more dateline concerns.
    #
@@ -6511,7 +6714,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  b) Preform UNIONS aS NEEDED ON SPDF for Regions, L2, and L3.
    #   
    #  c) Convert images into VisBorders format.
-   #     Repeat for each layer's SPDF (area, L2, L3, Regions)
+   #     Repeat for each layers SPDF (area, L2, L3, Regions)
    #
    #  d) Test images and Name Table together,
    #
@@ -6523,31 +6726,59 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  g) Draw the lattice maps and single map from the VisBorder 
    #      boundary dataset information.
    #
-   ##### 101x
+   
+      #####
+      #
+      #  Step 10.1 = Convert SPDF to VisBorder Data.frames and round vectex
+      #
+      #  User now has a usable SPDF for micromapST conversion and the start
+      #  of the NameTable structure to enhance.
+      #
+      #  Rounding smoothing.  For lat/long rounding of 2 is approprivate (xxx.xx)
+      #     However, this must be changed for other units of measure:
+      #       Lat/Long  = round(x,3)     x.xxx   = 1/1000 of degree or 0-364 feet
+      #       meters    = round(x,-2)    x,x00   = 100 meters or 369 feet.
+      #       kilometer = round(x,0)
+      #
+      #       1 mile = 1609.34 meters    (720 degrees around the world)
+      #
+      #       circumference of earth = 24901 miles  or 40,075,000 meters.
+      #  
+      #   The width and height of the map should also be taken into account.
+      #   If the map covers a small area, rounding of the vectex x,y values
+      #   may have to be changed to preserve the areas.
+      #   At this time, the +units will always be "m".   
+      #   Right now the rounding is at about the 364 to 369 feet increments.
+   
+   
+   ##### 393x
    #
    #  Step 10.1  - get SPDF for each boundary set - area, L2, L3, and Regions
    #
     
-   cat("Converting ShapeFile into the 4 micromapST boundary layers (area, L2, L3, and Regions).\n")
-   
+   cat("***3930 Creating the 4 micromapST boundary layers (area, L2, L3, and Regions).\n")
+    
    BCol        <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999")
-   BCol        <- c(BCol,BCol,BCol,BCol)
-   
+    
    WorkL2s      <- WorkSpMst
    WorkRegs     <- WorkSpMst
    WorkL3s      <- WorkSpMst
    
    vDebug  <- debug
-   #if (bitwAnd(debug,1024))  vDebug <- vDebug + 512
+   
+   #if (bitwAnd(debug,1024) != 0)  vDebug <- bitwOr(vDebug,512)   # have to OR it incase it is already set.
+   #   Not the final map.
    
    if (bitwAnd(vDebug,256+512) != 0) {
       # caller wants sample maps
       #cat("***3970 Generate scaled example of test maps - Before Conversion.\n")
+      #print(NTable)
+      #print(WorkSpMst@data)
       
       PPSp         <- WorkSpMst
       PPTitle      <- "Before conversion to VisBorder"
       PPMfrow      <- c(3,3)
-      SamplePrts(PPSp,PPTitle,PPMfrow,debug,NTable$Link,NTable$Key,MapAvgH)
+      SamplePrts(PPSp,PPTitle,PPMfrow,vDebug,NTable$Link,NTable$Key,MapAvgH)    # gotcha
    }
    
    SpMstrows <- row.names(WorkSpMst)  # the list of rows in the WorkSp08 SPDF
@@ -6559,7 +6790,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #cat("row.names of WorkSpMst:\n")
    #print(row.names(WorkSpMst))
    
-   
+      
    #
    #  L2 Groups - Create
    #
@@ -6575,11 +6806,12 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    if (bitwAnd(debug,8) != 0 ) {
       WorkL2Neib   <- nacol(WorkL2)
       #cat("Looking at Neighbors:", WorkL2Neib, " (colors)\n")
+      
       WorkL2ColK   <- BCol[WorkL2Neib] # find best color pattern
-      grDevices::pdf("BBG-Level 2 Map Image.pdf",width=10, height=7)
+      grDevices::pdf("BBG-Level_2_map_image.pdf",width=10, height=7)
       sp::plot(WorkL2,col=WorkL2ColK)
       graphics::title("Level 2 SP Shape file data")
-      dev.off()
+      x <- grDevices::dev.off()
    }
    #
    #  Regional Groups
@@ -6593,10 +6825,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
   
    if (bitwAnd(debug,8) != 0) {
       WorkRegColK <- BCol[nacol(WorkReg)]
-      grDevices::pdf("BBG-Regional Level Map Image.pdf",width=10, height=7)
+      grDevices::pdf("BBG-Regional_level_map_image.pdf",width=10, height=7)
       sp::plot(WorkReg,col=WorkRegColK)
       graphics::title("Region SP Shape file data")
-      dev.off()
+      x <- grDevices::dev.off()
    } 
    
    #
@@ -6609,15 +6841,15 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    
    if (bitwAnd(debug,8) != 0) {
       WorkL3ColK <- BCol[nacol(WorkL3)]
-      grDevices::pdf("BBG-Map Outline (L3) Map Image.pdf",width=10, height=7)
+      grDevices::pdf("BBG-Map_outline_(L3)_map_image.pdf",width=10, height=7)
       sp::plot(WorkL3,col=WorkL3ColK)
       graphics::title("L3 SP Shape file data")
-      dev.off()
+      x <- grDevices::dev.off()
    } 
    #
    ######
    
-   ###### 068x
+   ###### 394x
    #
    #  Step 7.2  - convert each boundary SPDF to the VisBorders format.
    #  (Make function)
@@ -6635,100 +6867,107 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #cat("Source SpatialPolygonsDataFrame:\n")
    #str(WorkSpMst)
    #print(NTable)
-      
-   PlOrd          <- NTable[,c("Key","Ord")]
-   PlOrd          <- PlOrd[order(PlOrd$Ord),]
-   #str(PlOrd)
-   #cat("areaVisBorders.\n")
-   #print(PlOrd)
    
-   areaVisBorders <- BuildVisBorder(WorkSpMst, PlOrd)
+   #  plotOrder is not really used pass this point in VisBorders data.frames. They are in "order".
+   #
+      
+   #cat("Building VisBorders for the areas.\n")
+   KeyList             <- NTable$Key
+   OrdList             <- WorkSpMst[KeyList,]@plotOrder   # in NT order
+   NTable$Ord          <- OrdList
+   
+   aPlotOrd            <- data.frame(Key=row.names(WorkSpMst), Ord=WorkSpMst@plotOrder, stringsAsFactors=FALSE)
+   row.names(aPlotOrd) <- aPlotOrd$Key
+   aPlotOrd            <- aPlotOrd[order(aPlotOrd$Ord),]
+   #str(aPlotOrd)
+   areaVisBorders      <- BuildVisBorder(WorkSpMst, aPlotOrd, "area")
    #head(areaVisBorders,20)
    
-   L2PlOrd        <- data.frame(Key=row.names(WorkL2), Ord=WorkL2@plotOrder, stringsAsFactors=FALSE)
+   #cat("Building VisBorders for the level 2 boundaries.\n")
+   L2PlOrd           <- data.frame(Key=row.names(WorkL2), Ord=WorkL2@plotOrder, stringsAsFactors=FALSE)
    row.names(L2PlOrd) <- L2PlOrd$Key
-   L2PlOrd        <- L2PlOrd[order(L2PlOrd$Ord),]
-   #cat("L2VisBorders.\n")
+   L2PlOrd           <- L2PlOrd[order(L2PlOrd$Ord),]
    #str(L2PlOrd)
-   L2VisBorders   <- BuildVisBorder(WorkL2, L2PlOrd)
+   L2VisBorders      <- BuildVisBorder(WorkL2, L2PlOrd, "Level 2")
    #head(L2VisBorders,20)
    
-   RegPlOrd       <- data.frame(Key=row.names(WorkReg), Ord=WorkReg@plotOrder, stringsAsFactors=FALSE)
+   #cat("Building VisBorders for the Regional boundaries.\n")
+   RegPlOrd          <- data.frame(Key=row.names(WorkReg), Ord=WorkReg@plotOrder, stringsAsFactors=FALSE)
    row.names(RegPlOrd) <- RegPlOrd$Key
-   RegPlOrd       <- RegPlOrd[order(RegPlOrd$Ord),]
-   #cat("RegVisBorders.\n")
+   RegPlOrd          <- RegPlOrd[order(RegPlOrd$Ord),]
    #str(RegPlOrd)
-   RegVisBorders  <- BuildVisBorder(WorkReg, RegPlOrd)
+   RegVisBorders     <- BuildVisBorder(WorkReg, RegPlOrd, "Regional")
    #head(RegVisBorders,20)
    
-   L3PlOrd        <- data.frame(Key=row.names(WorkL3), Ord=WorkL3@plotOrder, stringsAsFactors=FALSE)
+   #cat("Building VisBorders for the Level 3 map outline.\n")
+   L3PlOrd           <- data.frame(Key=row.names(WorkL3), Ord=WorkL3@plotOrder, stringsAsFactors=FALSE)
    row.names(L3PlOrd) <- L3PlOrd$Key
-   L3PlOrd        <- L3PlOrd[order(L3PlOrd$Ord),]
-   #cat("L3VisBorders.\n")
+   L3PlOrd           <- L3PlOrd[order(L3PlOrd$Ord),]
    #str(L3PlOrd)
-   L3VisBorders   <- BuildVisBorder(WorkL3, L3PlOrd)
+   L3VisBorders      <- BuildVisBorder(WorkL3, L3PlOrd,"Level 3 Map Outline")
    #head(L3VisBorders,20)
    #
-   cat("Completed conversion to VisBorder format.\n")
+   cat("***3940 Completed conversion to VisBorders format.\n")
    #
    ######
    
-   #####
+   #####  395x
    #
-   #  Display the final results.
+   #  Display on the screen the final results.
    #
    
    if (bitwAnd(debug,2048) !=0) {
-      ###### 069x
+      ###### 
       #
       #  Test Plotting to windows of each VisBorders  (debug= 2048)
       #
       grDevices::dev.new()
+      # The range of the CCode should only be between 4 and 6 at max.
       #cat("Drawing test images of the border group layers to the screen'\n")
       #cat("  one per windows.  Each must be manually closed.\n")
-      maxCol         <- max(NTable$CCode)
-      WANCol         <- RColorBrewer::brewer.pal(maxCol, "RdYlBu")
-      WANAreaCCode   <- NTable[areaVisBorders[is.na(areaVisBorders$x),"Key"],c("CCode")] 
-      WANAC          <- WANCol[WANAreaCCode]  # ordered by neigbhor
+      maxCol           <- max(NTable$CCode)
+      WANCol           <- RColorBrewer::brewer.pal(maxCol, "RdYlBu")
+      WANAreaCCode     <- NTable[areaVisBorders[is.na(areaVisBorders$x),"Key"],c("CCode")] 
+      WANAC            <- WANCol[WANAreaCCode]  # ordered by neigbhor
       
       PlotVis(areaVisBorders,WANAC)
       graphics::title("VisBorder of areas")
       grDevices::dev.new()
       
-      L2VisB         <- NULL
-      L2VisB$Key     <- L2VisBorders[is.na(L2VisBorders$x),"Key"]
-      uniL2Keys      <- unique(L2VisB$Key)
-      maxCol         <- length(uniL2Keys)
+      L2VisB           <- NULL
+      L2VisB$Key       <- L2VisBorders[is.na(L2VisBorders$x),"Key"]
+      uniL2Keys        <- unique(L2VisB$Key)
+      maxCol           <- length(uniL2Keys)
       #cat("L2 Max Colors:",maxCol,"\n")
       if (maxCol > 10) {
-         WANCol1     <- RColorBrewer::brewer.pal(11, "RdYlBu")
-         WANCol1     <- rep(WANCol1, maxCol / 11 + 1)
-         L2Col       <- WANCol1[1:maxCol]
+         WANCol1       <- RColorBrewer::brewer.pal(11, "RdYlBu")
+         WANCol1       <- rep(WANCol1, maxCol / 11 + 1)
+         L2Col         <- WANCol1[1:maxCol]
       } else {
-         L2Col       <- RColorBrewer::brewer.pal(maxCol,"RdYlBu")
+         L2Col         <- RColorBrewer::brewer.pal(maxCol,"RdYlBu")
       } 
       #cat("Colors:", paste0(L2Col,collapse=", ",sep=""),"\n")
-      xm             <- match(L2VisB$Key, uniL2Keys)
-      L2VisB$Col     <- L2Col[xm]
+      xm               <- match(L2VisB$Key, uniL2Keys)
+      L2VisB$Col       <- L2Col[xm]
         
       PlotVis(L2VisBorders,L2VisB$Col)
       graphics::title("VisBorders of L2")
       grDevices::dev.new()
       
-      RegVisB        <- NULL
-      RegVisB$Key    <- RegVisBorders[is.na(RegVisBorders$x),"Key"]
-      uniRegKeys     <- unique(RegVisB$Key)
-      maxCol         <- length(uniRegKeys)
+      RegVisB          <- NULL
+      RegVisB$Key      <- RegVisBorders[is.na(RegVisBorders$x),"Key"]
+      uniRegKeys       <- unique(RegVisB$Key)
+      maxCol           <- length(uniRegKeys)
       #cat("Reg Max Colors:",maxCol,"\n")
       if (maxCol > 10) {
-         WANCol1     <- RColorBrewer::brewer.pal(11, "RdYlBu")
-         WANCol1     <- rep(WANCol1, maxCol / 11 + 1)
-         RegCol      <- WANCol1[1:maxCol]
+         WANCol1       <- RColorBrewer::brewer.pal(11, "RdYlBu")
+         WANCol1       <- rep(WANCol1, maxCol / 11 + 1)
+         RegCol        <- WANCol1[1:maxCol]
       } else {
-         RegCol      <- RColorBrewer::brewer.pal(maxCol,"RdYlBu")
+         RegCol        <- RColorBrewer::brewer.pal(maxCol,"RdYlBu")
       } 
-      xm             <- match(RegVisB$Key, uniRegKeys)
-      RegVisB$Col    <- RegCol[xm]
+      xm               <- match(RegVisB$Key, uniRegKeys)
+      RegVisB$Col      <- RegCol[xm]
       #cat("Colors:", paste0(RegCol,collapse=", ",sep=""),"\n")
       
       PlotVis(RegVisBorders,RegVisB$Col)
@@ -6742,11 +6981,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #
    ###
       
-   #####
+   #####  395x
    #
    #   Record final areaVisBorder in file.
    #
-   if (bitwAnd(debug,1024) != 0) {
+   if (bitwAnd(debug,512+1024) != 0) {
       #  plot of final areaVisBorders map to PDF or PNG file.
       maxCol       <- max(NTable$CCode)
       WANCol       <- RColorBrewer::brewer.pal(maxCol, "RdYlBu")
@@ -6754,12 +6993,14 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       WANAC        <- WANCol[WANAreaCCode]  # ordered by neigbhor
    
       PPTitle      <- "Final_areaVisBorders"
-      PngH         <- MapAvgH
+      PngH         <- 4 + .4
       xAsp         <- areaParms$Map.Aspect
-      PngW         <- PngH / xAsp
+      PngW         <- PngH / xAsp   #  Y / (Y/X)  <-  Y * X/Y
       #cat("xAsp:",xAsp,"  PngW:",PngW,"  PngH:",PngH,"\n")
       
-      OutTestSm    <- paste0(BGDir,BGBase,"_FP_",PPTitle,OType)
+      FTitle       <- gsub(" ","_",PPTitle)
+      
+      OutTestSm    <- paste0(BGDir,BGBase,"_FP_",FTitle,OType)
       if (OType == ".png") {
          grDevices::png(OutTestSm, res=300, width=PngW, height=PngH, units="in")
       } else {
@@ -6772,10 +7013,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       par(omi=c(0,0,0,0))
       par(oma=c(0,0,0,0))
       par(mai=c(0,0,0,0))
-      par(mar=c(0,0,0,0))
+      par(mar=c(0,0,2,0))
               
-      PlotVis(areaVisBorders,WANAC)     # micromapST defaults lwd to 0.5
-      graphics::title(main=PPTitle,cex.main=0.1)
+      PlotVis(areaVisBorders,WANAC)     # micromapST defaults lwd to 0.5   (sp::plot())
+      #graphics::title(main=PPTitle,cex.main=0.1)
       
       # draw the extra characters (wrong - correct)
       MapT <- data.frame(l=NTable$MapL,x=NTable$MapX,y=NTable$MapY)
@@ -6791,7 +7032,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          #str(MapT)
          graphics::text(MapT$x, MapT$y, MapT$l, cex=LabelCex)  # micromapST LabelCex multiplier = def=0.25
       } 
-      grDevices::dev.off()
+      x <- grDevices::dev.off()
    
    }  # end of PDF or PNG final image plot of areaVisBorder borders.
    
@@ -6801,19 +7042,27 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #####
    
     
-   ##### 071x
+   ##### 395x
    #
    #
    #  Fields: 
    #   bordGrp  -  name of border group
-   
+   #
+   #  Clean up tables before writing to border group
+   #  We are done with the NTable$Link variable  Remove $Links again for the last time.
+   #
+   NTable$Link <- NULL
+   NTable$CCode <- NULL
+   #
+   #####
+     
    #
    #  Save the individual data.frames
    #
-   cat("Writing Border Group Package for ",BGBase,"  \n")
+   cat("***3953 Writing an images of each Border Group data.frame for ",BGBase,"  \n")
    
    save(areaNamesAbbrsIDs, file=paste0(BGDir,BGBase,"_areaNamesAbbrsIDs.rda"), compress="xz")
-   save(areaVisBorders,    file=paste0(BGDir,BGBase,"_areaVisBorders,rda"),    compress="xz")
+   save(areaVisBorders,    file=paste0(BGDir,BGBase,"_areaVisBorders.rda"),    compress="xz")
    save(L2VisBorders,      file=paste0(BGDir,BGBase,"_L2VisBorders.rda"),      compress="xz")
    save(L3VisBorders,      file=paste0(BGDir,BGBase,"_L3VisBorders.rda"),      compress="xz")
    save(RegVisBorders,     file=paste0(BGDir,BGBase,"_RegVisBorders.rda"),     compress="xz")
@@ -6823,12 +7072,12 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    #  Save the border group data set of all data.frames
    #
    saveL <- c("areaParms", "areaNamesAbbrsIDs", "areaVisBorders", "RegVisBorders", "L2VisBorders", "L3VisBorders")
-   saveL
+   #saveL
    
    SavePath <- BorderGroupPath # paste0(BGDir,BGBase,"BG.rda")
-   save(list=saveL,file=SavePath, compress="xz")
+   save(list=saveL,file=SavePath, compress="xz")    # save border group.
    
-   cat("Border Group Created - Successfully.\n")
+   cat("***3955 Border Group Created - Successfully.\n")
    #print("")
    #print("")
    
@@ -6840,11 +7089,11 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       KeyList      <- unique(VisB$Key)
       
       KeyCol       <- data.frame(Key=KeyList,Col=NA)
-      #KeyCol$Name  <- NTable[KeyCol$Key,"Name"]
+      #KeyCol$Name <- NTable[KeyCol$Key,"Name"]
       
       KeyNum       <- dim(KeyCol)[1]  # Get number of rows.
       NumPanels    <- as.integer((KeyNum-1)/5) + 1  # calculate number of panels.
-      #NumPanels    <- as.integer(NumPanels)
+      #NumPanels   <- as.integer(NumPanels)
       
       BaseColors   <- c(mcolors[1],mcolors[2],mcolors[3],mcolors[4],mcolors[5])
       Base6Colors  <- c(BaseColors,mcolors[6])
@@ -6860,7 +7109,7 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
       VColors      <- c(BaseColors, rep(NA,KeyNum-5))
       
       # One image per group/row.
-      PDFTest      <- paste0(BGDir,BGBase,"_TestChart_based on VisBorder.pdf")
+      PDFTest      <- paste0(BGDir,BGBase,"_TestChart_based_on_VisBorder.pdf")
       grDevices::pdf(PDFTest,width=10.5,height=7.75)
       
       par(mai=c(0.125,0.125,0.125,0.125))  #  1/8" around
@@ -6891,13 +7140,13 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
          VColors      <- c(BlankColors,VColors)[1:KeyNum]
       }
       
-      grDevices::dev.off()
+      x <- grDevices::dev.off()
       
    }  # end of multiple small image print out 
    #
    ###
    
-   ###
+   ### 396x
    #
    #   Final summary report of the names, abbrs, and ID used in the name table 
    #   as documentation of the border group.
@@ -6914,9 +7163,10 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    CCol     <- c("full","ab","id", "alt_ab", "alias")
    L2Col    <- c("L2_ID","L2_ID_Name")
    RegCol   <- c("regID", "regName")
+   AltL2RegCol <- c(L2Col,RegCol)
    ModCol   <- c("Xoffset","Yoffset","Scale","Rotate")
    MapLabel <- c("MapL","MapX","MapY")
-   
+   AltModMapLCol <- c(ModCol,MapLabel)
    
    xm       <- match(NTNames,TCol)  # what columns are in Name Table
    #print(xm)
@@ -6931,32 +7181,59 @@ BuildBorderGroup <- function(ShapeFile       = NULL,		# Base filename of Shape f
    NTNamesC <- CCol[xmm]
    names(NTUser) <- NTNamesC
    
-   print(NTUser)	    #  print a copy of the user's name table. 
+   print(NTUser)	    #  print a copy of the users name table. 
    cat("\n\n")
    
    NTrn    <- row.names(NTable)
+   NTnr    <- dim(NTable)[1]              # number of rows in NTable
    
-   if (length(unique(NTable$L2_ID)) > 1) {
-      cat("\n\nName Table Layer 2 Values\n")
-      print(NTable[,L2Col])
-   }
-   if (length(unique(NTable$regID)) > 1) {
-      cat("\n\nName Table Regional Values\n")
-      print(NTable[,RegCol])
-   }
-   if (sum(!is.na(NTable$MapL)) > 0) {
-      cat("\n\nName Table Map Label Values\n")
-      print(NTable[,MapLabel])
-   }
-   if (sum(NTable$DoAdj) > 0) {
-      cat("\n\nName Table Map Modifications Values\n")
-      print(NTable[,ModCol])
-   }
-   cat("\n\n*** Any entry with and 'NA' is empty or has value is not available.\n\n")
+   L2Uni <- length(unique(NTable$L2_ID))  # number of unique entries in L2 list
+   L2List <- ( L2Uni != NTnr )
+   L2Yes  <- L2List & (L2Uni > 1)
    
+   RegUni <- length(unique(NTable$regID)) 
+   RegList <- RegUni != NTnr
+   RegYes  <- RegList & ( RegUni > 1)
    
-   cat("Finished building Border Group:",paste0(BGBase,"BG"),"\n")
+   if (RegYes & L2Yes) {
+      # Both sets of columns are valid.
+      cat("\n\nName Table Layer 2 and Regional Values\n")
+      print(NTable[,AltL2RegCol])
       
-   return(SavePath)
+   } else {
+      # none, one or the other are needed.
+      if (L2Yes) {
+         cat("\n\nName Table Layer 2 Values\n")
+         print(NTable[,L2Col])
+      }   
+      if (RegYes) {
+         cat("\n\nName Table Regional Values\n")
+         print(NTable[,RegCol])
+      }
+   }
+   MapLYes <- sum(!is.na(NTable$MapL)) > 0
+   DoAdjYes <- sum(NTable$DoAdj) > 0
+   
+   if (MapLYes & DoAdjYes) {
+      cat("\n\nName Table Modifications and Map Label Values\n") 
+      print(NTable[,AltModMapLCol])
+   
+   } else {
+      if (DoAdjYes) {
+         cat("\n\nName Table Map Modifications Values\n")
+         print(NTable[,ModCol])
+      }
+      if (MapLYes) {
+         cat("\n\nName Table Map Label Values\n")
+         print(NTable[,MapLabel])
+      }
+   
+  } 
+   cat("\n\nAny entry in the name table with a value of 'NA', '', or ' ' is empty and will not be used.\n\n")
+   
+   
+   cat("***3969 Border Group:",paste0(BGBase,"BG")," is done.\n")
+      
+   invisible(SavePath)
 }   
    

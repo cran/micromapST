@@ -6,6 +6,8 @@
 
 micromapGSetPanelDef <- function(nRows,rSizeMaj,rSizeMin,rSepGap,MaxRows,UGrpPattern) {
 
+   #cat("Set Panel Def: nRows:",nRows,"  rSizeMaj:",rSizeMaj," rSizeMin:",rSizeMin," rSepGap:",rSepGap," MaxRows:",MaxRows,"\n")
+   
   
    #  $detail variables now in memory.  Use references up one caller level.
    
@@ -126,6 +128,7 @@ GrpCal6 <- function(nr) {
 #              rSizeMaj - number of units in Major group/row (7) - 2 to 6 rows.
 #              rSizeMin - number of units in Minor group/row (1) - single row
 #              rSepGap  - row separator gap (inches)
+#              uGrpPattern - vector of number of rows per group.
 #
 
 vnumRows = nRows        # number of rows in areaDFrame = Still need to check for duplicutes and validity.
@@ -149,7 +152,7 @@ if (is.na(wGCn)) {
 #
 # Key variables from this setup:
 #
-#  numRows       - number of sub-areas
+#  numRows       - number of areas
 #  maxRows       - maximum number of rows per group (5 or 6) - not implemented.
 #  medRow        - number of the median sub-area  or 0 - no exact median (even number of groups)
 #  GrpPattern    - rows per glyph group - pattern
@@ -162,19 +165,27 @@ if (is.na(wGCn)) {
 #
 
 #######
-   if (!(is.null(UGrpPattern) || is.na(UGrpPattern))) {
-      # User provided grpPattern
-      if (sum(UGrpPattern) != sum(GrpPattern)) {
-         stop("***0181 CARG-GP User provided grpPattern is invalid. The total of the rows per group must equal the number of rows as the data.")
-      } else {   
-         # replace generated pattern with user provided pattern
-         GrpPattern <- UGrpPattern   
-      }
+   # if user provided GrpPattern 
+   if (!(is.null(UGrpPattern) || length(UGrpPattern) < 1 )) {
+      # User provided grpPattern - yes
+      UGrpPattern <- as.numeric(UGrpPattern)
+      if (any(is.na(UGrpPattern))) {
+         # one or more of the values in the GrpPattern is not a number or is an NA.
+         # should have been caught eariler
+         xmsg <- ("***0182 CARG-GP User provided GrpPattern is invalid, contain non-numeric and/or NA values. The GrpPattern will be ignored.")
+         cat(xmsg,"\n")
+      } else {
+         if (sum(UGrpPattern,na.rm=TRUE) != sum(GrpPattern,na.rm=TRUE)) {
+            stop("***0181 CARG-GP User provided grpPattern is invalid. The total of the rows per group must equal the number of rows as the data.")
+         } else {   
+            # replace generated pattern with user provided pattern
+            GrpPattern <- UGrpPattern   # Save user pattern.
+         }
+      }   
    }
    numGrps <- length(GrpPattern)
-   
-   
-   if (sum(GrpPattern) != vnumRows) stop("Programming problem. GrpPattern has different number of rows then system needs.")
+ 
+   if (sum(GrpPattern,na.rm=TRUE) != vnumRows) stop("Programming problem. GrpPattern has different number of rows then system needs.")
    
    if (odd(numGrps)) {
       medGrp     <- as.integer(numGrps/2) + 1
@@ -196,39 +207,46 @@ if (is.na(wGCn)) {
 
    #cat("numGrps:",numGrps,"  medGrp:",medGrp,"  medGrpSize:",medGrpSize,"\n",
    #    "vnumRows:",vnumRows,"  medRow:",medRow,"  medRowAbv:",medRowAbv,"  medRowBlw:",medRowBlw,"\n")
-       
+   #cat("GrpPattern:",paste0(GrpPattern,collapse=", ",sep=""),"\n")    
    
-  iw = cumsum(c(1,GrpPattern))
-  wj <- as.integer(numGrps/2)       # 1/2 numGrps
+  iw = cumsum(c(1,GrpPattern))      # number of groups + 1  (starting row 1, 6, 11, 16, 17, 22, 27, 32)
+  wj <- as.integer(numGrps/2)       # 1/2 numGrps - signal of median group
   wi <- wj*2                        # get rounded value for number of groups (see if odd or even)
    
-  #print(paste0("num Grps-wj:",wj,"  rounded-num Grps-wi:",wi))
+  #cat(" Set Defs Panel - num Grps-wj:",wj,"  rounded-num Grps-wi:",wi,"\n")
 
-  vrowSep  <- rep(0,numGrps+1)
-  vrowSize <- rep(rSizeMaj,numGrps) 
+  vrowSep         <- rep(0,numGrps+1)
+  vgroupedRowSep  <- rep(0,numGrps+1)
+  vrowSize        <- rep(rSizeMaj,numGrps) 
+  vgroupedRowSize <- rep(rSizeMaj,numGrps)
+  #cat("vrowSep:",vrowSep," grpRowSep:",vgroupedRowSep,"  vrowSize:",vrowSize,"  grpRowSize:",vgroupedRowSize,"\n")
   
    # generate rowSep and rowSize vectors
-   vrowSep
+   # vrowSep
    if (odd(numGrps)) {
-      # odd number of groups - we have a median group
-    
-      # Row Information 
-      vrowSep[wj+1] = 1                    # set to 1 around the median group.
-      vrowSep[wj+2] = 1                    # above and below.
+      # odd number of groups - we have a median group - must check to see if the number of groups are > 1.
+      if (numGrps>1) {     # odd so 3, 5, 7, etc group/rows.
+         # Row Information - Must be 3 or greater, so handle the median group.
+         vrowSep[wj+1] = 1                    # set to 1 around the median group.
+         vrowSep[wj+2] = 1                    # above and below.
          
-      vgroupedRowSize <- c(rSizeMaj*wj, rSizeMaj, rSizeMaj*wj)  # median group same height as others. due to map.
-      vgroupedRowSep  <- c(0,1,1,0)                             # Upper Block, Median, Lower Block   
-    
-      if (medGrpSize == 1) {                # if median group with 1 row -> no map - special height       
-         
-         # set middle group's size to the default 1.65 for "median of sorted data" group
-         vrowSize[medGrp] = rSizeMin   
-            
-         # group Row size impacted - Large, one row, Large.
-         vgroupedRowSize[2] <- rSizeMin  # units (1.65)
-         
+         vgroupedRowSize <- c(rSizeMaj*wj, rSizeMaj, rSizeMaj*wj)  # median group same height as others. due to map.
+         vgroupedRowSep  <- c(0,1,1,0)                             # Upper Block, Median, Lower Block   
+         if (medGrpSize == 1) {                # if median group with 1 row -> no map - special height       
+                       # this can't be if the number of areas is less than 5.
+            # set middle group's size to the default 1.65 for "median of sorted data" group
+            vrowSize[medGrp] = rSizeMin   
+               
+            # group Row size impacted - Large, one row, Large.
+            vgroupedRowSize[2] <- rSizeMin  # units (1.65)  - center group (odd and > 1 group.)
+         }
+      } else {
+         # numGrps is 1 - slim it down.
+         # NO Reason to put 1 around median..  Only the center group.
+         # vgpRowSep should be c(0,0)
+         # vgpRowSize should be rSizeMaj - c(rSizeMaj).
+         x <- NULL
       }
-         
    } else {
    
       # EVEN number - only middle separator  (2, 4, 6, 8 groups instead of three)
@@ -237,8 +255,7 @@ if (is.na(wGCn)) {
       vrowSep[wj+1] = 1                    # to the center row(grp)  - multiple by sep size later.
       
       vgroupedRowSize <- c(rSizeMaj*wj, rSizeMaj*wj)  # upper half and lower half
-      vgroupedRowSep  <- c(0,1,0)               # top Sep, middle Sep, bot Sep
-   
+      vgroupedRowSep  <- c(0,1,0)               # top Sep, middle Sep, bot Sep  for 2, 4, 6 groups.
    }
    
    #
@@ -249,11 +266,10 @@ if (is.na(wGCn)) {
    #  Convert the separators from markers to inch values.
    vgroupedRowSep <- vgroupedRowSep * rSepGap
    vrowSep        <- vrowSep * rSepGap          
-
-   
+  
    DetailsPanel <- list(
    
-      numRows        = vnumRows,        #* number of rows (sub-areas)
+      numRows        = vnumRows,        #* number of rows (areas)
       maxRows        = MaxRows,         #* maximum number of rows per group (5 or 6)
       rowSize        = vrowSize,        #* RowSize vector for the row panel
       rowSep         = vrowSep,         #* RowSep vector for row panel
@@ -270,8 +286,8 @@ if (is.na(wGCn)) {
       groupedRowSize = vgroupedRowSize, #* RowSize vector for the group panel
       groupedRowSep  = vgroupedRowSep,  #* RowSep vector for the group panel
       
-      ib = iw[1:length(iw)-1],          #*
-      ie = iw[2:length(iw)]-1           #*
+      ib = iw[1:length(iw)-1],          #* beginning row for groups
+      ie = iw[2:length(iw)]-1           #* ending row for groups.
     
     )
  
@@ -333,17 +349,17 @@ micromapGSetDefaults = function()
 #
 ## row color table________________________________________________
 #
-#colorsRgb = matrix(c(                              # the basic 7 (9) colors.
-# 1.00, .15, .15,     #region 1: red	            1  #D53E4F - Red
-#  .90, .55, .00,     #region 2: orange	            2  #FC8D59 - Brn/Org
-#  .00, .65, .00,     #region 3: green	            3  #FEE08B - Pale Brn
-#  .20, .50,1.00,     #region 4: greenish blue       4  #99D594 - Pale Green
-#  .50, .20, .70,     #region 5: lavendar            5  #3288BD - Blue
-#  .88, .20, .59,     #region 6: magenta             6            (Added)
-#  .00, .00, .00,     #region 7: black for median    7  #000000 - Black
-# 1.00,1.00, .80,     #non-highlighted foreground    8  #E6F598 - Pale Yellow
-# 1.00, .9875,0.95,   #upper shade - very pale red   9  #FFFCF2   (Added)
-#  .955,.98,1.00,     #lower shade - very pale blue 10  #F4FAFF   (Added)
+#colorsRgb = matrix(c(                                # the basic 7 (9) colors.
+# 1.00, .15, .15,     #region 1: red	              1  #D53E4F - Red
+#  .90, .55, .00,     #region 2: orange	              2  #FC8D59 - Brn/Org
+#  .00, .65, .00,     #region 3: green	              3  #FEE08B - Pale Brn
+#  .20, .50,1.00,     #region 4: greenish blue        4  #99D594 - Pale Green
+#  .50, .20, .70,     #region 5: lavendar             5  #3288BD - Blue
+#  .88, .20, .59,     #region 6: magenta              6            (Added)
+#  .00, .00, .00,     #region 7: black for median     7  #000000 - Black
+# 1.00,1.00, .80,     #highlighted foreground (present) 8  #E6F598 - Pale Yellow
+# 1.00,0.7843134,0.8784314,   #upper shade - very pale red   9  #FFFCF2   (highlighted above median)  #ffc8e0
+# 0.7843137,1,0.8784314,     #lower shade - very pale green 10  #F4FAFF   (highlighted below median)  #c8ffe0
 #  .95, .95, .95,     #lightest gray - not referenced area        11 
 #  .94, .94, .94),    #lighter gray  - non-active backgroup area  12
 #  ncol=3,byrow=TRUE)
@@ -368,7 +384,7 @@ micromapGSetDefaults = function()
 #                 "l_lightest gray", "l_lighter gray"
 #                 )       
 
-XColors      <- GetMColors()
+XColors      <- GetMColors()    # get colors.
 mcolors      <- XColors$mcolors
 colorsRgb    <- XColors$colorRgb
 colorsRefRgb <- XColors$colorsRefRgb
@@ -414,7 +430,6 @@ colorsRef    <- XColors$colorsRef
 ## JP added temp variables so function would read in in R 2.7
 #      cannot use values within the details list since it's not really built yet.
 
-#tempne           <- 5                                # number of areas per panel   ## delete
 tempOutline.Line.col <- colorsRef["white"]            # grid and outline line color
 
 tempcolFill       <- colorsRef["lighter gray"]        # panel and default fill color
@@ -440,7 +455,6 @@ details = list(
     pkgBGList                  = c("USStatesBG"                         # List of border groups included in package
                                    ,"USSeerBG"
                                    ,"KansasBG"
-                                   ,"KYADDBG"
                                    ,"MarylandBG"
                                    ,"NewYorkBG"
                                    ,"UtahBG"
@@ -473,7 +487,7 @@ details = list(
 
     botMar                     = 0.5,                 # no legend bottom margin (inches)                           #  2
     botMarLegend               = 0.75,                #                                                            #  3
-    botMardif                  = 0.2,                 # maybe not needed                                           #  4   
+    botMardif                  = 0.2,                 # calulate legfacgor      #  4   
 
     leftMar                    = 0,                   #                                                            #  5 
     leftMarAxis                = 0.2,                 # left margin adjustment when Y axis is printed              #  6
@@ -483,10 +497,10 @@ details = list(
     borderSize                 = 0.5,                 # margin border - at least 0.5 inches.                       #  8
     
     #  height constraints
-    rowSepGap                  = 0.075,                 # Size of the rowSep  (in inches)                            #  9
+    rowSepGap                  = 0.075,                 # Size of the rowSep  (in inches)                          #  9
     
-    rowSizeMn                  = 0.5,                 # Minimum Row Size in inches                                 # 11   # overriden by data from BG areaParms (add validation check)  Map.MinH
-    rowSizeMx                  = 1.25,                # Maximum Row Size in inches.                                # 10   # overriden by data from BG areaParms     Map.MaxH
+    rowSizeMn                  = 0.5,                 # Minimum Row Size in inches                                 # 10   # overriden by data from BG areaParms (add validation check)  Map.MinH
+    rowSizeMx                  = 1.25,                # Maximum Row Size in inches.                                # 11   # overriden by data from BG areaParms     Map.MaxH
  
     rowSizeMin                 = 1.65,                # row Size for small-median minor group (no map) (in units)  # 12
     rowSizeMaj                 = 7,                   # row Size for standard - major group (in units)             # 13
@@ -546,295 +560,295 @@ details = list(
                                        # (.67-.5)=.17 padding at top and bottom of panel         
     padMinus                   = 0.63,                   # .67 - .04 # keep reference line off panel edge          # 22
 
-# mtext line placement (Titles)
+# mtext line placement (Titles)  # modifed Aug 2022 - align title with ID and glyphs.
 
     ##  JP adjusted placement of lines (titles) (units are "lines")
-    Title.Line.1.pos           = 0.01+(0.7*0.9)*2,       # top panel 1st line placement (lines=1.27) (delta 0.80)  # 23  (not used)
-    Title.Line.2.pos           = 0.01+(0.7*0.9)*1,       # top panel 2nd line placement (lines=0.64)               # 24  (not used)
-    Title.Line.2x.pos          = 0.01,                   # (USED) top panel 3rd line placement (lines) also Tick Labs placement # 25
+    Title.Line.0.pos	       = 0.01+(0.7*1)*3,       # top panel 0th line placement (lines=2.11 + .7 < 3)        # 23
+    Title.Line.1.pos           = 0.01+(0.7*1)*2,       # top panel 1st line placement (lines=1.41) (delta 0.70)    # 24  
+    Title.Line.2.pos           = 0.01+(0.7*1)*1,       # top panel 2nd line placement (lines=0.71)                 # 25  
+    Title.Line.2x.pos          = 0.01,                 # (USED) top panel 3rd line placement (lines) also Tick Labs placement # 26
  
-    Title.Line.3x.pos          = 0.01,                   # ??? bottom panel 3x line placement (axis)               # 26
-    Title.Line.3.pos           = 0.01+(0.7*0.9)*1,       # ??? bottom panel 3 line placement  (lines) (title)      # 27  (not used)
-    Title.Line.4.pos           = 0.01+(0.7*0.9)*2,       # ??? bottom panel-reference line  (lines) (refText and line) # 28 (not used)
-   
-    Title.Line.5.pos           = 0.35,                   # (USED) Y axis titles for ScatDot and TS. (lines)        # 29
+    Title.Line.3x.pos          = 0.01,                 # bottom panel-line 3x-Axis 1 placement (axis or 2)         # 27
+    Title.Line.3.pos           = 0.01+(0.7*1)*1,       # bottom panel-line 3-Axis 2 or header (3 line) (title)     # 28  
+    Title.Line.4.pos           = 0.01+(0.7*1)*2,       # bottom panel-line 4-lab 4 header   (3 lines) (refText and line) # 29 
+    Title.Line.4x.pos          = 0.01+(0.7*1)*3,       # bottom panel-line 4x-reference line (4 line)              # 30
+    Title.Line.5.pos           = 0.35,                 # Y axis titles for ScatDot and TS. (lines)                 # 31
 
-    Title.cex                  = 1.0,                    #                                                         # 30  (not used)
+    Title.cex                  = 1.0,                  #                                                           # 32  (not used)
     
     # Title.Line.2x.pos is only used in glyphs that do not have x-axis (the maps and id).
     # The X-axis line is independent.  However, we now want Title.line.1.pos to 
     # match across the entire page.
   
 # grid line parameters
-    Grid.Line.col              = tempOutline.Line.col,   # grid line color                                         # 31
-    Grid.Line.lwd              = 1,                      # weight of grid line                                     # 32
+    Grid.Line.col              = colorsRef["white"],     # grid line color                                         # 33
+    Grid.Line.lwd              = 1,                      # weight of grid line                                     # 34
  
-    mgpTop                     = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0.1,0)# 33  (not used)(margin spacing for title and axis = (title=2 lines, tick 0.1 lines, and 0 lines)
-    mgpBottom                  = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0,0)  # 34  (not used)
-    padjBottom                 = -0.35,                  # gridline (tick  placement                               # 35  (not used) Was -0.7 adjusted 11/14
-    mgpLeft                    = c(0.75, 0.1,  0),       # left axis labels                                        # 36  (used TS and SCD)
+    mgpTop                     = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0.1,0)# 35  (not used)(margin spacing for title and axis = (title=2 lines, tick 0.1 lines, and 0 lines)
+    mgpBottom                  = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0,0)  # 36  (not used)
+    padjBottom                 = -0.35,                  # gridline (tick  placement                               # 37  (not used) Was -0.7 adjusted 11/14
+    mgpLeft                    = c(0.75, 0.1,  0),       # left axis labels                                        # 38  (used TS and SCD)
 
     ###  End of sizing of areas...
     
 # axis parameters.
 
-    XAxis.L.mcex               = 0.8888889,              # font size multiplier for X axis large labels (8 pt)     # 38
-    XAxis.M.mcex               = 0.7777778,
-    XAxis.S.mcex               = 0.6666667,              # font size multiplier for X axis small staggered and scaled (6 pt) # 37 
-    XAxis.Sp.mcex              = 0.2,                    # Labels to Axis spacing.
+    XAxis.L.mcex               = 0.8888889,              # NA font size multiplier for X axis large labels (8 pt)    # 39
+    XAxis.M.mcex               = 0.7777778,              # NA font size multiplier for X axis medium                 # 40
+    XAxis.S.mcex               = 0.6666667,              # NA font size multiplier for X axis small staggered and scaled (6 pt) # 41 
+    XAxis.T.mcex               = 0.3,                    # Tiny font for axis                                        # 42
+    XAxis.Sp.mcex              = 0.2,                    # Labels to Axis spacing.                                   # 43
 
-    XAxis.offset               = 0.0,                    # offset for X Axis above plotting area.                  # 39
-    XAxis.indent               = 10,                     # indent outside labels by x/1000 of width                # 40
-    XAxis.nGridpIn             = 3.4,                    # X Axis - Grid lines per Inch max.                       # 41
-    XAxis.gapPC                = 0.75,                   # percentage of character width between columns (buffer)
-    XAxis.staggered            = TRUE,                   # straight or stagger labels.                             # 42
+    XAxis.offset               = 0.0,                    # offset for X Axis above plotting area.                    # 44
+    XAxis.indent               = 10,                     # indent outside labels by x/1000 of width                  # 45
+    XAxis.nGridpIn             = 3.4,                    # X Axis - Grid lines per Inch max.                         # 46
+    XAxis.gapPC                = 0.75,                   # percentage of character width between columns (buffer)    # 47
+    XAxis.staggered            = TRUE,                   # NA straight or stagger labels.                            # 48
 
-    YAxis.cex                  = 0.333333,               # font size (relative) for Y axis labels (4 pt)           # 43
-    YAxis.offset               = 0.0,                    # offset for Y Axis above plotting area.                  # 44
-    YAxis.nGridpIn             = 5,                      # X Axis - Grid lines per Inch max.                       # 45
-    YAxis.staggered            = TRUE,                   # straight or stagger labels.                             # 46
+    YAxis.cex                  = 0.333333,               # NA font size (relative) for Y axis labels (4 pt)          # 49
+    YAxis.offset               = 0.0,                    # NA offset for Y Axis above plotting area.                 # 50
+    YAxis.nGridpIn             = 5,                      # NA X Axis - Grid lines per Inch max.                      # 51
+    YAxis.staggered            = TRUE,                   # NA straight or stagger labels.                            # 52
 
 # panel column width allocation
     ### no change - scale from 7.5 inches by 10 inches
     
-    YAxis.width                = 0.2,                    # width for Y axis labels. (X axis-about inches-working units) # 47
+    YAxis.width                = 0.2,                    # width for Y axis labels. (X axis-about inches-working units) # 53
 
 # axis labeling
 
-    staggered                  = FALSE,                  # intra column flags - staggered state of previous column
+    staggered                  = FALSE,                  # intra column flags - staggered state of previous column # 54
     
 # panels
-    Panel.Fill.col             = tempcolFill,            # panel fill color                                        # 48
-    Panel.Outline.col          = colorsRef["black"],     # panel outline color                                     # 49
+    Panel.Fill.col             = colorsRef["lighter gray"],            # panel fill color                                        # 55
+    Panel.Outline.col          = colorsRef["black"],     # panel outline color                                     # 56
 
 # Title and Text - cex for character size
-    Text.cex                   = tempText.cex,  ## JP decreased text size.  Used almost everywhere.                # 50
+    Text.cex                   = 0.75,          ## JP decreased text size.  Used almost everywhere.                # 57
 
 # refVals parameters
 
     # see padMinus above for other parameters 
-    Ref.Val.lty                = "dashed",               # line type for Ref Value (dashed)                        # 51
-    Ref.Val.lwd                = 1.5,                    # line weight for Ref Value                               # 52
-    Ref.Val.col                = colorsRef["mid green"], # line color                                              # 53
-    Ref.Val.BW.col             = colorsRef["black"],     # line color when "grays"                                 # 54
+    Ref.Val.lty                = "dashed",               # line type for Ref Value (dashed)                        # 58
+    Ref.Val.lwd                = 1.5,                    # line weight for Ref Value                               # 59
+    Ref.Val.col                = colorsRef["mid green"], # line color                                              # 60
+    Ref.Val.BW.col             = colorsRef["black"],     # line color when "grays"                                 # 61
 
 # refText parameters
-    Ref.Text.cex               = tempText.cex,           # Ref Text Size                                           # 55
-    Ref.Text.col               = colorsRef["black"],     # JP 10/10/12-changed from black to mid green.            # 56
+    Ref.Text.cex               = 0.75,                   # NA Ref Text Size                                        # 63
+    Ref.Text.col               = colorsRef["black"],     # JP 10/10/12-changed from black to mid green.            # 64
                                           #  5/21/13 - changed back to black.
-    Ref.Text.BW.col            = colorsRef["black"],     # Ref Text color when "grays"                             # 57
+    Ref.Text.BW.col            = colorsRef["black"],     # Ref Text color when "grays"                             # 65
 
 #__________________________________________________________ 
 # working parameters for each panel graphing subfunction within micromapXXXX
 
 # arrow plot parameters
-    Arrow.cex                  = 0.08,                   # Not Used                                                # 58
-    Arrow.Head.length          = 0.08,                   #  Length of arrow head in inches.                        # 59
-    Arrow.lwd                  = 2.5,                    ## JP decrease arrow width.                               # 60
-    Arrow.Shadow.col           = colorsRef["black"],     # Not Used.                                               # 61
-    Arrow.Shadow.lwd           = 4.0,                    # Arrows shadow when border needed. (Not used)            # 62
+    Arrow.cex                  = 0.08,                   # Size of Arrow.                                          # 66
+    Arrow.lwd                  = 2.5,                    ## JP decrease arrow width.                               # 67
+    Arrow.Head.length          = 0.08,                   #  Length of arrow head in inches.                        # 68
+    Arrow.Shadow.col           = colorsRef["black"],     # NA Not Used.                                            # 69
+    Arrow.Shadow.lwd           = 4.0,                    # NA Arrows shadow when border needed. (Not used)         # 70
 
-    Arrow.Dot.pch              = 21,                     # plotting character  (1 circle, 16 dot, 21 filled circle)# 94
-    Arrow.Dot.pch.size         = 0.9,                    # dot size            ## JP adjusted dot size.            # 95
-    Arrow.Dot.pch.lwd          = 0.5,                    # 0:18 line weight                                        # 96
+    Arrow.Dot.pch              = 21,                     # plotting character  (1 circle, 16 dot, 21 filled circle)# 70
+    Arrow.Dot.pch.size         = 0.9,                    # dot size            ## JP adjusted dot size.            # 71
+    Arrow.Dot.pch.lwd          = 0.5,                    # 0:18 line weight                                        # 72
     
-    Arrow.Dot.Outline          = FALSE,                  ## JP added option to control Dot outline.                # 97
-    Arrow.Dot.Outline.col      = colorsRef["black"],                                                               # 98
-    Arrow.Dot.Outline.lwd      = 0.5,                                                                              # 99
+    Arrow.Dot.Outline          = FALSE,                  ## JP added option to control Dot outline.                # 73
+    Arrow.Dot.Outline.col      = colorsRef["black"],                                                               # 74
+    Arrow.Dot.Outline.lwd      = 0.5,                                                                              # 75
 
 # bar plot parameters
-    Bar.barht                  = 2/3,                    # fraction of line spacing                                # 63
-    Bar.Outline.col            = colorsRef["black"],     #                                                         # 64
-    Bar.Outline.lty            = "solid",                #                                                         # 65
-    Bar.Outline.lwd            = 0.5,                    #                                                         # 66
+    Bar.barht                  = 2/3,                    # fraction of line spacing                                # 76
+    Bar.Outline.col            = colorsRef["black"],     #                                                         # 77
+    Bar.Outline.lty            = "solid",                #                                                         # 78
+    Bar.Outline.lwd            = 0.5,                    #                                                         # 79
 
 # box plot parameters
-    BoxP.thin                  =0.2,                     # was .29     ## JP decreased line width                  # 67
-    BoxP.thick                 =0.60,                    # was .58                                                 # 68
+    BoxP.thin                  =0.2,                     # was .29     ## JP decreased line width                  # 80
+    BoxP.thick                 =0.60,                    # was .58                                                 # 81
    
-    BoxP.Use.Black             = FALSE,                  # FALSE = Use the Color for outliners;  TRUE = use black  # 69
+    BoxP.Use.Black             = FALSE,                  # FALSE = Use the Color for outliners;  TRUE = use black  # 82
   
-    BoxP.Median.col            = colorsRef["black"],     ## JP changed to BoxP.Median.col from colMedian-was duplicate-set to black # 70
-    BoxP.Median.Line           = 0.80,                   # lwd                                                     # 75
+    BoxP.Median.col            = colorsRef["black"],     ## JP changed to BoxP.Median.col from colMedian-was duplicate-set to black # 83
+    BoxP.Median.Line           = 0.80,                   # lwd                                                     # 84
 
-    BoxP.Median.Dot.cex        = 0.95,                   #                                                         # 71
-    BoxP.Median.Dot.col        = colorsRef["white"],     ## JP changed from colDotMedian for clarity               # 72
-    BoxP.Median.Dot.lwd        = 2,                      #                                                         # 73
-    BoxP.Median.Dot.pch        = 19,                     #                                                         # 74
+    BoxP.Median.Dot.cex        = 0.95,                   # NA                                                      # 85
+    BoxP.Median.Dot.col        = colorsRef["white"],     # NA # JP changed from colDotMedian for clarity           # 86
+    BoxP.Median.Dot.lwd        = 2,                      #                                                         # 87
+    BoxP.Median.Dot.pch        = 19,                     # NA                                                      # 88
   
-    BoxP.Outlier.BW.col        = colorsRef["dark gray"], # color for outline when using BW mode                    # 76
-    BoxP.Outlier.cex           = 0.7,                    # see Dot.pch.size  ## JP decreased dot size  (was .6)    # 77
-    BoxP.Outlier.lwd           = 0.5,                    ## JP decreased dot border line width                     # 78
-    BoxP.Outlier.pch           = 20,                     # Outlier symbol                                          # 79
+    BoxP.Outlier.lwd           = 0.5,                    ## JP decreased dot border line width                     # 89
+    BoxP.Outlier.cex           = 0.7,                    # see Dot.pch.size  ## JP decreased dot size  (was .6)    # 90
+    BoxP.Outlier.BW.col        = colorsRef["dark gray"], # color for outline when using BW mode                    # 91
+    BoxP.Outlier.pch           = 20,                     # NA Outlier symbol                                       # 92
   
-    BoxP.Outline.col           = colorsRef["dark gray"], # color for outline when using colors                     # 80
+    BoxP.Outline.col           = colorsRef["dark gray"], # NA color for outline when using colors                  # 93
   
 # segmented bar parameters - centered bar only
-    CBar.two.ended             = FALSE,                  #  (not implemented)                                      # 81
-    CBar.varht                 = FALSE,                  #  (default = fixed height)                               # 82  
-    CBar.Center.Line.enable    = FALSE,                  #  (not implemented)                                      # 83
-    CBar.Center.value          = 0,                      #  Center Bar - center value (def = 0)                    # 84
-    CBar.Zero.Line.col         = colorsRef["white"],     #  Center Bar - Zero vertical line color                  # 85
-    CBar.Zero.Line.lty         = "dotted",               #  Center Bar - Zero vertical line type                   # 86
-    CBar.Zero.Line.lwd         = 1,                      #  Center Bar - Zero vertical line weight                 # 87
+    CBar.two.ended             = FALSE,                  #  NA (not implemented)                                   # 94
+    CBar.varht                 = FALSE,                  #  (default = fixed height)                               # 95  
+    CBar.Center.Line.enable    = FALSE,                  #  NA (not implemented)                                   # 96
+    CBar.Center.value          = 0,                      #  Center Bar - center value (def = 0)                    # 97
+    CBar.Zero.Line.col         = colorsRef["white"],     #  Center Bar - Zero vertical line color                  # 98
+    CBar.Zero.Line.lty         = "dotted",               #  Center Bar - Zero vertical line type                   # 99
+    CBar.Zero.Line.lwd         = 1,                      #  Center Bar - Zero vertical line weight                 # 100
 
 # segmented bar parameters for all (segbar, normbar and ctrbar)
     # common parameters for center, segmented and normalized stacked bars.
-    CSNBar.barht               =  2/3,                   #  bar heights (percentage of row)                        # 88
-    CSNBar.First.barht         = 0.3333,                 # Segmented Bars (Ctr, Seg, Norm) height of first bar in variable height  # 89                                       # 111
-    CSNBar.Last.barht          = 0.80,                   # Segmented Bars (Ctr, Seg, Norm) height of last bar in variable height   # 90
+    CSNBar.barht               =  2/3,                   #  bar heights (percentage of row)                        # 101
+    CSNBar.First.barht         = 0.3333,                 # Segmented Bars (Ctr, Seg, Norm) height of first bar in variable height  # 102                                       # 111
+    CSNBar.Last.barht          = 0.80,                   # Segmented Bars (Ctr, Seg, Norm) height of last bar in variable height   # 103
 
-    CSNBar.Outline.col         = colorsRef["black"],     #  bar outline border color                               # 91
-    CSNBar.Outline.lty         = "solid",                #  bar outline border type                                # 92
-    CSNBar.Outline.lwd         = .75,                    #  bar outline border width                               # 93
+    CSNBar.Outline.col         = colorsRef["black"],     #  bar outline border color                               # 104
+    CSNBar.Outline.lty         = "solid",                #  bar outline border type                                # 105
+    CSNBar.Outline.lwd         = .75,                    #  bar outline border width                               # 106
                                                          # parameters when variable height is requested.
     
 # dot plot parameters (dot, dotconf, dotse, dotsignif)
-    Dot.pch                    = 21,                     # plotting character  (1 circle, 16 dot, 21 filled circle)# 94
-    Dot.pch.size               = 0.9,                    # dot size            ## JP adjusted dot size.            # 95
-
-    Dot.pch.lwd                = 0.5,                    # 0:18 line weight                                        # 96
+    Dot.pch                    = 21,                     # plotting character  (1 circle, 16 dot, 21 filled circle)# 107
+    Dot.pch.size               = 0.9,                    # dot size            ## JP adjusted dot size.            # 108
+    Dot.pch.lwd                = 0.5,                    # 0:18 line weight                                        # 109
                                                            
                                                          # 19:25 border parameters
-    Dot.Outline                = FALSE,                  ## JP added option to control Dot outline.                # 97
-    Dot.Outline.col            = colorsRef["black"],                                                               # 98
-    Dot.Outline.lwd            = 0.5,                                                                              # 99
+    Dot.Outline                = FALSE,                  ## JP added option to control Dot outline.                # 110
+    Dot.Outline.col            = colorsRef["black"],                                                               # 111
+    Dot.Outline.lwd            = 0.5,                                                                              # 112
 
 # dot conf parameters
-    Dot.Conf.pch               = 21,                     # plotting character for dot confidence                   #100
-    Dot.Conf.pch.size          = 0.9,                    # symbol size                                             #101
-
-    Dot.Conf.pch.lwd           = 0.5,                    # 0:18 - line weight                                      #102
+    Dot.Conf.pch               = 21,                     # plotting character for dot confidence                   # 113
+    Dot.Conf.pch.size          = 0.9,                    # symbol size                                             # 114
+    Dot.Conf.pch.lwd           = 0.5,                    # 0:18 - line weight                                      # 115
     
                                                          # 19:25 - border parameters.
-    Dot.Conf.Outline           = FALSE,                  ## JP added option to control Dot outline.                #103
-    Dot.Conf.Outline.col       = colorsRef["black"],                                                               #104
-    Dot.Conf.Outline.lwd       = 0.5,                    # for characters 0:18 - line lwd.                         #105                             # 85
-
+    Dot.Conf.Outline           = FALSE,                  ## JP added option to control Dot outline.                # 116
+    Dot.Conf.Outline.col       = colorsRef["black"],                                                               # 117
+    Dot.Conf.Outline.lwd       = 0.5,                    # for characters 0:18 - line lwd.                         # 118
                                                          # Confidence line parameters.
-    Dot.Conf.lwd               = 2,                                                                                #106
-    Dot.Conf.size              = 0.55,                   # Not Used                                                #107
+    Dot.Conf.lwd               = 2,                                                                                # 119
+    Dot.Conf.size              = 0.55,                   # NA Not Used                                             # 120
 
 # dot SE parameters
-    Dot.SE.pch                 = 21,                     # plotting character for dot confidence                   #108
-    Dot.SE.pch.size            = 0.9,                    # symbol size                                             #109
- 
-    Dot.SE.pch.lwd             = 0.5,                    # 0:18 line weight                                        #110
+    Dot.SE.pch                 = 21,                     # plotting character for dot confidence                   # 121
+    Dot.SE.pch.size            = 0.9,                    # symbol size                                             # 122
+    Dot.SE.pch.lwd             = 0.5,                    # 0:18 line weight                                        # 123
     
                                                          # 19:25 symbol border parameters
-    Dot.SE.Outline             = FALSE,                  ## JP added option to control Dot outline.                #111
-    Dot.SE.Outline.col         = colorsRef["black"],     # border line color                                       #112
-    Dot.SE.Outline.lwd         = 0.5,                    # border line weight                                      #113
+    Dot.SE.Outline             = FALSE,                  ## JP added option to control Dot outline.                # 124
+    Dot.SE.Outline.col         = colorsRef["black"],     # border line color                                       # 125
+    Dot.SE.Outline.lwd         = 0.5,                    # border line weight                                      # 126
 
                                                          # DotSE confidence line.
-    Dot.SE                     = 95,                     # % confidence interval                                   #114
-    Dot.SE.lwd                 = 2,                                                                                #115
-    Dot.SE.size                = 0.55,                   # Not Used                                                #116
+    Dot.SE                     = 95,                     # % confidence interval                                   # 127
+    Dot.SE.lwd                 = 2,                                                                                # 128
+    Dot.SE.size                = 0.55,                   # NA Not Used                                             # 129
                                                          # use default lty, and border color (.col = black)           
 # dot signif parameters
-    Dot.Signif.pch             = 4,                      # Over print character "x"                                #117
-    Dot.Signif.pch.size        = 0.9*1.2,                # size of over print                                      #118
-    Dot.Signif.pch.lwd         = 0.5,                    # 0:18 line weight                                        #119
-    Dot.Signif.pch.col         = colorsRef["black"],     # color (NA -> follow row color.                          #120
+    Dot.Signif.pch             = 4,                      # Over print character "x"                                # 130
+    Dot.Signif.pch.size        = 0.9*1.2,                # size of over print                                      # 131
+    Dot.Signif.pch.lwd         = 0.5,                    # 0:18 line weight                                        # 132
+    Dot.Signif.pch.col         = colorsRef["black"],     # color (NA -> follow row color.                          # 133
     
-    Dot.Signif.Outline         = FALSE,                  # enable 19:25 border outline                             #121
-    Dot.Signif.Outline.lwd     = 0.5,                    # border line weight                                      #122
-    Dot.Signif.Outline.col     = colorsRef["black"],     # border color                                            #123
+    Dot.Signif.Outline         = FALSE,                  # enable 19:25 border outline                             # 134
+    Dot.Signif.Outline.lwd     = 0.5,                    # border line weight                                      # 135
+    Dot.Signif.Outline.col     = colorsRef["black"],     # border color                                            # 136
     
-    Dot.Signif.pvalue          = 0.05,                   # default p-value test point.                             #124
-    Dot.Signif.range           = c(0,1),                 # p_value range 0 to 1 inclusive                          #125,126
+    Dot.Signif.pvalue          = 0.05,                   # default p-value test point.                             # 137
+    Dot.Signif.range           = c(0,1),                 # p_value range 0 to 1 inclusive                          # 138,139
     
 # id area Dot parameters (link - area Lab and Dot)
-    Id.Cex.mod                 = 1,                      # Fudge adjustment for Id text size. Default = 1          #127
-
-    Id.Dot.pch                 = 22,                     # ID Symbol - pch values (19:25) solid and filled symbols, default = filled square  #128
-    Id.Dot.cexm                = 1.5,                    # multiplier to the Id.Text.cex value for the symbol. Max should be about 3         #129
-    Id.Dot.lwd                 = 0.8,                    # line width applied to solid symbols                     #130
-    Id.Dot.Outline.col         = colorsRef["dark gray"], # line (border) color on filled symbols (21:25)           #131
-    Id.Dot.Outline.lwd         = 0.8,                    # line width of outline on filled symbols (21.25)         #132
-    Id.Dot.width               = 0.1,                    # inches.   (Size of Dot/Square or Symbol)                #133
-
-    Id.Space                   = 0.03125,                # width of a space.(inches)                               #134
-    Id.Start                   = 0.055,                  # offset from left edge of column for the center of symbol. (inches) #135
-
-    Id.Text.cex                = 0.65,                   ## JP decreased ID text size.                             #136
+    Id.Cex.mod                 = 0.75,                   # Fudge adjustment for Id text size. Default = 1          # 140
     
-    Id.Title.1.pos             = 0.9,                    # ID column title line # 1 (lines)                        #137
-    Id.Title.2.pos             = 0.1,                    # ID column title line # 2 (lines)                        #138
+    Id.Title.1.pos             = 0.71,                   # ID column title line # 1 (lines)                        # 141
+    Id.Title.2.pos             = 0.01,                   # ID column title line # 2 (lines)                        # 142
+                                                 # changed to match up with map titles and X Axis.
+
+    Id.Text.cex                = 0.75,                   ## JP decreased ID text size.                             # 143
+
+    Id.Dot.pch                 = 22,                     # ID Symbol - pch values (19:25) solid and filled symbols, default = filled square  # 144
+    Id.Dot.cexm                = 1.5,                    # multiplier to the Id.Text.cex value for the symbol. Max should be about 3         # 145
+    Id.Dot.lwd                 = 0.8,                    # line width applied to solid symbols                     # 146
+    Id.Dot.width               = 0.1,                    # inches.   (Size of Dot/Square or Symbol)                # 147
+
+    Id.Dot.Outline.col         = colorsRef["dark gray"], # NA line (border) color on filled symbols (21:25)        # 148
+    Id.Dot.Outline.lwd         = 0.8,                    # NA line width of outline on filled symbols (21.25)      # 149
+
+    Id.Space                   = 0.03125,                # width of a space.(inches)                               # 150
+    Id.Start                   = 0.055,                  # offset from left edge of column for the center of symbol. (inches) # 151
     
-# map parameters  
-    Map.Area.Spec.cex          = 0.32,                   # label size for AK, HI, DC in top map.                   #139
-    Map.Bg.col                 = grey(.88),              # map/state/sub-area background fill color                #140
-    Map.Bg.Line.col            = tempOutline.Line.col,   # map/state/sub-area background line color (white)        #141
-    Map.Bg.Line.lty            = "solid",                # map/state/sub-area background line type                 #142
-    Map.Bg.Line.lwd            = 0.3,                    # map/state/sub-area background line weight               #143
-    Map.Fg.Line.col            = colorsRef["black"],     # sub-area foreground line color                          #144
-    Map.Fg.Line.lty            = "solid",                # sub-area foreground line type                           #145
-    Map.Fg.Line.lwd            = 0.3,                    # sub-area foreground line weight                         #146
-    Map.L2.Fill.col            = tempcolSubFill,         # L2 region fill color                                    #147
-    Map.L2.Line.col            = tempOutline.Line.col,   # L2 region line color                     (white)        #148
-    Map.L2.Line.lty            = "solid",                # L2 region line type                                     #149
-    Map.L2.Line.lwd            = 0.35,                    # L2 region line weight                                   #150
-    Map.L3.Line.col            = colorsRef["black"],     # L3 area outline line color                              #151
-    Map.L3.Line.lty            = "solid",                # L3 area outline line type                               #152
-    Map.L3.Line.lwd            = 0.4,                    # L3 area outline line weight                             #153
-    Map.Lab.Box.Width          = 0.09,                   # width and height of the title "boxes" (updated from 0.075 to 0.09 - aug, 2015)  #154
-    Map.Max.width              = 2.5,                    # map max width                                           #155
-    Map.Median.text            = "Median for Sorted Panel", # text for the median single row box.                  #156
-    Map.Min.width              = 1.5,                    # map min width should be set portionally to the height of the panel (x axis - about inches)  #157
-    Map.Panel.col              = "white",                # map panel fill color                                    #158
-    
-    Map.Unu.col                = colorsRef["lightest gray"],  # map unused sub-area fill color                     #159
+# map parameters 
+    Map.Area.Spec.cex          = 0.25,                   # label size for AK, HI, DC in top map.    (.32->.4->.25)      # 152
+    Map.Bg.col                 = grey(.88),              # map/state/sub-area background fill color                # 153
+    Map.Bg.Line.col            = colorsRef["white"],     # map/state/sub-area background line color (white)        # 154
+    Map.Bg.Line.lty            = "solid",                # NA map/state/sub-area background line type              # 155
+    Map.Bg.Line.lwd            = 0.3,                   # map/state/sub-area background line weight               # 156
+    Map.Fg.Line.col            = colorsRef["black"],     # sub-area foreground line color                          # 157
+    Map.Fg.Line.lty            = "solid",                # NA sub-area foreground line type                        # 158
+    Map.Fg.Line.lwd            = 0.3,                   # sub-area foreground line weight                         # 159
+    Map.L2.Fill.col            = colorsRef["lightest gray"], # L2 region fill color                                # 160
+    Map.L2.Line.col            = colorsRef["white"],     # L2 region line color                     (white)        # 161
+    Map.L2.Line.lty            = "solid",                # NA L2 region line type                                  # 162
+    Map.L2.Line.lwd            = 0.32,                   # L2 region line weight                                   # 163
+    Map.L3.Line.col            = colorsRef["black"],     # L3 area outline line color                              # 164
+    Map.L3.Line.lty            = "solid",                # NA L3 area outline line type                            # 165
+    Map.L3.Line.lwd            = 0.4,                   # L3 area outline line weight                             # 166
+    Map.Lab.Box.Width          = 0.09,                   # width and height of the title "boxes" (updated from 0.075 to 0.09 - aug, 2015)  # 167
+    Map.Max.width              = 2.5,                    # map max width                                           # 168
+    Map.Min.width              = 1.5,                    # map min width should be set portionally to the height of the panel (x axis - about inches)  # 169
+    Map.Median.text            = "Median for Sorted Panel", # text for the median single row box.                  # 170
+
+    Map.Panel.col              = "white",                # NA map panel fill color                                 # 171
+    Map.Unu.col                = colorsRef["lightest gray"],  # NA map unused sub-area fill color                  # 172
 
 # Rank area parameters
-    Rank.width                 = 0.25,                   # rank width of column   (x axis - about inches - working units) #160
-    Rank.method                = 1,                      # rank method                                             *161
+    Rank.width                 = 0.25,                   # rank width of column   (x axis - about inches - working units) # 173
+    Rank.method                = 1,                      # rank method                                             * 174
 
 # scatdot parameters 
-    SCD.Axis.cex               = tempText.cex * .7,      # not used                                                #162
+    SCD.Axis.cex               = 0.75 * .7,              # not used                                                # 175
 
-    SCD.Bg.pch                 =  21,                    # Background symbol pch                                   #163
-    SCD.Bg.pch.fill            =  'transparent',         # Background symbol fill (bg) color (19:25)               #164
-    SCD.Bg.pch.col             =  "black",               # Background symbol border color                          #165
-    SCD.Bg.pch.lwd             =  0.6,                   # Background symbol border line weight                    #166
-    SCD.Bg.pch.size            =  0.75,                  # Background symbol size                                  #167
-    SCD.Fg.pch                 =  21,                    # Foreground symbol pch                                   #168
-    SCD.Fg.pch.col             =  "black",               # Foreground symbol border color                          #169
-    SCD.Fg.pch.lwd             =  0.6,                   # Foreground symbol border line weight                    #170
-    SCD.Fg.pch.size            =  1,                     # Foreground symbol size                                  #171
-    SCD.Median.pch             =  21,                    # median symbol PCH value (21 = filled circle)            #172
-    SCD.Median.pch.fill        = colorsRef["black"],     # median median symbol fill color.                        #173
-    SCD.Median.pch.col         =  "black",               # median symbol border color                              #174
-    SCD.Median.pch.lwd         =  0.6,                   # median symbol border line weight                        #175
-    SCD.Median.pch.size        =  1,                     # median symbol border size (cex)                         #176
-    SCD.hGrid                  = FALSE,                  # draw horizontal grid.                                   #177
+    SCD.Bg.pch                 =  21,                    # Background symbol pch                                   # 176
+    SCD.Bg.pch.fill            =  'transparent',         # Background symbol fill (bg) color (19:25)               # 177
+    SCD.Bg.pch.col             =  "black",               # Background symbol border color                          # 178
+    SCD.Bg.pch.lwd             =  0.6,                   # Background symbol border line weight                    # 179
+    SCD.Bg.pch.size            =  0.75,                  # Background symbol size                                  # 180
+    SCD.Fg.pch                 =  21,                    # Foreground symbol pch                                   # 181
+    SCD.Fg.pch.col             =  "black",               # Foreground symbol border color                          # 182
+    SCD.Fg.pch.lwd             =  0.6,                   # Foreground symbol border line weight                    # 183
+    SCD.Fg.pch.size            =  1,                     # Foreground symbol size                                  # 184
+    SCD.Median.pch             =  21,                    # median symbol PCH value (21 = filled circle)            # 185
+    SCD.Median.pch.fill        = colorsRef["black"],     # median median symbol fill color.                        # 186
+    SCD.Median.pch.col         =  "black",               # median symbol border color                              # 187
+    SCD.Median.pch.lwd         =  0.6,                   # median symbol border line weight                        # 188
+    SCD.Median.pch.size        =  1,                     # median symbol border size (cex)                         # 189
+    SCD.hGrid                  = FALSE,                  # draw horizontal grid.                                   # 190
  
-    SCD.DiagLine               = TRUE,                   # TRUE, draw a diagonal line in scatter plot at x=y       #178
-    SCD.DiagLine.col           = tempOutline.Line.col,   # color of diagonal line                                  #179
-    SCD.DiagLine.lwd           = 1.25,                   # width of diagonal line                                  #180
-    SCD.DiagLine.lty           = "solid",                # type of diagnoal line (see "R" line function)           #181
+    SCD.DiagLine               = TRUE,                   # TRUE, draw a diagonal line in scatter plot at x=y       # 191
+    SCD.DiagLine.col           = colorsRef["white"],     # color of diagonal line                                  # 192
+    SCD.DiagLine.lwd           = 1.25,                   # width of diagonal line                                  # 193
+    SCD.DiagLine.lty           = "solid",                # type of diagnoal line (see "R" line function)           # 194
 
-    SCD.xsc                    = 1.08,                   # fudge for margins to try and not clip circles.(not used)#182
-    SCD.ysc                    = 1.12,                   # fudge for margins to try and not clip circles.(not used)#183
+    SCD.xsc                    = 1.08,                   # NA fudge for margins to try and not clip circles.(not used)# 195
+    SCD.ysc                    = 1.12,                   # NA fudge for margins to try and not clip circles.(not used)# 196
 
 # segmented bar parameters - segbar and normbar only
-    SNBar.MDot.pch             = 21,                     #  middle point symbol                                    #184
-    SNBar.MDot.pch.border.col  = 'black',                # middle point symbol.border.col with using filled symbols#185
-    SNBar.MDot.pch.border.lwd  = 0.6,                    # middle point symbol border lwd                          #186
-    SNBar.MDot.pch.fill        = colorsRef["white"],     # middle point symbol fill/color                          #187
-    SNBar.MDot.pch.size        = 0.6,                    # middle point symbol size                                #188
-    SNBar.Middle.Dot           = FALSE,                  #  draw dot in middle point of segmented bars (default - no mid-poing dot) #189
+    SNBar.MDot.pch             = 21,                     #  middle point symbol                                    # 197
+    SNBar.MDot.pch.border.col  = 'black',                # middle point symbol.border.col with using filled symbols# 198
+    SNBar.MDot.pch.border.lwd  = 0.6,                    # middle point symbol border lwd                          # 199
+    SNBar.MDot.pch.fill        = colorsRef["white"],     # middle point symbol fill/color                          # 200
+    SNBar.MDot.pch.size        = 0.6,                    # middle point symbol size                                # 201
+    SNBar.Middle.Dot           = FALSE,                  #  draw dot in middle point of segmented bars (default - no mid-poing dot) # 202
 
-    SNBar.two.ended            = FALSE,                  #  (not implemented)                                      #190
-    SNBar.varht                = FALSE,                  #  (default fixed height)                                 #191
+    SNBar.two.ended            = FALSE,                  #  (not implemented)                                      # 203
+    SNBar.varht                = FALSE,                  #  (default fixed height)                                 # 204
 
 # ts and tsconf parameters
-    TS.Axis.cex                = tempText.cex * 0.7,                                                               #192
-    TS.hGrid                   = FALSE,                                                                            #193
-    TS.lwd                     = 1.1,                    # TS Line weight                                          #194
+    TS.Axis.cex                = 0.75 * 0.7,                                                                       # 205
+    TS.hGrid                   = FALSE,                                                                            # 206
+    TS.lwd                     = 1.1,                    # TS Line weight                                          # 207
 
 # debug parameter
-    MST.Debug                  = 0                       # debug switch - for use by developers only. (default=0)  #195
+    MST.Debug                  = 0                       # debug switch - for use by developers only. (default=0)  # 208
 
   )
 

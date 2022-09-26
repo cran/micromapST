@@ -70,7 +70,7 @@ and the region for each county, province or metro area in the \var{ChinaBG} bord
   Jiangxi\tab JX\tab CN.JX\tab 36\tab Huadong\cr
   Jilin\tab JL\tab CN.JL\tab 22\tab Dongbei\cr
   Liaoning\tab LN\tab CN.LN\tab 21\tab Dongbei\cr
-  Nei Menggu\tab NM\tab CN.NM\tab 15\tab Huadong\cr
+  Nei Mongol\tab NM\tab CN.NM\tab 15\tab Huadong\cr
   Ningxia Hui\tab NX\tab CN.NX\tab 64\tab Xibei\cr
   Qinghai\tab QH\tab CN.QH\tab 63\tab Xibei\cr
   Shaanxi\tab SN\tab CN.SA\tab 61\tab Xibei\cr
@@ -83,8 +83,8 @@ and the region for each county, province or metro area in the \var{ChinaBG} bord
   Xizang\tab XZ\tab CN.XZ\tab 54\tab Xinan\cr
   Yunnan\tab YN\tab CN.YN\tab 53\tab Xinan\cr
   Zhejiang\tab ZJ\tab CN.ZJ\tab 33\tab Buadong\cr
-  Hongkong\tab HK\tab CN.HK\tab 81\tab Zhongnan\cr
-  Macau\tab MC\tab CN.MC\tab 82\tab Zhongnan\cr
+  Hong Kong\tab HK\tab CN.HK\tab 81\tab Zhongnan\cr
+  Macao\tab MC\tab CN.MC\tab 82\tab Zhongnan\cr
   Taiwan\tab TW\tab CN.TW\tab 71\tab Huadong\cr
  }
 

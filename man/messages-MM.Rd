@@ -192,7 +192,7 @@
        }  
      
   
-      \item{010x}{\bold{\var{statsDFrame} call argument (1st argument):}
+      \item{010x}{\bold{\var{statsDFrame} call argument (1st argument) (CARG-DF):}
       
         \describe{
           \item{0101}{\bold{CARG-DF First argument (\var{statsDFrame}) is missing or not a data.frame.}
@@ -273,7 +273,7 @@
          }
        }
 
-      \item{011x}{\bold{panelDesc call argument (2nd argument):}
+      \item{011x}{\bold{panelDesc call argument (2nd argument) (CARG-PD):}
       
         \describe{
           \item{0111}{\bold{CARG-PD The second call argument, the panelDesc structure, 
@@ -318,7 +318,7 @@
          }
        }
 
-      \item{012x}{\bold{call argument column name/number verification:}
+      \item{012x}{\bold{call argument column name/number verification (CARG-xxx):}
       
          When a call argument/parameter contains a column name or number referencing
          the \var{<statsDFrame>} data.frame, the arguments values are 
@@ -392,10 +392,26 @@
            }
          }
        }
-      \item{015x}{\bold{\option{bordGrp} and \option{bordDir} parameter:}
+      \item{015x}{\bold{\option{bordGrp} and \option{bordDir} parameter (BGBx):}
     
         \describe{
-          \item{0150}{\bold{BGBD When the \option{bordDir} parameter is set to NULL, 
+          \item{0150}{\bold{BGBD The directory specified in the bordDir call parameter 
+             is not a valid character string.}
+             Check the bordDir path name and make sure it is valid.
+             }
+          \item{0151}{\bold{BGBD The directory specified in the \option{bordDir} argument/parameter 
+             does not exist. Value=\var{<bordDir>}}
+          
+             The path specified does not exist, Processing is stopped.  Correct the path 
+             name and re-run. Check to make sure the slashes in the path name are correct 
+             and that the path exists.
+           }
+          \item{0152}{\bold{BGBN The value provided as the bordGrp name is not character. Fix and rerun.}
+             The bordGrp call parameter must be a character string of the border group name (and it's file.)
+             If it is not the name of border group provided with the package, it must be the name of the 
+             border group file (without the .rda) that is located in the bordDir path.
+           }
+          \item{0153}{\bold{BGBN When the \option{bordDir} parameter is set to NULL, 
              the \option{bordGrp} must be one contain in the package. \var{<backageName>} }
 
              When the \option{bordDir} call parameter is not provied, or set 
@@ -420,38 +436,7 @@
              See the appropriate documention section for details on each border 
              group contained in this package.
             }
-          \item{0151}{\bold{BGBD After loading <bordGrp> border group data set, the following 
-             objects are missing: <MissBGObjects>}
-
-             The border group has been located and loaded into micromapST.  
-             However, the <MissBGObjexts> are missing and the border group can not be used.  
-             The border group must be rebuilt to include the missing objects.
-           }
-          \item{0153}{\bold{BGBD The directory specified in the \option{bordDir} argument/parameter 
-             does not exist. Value=\var{<bordDir>}}
-          
-             The path specified does not exist, Processing is stopped.  Correct the path 
-             name and re-run. Check to make sure the slashes in the path name are correct 
-             and that the path exists.
-           }
-          \item{0154}{\bold{BGBD The \option{bordGrp} filename must have an ".rda" 
-             or ".RData" file extension.}
-          
-             When private border group files are created, they must be saved 
-             as ".rda" or ".RData" type "R" files.  Please re-create your private 
-             border group file and re-run. Execution is stopped.
-           }
-          \item{0155}{\bold{BGBD The \option{bordGrp} file in the \option{bordDir} 
-             directory does not exist.}
-          
-             The package attempted to open the \option{bordGrp} file in the 
-             \option{bordDir} directory, but the file does not exist.  If the 
-             \option{bordGrp} filename was specified without a file extension, 
-             the package appended an ".rda" file extension.  Verify the \option{bordGrp} 
-             filename exists in the \option{bordDir} directory and re-run. 
-             Execution is stopped..
-           }
-          \item{0156}{\bold{BGBD The \option{bordGrp} parameter has not been 
+           \item{0154}{\bold{BGBN The \option{bordGrp} parameter has not been 
              specified and is required when the \var{bordDir} is provided.}
           
              When the \option{bordDir} call argument/parameter is specified, 
@@ -461,7 +446,24 @@
              the \option{bordGrp} filename is present and exists in 
              the \option{bordDir} directory and re-run. Execution was stopped.
            }
-          \item{0157}{\bold{BGBD System error encountered when loading the border group. 
+           \item{0155}{\bold{BGBN The \option{bordGrp} filename must have an ".rda" 
+             or ".RData" file extension.}
+          
+             When private border group files are created, they must be saved 
+             as ".rda" or ".RData" type "R" files.  Please re-create your private 
+             border group file and re-run. Execution is stopped.
+           }
+          \item{0156}{\bold{BGBN The \option{bordGrp} file in the \option{bordDir} 
+             directory does not exist.}
+          
+             The package attempted to open the \option{bordGrp} file in the 
+             \option{bordDir} directory, but the file does not exist.  If the 
+             \option{bordGrp} filename was specified without a file extension, 
+             the package appended an ".rda" file extension.  Verify the \option{bordGrp} 
+             filename exists in the \option{bordDir} directory and re-run. 
+             Execution is stopped..
+           }
+          \item{0160}{\bold{BGBG System error encountered when loading the border group. 
              See error message:}
           
              The package attempted to load the user/private border group.  
@@ -472,7 +474,14 @@
              
              ??? Second line to message. ???
            }
-         \item{0158}{\bold{BGBD In the areaParms data.frame the Map.L2Borders has 
+           \item{0162}{\bold{BGBN After loading <bordGrp> border group data set, the following 
+             objects are missing: <MissBGObjects>}
+
+             The border group has been located and loaded into micromapST.  
+             However, the <MissBGObjexts> are missing and the border group can not be used.  
+             The border group must be rebuilt to include the missing objects.
+           }
+          \item{0164}{\bold{BGBG In the areaParms data.frame the Map.L2Borders has 
              been set to FALSE, because no L2 level boundaries are available.}
           
              The border groups areaParms Map.L2Borders variable is set to TRUE 
@@ -481,7 +490,7 @@
              The variable has been set to FALSE and no level 2 
              boundaries will be drawn.
            }
-          \item{0159}{\bold{BGBD The areaParms variable aP_Regions is TRUE, 
+          \item{0166}{\bold{BGBG The areaParms variable aP_Regions is TRUE, 
              but no regional boundaries exist in border group. Regions feature disabled.}
              
              This warning does not impact the creation of linked micromaps.  
@@ -492,7 +501,7 @@
          }
        }
 
-      \item{017x}{\bold{\option{rowNamesCol} call argument:}
+      \item{017x}{\bold{\option{rowNamesCol} call argument (CARG-RNC):}
       
          To be able to link up the \var{statsDFrame} rows to sub-areas in the border 
          group and its boundary information, the \var{statsDFrame} must provide a column 
@@ -535,7 +544,7 @@
          }
        }
 
-      \item{018x}{\bold{\option{sortVar} and \option{ascend} call arguments:}
+      \item{018x}{\bold{\option{sortVar} and \option{ascend} call arguments (CARG-AS):}
 
          The \option{sortVar} calling argument/parameter specifies the \var{statsDFrame} 
          column numbers and/or names to be used to sort the data and the rows 
@@ -561,7 +570,7 @@
          }
        }
        
-      \item{019x}{\bold{\option{rowNames} call argument and \option{alias} name matching feature:}
+      \item{019x}{\bold{\option{rowNames} call argument and \option{alias} name matching feature (CARG-RN & ALIAS):}
       
          The \option{rowNames} call argument/parameter specifies what type of sub-area 
          name/string should be used to match the sub-area name in the 
@@ -626,29 +635,25 @@
          }
        }
        
-      \item{01Ax}{\bold{\option{title} call argument:}
-      
+      \item{01Ax}{\bold{\option{title} call argument (CARG-TL):}\cr
          The \option{title} calling argument/parameter is used to specify a one or 
          two line title for the linked micromap. If not \option{title} is provided, 
          the titles are left empty - blank.
          
         \describe{
           \item{01A0}{\bold{CARG-TL The \option{title} argument contains more than 2 items.  
-             Only the first two will be used.}
-
+             Only the first two will be used.}\cr
              The \option{title} call argument/parameter contains more that 2 character strings.  
              Only two title lines are supported.  Only the first two values (lines) 
              are used.
            }
           \item{01A1}{\bold{CARG-TL The typeof/class of the \option{title} parameter is not character. 
-             Only character vectors are supported. The \option{title} argument is ignored.}
-
+             Only character vectors are supported. The \option{title} argument is ignored.}\cr
              The type and class of the \option{title} call argument/parameter must be 
              a character vector. Numeric, integer and logical vectors are not supported.
            }
           \item{01A2}{\bold{CARG-TL The \option{title} argument/parameter is empty.  
-             Recommend providing a title for the linked micromap.}
-
+             Recommend providing a title for the linked micromap.}\cr
              The \option{title} call argument/parameter is empty (length of 0). It's recommend 
              a set of titles be specified for the linked micromap.  Please provide a \option{title} 
              character vector to help identify the linked micromap and re-run.
@@ -656,25 +661,26 @@
          }
        }
        
-      \item{01Bx}{\bold{\option{plotNames} call argument:}
-      
-         The \option{plotNames} calling argument/parameter specifies the type of sub-area 
+      \item{01Bx}{\bold{\option{plotNames} call argument (CARG-PL):}\cr
+               The \option{plotNames} calling argument/parameter specifies the type of sub-area 
          name to be used in the ID glyph. The allowed values are \option{ab} and \option{full}.
          
         \describe{
           \item{01B0}{\bold{CARG-PL Invalid \option{plotNames} argument value. The value 
-             must be \option{ab} or \option{full}.}
-          
+             must be \option{ab} or \option{full}.}\cr
              The value of the \option{plotNames} call argument/parameter is not valid, 
              The value must be \option{ab} or \option{full}. The default value of 
              \option{ab} is used. Check the spelling and re-run.
-             ***check***
+           }
+          \item{01B2}{\bold{CARG-PN Invalid plotNames argument value. The value must be 'ab' or 'full'. 
+                       The default of 'ab' will be used.}\cr
+            The \option{plotNames} argument value must be 'ab' (abbreviation) or 'full' (full name).
+            The default of 'ab' will be used.  If the data contails full names, correct and re-run.
            }
          }
        }
 
-      \item{01Cx}{\bold{\option{grpPattern} call argument:}
-      
+      \item{01Cx}{\bold{\option{grpPattern} call argument (CARG-GP):}\cr
          The package creates a pattern of how many sub-area rows will be placed 
          in each glyph group row based on the total number of sub-area with data.  
          The user can override this generated pattern by providing their own 
@@ -688,15 +694,13 @@
       
         \describe{
           \item{01C0}{\bold{CARG-GP The \option{grpPattern} call parameter is invalid. 
-             It must be an integer vector.}
-
+             It must be an integer vector.}\cr
              The vector provided must be an numeric or integer vector. The package 
              created pattern is used.  Correct and re-run.
             }
           \item{01C1}{\bold{CARG-GP The \option{grpPattern} call parameter is not valid. 
              The total of the rows per group must equal the number of rows in the 
-             \var{<statsDFrame>} data.frame}
-
+             \var{<statsDFrame>} data.frame}\cr
              The sum of the sub-area rows in the grpPattern vector is not equal 
              to the number of sub-areas present in the \var{statsDFrame} data.frame.  
              For example, if the \var{<statsDFrame>} data.frame has 51 rows after 
@@ -706,27 +710,30 @@
              calculated pattern.  Correct and re-run.
            }      
           \item{01C2}{\bold{CARG-GP The \option{grpPattern} call parameter contains 
-             a value > 5 rows per group.}
-
+             a value > 5 rows per group.}\cr
              Each element in the grpPattern vector represents the number of sub-area 
              rows per glyph group/row.  The maximum number of sub-area per group is 5.
              The package will use a calculated pattern.  Correct and re-run.
            }      
           \item{01C3}{\bold{CARG-GP The \option{grpPattern} call parameter is not 
              properly ordered. The number of rows per group must be in desending 
-             order to the median sub-area.}
-
+             order to the median sub-area.}\cr
              The number of rows per glyph group must be arranged in descending 
              order from the ends to the median sub-area row in the middle of the list.  
              For example:  grgPattern = c(5,5,4,3,4,5,5).  
              A grpPattern of c(3,4,5,5,4,3) is acceptable.
              The package will created and use a calculated pattern.  Correct and re-run.
-           }      
+           }  
+          \item{01C4}{\bold{CARG-GP The one of the values in the grpPattern call 
+             parameter is non-numeric or an NA.  grpPattern ignored.}\cr
+             The grpPattern is a vector of integers specifying the number of areas in 
+             each group/row or perceptional row.  One of the values in the vector is a non-numeric 
+             value or an NA.  Correct and re-run.
+           }           
          }
        }
 
-      \item{01Dx}{\bold{\option{axisScale} call argument:}
-      
+      \item{01Dx}{\bold{\option{axisScale} call argument (axisScale & CARG-SC):}\cr
          The \option{axisScale} calling argument/parameter is a single value character 
          vector that specifies the type of axis scaling the micromapST should 
          use on the glyphs.  The acceptable values are:
@@ -769,7 +776,6 @@
              The \option{axisScale} call argument/parameter does not contain a valid value.  
              It must be \option{o}, \option{e}, \option{s}, or \option{sn}. 
              The default of \option{e} will be used.
-             ***check***
            }
           \item{01D1}{\bold{CARG-SC The \option{axisScale} argument is not a character 
              vector of length 1.}
@@ -777,13 +783,12 @@
              The \option{axisScale} call argument/parameter must be a character vector 
              containing only one value. Numerical, integer and logical vectors are not 
              supported.  Only simple vector structures are support. Correct the value 
-             assigned with \option{axisScale} and re-sun.
-             ***check***
+             assigned with \option{axisScale} and re-run.
            } 
          }
        }
        
-      \item{01Ex}{\bold{\option{staggerLab} call argument:}
+      \item{01Ex}{\bold{\option{staggerLab} call argument (CARG-SL):}
       
         \describe{
           \item{01E0}{\bold{CARG-SL The \option{staggerLab} argument is not a logical value. 
@@ -796,74 +801,41 @@
          }
        }
        
-      \item{01Fx}{\bold{\option{colSize} call argument:}
+      \item{01Fx}{\bold{\option{colSize} call argument (CARG-CS):}
         
         This feature is not implemented in the version. The argument name is reserved 
         for future use and development. 
        \describe{
-          \item{01F0???}{\bold{CARG-CS The length of the \option{colSize} argument 
-            must be the same as the number of columns in the \var{panelDesc} data.frame.}
-
-             The number of elements in the \option{colSize} vector must be equal to 
-             the number of glyph graphic columns specified in the 
-             \var{panelDesc} data.frame.  The \option{colSize} argument/parameter is ignored.
-             ***check***
+         \item{01F1}{\bold{CARG-CS The \option{colSize} parameter in \var{pDName} contains NA values in the colSize column: <BadValues>. Values must be numeric and > 0.} 
+            The columns in the panelDesc data.frame (\var{panelDesc}) are not value width numbers.  <BadValues> lists the values in the column.  The width of the glyph
+            column will be calculated.  Correct if needed and re-run.
+          }
+         \item{01F2}{\bold{CARG-CS The \option{colSize} parameter in \var{pDName} has values for fixed width glyphs. Value(s): <BadValues>.  Value(s) are ignored and set to NA.}
+            The \option{colSize} parameter in the panelDesc data.frame can not be used to fix the column width 
+            on glyphs that already have fixed column widths.  The value is ignored.  <BadValues> contains the list
+            of values that will be ignored.
            }
-          \item{01F1}{\bold{CARG-CS In the \option{colSize} parameter in the 
-            \var{panelDesc} data.frame has values for fixed width glyph columns. 
-            Values will be set to the mean value for \var{colSize}.
-            }
-
-             The calculated and r******equested (\option{colSize}) columns width require 
-             \var{<reqWidth>} inches to build the linked micromap, only
-             \var{<availWidth>} inches are available in the plotting area.  
-             Increase the size of the plotting area to the required width plus 5% and re-run..
-             ***check***
+         \item{01F3}{\bold{CARG-CS The \option{colSize} parameter in <pDName> does not contain numeric values : <BadValues> } 
+            The <pDName> panelDesc data.frame has an a non-numeric value in the \option{colSize} parameter column.  The <BadValues>
+            identifies the problem.  The value is ignored.  Correct and re-run.
            }
-          \item{01F2}{\bold{CARG-CS The edited \option{colSize} parameter in the \var{panelDesc} 
-             data.frame has at least one invalid or missing value.  Values changed to mean 
-             of valid \option{colSize} values: <mean>}
+         \item{01F4}{\bold{CARG-CS The \option{colSize} entries in \var{pDName} are out of range ( <= 0 or > 200 ). Values: <BadValues>}
+           The one or more values specified for \option{colSize} in the \var{pDName} data.frame are out of range.
+           The \option{colSize} value will be ignored.
+          }
+         \item{01F5}{\bold{CARG-CS The reviewed \option{colSize} parameter in \var{pDName} has bad values (see above) and have been replaced by the mean of the good values: <meanColSize>,  Bad Values: <BadValues> }
 
-             The calculated a****************nd requested (\option{colSize}) columns width 
-             require \var{<reqWidth>} inches to build the linked micromap, only
-             \var{<availWidth>} inches are available in the plotting area.  Increase the size 
-             of the plotting area to the required width plus 5% and re-run.
-             ***check***
+           *** More information to be provided ***
            }
-          \item{01F4}{\bold{CARG-CS The \option{colSize} parameter in the \var{panelDesc} 
-             data.frame contains non-numeric entries: <list of entries>  
-             Entry(s) set to mean.
-            }
-
-             The calculat**************ed and requested (\option{colSize}) columns width 
-             require \var{<reqWidth>} inches to build the linked micromap, only
-             \var{<availWidth>}. Entry(s) set to mean of colSize values.
-             ***check***
-           }
-          \item{01F5}{\bold{CARG-CS The \option{colSize} entries in \var{panelDesc} 
-             data.frame are out of range ( <= 0 or > 200). 
-             Values: <list of bad values>.  Values set to mean. }
-
-             The calculated and requested (\option{colSize}) columns width require 
-             \var{<reqWidth>} inches to build the linked micromap, only
-             \var{<availWidth>} inches are available in the plotting area.  
-             Increase the size of the plotting area to the required width plus 5% and re-run.
-             ***check***
-           }
-         \item{01F6}{\bold{CARG-CS The 'colSize' parameter in <pDName> contains 
+         \item{01F6}{\bold{CARG-CS The \option{colSize} parameter in \var{pDName} contains 
              no useful information and will be ignored.}
-
-             The calculated and requested (\option{colSize}) columns width require 
-             \var{<reqWidth>} inches to build the linked micromap, only
-             \var{<availWidth>} inches are available in the plotting area.  
-             Increase the size of the plotting area to the required width plus 5% and re-run..
-             ***check***
+           *** More information to be provided ***
           }
         }
        }
        
        
-      \item{01Kx}{\bold{\option{colors} call argument:}
+      \item{01Kx}{\bold{\option{colors} call argument (COLORS):}
       
         \describe{
           \item{01K0}{\bold{COLORS An invalid single value is provided for the \option{colors} argument. 
@@ -896,7 +868,7 @@
          }
        }
 
-      \item{01Nx}{\bold{\option{details} call argument}
+      \item{01Nx}{\bold{\option{details} call argument (DETS):}
          
          The \option{details} call argument/parameter contains a named list of micromapST parameters values the user wants to override or change. 
          Most of the parameters relate to minor functional variations in how the glyphs are drawn.
@@ -1064,54 +1036,28 @@
            }
           \item{0205}{\bold{ <gNameList> The length of the glyph type list is 
              different the length of the variables list.}
-
-             <gNameList> ... Some of the column numbers in the \var{<pdVarName>} 
-             named list in the \var{<panelDesc>} panelDesc structure 
-             have ?????????tsDFrame> data.frame.  When provided as numbers, they must be in the 
-             range from 1 to the maximum number of columns in the \var{<statsDFrame>} data.frame.  
+             ***  More Information to be provided later. ***
            }
           \item{020A}{\bold{ <gName> <pdColNum> The first column name/number (<stColName1>) must 
              proceed the last column name/number (<stColName2>) in the <sDFName> data frame.}
-
-             <gName> .....Some of the column numbers in the \var{<pdVarName>} named list in the \var{<panelDesc>} panelDesc structure 
-             have ?????????tsDFrame> data.frame.  When provided as numbers, they must be in the 
-             range from 1 to the maximum number of columns in the \var{<statsDFrame>} data.frame.  
+             ***  More Information to be provided later. ***
            }
           \item{020B}{\bold{ <gName> <pdColNum> The first column name/number (<stColName1>) must 
              proceed the last column name/number (<stColName2>) in the <sDFName> data frame.}
-
-             <gName> ....Some of the column numbers in the \var{<pdVarName>} named list in the \var{<panelDesc>} panelDesc structure 
-             have ?????????tsDFrame> data.frame.  When provided as numbers, they must be in the 
-             range from 1 to the maximum number of columns in the \var{<statsDFrame>} data.frame.  
+             ***  More Information to be provided later. ***
            }
-           
           \item{02y1xx}{\bold{ <gName> <pdColNum> The number of segments is <value>. It must be 
              between 2 and 9. If over 9, only the first 9 will be used.}
-
-             (DUPLICATE-KILL)  The <\var{<glyph>} in \var{panelDesc} column "y" determined the 
-             data type of the var{<PDvar>} to be invalid.  The \var{<glyph>} routine expected 
-             the value to be an integer.   Correct and re-run.
-             DUPLICATE OF 02y0...
-             ***check***
+             ***  More Information to be provided later. ***
            }
           \item{02y2}{\bold{PDCOL <glyph> cc The column number of <PDColOrig> in <PDVar> 
              is negative or zero. Must be a positive integer or the name of a column 
              in \var{statsDFrame}.}
-
-             Duplicate of 02y1?  But better (keep).
-             The <glyph> determined the \var{<statsDFrame>} column number of \var{<PDColOrig>} in 
-             \var{<PDVar>} for glyph column "cc" has a zero or negative value.  It must be a positive 
-             integer no greater than the number of columns in the user provided \var{<statsDFrame>} data.frame.
-             ***check***
+             ***  More Information to be provided later. ***
            }
           \item{02y3}{\bold{PDCOL <glyph> cc The column number of \var{<PDColOrig>} in \var{<PDVar>} is greater 
              than the number of columns in the \var{<statsDFrame>} data.frame.}
-
-             Duplicate of 02y1?  But better (keep).
-             The <glyph> determined the \var{<statsDFrame>} column number of \var{<PDColOrig>} in \var{<PDVar>} \var{panelDesc} variable for
-             glyph column \var{cc} is out of range.  Its value is greater than the number of columns in the user
-             provided \var{statsDFrame} data.frame.
-             ***check***
+             ***  More Information to be provided later. ***
            }
          }
          It appears the "y" is the col"y" indicator and "cc" is the glyph column number.
@@ -1202,7 +1148,8 @@
         \describe{    
            \item{02yC}{\bold{<glyph> cc The \var{<stColName>} column in \var{<statsDFrame>} data frame 
              contains one or more missing values. \var{<usage>}}
-
+       
+             ***  More Information to be provided later. ***
              Description needed.  **checked** arrow, bar, dot, dotsignif, dotconf, 
              ***check***
             }
@@ -1252,6 +1199,7 @@
              ****Duplicate of 020B
              Used by segbar, normbar, ctrbar glyphs.
              ***check***
+             ***  More Information to be provided later. ***
            }
           \item{020D}{\bold{<glyph> cc The data provided cannot be centered around the value of <center value>.}
 
@@ -1280,14 +1228,14 @@
            \item{02B3}{\bold{BOXPLOT cc The \var{<pdDataName>} data for the boxplot is not is list.}
 
               Must be a list of boxplot sets of data - one per sub-area. 
-              
+              ***  More Information to be provided later. ***
               Needs description  
             }
            \item{02B4}{\bold{BOXPLOT cc The \var{<pdDataName>} structure does not have any name attributes 
               for the boxplot data.}
 
               No names, no way to link to the boundary data. 
-              
+              ***  More Information to be provided later. ***
               Needs description  
             }
            \item{02B5}{\bold{BOXPLOT cc The \var{<pdDataName>} boxplot data is not a valid structure. Must 
@@ -1295,7 +1243,7 @@
 
               The \var{<pdDataName>} structure must contain the 6 data lists for each sub-area. Less than 
               6 or greater than 6 lists were found..
-              
+              ***  More Information to be provided later. ***
               Need description  
             }
            \item{02B6}{\bold{BOXPLOT cc The \var{<pdDataName>} boxplot data does not contain all of the lists 
@@ -1329,55 +1277,49 @@
             }
            \item{02BB}{\bold{BOXPLOT cc The $stats matrix in the \var{<pcDataName>} boxplot data must \var{<bpNumNames>} 
               elements.}
-
-              Need description 
+              ***  More Information to be provided later. ***
             }
            \item{02BC}{\bold{BOXPLOT cc The $stats matrix in the \var{<pcDataName>} boxplot data has missing values. 
               Sub-areas with missing values will not be drawn.}
 
-              Need description 
+              ***  More Information to be provided later. ***
             }
            \item{02BD}{\bold{BOXPLOT cc The sub-area names/abbrevations in the \var{<pdDataName>} boxplot data $names 
               values do not match the border group names: \var{<nameList>}.}
 
-              Need description 
+              ***  More Information to be provided later. ***
             }
            \item{02BE}{\bold{BOXPLOT cc 02BE BOXPLOT cc There are one or more of rows in the \var{<statsDFrame>} 
               that does not have matching boxplot data, (\var{<pdDataName>}) entries.}
 
-              Need description 
+              ***  More Information to be provided later. ***
             }
            \item{02BF}{\bold{BOXPLOT cc 02BE BOXPLOT cc The missing sub-areas are: \var{<subAreaList>}}
 
-              Need description 
+              ***  More Information to be provided later. ***
             }
 
 
 
            \item{02Bx}{\bold{BOXPLOT cc The $n list is not the same length as the $name list.}
 
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02B5}{\bold{BOXP-0x cc The $conf list is not the same length as the $name list.}
 
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02B6}{\bold{BOXP-0x cc The $group list is not the same length as the $name list.}
 
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02B7}{\bold{BOXP-06 cc The $stats matrix in the boxplot data does not have 5 columns of data per sub-area.}
 
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02B9}{\bold{BOXP-09 cc The boxplot $stats data contains missing values NA.}
 
-              Need Description
-             ***check***
+              ***  More Information to be provided later. ***
             }
   
          }
@@ -1391,6 +1333,7 @@
           \item{02D1}{\bold{<glyphs> cc The \var{panelData} value of (\var{<pDataValue>} in the \var{<panelData>} 
             data frame does not exist or is not accessible.}
 	
+              ***  More Information to be provided later. ***
 	    The \var{panelData} variable in the \var{<panelDesc>} data frame is used to pass completed data 
 	    structures to glyphs that cannot be contained in the \var{<statsDFrame>} data frame.  In this case, 
 	    the variable name provided \var{<pDataValue>} does not exist or is not accessible by the package.  
@@ -1408,25 +1351,25 @@
              \var{statsDFrame} sub-areas: <list of \var{statsDFrame} sub-areas.}
 
              Sub-areas in the \var{statsDFrame} do not have data in \var{<PDDataName>}.
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02P4}{\bold{<glyph> cc The following sub-area links in \var{<PDDataName>} data do not link to 
              \var{<statsDFrame>} sub-areas and will not be used:  <listOfNames>}
 
               Sub-areas in the \var{<PDDataName>} do not have links to the \var{<statsDFrame>} data.frame.
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02P5}{\bold{<glyph> cc There are no sub-area links provided in \var{<PDDataName>}. Cannot link 
               data to the \var{statsDFrame} data.frame.}
 
               \var{<PDDataName>} does not have values to link to \var{<statsDFrame>} or the name table.
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02P6}{\bold{<glyph> cc There are duplicate sub-areas in the \var{<PDDataName>} structure. 
               Only the first match will be used.}
 
               \var{<PDDataName>} has duplicate entries.
-             ***check***
+              ***  More Information to be provided later. ***
             }
          }
 
@@ -1449,44 +1392,36 @@
            \item{02T0}{\bold{TSxxxx-11 cc The time series array does not have rownames assigned to the 1st 
               dimension. Data cannot be paired up with area.}
 
-              Need description
-             ***check***
+                      ***  More Information to be provided later. ***
             }
            \item{02T2}{\bold{TSxxxx-02 cc The data structured passed in the panelData field is not an array. 
               Structure name = <dataNam>.}
 
-              Need description
-             ***check***
+               ***  More Information to be provided later. ***
             }
            \item{02T3}{\bold{TSxxxx-03 cc The time serial array's 1st dimension is not <numRows> sub-areas 
               to match statsDFrrame. It is <dimDArr[1]>.}
-
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02T4}{\bold{TSxxxx-04 cc The time serial array's 2nd dimension must have at least 2 values 
               (time periods 2 to "n"). It is <dimDArr[2]>.}
 
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02T5}{\bold{TSxxxx-05 cc The time series array's 3rd dimension is not 4 values for TSConf 
               (X, Y, LowY and HighY). It is <dimDArr[3]>.}
 
-              Need description  (Duplicate)
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02T6}{\bold{TSxxxx-06 cc The time series array's 3rd dimension must be 2 or 4. It is <dimDArr[3]>. 
               (TS: X & Y, TSCONF: X, Y, LowY, HighY.}
 
-              Need description
-             ***check***
+              ***  More Information to be provided later. ***
             }
            \item{02T7}{\bold{TSxxxx-10 cc The time series array's 3nd dimension must be at least 2. (TS: X & Y)  
               It is <dimDArr[3]>.}
 
-              Need description.  Duplicate - relook at.
-             ***check***
+              ***  More Information to be provided later. ***
             }
          }
        }
@@ -1498,8 +1433,7 @@
     \describe{
       \item{03yy}{\bold{- asdf}
      
-         description of error group   
-             ***check***
+              ***  More Information to be provided later. ***
        }
      }
    }
@@ -1513,13 +1447,11 @@
           \item{0420}{\bold{PANEL Calculated column widths is less than minimum <colSizeMin> inches - too many 
              columns specified.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{0421}{\bold{PANEL Column width is to small to be useful, Package stopped.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
          }
        }
@@ -1529,24 +1461,20 @@
           \item{0430}{\bold{PANEL panelLayout - The calculated width of <calculated-width> is too large for 
              the available space of <space-width>.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{0431}{\bold{PANEL panelLayout - The calculated GrpRow Height is too small to be used.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{0432}{\bold{PANEL panelLayout - The calculated GrpRow Height is <GrpRowHeight> inches.  
              The minimum size limit is: <minimum row height.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{xsh}{\bold{title}
           
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
          }
        }
@@ -1555,18 +1483,15 @@
         \describe{
           \item{0450}{\bold{PANEL panelLengthen - invalid vector length. < 2}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{0451}{\bold{PANEL panelSelect - Dimension error. Program error - index 'i' or 'j' is out of bounds.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{0452}{\bold{PANEL panelSelect - Bad label region name.  Must be left, right, top or bottom.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
          }
        }
@@ -1575,13 +1500,12 @@
         \describe{
           \item{0490}{\bold{DMP Error in axisMethod selection in Dot and DotSignif code.}
 
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
           \item{0491}{\bold{INB is.between.r The r range value is not a vector with length of 2. FALSE returned.}
 
              Function is.between.r --- Need description **checked**
-             ***check***
+              ***  More Information to be provided later. ***
            }
          }
        }
@@ -1596,24 +1520,16 @@
         \describe{
           \item{0501}{\bold{PANEL Number of parameters overlaid = <numOverlaid.}
 
-             Need description
-             ***check***
-           }
-          \item{xxx}{\bold{asdf}
-
-             Need description
-             ***check***
-           }
-          \item{xxx}{\bold{asdf}
-
-             Need description
-             ***check***
+              ***  More Information to be provided later. ***
            }
          }
        }
      }
    }
  } 
+}
+\author{
+Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
 }
 \keyword{messages}
 \keyword{datasets}

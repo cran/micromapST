@@ -210,10 +210,11 @@
 	 column. }
         \item{ID.Hdr.2}{ - 2nd title for the id type glyphics
 	 column. }
-        \item{Map.Hdr.1}{ - 1st title for the map type glyphics
-	 column. }
-        \item{Map.Hdr.2}{ - 2nd title for the map type glyphics
-	 column. }
+        \item{Map.Hdr.1}{ - 1st title element for the map type glyphics
+	 column. This variable is not implemented in this release.}
+        \item{Map.Hdr.2}{ - 2nd title element for the map type glyphics
+	 column. This variable provides the type of areas in the map.
+	 This string should be kept to less than 12-16 characters.}
         \item{Map.Aspect}{ - is the X/Y aspect ratio for the map
 	  borders in this border group.  This is used to adjust
 	  the map glyphic to keep the area's aspect looking
@@ -512,6 +513,9 @@
     
     border groups.
    }
+}
+\author{
+Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
 }
 
 \keyword{datasets}

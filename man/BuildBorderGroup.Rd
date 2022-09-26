@@ -49,8 +49,7 @@ by the micromapST package}
  group: may different spatial areas by using different border groups.  
  Several border group \option{bordGrp} examples are contained 
  in the package and include the 51 states and DC of the United States, 
- the counties of Kansas, Maryland, New York, Utah, Adminstrative 
- Development Districts (ADD) in Kentucky, the countries and provinces 
+ the counties of Kansas, Maryland, New York, Utah, the countries and provinces 
  of the U.K. and China, and the U. S. Seer Registries used by the 
  National Cancer Institute.  Each border group is a different dataset 
  containing the unique boundaries and operational information to allow 
@@ -155,23 +154,28 @@ by the micromapST package}
    the completed border group dataset.
   }
  }
- \usage{BuildBorderGroup(ShapeFile       = NULL,	       
-                         ShapeFileDir    = NULL,
-                         ShapeLinkName   = NULL,
-                         NameTableDir    = NULL,
-                         NameTableFile   = NULL,
-                         NameTableLink   = NULL,           
-                         BorderGroupName = NULL,
-                         BorderGroupDir  = NULL,		
-                         MapHdr          = NULL,		
-                         MapMinH         = NULL,           
-                         MapMaxH         = NULL,           
-                         IDHdr           = NULL,		
-                         LabelCex        = NULL,           
-                         ReducePC        = 1.25, 		
-                         proj4           = NULL,		
-                         checkPointReStart = NULL,
-                         debug           = 0		
+ \usage{BuildBorderGroup(ShapeFile       = NULL,   # required	       
+                         ShapeFileDir    = NULL,   # defaults to NameTableDir
+                         # required if not the default value of "link"
+                         ShapeLinkName   = NULL,   
+                         NameTableDir    = NULL,   # required
+                         NameTableFile   = NULL,   # required
+                         # required if not the default value of "link"   
+                         NameTableLink   = NULL,       
+                         BorderGroupName = NULL,   # required
+                         # defaults to NameTableDir	
+                         BorderGroupDir  = NULL,  	
+                         MapHdr          = NULL,   # optional		
+                         MapMinH         = NULL,   # optional           
+                         MapMaxH         = NULL,   # optional      
+                         # required, default is the BorderGroupName and "Areas"
+                         IDHdr           = NULL,  		
+                         LabelCex        = NULL,   # optional      
+                         # optional, but highly recommended 
+                         ReducePC        = 1.25,   # percent value	
+                         proj4           = NULL,   # optional		
+                         checkPointReStart = NULL, # optional
+                         debug           = 0	   # debug only	
                       ) 
  			     
  }   
@@ -218,15 +222,20 @@ by the micromapST package}
     pre-defined map header labels in \var{micromapST} for map type glyphs. 
     The value is entered as \cr \code{MapHdr = c("1stHdr", "2ndHdr")}. 
     Check the \var{micromapST} documentation for more details.
-    The defaults for these elements are "States".
+    The first element (MapHdr[1]) is not implemented and is reserved for 
+    a future release.  The MapHdr[2] element is used to generated the 
+    map headers for all of the map glyph tyeps.  It should
+    specify the type of area being mapped.  For example for the US States
+    map, it was set to "States". The default value is MapHdr=c(<border group name>,"Areas").
+    This call parameter is not required.
    }
   \item{MapMinH}{is a numerical variable specifying the minimum height 
     the maps should be in the group/rows in a linked micromap graphic.  
-    The default value is 1. 
+    The default value is 0.5.
    }
   \item{MapMaxH}{is a numerical variable specifying the maximum height 
     the maps should be in the group/rows in a linked micromap graphic.  
-    The default value is 2. 
+    The default value is 1.75. 
    }
   \item{IDHdr}{is a two element character vector used to modify the id 
     glyph headers in \var{micromapST}. The two values are entered as 
@@ -236,14 +245,19 @@ by the micromapST package}
    }
   \item{LabelCex}{a numerical value indicating the cex multiplier to 
     use when drawing the Map Labels (MapL) on the first map in a linked 
-    micromap graphic.  The default value is 0.25.
+    micromap graphic.  The default value is 0.4 to match the micromapST maps.
    }
-  \item{ReducePC}{a numerical value between 1 and 100 % or .01 and .99.  
-    It represents the presentage of vertex that be remaining in the shape
-    file after simplification by rmapshaper. The default value is 0.002 or 
-    0.2%.  Finding the best value may require multiple runs of 
+  \item{ReducePC}{a numerical value between .01 and 100 %.   100% is used to 
+    tell the package to not reduce the number vertex in the shapefile. This is 
+    change from earlier releases where 0 to 1 could be used to represent 0 to 100%.
+    With the use of smaller keep values, the scale of the parameter can't be 
+    determined. Reduced percentage below 1 are common.  Therefore, 0.65 is not
+    65 % but a 0.65 % keep value.  It represents the presentage of vertex 
+    that be remaining in the shape file after simplification by rmapshaper. 
+    The default value is 1.25 %.  In many cases the minimizing can be reduced 
+    to even 0.65% or more. Finding the best value may require multiple runs of 
     BuildBorderGroup to determine how this factor attects your boundary 
-    data. The default is 1.25% remaining.
+    data. 
    }
   \item{proj4}{is a character string representing a projection using the 
     Proj4 notation. The transformation to this projection is done as the 
@@ -689,6 +703,9 @@ and variables in the border group dataset.
     assist the user in converting a shape file into their own borderGrp dataset for 
     \var{micromapST}.  Refer to the section on \var{BuildBorderGroup} for more details.
    }
+}
+\author{
+Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
 }
 \keyword{functions}
 \keyword{BuildBorderGroup}

@@ -35,8 +35,7 @@ operational changes to the colors and details list, this function can be used to
 of the full colors and details lists.
 }
 \author{
-Daniel B. Carr, George Mason University, Fairfax VA, and Jim Pearson, StatNet Consulting,
-LLC, Gaithersburg, MD 
+Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
 }
 \value{\link{micromapGDefaults}}
 \keyword{functions}

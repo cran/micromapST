@@ -62,4 +62,7 @@
    glyphics when the purpose is the same. This should reduce the
    users learning curve.
 }
+\author{
+Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
+}
 \keyword{datasets}

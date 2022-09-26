@@ -24,7 +24,6 @@ information for the following::
  the U. S. 50 states and the District of Columbia.
  \item \var{USSeerBG}     - data for the 21 U. S. Seer Areas.
  \item \var{KansasBG}     - data for the 105 counties in the state of Kansas.
- \item \var{KY_ADD_BG}    - data for the 15 area development districts in Kentucky.
  \item \var{NewYorkBG}    - data for the 62 counties in the state of New York.
  \item \var{MarylandBG}   - data for the 24 counties in the state of Maryland.
  \item \var{UtahBG}       = data for the 29 counties in the state of Utah
@@ -213,7 +212,9 @@ All border groups are distrbuted with the package as .rda datasets.
   \item{bordGrp}{specifies which preloaded border group to use for the area names, 
      abbreviations, numeric identifier, and area boundary data.  The supported 
      border groups are \var{USStatesBG} and \var{USSeerBG}.  
-     The default \var{bordGrp} value is \var{USSeerBG}.
+     The default \var{bordGrp} value is \var{USStatesBG}.  For more information 
+     on building your own border group refer to the section in this manual on the
+     \var{BuildBorderGroup} function.
     }
   \item{dataRegionsOnly}{specifies to only map regions containing data when 
      \var{aP_Regions} is set to \var{TRUE}.  This indicates the name table contains
@@ -380,9 +381,9 @@ cat("TempDir:",TDir,"\n")
    # replace this directory name with the location if you want to same 
    # the output from the examples.
 
-data(wflung00and95,wflung00and95US,wflung00cnty,envir=environment()) 
+utils::data(wflung00and95,wflung00and95US,wflung00cnty,envir=environment()) 
 
-wfboxlist = boxplot(split(wflung00cnty$rate,wflung00cnty$stabr),
+wfboxlist = graphics::boxplot(split(wflung00cnty$rate,wflung00cnty$stabr),
                       plot=FALSE) 
 
 # set up 4 column page layout
@@ -400,7 +401,7 @@ panelDesc01 <- data.frame(
 panelDesc <- panelDesc01
 # set up PDF output file, call package
 
-pdf(file=paste0(TDir,"Ex01-WFLung-2000-2004-State-Dot-County-Box.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex01-WFLung-2000-2004-State-Dot-County-Box.pdf"),
      width=7.5,height=10)
 
 micromapST(wflung00and95, panelDesc, sortVar=1, ascend=FALSE,
@@ -408,7 +409,7 @@ micromapST(wflung00and95, panelDesc, sortVar=1, ascend=FALSE,
                "State Rates & County Boxplots")
          )  
 
-dev.off()
+x <- grDevices::dev.off()
 
 ##End Example 01
 
@@ -424,7 +425,7 @@ dev.off()
 ####
 # Load example data from package.
 
-data(wmlung5070,wmlung5070US,envir=environment())  
+utils::data(wmlung5070,wmlung5070US,envir=environment())  
 
 panelDesc02 <- data.frame(
    type=c("mapcum","id","arrow","bar"),		
@@ -466,14 +467,14 @@ names(xcolors) =c("rustred","orange","lightbrown","mediumgreen",
                   "lightblue","l_black","l_yelgreen","l_mauve",
                   "l_cyan","l_lightest grey","l_lighter grey")       
 
-pdf(file=paste0(TDir,"Ex02-WmLung50-70-Arrow-Bar.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex02-WmLung50-70-Arrow-Bar.pdf"),width=7.5,height=10)
 
 micromapST(wmlung5070,panelDesc02,sortVar=1,ascend=FALSE,
         title=c("Ex02-Change in White Male Lung Cancer Mortality Rates",
                    "from 1950-69 to 1970-94-Diff colors"), colors=xcolors
             ) 
 
-dev.off()
+x <- grDevices::dev.off()
 ##End Example 02
 
 ######
@@ -483,7 +484,7 @@ dev.off()
 #     default border group of "USStatesDF".
 ####
 
-data(TSdata,envir=environment())  
+utils::data(TSdata,envir=environment())  
 temprates     <-  data.frame(TSdata[,,2])  
 
 # TSdata structure is array of size c(51,15,4), 
@@ -502,13 +503,13 @@ panelDesc03   <- data.frame(
 ExTitle   <- c("Ex03-Time Series with Confidence bands",
                "Annual Female Lung Cancer Mortality Rates, 1996-2010")
 
-pdf(file=paste0(TDir,"Ex03-Time-Series-with-Conf.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex03-Time-Series-with-Conf.pdf"),
     width=7.5,height=10)
 
 micromapST(temprates,panelDesc03,sortVar="P15",ascend=FALSE,
            title=ExTitle)  
 
-dev.off()
+x <- grDevices::dev.off()
 
 # end of example 03
 
@@ -536,11 +537,11 @@ panelDesc04 <- data.frame(
 ExTitle <- c("Ex04-Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
                "Female Lung Cancer Mortality Rates")
 
-pdf(file=paste0(TDir,"Ex04-Scatter-Dots.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex04-Scatter-Dots.pdf"),width=7.5,height=10)
 
 micromapST(temprates,panelDesc04,sortVar=1,ascend=FALSE,title=ExTitle)  
 
-dev.off()
+x <- grDevices::dev.off()
 
 ##End Example 04
 
@@ -553,7 +554,7 @@ dev.off()
 #     of "USStatesBG"
 ####
 
-data(statePop2010,envir=environment())
+utils::data(statePop2010,envir=environment())
 
 panelDesc05 <- data.frame(                   
     type=c("map","id","segbar","normbar"), 
@@ -563,7 +564,7 @@ panelDesc05 <- data.frame(
     col2=c(NA,NA,"OtherWBH","OtherWBH")		  
     )
 
-pdf(file=paste0(TDir,"Ex05-Stkd-Bar-var-height.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex05-Stkd-Bar-var-height.pdf"),
      width=7.5,height=10)
 
 micromapST(statePop2010, panelDesc05, sortVar="OtherWBH", ascend=FALSE,
@@ -571,7 +572,7 @@ micromapST(statePop2010, panelDesc05, sortVar="OtherWBH", ascend=FALSE,
            "Cat-L to R: Hispanic, non-Hisp White, Black, Other-sn-varbar"),
      details=list(SNBar.varht=TRUE), axisScale="sn" )  
      
-dev.off()
+x <- grDevices::dev.off()
 ## End Example 05
 
 ######
@@ -598,7 +599,7 @@ panelDesc06= data.frame(
       col2=c(NA,NA,"OtherWBH","OtherWBH")		  
     )
 
-pdf(file=paste0(TDir,"Ex06-Stkd-Bar-fixedheight-nodot.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex06-Stkd-Bar-fixedheight-nodot.pdf"),
     width=7.5,height=10)
 
 micromapST(statePop2010,panelDesc06,sortVar=4,ascend=FALSE,
@@ -606,7 +607,7 @@ micromapST(statePop2010,panelDesc06,sortVar=4,ascend=FALSE,
           "Cat-L to R: Hisp, non-Hisp White, Black, Other,ID-diamond"),
        details=list(SNBar.Middle.Dot=FALSE,SNBar.varht=FALSE,Id.Dot.pch=23)
      )  
-dev.off()
+x <- grDevices::dev.off()
 
 ## End Example 06
 
@@ -622,7 +623,7 @@ dev.off()
 #     using the default border group of "USStatesBG".
 ####
 
-data(Educ8thData,envir=environment())  
+utils::data(Educ8thData,envir=environment())  
 
 # columns = State abbrev, State name, Avg Score, \%s \<basic, 
 #           basic, proficient, advanced
@@ -632,18 +633,19 @@ panelDesc07 <- data.frame(
     lab1=c("","","Avg. Scores","Math Proficiency"),         
     lab2=c("","","","<Basic, Basic, Proficient, Advanced"),  
     lab3=c("","","","\% to Left of 0           |    \% to Right"),  
-    col1=c(NA,NA,"avgscore","PctBelowBasic"),col2=c(NA,NA,NA,"PctAdvanced")   
+    col1=c(NA,NA,"avgscore","PctBelowBasic"),
+    col2=c(NA,NA,NA,"PctAdvanced")   
   )
 ExTitle <- c("Ex07-Stkd Bars:Educational Progress (NAEP) in Math-2011, 8th Grade",
              "Centered at Not-Prof vs. Prof")
 
-pdf(file=paste0(TDir,"Ex07-Educ-Centered-Bar.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex07-Educ-Centered-Bar.pdf"),width=7.5,height=10)
 
 micromapST(Educ8thData,panelDesc07,
              sortVar=3, 
              title=ExTitle)  
 
-dev.off()
+x <- grDevices::dev.off()
 
 ### End of example 07
 
@@ -652,7 +654,7 @@ dev.off()
 #   with the bordGrp = "USSeerBG".  
 #
 
-data(Seer18Area,envir=environment())
+utils::data(Seer18Area,envir=environment())
 
 # set up 4 column page layout
 
@@ -668,7 +670,7 @@ panelDesc08 = data.frame(
 ExTitle       <- c("Ex08 - SeerStat Data - 2002-6 and 2007-11",
                      "Dot with Signif., Arrow and Bar")
 
-pdf(file=paste0(TDir,"Ex08-DotSignificants.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex08-DotSignificants.pdf"),width=7.5,height=10)
 
 micromapST(Seer18Area,panelDesc08,
         sortVar="Rate20022006",ascend=FALSE,
@@ -677,7 +679,7 @@ micromapST(Seer18Area,panelDesc08,
         bordGrp="USSeerBG",
         plotNames="ab")
 
-dev.off()
+x <- grDevices::dev.off()
 #
 #  Both calls are effectively identical.
 #
@@ -690,7 +692,7 @@ dev.off()
 
 # set up 4 column page layout
 
-data(KansPopInc,envir=environment())
+utils::data(KansPopInc,envir=environment())
 
 panelDesc10 = data.frame(
   type=c("map","id","dot",        "dot")    
@@ -703,7 +705,7 @@ panelDesc10 = data.frame(
 ExTitle       <- c("Ex10 - Kansas Pop data 11x17",
                      "Current Pop and Average Inc - scaling=e")
 
-pdf(file=paste0(TDir,"Ex10-Kansas Population and Inc-11x17.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex10-Kansas_Population_and_Income-11x17.pdf"), 
      width=10, height=16)  
           # tabloid size page (11x17) to handle 105 counties.
 
@@ -719,7 +721,7 @@ micromapST(KansPopInc, panelDesc10,
         bordGrp="KansasBG",
         plotNames="ab")
 
-dev.off()        
+x <- grDevices::dev.off()        
 #
 #
 #### end of # Ex 10
@@ -736,7 +738,7 @@ dev.off()
 #      
 #####
 
-data(nyPopData,envir=environment())
+utils::data(nyPopData,envir=environment())
 
 nyPopData$Dif00_10 <- nyPopData$Pop_2010 - nyPopData$Pop_2000
 
@@ -755,7 +757,7 @@ panelDesc11 <- data.frame(
 ExTitle       <- c("Ex11 - New York Population data",
                      "2010 Pop and since 2000-colSize,sn,stag")
 
-pdf(file=paste0(TDir,"Ex11-New York Pop 2010 and Change-sn colSize.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex11-New York Pop 2010 and Change-sn colSize.pdf"), 
      width=7.5, height=10.5) 
 
 micromapST(nyPopData, panelDesc11, 
@@ -766,7 +768,7 @@ micromapST(nyPopData, panelDesc11,
         bordGrp="NewYorkBG"
       )
 
-dev.off()        
+x <- grDevices::dev.off()        
 #
 #
 #### End of Examples 11
@@ -781,7 +783,7 @@ dev.off()
 #      to the median county as sorted by the 1970 population.
 #####
 
-data(mdPopData,envir=environment())
+utils::data(mdPopData,envir=environment())
 
 # set up 5 column page layout
 
@@ -797,7 +799,7 @@ panelDesc12 = data.frame(
 ExTitle       <- c("Ex12 - Maryland Population-map",
                       "1970 and 2010 Pop and Change,stag,sn")
 
-pdf(file=paste0(TDir,"Ex12-MD Pop 1970 and 2010 plus change-map.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex12-MD Pop 1970 and 2010 plus change-map.pdf"), 
      width=7.5, height=10.5) 
 
 micromapST(mdPopData, panelDesc12, 
@@ -808,7 +810,7 @@ micromapST(mdPopData, panelDesc12,
         axisScale="sn", staggerLab=TRUE,
         plotNames="ab")
 
-dev.off()        
+x <- grDevices::dev.off()        
 #
 #
 #### End of Example 12
@@ -821,7 +823,7 @@ dev.off()
 #      population and average increase per area.
 #####
 
-data(cnPopData,envir=environment())
+utils::data(cnPopData,envir=environment())
 
 # set up 4 column page layout
 
@@ -836,7 +838,7 @@ panelDesc13 = data.frame(
 ExTitle       <- c("Ex13 - China Population",
                      "in 2013 by area")
 
-pdf(file=paste0(TDir,"Ex13-China 2013 Population.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex13-China 2013 Population.pdf"), 
     width=7.5, height=10.5) 
 
 micromapST(cnPopData, panelDesc13, 
@@ -846,7 +848,7 @@ micromapST(cnPopData, panelDesc13,
         bordGrp="ChinaBG",
         plotNames="full")
 
-dev.off()        
+x <- grDevices::dev.off()        
 #
 #
 #### End of Example 13
@@ -862,7 +864,7 @@ dev.off()
 #      the area.
 #####
 
-data(SeoulPopData,envir=environment())
+utils::data(SeoulPopData,envir=environment())
 
 # set up 4 column page layout
 
@@ -877,7 +879,7 @@ panelDesc14 = data.frame(
 ExTitle       <- c("Ex14 - Seoul Population",
                      "in 2012 by district")
 
-pdf(file=paste0(TDir,"Ex14-Seoul 2012 Population.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex14-Seoul 2012 Population.pdf"), 
      width=7.5, height=10.5) 
 
 micromapST(SeoulPopData,panelDesc14,
@@ -888,7 +890,7 @@ micromapST(SeoulPopData,panelDesc14,
         plotNames="full"
       )
 
-dev.off()        
+x <- grDevices::dev.off()        
 #
 #
 #### End of Example 14
@@ -899,7 +901,7 @@ dev.off()
 #      - current population and average increase per area.
 #####
 
-data(UtahPopData,envir=environment())
+utils::data(UtahPopData,envir=environment())
 
 #
 #  Get population differences from 2011 to 2001 and 1991.
@@ -931,7 +933,7 @@ panelDesc15 = data.frame(
 ExTitle       <- c("Ex15 - Utah county population 2011",
                      " and changes last two decades,sn")
 
-pdf(file=paste0(TDir,"Ex15-Utah Population.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex15-Utah Population.pdf"),
      width=7.5,height=10.5) 
 
 micromapST(UtahPopData, panelDesc15, 
@@ -943,7 +945,7 @@ micromapST(UtahPopData, panelDesc15,
         plotNames="ab"
       )
 
-dev.off()        
+x <- grDevices::dev.off()        
 #
 #
 #### End of Example 15
@@ -955,7 +957,7 @@ dev.off()
 #     Example also uses a smaller then 7.5 x 10 graphic space.
 #
 
-data(state,envir=environment())
+utils::data(state,envir=environment())
 
 stateData <- as.data.frame(state.x77)
 
@@ -969,14 +971,14 @@ panelDesc16 <- data.frame(type = c("maptail", "id", "dot"),
 ExTitle <- c("Ex16 - LM Plot of Murders in the United States",
                       "No DC row entry.")
 
-pdf(file = paste0(TDir,"Ex16_state.x77_no_DC.pdf"), 
+grDevices::pdf(file = paste0(TDir,"Ex16_state.x77_no_DC.pdf"), 
     width = 5, height = 9) 
 
 micromapST(stateData, panelDesc16, 
            sortVar = 5, ascend = FALSE,
            title = ExTitle)
 
-dev.off()
+x <- grDevices::dev.off()
 
 #
 #  Example 17 - US state map based on data from state.x77 table with
@@ -996,14 +998,14 @@ stateData <- rbind(stateData, DC = rep(NA, 8))
 ExTitle <- c("Ex17 - LM Plot of Murders in the United States",
                   "DC row added with NA, decending.")
 
-pdf(file =paste0(TDir,"Ex17_state.x77_DCasNA_D.pdf"), 
+grDevices::pdf(file =paste0(TDir,"Ex17_state.x77_DCasNA_D.pdf"), 
      width = 5, height = 9) 
 
 micromapST(stateData, panelDesc16, 
            sortVar = 5, ascend = FALSE,
            title = ExTitle)
 
-dev.off()
+x <- grDevices::dev.off()
 
 #
 #
@@ -1016,7 +1018,7 @@ dev.off()
 #       areas.
 #
 
-data(AfricaPopData,envir=environment())
+utils::data(AfricaPopData,envir=environment())
 
 panelDesc18 <- data.frame(
               type = c("map", "id", "dot",      "dot",          "dot"),
@@ -1026,7 +1028,7 @@ panelDesc18 <- data.frame(
             )
                            
                            
-pdf(file = paste0(TDir,"Ex18_Africa Micromap-11x17.pdf"), 
+grDevices::pdf(file = paste0(TDir,"Ex18_Africa Micromap-11x17.pdf"), 
      width = 11, height = 17) 
 
 ExTitle <- c("Ex18-Africa Population Data",
@@ -1038,7 +1040,7 @@ micromapST(AfricaPopData, panelDesc18,
            rowNames = "ab", rowNamesCol = "Abbr",
            bordGrp = "AfricaBG" )
 
-dev.off()
+x <- grDevices::dev.off()
 #
 ##### End of Example 18
 
@@ -1048,31 +1050,31 @@ dev.off()
 #   border groups are:
 
 #  Data for segmented stacked bar charts
-data(Educ8thData)
+utils::data(Educ8thData)
 str(Educ8thData)
 
 #  Data for time series gryph
-data(TSdata)
+utils::data(TSdata)
 str(TSdata)
 
 #  US states population data
-data(statePop2010)
+utils::data(statePop2010)
 str(statePop2010)
 
 #  White Female Lung data
-data(wflung00and95)
+utils::data(wflung00and95)
 str(wflung00and95)
 
-data(wflung00and95US)
+utils::data(wflung00and95US)
 str(wflung00and95US)
 
-data(wflung00cnty)
+utils::data(wflung00cnty)
 str(wflung00cnty)
 
-data(wmlung5070)
+utils::data(wmlung5070)
 str(wmlung5070)
 
-data(wmlung5070US)
+utils::data(wmlung5070US)
 str(wmlung5070US)
 
 #

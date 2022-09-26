@@ -2,11 +2,13 @@
 # Release Version 130602 build - V1.0 (micromapST)
 # Release Version 141107 build - V1.1 (micromapSEER)
 # Release Version 150127 build - V1.1 (micromapST (super version))
+#
 #     Adjustments for dynamic panel setup.
 #     Updated logic to enforce min and max panel sizes.
 #     Allow legal paper sideways.
 #
 # Release Version 220417 build - V1.1.2 - replace emails and minor fix.
+# Release Version 220829 build - V2.0 and V2.0.1 (micromapST) - correct layout to handle 1 group/row.
 #
 
 panelFill <- function(col="#D0D0D0",border=NA,...)
@@ -139,24 +141,25 @@ panelSelect <- function(layout, i = 1, j = 1, margin = NULL) {
 panelLayout <-
 function(vnrow = 1, 
          vncol = 1, 
-         leftMargin  = 0,                     # inches
-         rightMargin = 0,                     # inches
-         topMargin   = 1,                     # inches, leave room for page titles. 
-         bottomMargin = 0,                    # inches
-         borders     = rep(.5, 4),            # inches 
+         leftMargin   = 0,                     # inches
+         rightMargin  = 0,                     # inches
+         topMargin    = 1,                     # inches, leave room for page titles. 
+         bottomMargin = 0,                     # inches
+         borders      = rep(.5, 4),            # inches 
          # The figure borders are left(1), right, top, bottom(4)
-         colSize     = 1, 
-         rowSize     = 1, 
-         colSep      = 0, 
-         rowSep      = 0,
-         rSizeMx     = 2,
-         rSizeMn     = 0.5,
-         rSizeMaj    = 7,
-         rMapCol     = NULL,
-         lpad        = NULL,
-         disErr      = FALSE,
-         rDebug      = NULL
-         )
+         colSize      = 1, 
+         rowSize      = 1, 
+         colSep       = 0, 
+         rowSep       = 0,
+         rSizeMx      = 2,
+         rSizeMn      = 0.5,
+         rSizeMaj     = 7,
+         rMapCol      = NULL,
+         lpad         = NULL,
+         disErr       = FALSE,                 # TRUE disable error message on internal metrics.  But still see it. 
+         rDebug       = NULL
+        )                                      # All of these call parameters should match up with the 
+                                               # Global Variables - This will be done by the caller.
 {
   #
   #  Function to Generate a panel layout structure based on column and row parameters
@@ -174,17 +177,21 @@ function(vnrow = 1,
   #    lpad     = padding
   #    disErr   = T/F  - disable error checking and messages.
   #    rDebug   = debug flag
-  #cat("panelLayout parameters:\n")
-  #cat("  colSize :",colSize,"\n")
-  #cat("  rowSize :",rowSize,"\n")
-  #cat("  colSep  :",colSep,"\n")
-  #cat("  rowSep  :",rowSep,"\n")
-  #cat("  rSizeMx :",rSizeMx,"\n")
-  #cat("  rSizeMn :",rSizeMn,"\n")
-  #cat("  rSizeMaj:",rSizeMaj,"\n")
-  #cat("  rMapCol :",rMapCol,"\n")
-  #cat("  lpad    :",lpad,"\n")
-  #cat("  rDebug  :",rDebug,"\n\n")
+  
+  if (bitwAnd(rDebug,256) != 0 ) {
+     cat("panelLayout parameters:\n")
+     cat("  vnrow     :",vnrow,"  rowSize :",rowSize,"  rowSep  :",rowSep,"\n")
+     cat("  vncol     :",vncol,"  colSize :",colSize,"  colSep  :",colSep,"\n")
+     cat("  rSizeMn   :",rSizeMn,"  rSizeMx :",rSizeMx,"  rSizeMaj:",rSizeMaj,"\n")
+     cat("  rMapCol   :",rMapCol,"\n")
+     cat("  lpad      :",lpad,"\n")
+     cat("  rDebug    :",rDebug,"\n\n")
+     cat(" borders    :",borders,"\n")
+     cat("leftMargin  :",leftMargin,"\n")
+     cat("rightMargin :",rightMargin,"\n")
+     cat("topMargin   :",topMargin,"\n")
+     cat("bottomMargin:",bottomMargin,"\n")
+  }
   
   #
   #  Used for panels, panelGroup, panelOne
@@ -193,13 +200,10 @@ function(vnrow = 1,
   #     below median areas, and the single area at the median (if odd number of areas).
   #   panelOne has one column covering all columns, and one row, covering all rows.
   #
+  #  Modified 2022/8/29 to handle only one group/row in all cases.
+  #
   enableErr <- !disErr
   
-  #cat("borders    :",borders,"\n")
-  #cat("leftMargin :",leftMargin,"\n")
-  #cat("rightMargin:",rightMargin,"\n")
-  #cat("topMargin  :",topMargin,"\n")
-  #cat("bottomMargin:",bottomMargin,"\n")
   
   # Note fig matrices rounded to 6 places in an effort of avoid a R problem with fig when
   #  values appear in exponential notation.
@@ -212,11 +216,11 @@ function(vnrow = 1,
 
         # page >>  b[1] | leftM | plotX | rightM | b[2] = din.x
 	plotX = din.x - borders[1] - borders[2] - leftMargin - rightMargin  # usable width inches
-        #cat("plotX:",plotX,"\n")
+        #cat("pL plotX:",plotX,"\n")
 
         # page >>  b[4] | topM  | plotY | bottomM | b[3] = din.y
 	plotY = din.y - borders[3] - borders[4] - bottomMargin - topMargin  # usable height inches
-        #cat("plotY:",plotY,"\n")	
+        #cat("pL plotY:",plotY,"\n")	
 
 	# bounds (x1, x2, y1, y2)
 	
@@ -228,7 +232,7 @@ function(vnrow = 1,
 	#   bounds (edge left, margin left, margin right, edge right) shifted right by "borders[1]"
 	
 	xbnds = c(0, leftMargin, leftMargin + plotX, leftMargin + plotX + 
-		rightMargin) + borders[1]  #shift all by the left borders
+		rightMargin) + borders[1]         # shift all by the left borders
         #cat("xbnds:",xbnds,"\n")
 	
 	#  [1] >>   |
@@ -244,7 +248,7 @@ function(vnrow = 1,
 	#  [2] >>   | b[1]  |   LM    |
 	#  [3] >>   | b[1]  |   LM    |   plotX   |
 	#  [4] >>   | b[1]  |   LM    |   plotX   |   RM   |
-	#           | b[1]  |   LM    |   plotX   |   RM   |  b[2]  }
+	#           | b[1]  |   LM    |   plotX   |   RM   |  b[2]  
 	#
 	#      
 	#   bounds (edge bottom, margin bottom, margin top, edge top) shifted up by "borders[4]"
@@ -277,34 +281,35 @@ function(vnrow = 1,
 	#   So, outlines the left margin space (left to plot and bottom to top) with 
 	#   borders around the area.
 	#
-	leftfig = c(xbnds[1] - borders[1], xbnds[2] + borders[2], ybnds[1] - 
-		borders[4], ybnds[4] + borders[3])   
+	leftfig <- c(xbnds[1] - borders[1], xbnds[2] + borders[2], 
+	             ybnds[1] - borders[4], ybnds[4] + borders[3])   
 		    # x   >>  left edge to B1+LM+B2 from left edge, 
 		    # y   >>  bot edge              to   top edge 
 	
 	# right figure is in the right margin space of the plot area from top to bottom
-	rightfig = c(xbnds[3] - borders[1], xbnds[4] + borders[2], ybnds[1] - 
-		borders[4], ybnds[4] + borders[3])   
+	rightfig <- c(xbnds[3] - borders[1], xbnds[4] + borders[2], 
+	              ybnds[1] - borders[4], ybnds[4] + borders[3])   
 		    # x   >>  B1+RM+B2 from right   to   right edge
 		    # y   >>  bot edge              to   top edge
 	
 	# top figure is in the top margin space from from left to right
-	topfig = c(xbnds[1] - borders[1], xbnds[4] + borders[2], ybnds[3] - 
-		borders[4], ybnds[4] + borders[3])
+	topfig <- c(xbnds[1] - borders[1], xbnds[4] + borders[2], 
+	            ybnds[3] - borders[4], ybnds[4] + borders[3])
 		    # x   >>  left edge             to   right edge, 
 	            # y   >>  B3+TM+B4 from top edge to  top edge  
 	
 	# bottom figure is in the bottom margin space from left to right
-	botfig = c(xbnds[1] - borders[1], xbnds[4] + borders[2], ybnds[1] - 
-		borders[4], ybnds[2] + borders[3])
+	botfig <- c(xbnds[1] - borders[1], xbnds[4] + borders[2], 
+	            ybnds[1] - borders[4], ybnds[2] + borders[3])
 		    # x   >>  left edge             to   right edge, 
 		    # y   >>  bot edge              to   B3+BM+B4 from bot edge  
-	
-        #cat("leftfig :",leftfig,"\n")
-        #cat("rightfig:",rightfig,"\n")
-        #cat("topfig  :",topfig,"\n")
-        #cat("botfig  :",botfig,"\n")
-        
+
+        if (bitwAnd(rDebug,256) != 0 ) {	
+           cat("leftfig :",leftfig,"\n")
+           cat("rightfig:",rightfig,"\n")
+           cat("topfig  :",topfig,"\n")
+           cat("botfig  :",botfig,"\n")
+        }        
 	#
 	#  All of the above are in inches..
 	#
@@ -316,13 +321,15 @@ function(vnrow = 1,
 	#   columns.  Same with panel/rows
 	#
 	
-	colSep = panelLengthen(colSep, vncol + 1)      # initially 1 element of zero - now "ncol" elements
-	rowSep = panelLengthen(rowSep, vnrow + 1)      # nrow elements.
+	rowSep <- panelLengthen(rowSep, vnrow + 1)      # nrow elements.  Number of rows -> now number of rows+1 (T,m,x,x,m,B) seps
+	colSep <- panelLengthen(colSep, vncol + 1)      # initially 1 element of zero - now "ncol" elements
 	
-	#cat("vncol:",vncol,"  adj colSep:",colSep,"\n")
-	#cat("vnrow:",vnrow,"  adj rowSep:",rowSep,"\n")
+	if (bitwAnd(rDebug,256) != 0 ) {
+	   cat("Num of Rows   -vnrow:",vnrow,"  adj rowSep:",rowSep,"\n")
+	   cat("Num of Columns-vncol:",vncol,"  adj colSep:",colSep,"\n")
+	} 
 	
-	if(is.null(lpad)) {    # now sure this is used.
+	if (is.null(lpad)) {    # now sure this is used.
 	     # no lpad, initialize - lpad is space round columns and rows.
 	     #   includes borders, margins and left and right separators
 	     lpad = c(borders[1] + leftMargin + colSep[1],            # left
@@ -330,6 +337,7 @@ function(vnrow = 1,
 		      borders[3] + topMargin + rowSep[1],             # top
 		      rowSep[vnrow + 1] + bottomMargin + borders[4])  # bottom	
 	}
+	
 	#cat("lpad:",lpad,"\n")
 	
 	#  lpad[1] = borders[1] + leftmargin + colSep[1] = left edge
@@ -347,37 +355,43 @@ function(vnrow = 1,
 	#  Check to see if Header and Trailer of page is accounted for and subtracted.
 	#
 	
-	colCumSep = cumsum(colSep)              # columns - inches -convert individual spaces to cumulative sums.           
-	rowCumSep = cumsum(rowSep)              # inches.
+	rowCumSep <- cumsum(rowSep)              # inches.
+	colCumSep <- cumsum(colSep)              # columns - inches -convert individual spaces to cumulative sums.           
 	
-	#cat("colCumSep:",colCumSep,"\n")
-	#cat("rowCumSep:",rowCumSep,"\n")
 	
-	wPlotXAvail = round(plotX - colCumSep[vncol + 1], digits=3)    # subtract total separate gaps. inches  (space available for columns in inches)
-	wPlotYAvail = round(plotY - rowCumSep[vnrow + 1], digits=3)    # inches remaining.                     (space available for rows in inches
+	wPlotXAvail <- round(plotX - colCumSep[vncol + 1], digits=3)    # subtract total separate gaps. inches  
+	                                               # (space available for columns in inches)
+	wPlotYAvail <- round(plotY - rowCumSep[vnrow + 1], digits=3)    # inches remaining.                     
+	                                               # (space available for rows in inches)
 	
-	#cat("wPlotXAvail:",wPlotXAvail,"\n")
-	#cat("wPlotYAvail:",wPlotYAvail,"\n")
+	if (bitwAnd(rDebug,256) != 0 ) {
+	   cat("Code: 368\n")
+	   cat("rowCumSep:",rowCumSep,"\n")
+	   cat("colCumSep:",colCumSep,"\n")
+	   cat("Width -wPlotXAvail:",wPlotXAvail," inches\n")
+	   cat("Height-wPlotYAvail:",wPlotYAvail," inches\n")
+	}
 	
         # the colSize and rowSize values are relative to a projected sum of units.
 	#      colSize = inches
 	#      rowSize = user units
 	
+	# sum(rowSize) = 71.65 as coded for 10 full groups and the median group  (10 * 7 + 1.65)
 	# sum(colSize) =  inches needed minus separators.  
-	# sum(rowSize) = 71.65 as coded for 10 full groups and the median group
 	
 	#  Assumption is we use all of the space?  But need to account for 
 	#  aspect ratios and min and max sizes.
 	
+	# max row space available    = plotY     
+	#       now convert to units --->>>  rowMax = din.y*7 (7 units per inch)
 	# max column space available = plotX inches
-	# max row space available = plotY   //  now convert to units --->>>  rowMax = din.y*7 (7 units per inch)
 	
 	#####  Row size scaling.
 	
-	#cat("rSizeMn:", rSizeMn,"   rSizeMx:", rSizeMx,"\n")
+	#cat("rSizeMin-391:", rSizeMn,"   rSizeMax:", rSizeMx,"\n")
 	
 	if (rDebug == 2) {
-   	   print(par("din"))
+   	   cat("par(din):",(par("din")),"\n")
 	   print(paste0("plotX Avail=",wPlotXAvail,"  plotY Avail=",wPlotYAvail))
 	}
 	#   Calculate and verify the row sizing first.  May need to adjust.
@@ -387,41 +401,50 @@ function(vnrow = 1,
 	sumRowSize <- sum(rowSize)
 	
 	# Check size of group/row (inches) (min -> max)
-	rInPerUnit = wPlotYAvail / sumRowSize
+	rInPerUnit <- wPlotYAvail / sumRowSize     #   inches / totL row units <> group/row = 7 units
 	
-	curGRowInch <- rInPerUnit * rSizeMaj    # inches for 7 units  -> a group/row.
+	#  Max Units per row (7 or 8) times inches per unit.
+	curGRowInch <- rInPerUnit * rSizeMaj    # inches for 7 units (Max units)  -> a group/row.
+	# curGRowInch is the current group/row size in inches based on plotYavail 
+	# and number row units required.
 	
-	#cat(" rInPerUnit Orig:",rInPerUnit,"  curGRowInch:",curGRowInch,"  sumRowSize:",sumRowSize,"\n",
-	#   "  rowSize:",paste0(rowSize,collapse=", "),"\n")
+	#cat(" rInPerUnit Orig-411:",rInPerUnit,"  curGRowInch:",curGRowInch,
+	#    " rSizeMin:",rSizeMn," sumRowSize:",sumRowSize,"\n",
+	#    " rowSize :",paste0(rowSize,collapse=", "),"\n")
 	
-        # check min and max range
-	if (curGRowInch < rSizeMn) {
+        #  check min and max range
+	if ((curGRowInch * 1.4) < rSizeMn) {
 	   if (enableErr) {
-	      warnCnt()
+	      #warnCnt()
 	      #warnNum <<- warnNum + 1
-	      xmsg    <- paste0("***0432 PANEL panelLayout - The calculated GrpRow Height is: ",curGRowInch," inches.  The mininum size limit is:",rSizeMn,"\n")
-	      warning(xmsg, call.=FALSE)
+	      xmsg     <- paste0("***0432 PANEL panelLayout - Info:The calculated GrpRow Height is: ",curGRowInch," inches. The mininum size limit is:",rSizeMn,"\n")
+	      cat(xmsg)
+	      #warning(xmsg, call.=FALSE)
 	   }
 	   if (curGRowInch < (rSizeMn/2)) {
-	      stopCnt()
+	      #cat("panelLayout:  curGRowInch:",curGRowInch,"  rSizeMn/2:", ( rSizeMn/2 ),"\n")
+	      #warnCnt()
 	      #stopNum <<- stopNum + 1
-	      xmsg <- paste0("***0431 PANEL panelLayout - The calculated GrpRow Height is too small to be used.")
-	      stop(xmsg, call.=FALSE)
+	      xmsg     <- paste0("***0431 PANEL panelLayout - Info:The calculated GrpRow Height may be too small to be used.\n")
+	      cat(xmsg)
+	      #stop(xmsg, call.=FALSE)
 	   }
 	} else {
 	
 	   if (curGRowInch > rSizeMx) { curGRowInch <- rSizeMx }
+	   #cat("Current GR Size > Max, setting to fixed max of: ", rSizeMx,"\n")
 	
 	}
 	
 	# recalculate Inches per unit (recalibrated.)
+	
 	rInPerUnit   <- curGRowInch / rSizeMaj               # get inches per unit for full convert
 	
 	# convert rowSize from units into inches.
 	rowSizeIn    <- rowSize * rInPerUnit                  # convert rowSize to inches
 	sumrowSizeIn <- sum(rowSizeIn)
 	
-	#cat(" Inch/Unit:",rInPerUnit,"  sumrowSizeIn:",sumrowSizeIn,"  rowSizeIn:",paste0(rowSizeIn,collapse=", "),"\n")
+	#cat(" Inch/Unit-447:",rInPerUnit,"  sumrowSizeIn:",sumrowSizeIn,"  rowSizeIn:",paste0(rowSizeIn,collapse=", "),"\n")
 		
 	#  why???
 	#rowSizeTotMaxInches = plotY
@@ -445,12 +468,12 @@ function(vnrow = 1,
 	
 	xRatio      <- 1
 	
-	#cat("size compare  - relxInSum:",relxInSum,"  to wPlotXAvail:", wPlotXAvail,"\n")
+	#cat("size compare 471  - relxInSum:",relxInSum,"  to wPlotXAvail:", wPlotXAvail,"\n")
 	
 	if (relxInSum > (wPlotXAvail+0.0001)) {
 	   if (enableErr) {
               warnCnt()
-              xmsg      <- paste0("***0430 PANEL panelLayout - The calculated width of ",relxInSum," is too large for the available space of ",wPlotXAvail)
+              xmsg      <- paste0("***0430 PANEL panelLayout - The calculated width of ",relxInSum," is too large for the available space of ",wPlotXAvail,"\n")
               warning(xmsg, call.=FALSE)
               #stop
            }
@@ -460,12 +483,11 @@ function(vnrow = 1,
 	}
 	
 	######
-
         
         if (rDebug == 2) { 
 	   cat("relxInSum:",relxInSum,"  relxIn:",paste0(relxIn,collapse=", "),"\n")
-	   cat("colSize:",paste0(colSize,collapse=", "),"\n")
-	   cat("xRatio:",xRatio,"\n")
+	   cat("colSize  :",paste0(colSize,collapse=", "),"\n")
+	   cat("xRatio   :",xRatio,"\n")
 	}
 	
 	yRatio    <- 1
@@ -476,23 +498,19 @@ function(vnrow = 1,
            #  If requirements to large, find the ratio to cut them all back.
             
            yRatio = wPlotYAvail / relyInSum   #  Have / Needed  ---  inches/units = inches per unit.
-           
-	   if (rDebug == 2) {
-	     cat("rowSize array - in inches:",relyInSum,"\n")
-	     print(paste0("   rowSize in inches reduced by ",yRatio*100," percent."))
-	   }
 	}
+        comRatio <- min(xRatio, yRatio)
+       
 
         if (rDebug == 2) { 
+           cat("rowSize array - in inches:",relyInSum,"\n")
+           print(paste0("   rowSize in inches reduced by ", (yRatio*100)," percent."))
 	   cat("relyInSum:",relyInSum,"  relyIn:",paste0(relyIn,collapse=", "),"\n")
-	   cat("rowSize:",paste0(rowSize,collapse=", "),"\n")
-	   cat("yRatio:",yRatio,"\n")
+	   cat("rowSize  :",paste0(rowSize,collapse=", "),"\n")
+	   cat("yRatio   :",yRatio,"\n")
+	   cat("comRatio :", comRatio,"\n")
 	}
-	
-	
-	comRatio <- min(xRatio, yRatio)
-        #cat("comRatio:", comRatio,"\n")
-        
+
 	if (comRatio < 0.999) {
 	   # reduce scaling.
 	   #rowSizeTotMaxUnits =  relySum
@@ -508,9 +526,9 @@ function(vnrow = 1,
 	}
 	
 	if (rDebug == 2) {
-	   cat("xRatio :", xRatio,"  yRatio=",yRatio, "  map cols=",paste0(rMapCol,collapse=" "),"\n")
-	   cat("colSize:", paste0(colSize,collapse=" "),"\n")
-	   cat("rowSizeIn:",rowSizeIn,"\n")
+	   cat("xRatio   :", xRatio,"  yRatio:",yRatio, "  map cols=",paste0(rMapCol,collapse=" "),"\n")
+	   cat("colSize  :", paste0(colSize,collapse=" "),"\n")
+	   cat("rowSizeIn:", rowSizeIn,"\n")
 	}
 	
 	######
@@ -556,16 +574,16 @@ function(vnrow = 1,
               
                #  x axis
                #            left     + left x  + left sep - lpad(1)       (Start of x in i,j panel)
-	       fig[k, 1] <- xbnds[2] + xinc[j] + colCumSep[j] - lpad[1]             # x.pos k<=1:- start (x left)
+	       fig[k, 1] <- xbnds[2] + xinc[j] + colCumSep[j] - lpad[1]       # x.pos k<=1:- start (x left)
 	       
 	       #            left     + right x + left sep - lpad(2)       (End of x in i.j panel)
-	       fig[k, 2] <- xbnds[2] + xinc[j + 1] + colCumSep[j] + lpad[2]         # x pos      - end   (x right)
+	       fig[k, 2] <- xbnds[2] + xinc[j + 1] + colCumSep[j] + lpad[2]   # x pos      - end   (x right)
 	      
 	       #            top      - top y   - top sep  + lpad(3)       (Top of y in i,j panel)
-	       fig[k, 4] <- ybnds[3] - yinc[i] - rowCumSep[i] + lpad[3]             # y pos - start      (y top)
+	       fig[k, 4] <- ybnds[3] - yinc[i] - rowCumSep[i] + lpad[3]       # y pos - start      (y top)
 	       
 	       #            top      - bottom y - top sep + lpad(4)       (end of y in i.y panel)
-	       fig[k, 3] <- ybnds[3] - yinc[i + 1] - rowCumSep[i] - lpad[4]         # y pos - end        (y bottom) 
+	       fig[k, 3] <- ybnds[3] - yinc[i + 1] - rowCumSep[i] - lpad[4]   # y pos - end        (y bottom) 
 	   }
 	}
 	
@@ -607,18 +625,18 @@ function(vnrow = 1,
 
 	# coltabs are in inches and start inside the left border
 	#     elements= left, points (CumSep+XInc+leftmar)(nCol), leftMar+CumSep + xinc + rightMarf
-	coltabs  <- cbind(c(0, colCumSep + xinc + leftMargin), leftMargin + c(0,colCumSep) + 
-	                  c(xinc, xinc[length(xinc)] + rightMargin )
-	               )	
+	coltabs  <- cbind(c(0, colCumSep + xinc + leftMargin), 
+	                    leftMargin + c(0,colCumSep) + c(xinc, xinc[length(xinc)]
+	                    + rightMargin )
+	                 )	
 	#cat("coltabs:",coltabs,"\n")
-	
-	
+		
 	# rowtabs are in inches and start below the lower border
        
         # yinc is padded with a leading 0.  
 	rowtabs  <- cbind(c(ybnds[3], ybnds[3] - rowCumSep - c(yinc[-1], yinc[vnrow + 1] + bottomMargin)), 
-	                c(ybnds[4], ybnds[3] - rowCumSep - yinc)
-	               ) - borders[4]
+	                  c(ybnds[4], ybnds[3] - rowCumSep - yinc)
+	                 ) - borders[4]
 	#cat("rowtabs:",rowtabs,"\n")
 	
 	# The tabs provide the physical points for each panel.
