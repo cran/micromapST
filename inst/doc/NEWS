@@ -1,3 +1,137 @@
+micromapST - Version 3.0.0 - Beta Pre-Release Version for Testing.
+Updated: August 8, 2023
+
+Enhancements:
+1) Removal of all references to the retiring packages (maptools, 
+   rgeos, rgdal) and the use of the sp spatial data structures.
+   References to functions in the sp and spdef packages have
+   also been replaced.
+2) Replace removed function calls with sf and sfdef package 
+   functions and required adjustments to the code to compensate 
+   for sf's different approaches and style.
+3) Modified BuildBorderGroup to allow spatial structures (sf and SPDF) 
+   to be passed to the function using the “ShapeFile” parameter.
+4) Added logic to allow any type of shapefile format to be read 
+   by sf's st_read function.  Since each shapefile format driver 
+   uses the dsn and layer call parameters differently the package 
+   attempts to use the dsn= parameter to point to the directory 
+   containing the shapefiles and the layer= parameter to indicate 
+   the shapefile's base filename.  If the st_read function call 
+   fails, a second attempt is made using the dsn= to indicate the 
+   entire path and filename of the shapefile and not use the 
+   layer=.  If both st_read calls fail, an error message
+   is created.
+5) Additional call parameter validates were added for micromapST 
+   and BuildBorderGroup functions to try to explain how to use 
+   the call parameters on each function and to make sure the 
+   functions provide the results the user expects.
+6) Since the border groups may have been created manually, 
+   basic structure and content checks are preformed by micromapST 
+   when the name table is loaded.
+7) Retired the “MapLabel” column in the Name Table and replace it 
+   with the “MapL”, “MapX”, and “MapY” columns.
+8) The areaUSdata flag has also been retire and is no longer used      
+   in any border group in the package.
+9) Improved the call parameter checking to better handle NA, "", or bad 
+   forms of numerical or character input.
+10)In the attempt to not reference the sp, spdep, maptools, rgeos, and rgdal 
+   packages, it was discovered the several other packages micromapST uses still
+   references the packages.  The package may have to be re-installed to pickup 
+   the corrected versions of these packages at a future time.  Until then,
+   there will be a warning banner about the retired packages and features.
+   
+   
+
+
+Fixes:
+1) Correction to the method used to find the centroid of the map 
+   shapefile to the micromapST boundary files.  The original 
+   method used gCentriod that provide a single answer when 
+   gCentroid(Shapefile) was executed. In the conversion form sp, 
+   spdef, maptools, rgdal, and rgeos to sf and sfdep, the 
+   sf::st_centroid function does not return a single point 
+   value for the entire shapefile.  Instead, it returns a centroid 
+   for each polygon in the structure.  Geometric Averaging 
+   technique was used to obtain the centroid of the map.  
+   However, during testing, this method proved to provide incorrect 
+   centroid points for the map.  The script was re-written to 
+   perform st_union on the geometry of the map to reduce it to 
+   one multipolygon object. When st_centroid is applied to this 
+   object the correct centroid is calculated.
+2) Since most of shapefiles used with micromapST US areas, 
+   the st_shift_longitude function has become very handy to 
+   processing any situations where the boundary data crosses the 
+   anti-meridian longitude (+-180).  However, several function 
+   in sf return values indicating the applied shift was noticed 
+   and removed.  Initial guess is these routines make use of the 
+   st_make_valid functions to ensure the geometries are correct 
+   before processing.  One of the attributes of the st_make_valid 
+   function is it corrects for shifted long/lat values as part
+   of it's repair.  The functions that effectively unshift a 
+   long/lat boundary data that was shifted are known and the 
+   shift is re-applied to the results and if necessary the 
+   working spatial structure.
+3) Corrected processing of the specification of the statsDFrame 
+   column names or numbers to match the names or numbers specified 
+   in the call parameters and the panelDesc data.frame.  Values
+   of "2020" were seen as numeric instead of character and created
+   an error indicating the column number was too big.
+4) rmapshaper's ms_simplify function has changed how they handle 
+   the call parameters again.  I understand why they are attempting 
+   to pass parameters through the higher level calls via the "..." 
+   structure in the function call to the apply_mapshaper_commands 
+   function call, but it is now difficult to get the placement of 
+   force_FC, sys, and sys_mem. Since BuildBorderGroup uses the 
+   default values of these parameters, they have been removed
+   from all calls to rmapshaper function.  
+5) micromapST and BuildBorderGroup messages have been updates,
+   deleted and added as needed to try and add some clarity to any
+   issues identified by the functions.
+6) Adjusted BuildBorderGroup function's usage of sf functions to 
+   handle rectangular coordinates when “sf_set_s2=FALSE”.  Turning 
+   off the usage of the s2 package was required to avoid errors
+   and be able to make valid several geometries.  The usage of the
+   s2 package is re-enabled prior to exiting the function.
+7) Corrected problem with st_shift_longitude. It can only be used 
+   when the map is in the west hemsphere. 
+8) Corrected a problem with the R polygon function.  Any point or 
+   line in the x,y vector is not considered a polygon.  Therefore, 
+   the col= parameter on the call is not stepped to the next color 
+   when an NA is encountered.  Point and Lines are removed from the 
+   x,y vectors.
+9) Add the feature to re-direct the Name Table report output to a file.  
+   This will help the user quickly document their border group.
+10) Correct the logic generating error message related to date 
+   in the sorted areas. The message indicated the sorted row 
+   order and was very difficult to identify where the error was 
+   in the data.frame.  The corrected logic the message references 
+   the original data.frame row order.
+11) To make sure all “name”, “abbr”, “alt-ab”, and “alias” fields 
+   have the best chance of matching the user’s data location 
+   identifiers, these strings will be forced to upper case, the 
+   string will be “str_squash” (no more than one internal blank 
+   and no leading and trailing blanks), and all punctuation will 
+   be removed.  This is done when the Name Table is built in 
+   BuildBorderGroup and when the data data.frame table 
+   (statsDFrame) is inspected by micromapST.
+12) The current method of determining if the data data.frame 
+   table (statsDFrame) column names used in the call parameters 
+   and the panelDesc data.frame exists, could not distinguish 
+   between a string of “2020” and a numeric value of 2020.  
+   The code has been rewritten to handle this situation.
+13) Modified the rowNamesCol processing to only accept 1 value.
+   The identified column is still checked for duplicates before
+   assigning the values to the row.names of the data.frame.
+14) Since sfdep st_contiguity function adds no value and only calls 
+   the spdep poly2nb function, references to the sfdep package has been
+   replaced with the spdep poly2nb function call directly.
+15) Replaced the older is.character, is.numeric, is.logical type functions
+   with methods::is(xxx,"type") functions. Certain check stayed is. type calls:
+   is.atomic, is.recursive, is.Color, is.between, which are more 
+   functional checks.
+
+
+
 micromapST - Version 2.0.0 and Version 2.0.1
 
 Fixes:

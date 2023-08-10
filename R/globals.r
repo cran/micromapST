@@ -9,6 +9,9 @@ utils::globalVariables(c(
                 "wSFName",
                 "callVarList",
                 
+          # Working Variables
+                "areaDatIDNames",     "ReadFlag",
+                
           # panel variables and parameters      
                 "numRows",            "numGrps",         
                 "rowSep",             "rowSepGap",
@@ -187,7 +190,8 @@ utils::globalVariables(c(
                 
             # functions
                 "GetMColors",         "mchr",               "masc",               "NewCounter",
-                "PlotVis",            "PlotSPDF"
+                "PlotVis",            "Plotsf",             "is.between.r",       "is.between",
+                "errCntMsg",          "stopCntMsg"
                 
                 ), add=TRUE)
 
@@ -214,6 +218,7 @@ NewCounter <- function() {
 #
 #####
 
+
 #####
 #
 #  mchr(x) returns character value for "x".   
@@ -221,10 +226,10 @@ NewCounter <- function() {
 #      if x is numeric, it is converted to character value
 #
 mchr <- function(x) {
-        if (is.character(x)) {
+        if (methods::is(x,"character")) {
            return(x)
         } else {
-           if (is.numeric(x)) {
+           if (methods::is(x,"numeric")) {
               as.character(rawToChar(as.raw(x)))     
            } else {
               return("\025")
@@ -243,11 +248,11 @@ mchr <- function(x) {
 #
 masc <- function (wX) {
          wax <- wX
-         if (is.numeric(wX))   {
+         if (methods::is(wX,"numeric"))   {
             # numeric - turn into character
             wax <- as.character(wX)
          }
-         if (is.character(wX)) {
+         if (methods::is(wX,"character")) {
             if (nchar(wX) > 1) {  wax <- substr(wX,1,1)  }   # get only one character
             
             strtoi(charToRaw(wX),16L)   # convert character to numericstrtoi(charToRaw(wX),16L) 
@@ -258,6 +263,153 @@ masc <- function (wX) {
 #
 #
 #####
+
+#####
+#
+# function to test if "x" is between or equal to a and b.
+#
+is.between <- function(x,a,b) {
+        # function checks x to make sure it's is between a and b
+        #  This version supports vectors.
+        if (a>b) {
+          (x >= b & x <= a)
+        } else {
+          (x >= a & x <= b)
+        }
+      }
+ 
+ #
+ #####
+ 
+ #####
+ #
+ # function to test if "x" is within or equal to the range of "r".
+ #    "r" must be a vector of length 2 to be evaluated.
+ #
+ is.between.r <- function(x,r) {
+    # the x must be within or equal to the range spacified in R
+    #
+    if (length(r) != 2) {
+         errCntMsg("***0491 INB is.between.r The r range value is not a vector with length of 2. FALSE returned.\n")
+         return(rep(FALSE,length(x)))   # not valid range
+    } else {
+         return(is.between(x,r[1],r[2]))
+    }
+  }
+
+#
+#####
+ 
+
+####
+#
+#  odd - check if number is odd (TRUE) or even (FALSE)
+#
+
+odd <- function(x) {
+    x%%2 == 1
+}
+
+#
+####
+
+####
+#
+#  CleanString - clean up character string - remove extra spaces, all punctuation, control characters and 
+#     make all caps.   Replaces all "space", "control", "punctuation" with "space".
+#
+CleanString <- function(wstr) {
+   nstr <- stringr::str_to_upper(stringr::str_trim(stringr::str_replace_all(wstr,"[[:space:][:cntrl:][:punct:]]+"," ")))
+   return(nstr)
+}
+
+#
+####
+
+####
+#
+#  Clean up strings - remove 
+#    1) special single and double quotes (open and closed)
+#    2) tick mark
+#    3) general punctuation (periods, etc.)
+#    4) control characters
+#    5) Make upper case.
+#    6) remove multiple blanks.
+#
+#    Designed to allow strings that may have different times of quotes, apos. to be compared.
+#
+ClnStr <- function(x) {
+
+    z <- gsub("[[:punct:][:cntrl:]\u2018-\u201F]", "", x, perl=TRUE)
+    z <- stringr::str_to_upper(z)
+    z <- stringr::str_squish(z)
+    return(z)
+}
+
+#
+####
+
+####
+#
+#  Clean up strings - remove 
+#    1) special single and double quotes (open and closed)
+#    2) tick mark
+#    3) control characters
+#    4) Make upper case.
+#    5) remove multiple blanks.
+#
+#    Designed to allow strings that may have different times of quotes, apos. to be compared.
+#
+ClnStr2 <- function(x) {
+
+    z <- gsub("[[:cntrl:]\u2018-\u201F]", "", x, perl=TRUE)
+    z <- stringr::str_to_upper(z)
+    z <- stringr::str_squish(z)
+    return(z)
+}
+
+#
+####
+
+####
+#
+# simpleCap - capitalize each word in a phrase and removes "."s, "_"s, and extra blanks.
+#     Not good on vectors - must apply
+#
+
+simpleCap <- function (x)
+   {
+      s  <- stringr::str_split(x,"[ ._]")[[1]]    # split on boundaries " ", "." or "_".
+      s1 <- s[s != ""]                 # skip empty strings
+      
+      paste0(stringr::str_to_upper(stringr::str_sub(s1,1,1)),stringr::str_to_lower(stringr::str_sub(s1,2)),collapse=" ")
+   }
+      
+#
+# Alternative:
+#   gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", name, perl=TRUE)
+#
+####
+
+
+####
+#
+#  Color string to hex string conversion (handles vectors of values)
+#
+col2hex <- function(cname) {
+
+   res <- try(colMat <- grDevices::col2rgb(cname), silent=TRUE)  # us the color name valid?
+   if (!inherits(res,c("try-error")) ) {
+       # result is no-error - res has a good answer.
+       grDevices::rgb(red=colMat[1,]/255, green=colMat[2,]/255, blue=colMat[3,]/255)
+   } else {
+       # result is with error - return the error vectors
+       res  # recheck on outside.
+   }
+ }
+  
+#
+####
 
 
 ####
@@ -356,8 +508,8 @@ GetMColors <- function() {
 #
 #     VisB  = VisBorder data .frame structure.
 #           se = sequence number
-#           x   = x coordinates value (in meters)
-#           y   = y coordinates value (in meters)
+#           x   = x coordinates value (in meters) (or X)
+#           y   = y coordinates value (in meters) (or Y)
 #           areaName = name or id of the area 
 #           hole = T/F indicating this polygon is a hole in the area.
 #                  Hole must be drawn last when drawing an area.
@@ -373,6 +525,13 @@ GetMColors <- function() {
 #        It should be a vector of color names with the same length as the number of 
 #        areas in the VisBorder structure.  If the length of the color vector is shorter
 #        than the number of areas, the mcolors in the vector will be re-used.
+#        If the vectors between the NA rows is a point or a line, R's polygon function
+#        will not advance to the next color, nothing to fill.  This will affect which 
+#        colors shade each polygon.  If multiple polygons represent a single area,
+#        the function caller must compensate for this in the VisCol vector.
+#        The usual strategy is to assign a color to each row in the Name Table, then
+#        compare the keys in the Name Table and the keys in the VisBorder and assign 
+#        the color for that Key/Polygon.
 #
 #     xTitle - character string to be used as the title for the graphics.
 #
@@ -380,41 +539,23 @@ GetMColors <- function() {
 #
 #     xLwd   - line width for the map drawing.
 #
-PlotVis <- function(VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
+PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
 
     # If VisCol is missing, set the VisCol to NULL.
     if (missing(VisCol) || is.null(VisCol) || length(VisCol) == 0) 
         VisCol = NULL
-    
-    # Set the x and y Limits based on the range of the X and Y coordinates in the VisBorder.       
-    xLim         <- range(VisB$x,na.rm=TRUE)
-    yLim         <- range(VisB$y,na.rm=TRUE)
+   
+    # Set the x and y Limits based on the range of the x and y coordinates in the VisBorder.       
+    xLim         <- (range(VisBrd$x,na.rm=TRUE))
+    yLim         <- (range(VisBrd$y,na.rm=TRUE))
+    #cat('xLim:',xLim,'  yLim:',yLim,"\n")
     #print(par("plt"))    # plot area 
     #print(par("pin"))    # plot in inches
     #print(par("usr"))    # plot in user scale
      
-    Asp          <- diff(yLim)/diff(xLim)   # get aspect ratio (y/x) of map.
+    #Asp          <- diff(yLim)/diff(xLim)   # get aspect ratio (y/x) of map.
     #cat("PlotVis: xLim:",xLim,"  yLim:",yLim,"  Asp:",Asp,"\n")
     
-    # Since the plot space is different. In order to keep the map's
-    # drawing with the correct Aspect Ratio, we have to force the 
-    # proper parameters on the ploting space via the par() parameters.
-    #
-    # if Aspect = y/x, then H = W * Aspect  or   W = H / Aspect
-    
-    R_pin      <- par("pin")        # inches ( X by Y ) of space in inches
-    N_pin      <- R_pin             # copy values to new "pin".
-    N_pin[2]   <- R_pin[1] * Asp    # correct Y <= X * Asp. (based on Asp and X size) 
-    
-    # If the calculated Y > real Y, reverse calculation to adjust X parameter.
-    if(N_pin[2] > R_pin[2]) {   # Ys 
-      # new parameters will not fit. Reverse the calculation
-      N_pin    <- R_pin
-      N_pin[1] <- R_pin[2] / Asp    # set X <= Y / Asp.
-    }
-    # Reset the graphic "PIN" space.
-    par(pin=N_pin)
-    #cat("R_pin:",R_pin,"  N_pin:",N_pin,"\n")
     
     # polygon function steps to the next color on each "NA" ending
     # a polygon in the data.frame.  Since multtiple polygons 
@@ -423,7 +564,7 @@ PlotVis <- function(VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
     # to KEYs, then call polygon with the adjusted color list.
       
     # Start an empty plot to get the limits and graphic space set.
-    plot(1,1,type="n", xlim=xLim, ylim=yLim, asp=1,
+    plot(0,0,type="n", xlim=xLim, ylim=yLim, asp=1,
                        axes=xAxes, lwd=xLwd,
                        xlab="", ylab="", 
                        main=xTitle)
@@ -431,25 +572,33 @@ PlotVis <- function(VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
     # Draw the VisBorder using the polygon function for the group/row.
     # The entire VisBorder data.frame can be drawn with 
     # one polygon function call.
+    #xl <- length(VisBrd$x)
+    #yl <- length(VisBrd$y)
+    #ku <- unique(VisBrd$Key[is.na(VisBrd$x)])
+    #kul <- length(ku)
+    ##cat("xl:",xl,"  yl:",yl,"  ku:",ku,"  kul:",kul,"\n")
+    #Pomark <- is.na(VisBrd$x)
     
-    graphics::polygon(VisB$x, VisB$y ,border="black", col=VisCol, lwd=xLwd)  
+    graphics::polygon(VisBrd$x, VisBrd$y ,border="black", col=VisCol, lwd=xLwd)  
     
                # drawn using one call because of its structure.
 }
 #
 #####
 
+
+
 #####
 #
-#   PlotSPDF ( xSp, xCol ,xTitle=NULL, xAxes=FALSE, xLwd=0.5)
-#   Function plots an SPDF data structure.  
+#   Plotsf (xsf, xCol ,xTitle=NULL, xAxes=FALSE, xLwd=0.5)
+#   Function plots an sf data structure.  
 #   The color of the areas can be specified.  This is the same
 #   type of function as the PlotVis function.  It corrects for 
 #   the aspect ratio of the map and graphic plot space, and 
-#   draws the map from the SpatialPolygons.
+#   draws the map from the spatial structure.
 #
-#    xSp - standard SpatialPolygons or SpatialPolygonsDataFrame structure.
-#         The sp has it's row.names set to the areas' keys
+#    xsf - standard sf structure structure.
+#         The sf has a row.names set as the areas' key
 #    xCol - standard color definition used for the color of the areas.
 #         It should be a vector of color names with the same length 
 #         as the number of areas in the sp.  If the length of the color 
@@ -462,50 +611,28 @@ PlotVis <- function(VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
 #
 #    xLwd - line width for the map drawing.
 #
-PlotSPDF <- function(xSp, xCol, xTitle=NULL, xAxes=FALSE, xLwd=0.5) {
+Plotsf <- function(xsf, xCol, xTitle=NULL, xAxes=FALSE, xLwd=0.5) {
 
     # If xCol is missing, set the xCol to NULL.
     if (missing(xCol) || is.null(xCol) || length(xCol)==0) 
-                  xCol = rep(NA,length(xSp))
-    
+                  xCol = rep(NA,length(st_geometry(xsf)))
+    #                  
     # Set the x and y Limits based on the range of the X and Y coordinates in the VisBorder.       
-    xBBox      <- sp::bbox(xSp)             # get box - xLim and yLim
+    xBBox      <- as.numeric(sf::st_bbox(xsf))             # get box - xLim and yLim
     xLim       <- xBBox[1,]
     yLim       <- xBBox[2,]
     #print(xLim)          # X axis limits
     #print(yLim)          # Y axis limits
-    #print(par("plt"))    # plot area 
-    #print(par("pin"))    # plot in inches
-    #print(par("usr"))    # plot in user scale
      
-    Asp       <- diff(yLim)/diff(xLim)   # get aspect of map.
-    #cat("Aspect:",Asp,"\n")
-    
-    # Since the plot space is different. To keep the ASP, 
-    # you must force it to match.
-    
-    R_pin      <- par("pin")        # inches ( X by Y ) of space
-    N_pin      <- R_pin
-    N_pin[2]   <- R_pin[1] * Asp    # set Y to X * Asp. 
-    
-    # if calculated Y > real Y, reverse calculation to adjust X
-    if(N_pin[2] > R_pin[2]) {
-      # new parameters will not fit. Reverse the calculation
-      N_pin    <- R_pin
-      N_pin[1] <- R_pin[2] / Asp
-    }
-    # Reset the graphic "PIN" space.
-    par(pin=N_pin)
-    #cat("R_pin:",R_pin,"  N_pin:",N_pin,"\n")
-    
     # polygon function steps to the next color on each "NA" ending
     # a polygon in the data.frame.  Since multtiple polygons 
     # can make up an area, logic must be added to get 
     # a table of KEYs to NAs in the VisBorder, map the mcolors provided
     # to KEYs, then call polygon with the adjusted color list.
       
-    # Once the par(pin) is set, draw the map.
-    plot(xSp,col=xCol, xlim=xLim,ylim=yLim,axes=xAxes,lwd=xLwd, asp=1, 
+    ## Once the par(pin) is set, draw the map.
+    xsfG  <- st_geometry(xsf)
+    plot(xsfG,col=xCol, xlim=xLim,ylim=yLim,axes=xAxes,lwd=xLwd, asp=1, 
                        xlab="",ylab="",main=xTitle)
  }
 #

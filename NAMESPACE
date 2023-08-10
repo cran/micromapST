@@ -3,38 +3,34 @@ export(BuildBorderGroup)
 export(micromapGSetDefaults)
 export(micromapGSetPanelDef)
 export(PlotVis)
-importFrom("utils",      "globalVariables","capture.output", "read.csv", "object.size", "data", "str", "head") 
-importFrom("methods",    "slot", "slot<-", "is")
-importFrom("tools",      "file_ext", "file_path_sans_ext")
-importFrom("graphics",   "arrows", "axis", "points", "lines", 
-    "par",   "legend",  "polygon", "strheight", "strwidth", "title",  
-    "text",  "mtext",   "grid",  "abline", "segments",
-    "plot",  "plot.new")
-importFrom("grDevices", "rgb",   "col2rgb",  "adjustcolor", "grey", "xy.coords",  
-    "dev.new", "dev.off","pdf",  "png",      "colors",      "gray")
-importFrom("stats",     "qnorm")
+importFrom("utils",       "globalVariables","capture.output", "read.csv", "object.size", 
+    "data", "str", "head", "write.csv", "unzip") 
+importFrom("methods",     "is")
+importFrom("tools",       "file_ext", "file_path_sans_ext")
+importFrom("graphics",    "arrows",  "axis",      "legend",   "lines", 
+    "par",     "points",  "polygon", "strheight", "strwidth", "title",  
+    "text",    "mtext",   "grid",    "abline",    "segments",
+    "plot",    "plot.new")
+importFrom("grDevices",   "rgb",     "col2rgb",  "adjustcolor", "xy.coords",  
+    "dev.new",            "dev.off", "pdf",      "png",      "colors",      
+    "gray", "grey")
+importFrom("stats",     "qnorm",  "aggregate")
 importFrom("RColorBrewer", "brewer.pal")
-importFrom("stringr",   "str_trim", "str_split", "str_sub", "str_replace_all" ,
-    "str_pad", "str_replace",
-    "str_to_upper",   "str_locate", "str_to_lower")
-importFrom("labeling",  "wilkinson","extended")
-importFrom("readxl",     "read_xls", "read_xlsx")
-importFrom("writexl",    "write_xlsx")
-importFrom("sp",        "bbox","CRS","Polygons","Polygon","polygons",
-    "SpatialPolygons",  "SpatialPolygonsDataFrame","spTransform",   
-    "SpatialPoints",    "SpatialPointsDataFrame", "plot",
-    "proj4string",      "wkt",   "geometry")
-importFrom("rgdal",     "readOGR", "writeOGR", "CRSargs",
-    "set_P6_datum_hard_fail", "rgdal_extSoftVersion", "set_thin_PROJ6_warnings", 
-    "set_rgdal_show_exportToProj4_warnings")
-importFrom("rgeos",     "gCentroid", "gBuffer", "gDifference" )
-importFrom("sf",        "sf_use_s2")
-importFrom("maptools",  "checkPolygonsHoles", "unionSpatialPolygons", "spRbind")
-importFrom("spdep",      "poly2nb")
+importFrom("stringr",  "str_trim", "str_split",  "str_sub",    "str_replace", 
+    "str_replace_all", "str_pad",  "str_locate", "str_squish", "str_to_upper",   
+    "str_to_lower")
+importFrom("labeling","wilkinson",  "extended")
+importFrom("readxl",  "read_xls",   "read_xlsx")
+importFrom("writexl", "write_xlsx")
+importFrom("sf",      "st_geometry",     "st_shift_longitude", "st_is_longlat", 
+    "st_transform",   "st_drop_geometry","st_as_sf",           "st_as_sfc",
+    "st_union",       "st_difference",   "st_intersects",      "st_intersection",          
+    "st_area",        "st_coordinates",  "st_bbox",            "st_centroid",
+    "st_crs",         "st_crs<-",        "st_as_text",   
+    "st_is_valid",    "st_make_valid",   "st_read",            "st_write",           
+    "sf_use_s2")
+importFrom("spdep",    "poly2nb")
 importFrom("rmapshaper", "ms_simplify")
-importFrom("cleangeo",   "clgeo_CollectionReport", "clgeo_SuspiciousFeatures", 
-     "clgeo_SummaryReport","clgeo_IsValid", "clgeo_CleanByPolygonation.SpatialPolygons")
-importFrom("pbapply",    "pblapply")
 
 
 

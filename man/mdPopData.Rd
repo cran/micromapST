@@ -11,6 +11,7 @@ each Maryland county and Baltimore City.
 \format{
   A data frame with 24 rows, 1 for each county, with 12 variables for each county: 
   \describe{
+    \item{Abbr}{a character vector abbreviation for the county.}
     \item{County}{a character vector containing the Maryland county name and Baltimore City.}
     \item{X1970}{a numeric vector of the county's population in 1970.}
     \item{X1980}{a numeric vector of the county's population in 1980.}

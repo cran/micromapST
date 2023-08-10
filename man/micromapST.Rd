@@ -348,16 +348,16 @@ column titles, reference values, etc.   Additional data for boxplots and time se
 plots are provided through the panelData data.frame column. 
 }
 \value{None}
+\author{
+Daniel B. Carr, George Mason University, Fairfax VA, with 
+contributions from Jim Pearson and Linda Pickle of StatNet 
+Consulting, LLC, Gaithersburg, MD
+}
 \references{
   Daniel B. Carr and Linda Williams Pickle, Visualizing Data Patterns with Micromaps, CRC
   Press, 2010\cr
   Linda Williams Pickle, James B. Pearson Jr., Daniel B. Carr (2015), micromapST: Exploring and Communicating Geospatial Patterns in US State Data.,
   Journal of Statistical Software, 63(3), 1-25., \url{https://www.jstatsoft.org/v63/i03/}
-}
-\author{
-Daniel B. Carr, George Mason University, Fairfax VA, with 
-contributions from Jim Pearson and Linda Pickle of StatNet 
-Consulting, LLC, Gaithersburg, MD
 }
 \seealso{
   \link{micromapST},
@@ -365,13 +365,14 @@ Consulting, LLC, Gaithersburg, MD
 }
 \examples{
 
-
-######
+###
+#
 #   micromapST - Example # 01 - map with no cumulative shading,
 #     2 columns of statistics: dot with 95\% confidence interval, 
 #     boxplot sorted in descending order by state rates, using 
 #     the default border group of "USStatesBG", with default symbols.
-####
+###
+
 # load sample data, compute boxplot
 TDir<-"c:/projects/statnet/"  # my private test PDF directory exist, don't use temp.
 if (!dir.exists(TDir)) {TDir <- paste0(tempdir(),"/") }  # get a temp directory for the output 
@@ -401,19 +402,22 @@ panelDesc01 <- data.frame(
 panelDesc <- panelDesc01
 # set up PDF output file, call package
 
-grDevices::pdf(file=paste0(TDir,"Ex01-WFLung-2000-2004-State-Dot-County-Box.pdf"),
+ExTitle <- c("Ex01-US White Female Lung Cancer Mortality, 2000-2004", 
+               "State Rates & County Boxplots")
+               
+grDevices::pdf(file=paste0(TDir,"Ex01-US-WFLung-2000-2004-St-DotCf-Co-Box.pdf"),
      width=7.5,height=10)
 
 micromapST(wflung00and95, panelDesc, sortVar=1, ascend=FALSE,
-       title=c("Ex01-White Female Lung Cancer Mortality, 2000-2004", 
-               "State Rates & County Boxplots")
+           title=ExTitle
          )  
 
 x <- grDevices::dev.off()
+#
+### End Example 01
 
-##End Example 01
-
-######
+###
+#
 #   micromapST - Example # 02 - map with cumulative shading 
 #                 from top down (mapcum), arrow and bar charts, 
 #                 sorted in descending order by starting
@@ -422,7 +426,8 @@ x <- grDevices::dev.off()
 #                 example also provides custom colors for the 
 #                 linked micromaps, highlights, etc.
 #   
-####
+###
+
 # Load example data from package.
 
 utils::data(wmlung5070,wmlung5070US,envir=environment())  
@@ -467,22 +472,26 @@ names(xcolors) =c("rustred","orange","lightbrown","mediumgreen",
                   "lightblue","l_black","l_yelgreen","l_mauve",
                   "l_cyan","l_lightest grey","l_lighter grey")       
 
-grDevices::pdf(file=paste0(TDir,"Ex02-WmLung50-70-Arrow-Bar.pdf"),width=7.5,height=10)
+ExTitle <- c("Ex02-US Change in White Male Lung Cancer Mortality Rates",
+                   "from 1950-69 to 1970-94-Diff colors")
+
+grDevices::pdf(file=paste0(TDir,"Ex02-US WmLung50-70-Arrow-Bar.pdf"),width=7.5,height=10)
 
 micromapST(wmlung5070,panelDesc02,sortVar=1,ascend=FALSE,
-        title=c("Ex02-Change in White Male Lung Cancer Mortality Rates",
-                   "from 1950-69 to 1970-94-Diff colors"), colors=xcolors
+            title=ExTitle, colors=xcolors
             ) 
 
 x <- grDevices::dev.off()
-##End Example 02
+#
+### End Example 02
 
-######
+###
+#
 #   micromapST - Example # 03 - Time Series Line Plots with 
 #     Confidence Bands maptail option highlights states from extremes 
 #     to middle state read in time series data set example using the 
 #     default border group of "USStatesDF".
-####
+###
 
 utils::data(TSdata,envir=environment())  
 temprates     <-  data.frame(TSdata[,,2])  
@@ -500,10 +509,10 @@ panelDesc03   <- data.frame(
     col1=c(NA,NA,NA,15),        
     panelData =c(NA,NA,"TSdata",NA)
     )
-ExTitle   <- c("Ex03-Time Series with Confidence bands",
+ExTitle <- c("Ex03-US Time Series with Confidence bands",
                "Annual Female Lung Cancer Mortality Rates, 1996-2010")
 
-grDevices::pdf(file=paste0(TDir,"Ex03-Time-Series-with-Conf.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex03-US Time-Series-with-Conf.pdf"),
     width=7.5,height=10)
 
 micromapST(temprates,panelDesc03,sortVar="P15",ascend=FALSE,
@@ -511,10 +520,12 @@ micromapST(temprates,panelDesc03,sortVar="P15",ascend=FALSE,
 
 x <- grDevices::dev.off()
 
-# end of example 03
+#
+### End Example 03
 
 
-######
+###
+#
 #   micromapST - Example 04 - dot followed by a scatter dot columns
 #     use same data as Example 3 to compare 1996 & 2010 rates
 #     mapmedian option shades states above or below the median 
@@ -534,18 +545,21 @@ panelDesc04 <- data.frame(
     col1=c(NA,NA,1,1),                 
     col2=c(NA,NA,NA,15)		
     )
-ExTitle <- c("Ex04-Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
+    
+ExTitle <- c("Ex04-US Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
                "Female Lung Cancer Mortality Rates")
 
-grDevices::pdf(file=paste0(TDir,"Ex04-Scatter-Dots.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex04-US FLCMR Scatter-Dots-1996-2010.pdf"),width=7.5,height=10)
 
 micromapST(temprates,panelDesc04,sortVar=1,ascend=FALSE,title=ExTitle)  
 
 x <- grDevices::dev.off()
 
-##End Example 04
+#
+### End Example 04
 
-######
+###
+#
 #   micromapST - Example 05 - horizontal stacked (segmented) bars
 #     segbar plots the input data, normbar plots percent of total
 #     package computes the percents from input data
@@ -563,19 +577,21 @@ panelDesc05 <- data.frame(
     col1=c(NA,NA,"Hisp","Hisp"),                     
     col2=c(NA,NA,"OtherWBH","OtherWBH")		  
     )
+ExTitle <- c("Ex05-Stkd Norm Bars: 2010 Census Pop by Race, Sorted by Cnt Other Race",
+             "Cat-L to R: Hispanic, non-Hisp White, Black, Other-sn-varbar")
 
-grDevices::pdf(file=paste0(TDir,"Ex05-Stkd-Bar-var-height.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex05-US Stkd-Norm Bar-var-height.pdf"),
      width=7.5,height=10)
 
 micromapST(statePop2010, panelDesc05, sortVar="OtherWBH", ascend=FALSE,
-   title=c("Ex05-Stkd Bars: 2010 Census Pop by Race, Sorted by Cnt Other Race",
-           "Cat-L to R: Hispanic, non-Hisp White, Black, Other-sn-varbar"),
-     details=list(SNBar.varht=TRUE), axisScale="sn" )  
+           title= ExTitle,
+           details=list(SNBar.varht=TRUE), axisScale="sn" )  
      
 x <- grDevices::dev.off()
-## End Example 05
+#
+### End Example 05
 
-######
+###
 #
 #   micromapST - Example 06 - horizontal stacked (segmented) bars
 #     segbar plots the input data, normbar plots percent of total
@@ -589,7 +605,7 @@ x <- grDevices::dev.off()
 #
 #  USES data loaded for Example 05 above - statePop2010.
 #
-####
+###
 
 panelDesc06= data.frame(                   
       type=c("map","id","segbar","normbar"), 
@@ -598,21 +614,25 @@ panelDesc06= data.frame(
       col1=c(NA,NA,"Hisp","Hisp"),                     
       col2=c(NA,NA,"OtherWBH","OtherWBH")		  
     )
+   
+ExTitle <- c("Ex06-Stacked Norm Bars: 2010 Census Pop by Race, Sorted by Other Race",
+              "Cat-L to R: Hisp, non-Hisp White, Black, Other,ID-diamond")
 
-grDevices::pdf(file=paste0(TDir,"Ex06-Stkd-Bar-fixedheight-nodot.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex06-Stkd-Norm-Bar-fixedheight-nodot.pdf"),
     width=7.5,height=10)
 
 micromapST(statePop2010,panelDesc06,sortVar=4,ascend=FALSE,
-  title=c("Ex7-Stacked Bars: 2010 Census Pop by Race, Sorted by Other Race",
-          "Cat-L to R: Hisp, non-Hisp White, Black, Other,ID-diamond"),
-       details=list(SNBar.Middle.Dot=FALSE,SNBar.varht=FALSE,Id.Dot.pch=23)
+            title= ExTitle,
+            details=list(SNBar.Middle.Dot=FALSE,SNBar.varht=FALSE,Id.Dot.pch=23)
      )  
 x <- grDevices::dev.off()
 
-## End Example 06
+#
+### End Example 06
 
 
-######
+###
+#
 #   micromapST - Example 07 - centered (diverging) stacked bars
 #
 #     National 8th grade Math Proficiency NAEP Test Scores Data for 2011
@@ -636,10 +656,11 @@ panelDesc07 <- data.frame(
     col1=c(NA,NA,"avgscore","PctBelowBasic"),
     col2=c(NA,NA,NA,"PctAdvanced")   
   )
-ExTitle <- c("Ex07-Stkd Bars:Educational Progress (NAEP) in Math-2011, 8th Grade",
+  
+ExTitle <- c("Ex07-US Dot Stkd Bars:Educational Progress (NAEP) in Math-2011, 8th Grade",
              "Centered at Not-Prof vs. Prof")
 
-grDevices::pdf(file=paste0(TDir,"Ex07-Educ-Centered-Bar.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex07-US Dot-Centered-Bar Educ.pdf"),width=7.5,height=10)
 
 micromapST(Educ8thData,panelDesc07,
              sortVar=3, 
@@ -649,16 +670,97 @@ x <- grDevices::dev.off()
 
 ### End of example 07
 
+
+###
 #
-#  Example # 08 - Maps Seer Registries using the micromapST function 
+#  Example 08 - use of state.x77 data table as data source
+#     Data does not contain a row for DC, a missing sub-area.
+#     Example also uses a smaller then 7.5 x 10 graphic space.
+#
+###
+
+utils::data(state,envir=environment())
+
+stateData <- as.data.frame(state.x77)
+
+rownames(stateData) <- state.abb
+
+panelDesc08 <- data.frame(type = c("maptail", "id", "dot"),
+                   lab1 = c("", "", "Murder"),
+                   lab3 = c("", "", "Murders per 100K Population"),
+                   col1 = c(NA, NA, 5))
+                   
+ExTitle <- c("Ex08-US LM Plot of Murders in the United States",
+                      "No DC row entry.")
+
+grDevices::pdf(file = paste0(TDir,"Ex08_US state.x77_no_DC.pdf"), 
+    width = 5, height = 9) 
+
+micromapST(stateData, panelDesc08, 
+           sortVar = 5, ascend = FALSE,
+           title = ExTitle)
+
+x <- grDevices::dev.off()
+
+#
+### End Example 08
+
+###
+#
+#  Example 09 - US state map based on data from state.x77 table with
+#     DC row added to complete data.frame, but with missing values (NAs).
+#     The DC row will be sorted to the bottom of the list size 
+#     it does not contain any data.
+#
+#   Used data and the panelDesc data.frames (stateData and panelDesc16) 
+#   used in example 09.
+#
+###
+
+panelDesc09 <- data.frame(type = c("maptail", "id", "dot"),
+                   lab1 = c("", "", "Murder"),
+                   lab3 = c("", "", "Murders per 100K Population"),
+                   col1 = c(NA, NA, 5))
+                   
+# add DC as 51st state with missing data "NA" to stateData.  
+
+rm(state)
+
+utils::data(state,envir=environment())
+
+stateData <- as.data.frame(state.x77)
+rownames(stateData) <- state.abb
+
+stateData <- rbind(stateData, DC = rep(NA, 8))   
+                  # missing values for DC row.
+
+ExTitle <- c("Ex09-US-LM Plot of Murders in the United States",
+                  "DC row added with NA, decending.")
+
+grDevices::pdf(file =paste0(TDir,"Ex09_US_state.x77_DCasNA_D.pdf"), 
+     width = 5, height = 9) 
+
+micromapST(stateData, panelDesc09, 
+           sortVar = 5, ascend = FALSE,
+           title = ExTitle)
+
+x <- grDevices::dev.off()
+
+#
+### End Example 09
+
+###
+#
+#  Example # 10 - Maps Seer Registries using the micromapST function 
 #   with the bordGrp = "USSeerBG".  
 #
+###
 
 utils::data(Seer18Area,envir=environment())
 
 # set up 4 column page layout
 
-panelDesc08 = data.frame(
+panelDesc10 = data.frame(
   type=c("mapcum","id","dotsignif","arrow")    
   ,lab1=c("","","Rate Trend APC", "Rate Change")  
   ,lab2=c("","","Dot-Signif","2002-06 to 2007-11") 
@@ -667,12 +769,12 @@ panelDesc08 = data.frame(
   ,col2=c(NA,NA,"pValue", "Rate20072011")
   ) 
 
-ExTitle       <- c("Ex08 - SeerStat Data - 2002-6 and 2007-11",
+ExTitle    <- c("Ex10-SeerStat Data-2002-6 and 2007-11",
                      "Dot with Signif., Arrow and Bar")
 
-grDevices::pdf(file=paste0(TDir,"Ex08-DotSignificants.pdf"),width=7.5,height=10)
+grDevices::pdf(file=paste0(TDir,"Ex10-SeerStat-DotSignif.pdf"),width=7.5,height=10)
 
-micromapST(Seer18Area,panelDesc08,
+micromapST(Seer18Area,panelDesc10,
         sortVar="Rate20022006",ascend=FALSE,
         title=ExTitle,
         rowNames="alias",rowNamesCol='Registry', 
@@ -683,18 +785,22 @@ x <- grDevices::dev.off()
 #
 #  Both calls are effectively identical.
 #
-#### End of examples 08
+### End of example 10
 
-#####
+
+
+
+###
 #
-#  Example # 10 - Counties in Kansas on an 11 x 17 page
+#  Example # 11 - Counties in Kansas on an 11 x 17 page
 #
+###
 
 # set up 4 column page layout
 
 utils::data(KansPopInc,envir=environment())
 
-panelDesc10 = data.frame(
+panelDesc11 = data.frame(
   type=c("map","id","dot",        "dot")    
   ,lab1=c("",     "",  "Population", "Average Inc.")  
   ,lab2=c("",     "",  "in 2000",    "per year") 
@@ -702,10 +808,10 @@ panelDesc10 = data.frame(
   ,col1=c(NA,     NA,  "Pop",        "AvgInc")
   ) 
 
-ExTitle       <- c("Ex10 - Kansas Pop data 11x17",
-                     "Current Pop and Average Inc - scaling=e")
+ExTitle    <- c("Ex11-Kansas Pop data 11x17",
+                  "Current Pop and Average Inc - scaling=e")
 
-grDevices::pdf(file=paste0(TDir,"Ex10-Kansas_Population_and_Income-11x17.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex11-Kansas_Population_and_Income-11x17.pdf"), 
      width=10, height=16)  
           # tabloid size page (11x17) to handle 105 counties.
 
@@ -714,7 +820,7 @@ grDevices::pdf(file=paste0(TDir,"Ex10-Kansas_Population_and_Income-11x17.pdf"),
 #  but presented abbreviated county names 
 #  in "id" glyphic column with large page.
 
-micromapST(KansPopInc, panelDesc10, 
+micromapST(KansPopInc, panelDesc11, 
         sortVar=c("AvgInc","Pop"), ascend=FALSE, 
         title=ExTitle,
         rowNames="full", rowNamesCol='County',
@@ -723,65 +829,18 @@ micromapST(KansPopInc, panelDesc10,
 
 x <- grDevices::dev.off()        
 #
+### End Example 11
+
+
+###
 #
-#### end of # Ex 10
-
-
-#####
-#
-#   micromapST - Example 11 - A linked micromap of the counties 
-#      of the state of New York state using the border group 
-#      "NewYorkDF".  The pop/inc data is shown using two dot glyphs, 
-#      an arrow and bar glyph (2010 Population, an arrow showing the 
-#      change in population from 2000 to 2010, Population in 2000, 
-#      and a bar showing the amount of the change.)
-#      
-#####
-
-utils::data(nyPopData,envir=environment())
-
-nyPopData$Dif00_10 <- nyPopData$Pop_2010 - nyPopData$Pop_2000
-
-# set up 6 column page layout with colSize
-
-panelDesc11 <- data.frame(
-  type=c("map","id","dot",           "arrow",        "dot",     "bar")    
-  ,lab1=c("",  "",  "Population in", "Increase from","Pop 2005","Incre")  
-  ,lab2=c("",  "",  "2010",          "2000",         "",        "2000to2010") 
-  ,lab3=c("",  "",  "",              "",             "",        "") 
-  ,col1=c(NA,  NA,  "Pop_2010",      "Pop_2000",     "Pop_2000","Dif00_10")
-  ,col2=c(NA,  NA,  "",              "Pop_2010",     "",        "")
-  ,colSize=c(NA,NA, 15,              20,             5,        20)
-  ) 
-
-ExTitle       <- c("Ex11 - New York Population data",
-                     "2010 Pop and since 2000-colSize,sn,stag")
-
-grDevices::pdf(file=paste0(TDir,"Ex11-New York Pop 2010 and Change-sn colSize.pdf"), 
-     width=7.5, height=10.5) 
-
-micromapST(nyPopData, panelDesc11, 
-        sortVar="Pop_2000", ascend=FALSE,
-        title=ExTitle,
-        rowNames="full",rowNamesCol="Area", 
-        axisScale="sn", staggerLab=TRUE,
-        bordGrp="NewYorkBG"
-      )
-
-x <- grDevices::dev.off()        
-#
-#
-#### End of Examples 11
-
-
-#####
 #   micromapST - Example 12 - A linked micromap of the counties of 
 #      the state of Maryland using the border group "MarylandBG". 
 #      The MarylandPopInc data is shown using two dot glypics - current 
 #       population and average increase per county.
 #      A "maptail" state map is used to show the counties in relationship
 #      to the median county as sorted by the 1970 population.
-#####
+###
 
 utils::data(mdPopData,envir=environment())
 
@@ -796,7 +855,7 @@ panelDesc12 = data.frame(
   ,col2=c(NA,NA,"","","X2010")
  ) 
 
-ExTitle       <- c("Ex12 - Maryland Population-map",
+ExTitle       <- c("Ex12-Maryland Population-map",
                       "1970 and 2010 Pop and Change,stag,sn")
 
 grDevices::pdf(file=paste0(TDir,"Ex12-MD Pop 1970 and 2010 plus change-map.pdf"), 
@@ -811,95 +870,64 @@ micromapST(mdPopData, panelDesc12,
         plotNames="ab")
 
 x <- grDevices::dev.off()        
+
 #
+### End Example 12
+
+###
 #
-#### End of Example 12
+#   micromapST - Example 13 - A linked micromap of the counties 
+#      of the state of New York state using the border group 
+#      "NewYorkDF".  The pop/inc data is shown using two dot glyphs, 
+#      an arrow and bar glyph (2010 Population, an arrow showing the 
+#      change in population from 2000 to 2010, Population in 2000, 
+#      and a bar showing the amount of the change.)
+#      
+###
 
-#####
-#   micromapST - Example 13 - A linked micromap of the provinces, 
-#      municipalities, autonomous regions and special administrative 
-#      regions of China using the border group of "ChinaDF". 
-#      The ChinaPopInc data is shown using two dot glypics - current 
-#      population and average increase per area.
-#####
+utils::data(nyPopData,envir=environment())
 
-utils::data(cnPopData,envir=environment())
+nyPopData$Dif00_10 <- nyPopData$Pop_2010 - nyPopData$Pop_2000
 
-# set up 4 column page layout
+# set up 6 column page layout with colSize
 
-panelDesc13 = data.frame(
-  type=c("map","id","dot","bar")    
-  ,lab1=c("","","Population", "Population")  
-  ,lab2=c("","","in 2013","in 2013") 
-  ,lab3=c("","","","") 
-  ,col1=c(NA,NA,"pop2013","pop2013")
+panelDesc13 <- data.frame(
+  type=c("map","id","dot",           "arrow",        "dot",     "bar")    
+  ,lab1=c("",  "",  "Population in", "Increase from","Pop 2005","Incre")  
+  ,lab2=c("",  "",  "2010",          "2000",         "",        "2000to2010") 
+  ,lab3=c("",  "",  "",              "",             "",        "") 
+  ,col1=c(NA,  NA,  "Pop_2010",      "Pop_2000",     "Pop_2000","Dif00_10")
+  ,col2=c(NA,  NA,  "",              "Pop_2010",     "",        "")
+  ,colSize=c(NA,NA, 15,              20,             5,        20)
   ) 
+  
+ExTitle   <- c("Ex13-New York Population data",
+                "2010 Pop and since 2000-colSize,sn,stag")
 
-ExTitle       <- c("Ex13 - China Population",
-                     "in 2013 by area")
-
-grDevices::pdf(file=paste0(TDir,"Ex13-China 2013 Population.pdf"), 
-    width=7.5, height=10.5) 
-
-micromapST(cnPopData, panelDesc13, 
-        sortVar="pop2013", ascend=FALSE, 
-        title=ExTitle,
-        rowNames="full", rowNamesCol='area',
-        bordGrp="ChinaBG",
-        plotNames="full")
-
-x <- grDevices::dev.off()        
-#
-#
-#### End of Example 13
-
-
-#####
-#   micromapST - Example 14 - A linked micromap of the districts 
-#      of the city Seoul South Korea, using the border group of 
-#      "SeoulSKoreaBG". The included SeoulPopData dataset provides 
-#      population and district area statistics for 2012.  
-#      The micromapST generates two glyphics, a sorted dot
-#      glyphic based on the population and a bar graph based on 
-#      the area.
-#####
-
-utils::data(SeoulPopData,envir=environment())
-
-# set up 4 column page layout
-
-panelDesc14 = data.frame(
-  type=c("map","id","dot","bar")    
-  ,lab1=c("","","Population", "Area")  
-  ,lab2=c("","","in 2012","in 2012") 
-  ,lab3=c("","","","sqkm") 
-  ,col1=c(NA,NA,"Pop.2012","Area")
-  ) 
-
-ExTitle       <- c("Ex14 - Seoul Population",
-                     "in 2012 by district")
-
-grDevices::pdf(file=paste0(TDir,"Ex14-Seoul 2012 Population.pdf"), 
+grDevices::pdf(file=paste0(TDir,"Ex13-New York Pop 2010 and Change-sn colSize.pdf"), 
      width=7.5, height=10.5) 
 
-micromapST(SeoulPopData,panelDesc14,
-        sortVar=3, ascend=FALSE,    # sort based on the population
+micromapST(nyPopData, panelDesc13, 
+        sortVar="Pop_2000", ascend=FALSE,
         title=ExTitle,
-        rowNames="full", rowNamesCol='District',
-        bordGrp="SeoulSKoreaBG",
-        plotNames="full"
+        rowNames="full",rowNamesCol="Area", 
+        axisScale="sn", staggerLab=TRUE,
+        bordGrp="NewYorkBG"
       )
 
 x <- grDevices::dev.off()        
-#
-#
-#### End of Example 14
 
-#####
-#   micromapST - Example 15 - A linked micromap of the counties in the 
+#
+#### End Example 13
+
+
+###
+#
+#   micromapST - Example 14 - A linked micromap of the counties in the 
 #      state of Utah.  The UtahPopData data is shown using two dot glypics
 #      - current population and average increase per area.
-#####
+#
+###
 
 utils::data(UtahPopData,envir=environment())
 
@@ -913,15 +941,18 @@ utils::data(UtahPopData,envir=environment())
 UtahPopData2 <- as.data.frame(sapply(UtahPopData, 
                         function(x) gsub(",","",x)),stringsAsFactors=FALSE)
 
+# Calculate the differenct between 2001 and 2011 population.
 UtahPopData2$Del1101 <- as.numeric(UtahPopData2$X2011) 
                          - as.numeric(UtahPopData2$X2001)
+                         
+# Calculate the difference between 1991 and 2001 population.
 UtahPopData2$Del0191 <- as.numeric(UtahPopData2$X2001) 
                          - as.numeric(UtahPopData2$X1991)
 
 
 # set up 5 column page layout
 
-panelDesc15 = data.frame(
+panelDesc14 = data.frame(
   type=c("map","id","dot","arrow","arrow")    
   ,lab1=c("","","Population", "2001-2011","Chg 1991-2001")  
   ,lab2=c("","","in 2011","pop change","pop change") 
@@ -930,13 +961,13 @@ panelDesc15 = data.frame(
   ,col2=c(NA,NA,NA,"X2001","X1991")
   ) 
 
-ExTitle       <- c("Ex15 - Utah county population 2011",
-                     " and changes last two decades,sn")
+ExTitle    <- c("Ex14 - Utah county population 2011",
+                  " and changes last two decades,sn")
 
-grDevices::pdf(file=paste0(TDir,"Ex15-Utah Population.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex14-Utah Population.pdf"),
      width=7.5,height=10.5) 
 
-micromapST(UtahPopData, panelDesc15, 
+micromapST(UtahPopData, panelDesc14, 
         sortVar="X2011", ascend=FALSE,
         title=ExTitle,
         rowNames="full",rowNamesCol='County', 
@@ -946,105 +977,134 @@ micromapST(UtahPopData, panelDesc15,
       )
 
 x <- grDevices::dev.off()        
-#
-#
-#### End of Example 15
-
-####
-#
-#  Example 16 - use of state.x77 data table as data source
-#     Data does not contain a row for DC, a missing sub-area.
-#     Example also uses a smaller then 7.5 x 10 graphic space.
-#
-
-utils::data(state,envir=environment())
-
-stateData <- as.data.frame(state.x77)
-
-rownames(stateData) <- state.abb
-
-panelDesc16 <- data.frame(type = c("maptail", "id", "dot"),
-                   lab1 = c("", "", "Murder"),
-                   lab3 = c("", "", "Murders per 100K Population"),
-                   col1 = c(NA, NA, 5))
-
-ExTitle <- c("Ex16 - LM Plot of Murders in the United States",
-                      "No DC row entry.")
-
-grDevices::pdf(file = paste0(TDir,"Ex16_state.x77_no_DC.pdf"), 
-    width = 5, height = 9) 
-
-micromapST(stateData, panelDesc16, 
-           sortVar = 5, ascend = FALSE,
-           title = ExTitle)
-
-x <- grDevices::dev.off()
 
 #
-#  Example 17 - US state map based on data from state.x77 table with
-#     DC row added to complete data.frame, but with missing values (NAs).
-#     The DC row will be sorted to the bottom of the list size 
-#     it does not contain any data.
+### End Example 14
+
+
+
+###
 #
-#   Used data and the panelDesc data.frames (stateData and panelDesc16) 
-#   used in example 16.
+#   micromapST - Example 15 - A linked micromap of the provinces, 
+#      municipalities, autonomous regions and special administrative 
+#      regions of China using the border group of "ChinaDF". 
+#      The ChinaPopInc data is shown using two dot glypics - current 
+#      population and average increase per area.
 #
+###
 
-# add DC as 51st state with missing data "NA" to stateData.  
+utils::data(cnPopData,envir=environment())
 
-stateData <- rbind(stateData, DC = rep(NA, 8))   
-                  # missing values for DC row.
+# set up 4 column page layout
 
-ExTitle <- c("Ex17 - LM Plot of Murders in the United States",
-                  "DC row added with NA, decending.")
+panelDesc15 = data.frame(
+  type=c("map","id","dot","bar")    
+  ,lab1=c("","","Population", "Population")  
+  ,lab2=c("","","in 2013","in 2013") 
+  ,lab3=c("","","","") 
+  ,col1=c(NA,NA,"pop2013","pop2013")
+  ) 
 
-grDevices::pdf(file =paste0(TDir,"Ex17_state.x77_DCasNA_D.pdf"), 
-     width = 5, height = 9) 
+ExTitle       <- c("Ex14-China Population",
+                     "in 2013 by area")
 
-micromapST(stateData, panelDesc16, 
-           sortVar = 5, ascend = FALSE,
-           title = ExTitle)
+grDevices::pdf(file=paste0(TDir,"Ex15-China 2013 Population.pdf"), 
+    width=7.5, height=10.5) 
 
-x <- grDevices::dev.off()
+micromapST(cnPopData, panelDesc15, 
+        sortVar="pop2013", ascend=FALSE, 
+        title=ExTitle,
+        rowNames="full", rowNamesCol='area',
+        bordGrp="ChinaBG",
+        plotNames="full")
+
+x <- grDevices::dev.off()        
 
 #
-#
-##### end of example # 17
+### End Example 15
 
-####
+
+###
 #
-#  Example 18 - use of Africa population data as data source
+#   micromapST - Example 16 - A linked micromap of the districts 
+#      of the city Seoul South Korea, using the border group of 
+#      "SeoulSKoreaBG". The included SeoulPopData dataset provides 
+#      population and district area statistics for 2012.  
+#      The micromapST generates two glyphics, a sorted dot
+#      glyphic based on the population and a bar graph based on 
+#      the area.
+#
+###
+
+utils::data(SeoulPopData,envir=environment())
+
+# set up 4 column page layout
+
+panelDesc16 = data.frame(
+  type=c("map","id","dot","bar")    
+  ,lab1=c("","","Population", "Area")  
+  ,lab2=c("","","in 2012","in 2012") 
+  ,lab3=c("","","","sqkm") 
+  ,col1=c(NA,NA,"Pop.2012","Area")
+  ) 
+
+ExTitle       <- c("Ex16-Seoul Population",
+                     "in 2012 by district")
+
+grDevices::pdf(file=paste0(TDir,"Ex16-Seoul 2012 Population.pdf"), 
+     width=7.5, height=10.5) 
+
+micromapST(SeoulPopData,panelDesc16,
+        sortVar=3, ascend=FALSE,    # sort based on the population
+        title=ExTitle,
+        rowNames="full", rowNamesCol='District',
+        bordGrp="SeoulSKoreaBG",
+        plotNames="full"
+      )
+
+x <- grDevices::dev.off()        
+
+#
+### End Example 16
+
+
+###
+#
+#  Example 17 - use of Africa population data as data source
 #      Demonstrates support for vertical oriented geographical 
 #       areas.
 #
+###
 
 utils::data(AfricaPopData,envir=environment())
 
-panelDesc18 <- data.frame(
+panelDesc17 <- data.frame(
               type = c("map", "id", "dot",      "dot",          "dot"),
               lab1 = c("",      "","Population","Percentage Of","Est x2 Time"),
               lab3 = c("",      "","People",    "Total",        "Years"),
               col1 = c(NA,      NA,"Projection","PercOf",       "Est2Time")
             )
-                           
-                           
-grDevices::pdf(file = paste0(TDir,"Ex18_Africa Micromap-11x17.pdf"), 
-     width = 11, height = 17) 
-
-ExTitle <- c("Ex18-Africa Population Data",
+                          
+ExTitle <- c("Ex17-Africa Population Data",
                "Sorted by Population on 11x17")
 
-micromapST(AfricaPopData, panelDesc18, 
+grDevices::pdf(file = paste0(TDir,"Ex17-Africa Micromap-11x17.pdf"), 
+     width = 11, height = 17) 
+
+micromapST(AfricaPopData, panelDesc17, 
            sortVar = "Projection", ascend = TRUE,
            title = ExTitle, 
            rowNames = "ab", rowNamesCol = "Abbr",
            bordGrp = "AfricaBG" )
 
 x <- grDevices::dev.off()
-#
-##### End of Example 18
 
-##### Other data available
+#
+### End  Example 17
+
+
+### Other data available
+\dontrun{
 #
 #  Other dataset available in the package to experiment with other 
 #   border groups are:
@@ -1078,8 +1138,8 @@ utils::data(wmlung5070US)
 str(wmlung5070US)
 
 #
-#
-#####
+}
+###
 
 unlink(TDir)
 

@@ -1,34 +1,34 @@
-citHeader("To cite package 'stateMicromaps' renamed 'micromapST' and later 'micromapPLUS' 
-in publications use: Daniel B. Carr andd Linda Williams Pickle, 
+citHeader("To cite package 'stateMicromaps' renamed 'micromapST'
+in publications use: Daniel B. Carr and Linda Williams Pickle, 
 Visualizing Data Patterns with Micromaps, CRC Press, 2010.")
 
 ## R >= 3.0.0 passes package metadata to citation().
 
-if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapPLUS")
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("micromapST")
        
        year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date)
        vers <- paste("R package version", meta$Version)
        
-       citEntry(entry="Manual",
-       title = "Visualizing Data Patterns with Micromaps",
-       author = personList(as.person("Daniel B. Carr"),
-                           as.person("Linda Williams Pickle"),
-                           person("micromapST Author Team")),
-       year = "2010",
-       note = "CRC Press",
-       textVersion =
+       bibentry(bibtype="Manual",
+          title  = "Visualizing Data Patterns with Micromaps",
+          author = c(person("Daniel B. Carr"),
+                     person("Linda Williams Pickle"),
+                     person("micromapST Author Team")),
+          year = "2010",
+          note = "CRC Press",
+          textVersion =
             paste("Daniel B. Carr and Linda Williams Pickle (2010), Visualizing Data Patterns with Micromaps", sep="")
        )
 
-       citEntry(entry="Manual",
-       title = "micromapST: Exploring and Communicating Geospatial Patterns in U. S. State Data",
-       author = personList(as.person("Linda Williams Pickle"),
-                           as.person("James B. Pearson, Jr"),
-                           as.person("Daniel B. Carr"),
-                           person("micromapST Author Team")),
-       year = "2014",
-       note = "Journal of Statistical Software",
-       textVersion =
+       bibentry(bibtype="Manual",
+          title = "micromapST: Exploring and Communicating Geospatial Patterns in U. S. State Data",
+          author = c(person("Linda Williams Pickle"),
+                     person("James B. Pearson, Jr"),
+                     person("Daniel B. Carr"),
+                     person("micromapST Author Team")),
+          year = "2014",
+          note = "Journal of Statistical Software",
+          textVersion =
             paste("Linda Williams Pickle, James B. Pearson, Jr. and Daniel B. Carr (2014), micromapST: Exploring and Communicating Geospatial Patterns in U. S. State Data", sep="")
        )
 

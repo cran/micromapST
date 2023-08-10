@@ -483,19 +483,23 @@ details = list(
 
 # panel layout margin allocation
     # JP - changed median row size to 1.5.
-    topMar                     = 1.1,                 # margin panel height (inches)                               #  1
-
+    topMar                     = 1.1,                 # margin panel height (inches) #  1
+                  # must have enough space for titles above the linked micromap.
+                  # The column titles/headers and axis ticks are handled by the gryphics
+                  
     botMar                     = 0.5,                 # no legend bottom margin (inches)                           #  2
     botMarLegend               = 0.75,                #                                                            #  3
     botMardif                  = 0.2,                 # calulate legfacgor      #  4   
+                  # ? room for the bottom "what", no titles, axis tick should be in columns.
 
     leftMar                    = 0,                   #                                                            #  5 
-    leftMarAxis                = 0.2,                 # left margin adjustment when Y axis is printed              #  6
-  
+    leftMarAxis                = 0.2,                 # left margin adjustment when Y axis is printed  #  6
+                  # no left margin, but the left axis is in the column?
+                  
     rightMar                   = 0,                   #                                                            #  7
 
     borderSize                 = 0.5,                 # margin border - at least 0.5 inches.                       #  8
-    
+                  # why a general border spacing?
     #  height constraints
     rowSepGap                  = 0.075,                 # Size of the rowSep  (in inches)                          #  9
     
@@ -582,12 +586,13 @@ details = list(
   
 # grid line parameters
     Grid.Line.col              = colorsRef["white"],     # grid line color                                         # 33
-    Grid.Line.lwd              = 1,                      # weight of grid line                                     # 34
+    Grid.Line.lwd              = 1,                      # weight of grid line  # 34
  
+# margin lines (in mex units) for axis title, axis labels, and axis line.  
     mgpTop                     = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0.1,0)# 35  (not used)(margin spacing for title and axis = (title=2 lines, tick 0.1 lines, and 0 lines)
     mgpBottom                  = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0,0)  # 36  (not used)
-    padjBottom                 = -0.35,                  # gridline (tick  placement                               # 37  (not used) Was -0.7 adjusted 11/14
-    mgpLeft                    = c(0.75, 0.1,  0),       # left axis labels                                        # 38  (used TS and SCD)
+    padjBottom                 = -0.35,                  # gridline (tick  placement)                               # 37  (not used) Was -0.7 adjusted 11/14
+    mgpLeft                    = c(0.75,   0.1,  0),     # left axis labels (when present)                                       # 38  (used TS and SCD)
 
     ###  End of sizing of areas...
     

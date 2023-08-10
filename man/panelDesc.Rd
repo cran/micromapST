@@ -455,18 +455,20 @@
       
       For \option{boxplot} data, each row name in the boxplot list must be the area 
       abbreviation (2 character) for the area associated with the data. There must 
-      be 51 rows in the data.frame. Each row must be data produced by the 
-      \option{boxplot} function.  The area abbreviation must be used as the boxplot$names 
-      to be able to associate the individual boxplots to each area.  The \var{names} attribute
-      must contain the area name.
+      be the same number of rows as in the name table and statsDFrame table.
+      Each row must be data produced by the \option{boxplot} function.  
+      The area location identifier used in the statsDFrame data and must be 
+      placed in the boxplot$names (\var{names}) attribute for that set of boxplot data 
+      to be able to associate the individual boxplots to each area.  
       
       For the time series glyph (ts), the data must be a three (3) dimensional array.  
       The first dimension \code{[\var{st},,]} represent one entry for each area (1 to 51).  
       The second dimension \code{[,\var{t},]} indexes up to 30 data points for the area.  
       The third dimension \code{[,,\var{v}]} are the data point values.  \code{[,,var{1}]} is 
       the \var{x} value and \code{[,,\var{2}]} is the median \var{y} value for the data point.  
-      The rownames associated with the first dimension must be the area abbreviationss to 
-      link the elements of this structure the presentation order of the areas.
+      The rownames associated with the first dimension must be the area location ids used
+      in the statsDFrame table to link the elements of this structure the presentation 
+      order of the areas.
       
       For the time series with confidence intervals glyph (tsconf), the array is extended to include:  
       \code{[,,\var{3}]} and \code{[,,\var{4}]} for the \var{lower y} and \var{upper y} values.

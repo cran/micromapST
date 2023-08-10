@@ -2,7 +2,7 @@
 \alias{micromapST-package}
 \docType{package}
 \title{A graphics package to easily and quickly create linked micromaps for a specified geographic collection of areas.}
-\description{
+\description{(Beta Pre-Release Version)
  The micromapST package provides a means of creating multiple column
  graphics representing data for a collection of geographic areas. The originally micromapST was limited
  to creating linked micromaps for each US 50 state and the District of Columbia. With this 
@@ -14,8 +14,8 @@
     \tabular{ll}{
       Package:  \tab micromapST\cr
       Type:     \tab Package\cr
-      Version:  \tab 2.0.1\cr
-      Date:     \tab 2022-09-26\cr
+      Version:  \tab 3.0.0\cr
+      Date:     \tab 2023-08-08\cr
       License:  \tab GPL-2\cr
       LazyLoad: \tab no\cr
     } 
@@ -202,26 +202,33 @@ The package contains a set of examples of how to produce linked area micromaps.
 The datasets used in each example are provided to help you learn how 
 to use micromapSEER.
 
-As of release 2.0.1 of the package, a new function has been added.  The \var{BuildBorderGroup}
-function provide assistance to the user in building their own border groups from shape file
-and a name table as needed for geographic areas not covered by areas included in the 
-package.   Review the documentation on the \var{BuildBorderGroup} function for 
-more detail.
+As of release 2.0.1 of the package, a new function has been added.  The 
+\var{BuildBorderGroup} function provide assistance to the user in building 
+their own border groups from shape file and a name table as needed for 
+geographic areas not covered by areas included in the package. Review the 
+documentation on the \var{BuildBorderGroup} function for more details.
 
 There are four primary sources for boundary data:  
 \itemize{
- \item{U. S. Census Bureau} for U. S. states and territories (\url{http://www.census.gov}) 
-   (2021 - Cartographic Boundary Files) ;
- \item{GADM (Global Administrative area Database)} for all of the countries and sub-divisions 
-   in the world (\url{https://gadm.org}) (V4.1, July 16, 2022 release, older versions are available.);
+ \item{U. S. Census Bureau} for U. S. states and territories 
+   (\url{https://www.census.gov/}) (2021 - Cartographic Boundary Files) ;
+ \item{GADM (Global Administrative area Database)} for all of the 
+   countries and sub-divisions in the world (\url{https://gadm.org}) 
+   (V4.1, July 16, 2022 release, older versions are available.);
  \item{DIVA-GIS (\url{https://diva-gis.org})} (January 2012); and 
  \item{local governments}.
 } 
-All of the boundary data (shape files or json format) are free for public use.  Care must be taken
-to ensure your data matches the boundary areas available in each collection.  
-Data location IDs and boundaries change over time as areas are split, merged, added, or eliminated. 
-The BuildBorderGroup function tries to clean up and repair the boundary data as best as it can. 
-Always inspect the boundary data and make sure its usable for your application and is valid.
+All of the boundary data (shape files or json format) are free for public 
+use.  Care must be taken to ensure your data matches the boundary areas 
+available in each collection. Data location IDs and boundaries change 
+over time as areas are split, merged, added, or eliminated. 
+The BuildBorderGroup function tries to clean up and repair the boundary 
+data as best as it can. Always inspect the boundary data and make sure 
+its usable for your application and is valid.
+
+With the announcement of the support retirement of maptools, rgeos, 
+rgdal, and effectively sp and spdep, this package had to be upgraded 
+to continue to be useful by it's users. V3.0.0 completes that enhancement.
 }
 
 \author{
@@ -233,21 +240,23 @@ Package compiled by "James B, Pearson, Jr." \email{jbpearson353@gmail.com}
 }
 
 \references{
-  Daniel B. Carr and Linda Williams Pickle, Visualizing Data Patterns with Micromaps, CRC
-  Press, 2010\cr
+  Daniel B. Carr and Linda Williams Pickle, Visualizing Data Patterns with 
+  Micromaps, CRC Press, 2010\cr
   Linda Williams Pickle, James B. Pearson Jr., Daniel B. Carr (2015), 
   micromapST: Exploring and Communicating Geospatial Patterns in US State Data.,
-  Journal of Statistical Software, 63(3), 1-25., \url{https://www.jstatsoft.org/v63/i03/}
+  Journal of Statistical Software, 63(3), 1-25., 
+  \url{https://www.jstatsoft.org/v63/i03/}
 }
 
 \note{
-The packaged is tuned to work with an area 7.5" wide and 10.5" high. Testing has
-shown it works well with portrait or landscape orientation and areas up to 11" x 17".
+The packaged is tuned to work with an area 7.5" wide and 10.5" high. 
+Testing has shown it works well with portrait or landscape orientation 
+and areas up to 11" x 17".
 
-The examples in this package the output is directed to a PDF file for best clarity and resolution. 
-File types of SVG, PNG, JPEG or TIFF can also be used.   
+The examples in this package the output is directed to a PDF file for best 
+clarity and resolution. File types of SVG, PNG, JPEG or TIFF can also be used.   
 If the output is directed to a window, it is suggested a 
-\code{windows( 7.5, 10.5, xpinch=72, ypinch=72, pointsize=9 )} command is used to 
-set up the window to best display the linked micromap. 
+\code{windows( 7.5, 10.5, xpinch=72, ypinch=72, pointsize=9 )} command 
+is used to set up the window to best display the linked micromap. 
 The results will vary based on the resolution of the monitor being used.
 }

@@ -1,4 +1,6 @@
 #
+#  micromapST - 
+#  Updated: August 2, 2023 by Jim Pearson
 #
 #  discussion points:  not all border groups have abbreviations or IDs.  Names yes, but need to 
 #       handle the value inputed by the user and link data to boundaries. May be needed
@@ -378,7 +380,7 @@
 #         - Add "Alt_Abbr" option for rowNames
 #         - Update code to use "LINK" or make sure "Abbr" works.
 #         - Changed Border Group .rda file name from ????DF.rda to ????BG.rda.
-#         - Added MapLabel field to areaNamesAbbrsIDs tables - to be used to generalize
+#         - Added MapLabel field to rlAreaNamesAbbrsIDs tables - to be used to generalize
 #           the over printing of sub area names on first map - AK, HI, DC like.
 #
 #  2015-07-15 - Updates:
@@ -605,13 +607,102 @@
 #           areas a group/row can represent.  The default is 5 areas.  The value
 #           can range from 2 to 5.
 #
-#  2022-08-10 - Integrated BuildBorderGroup Function into package - problems with globalVariables, common functions,
-#           and plots.
+#  2022-08-10 - Integrated BuildBorderGroup Function into package - problems with 
+#           globalVariables, common functions, and plots.
 #
 #  2022-09-07 - Fixed the MapL,X,Y logic at the end of each of the four "map" glyphics.  Was missing.
 #         - Corrected the CheckNum logic when there are miss matches.
+#  
+#  2022-09 to 12 - updated BuildBorderGroup to switch from sp/spdep/maptools/rgdal/rgeos 
+#           packages to sf and sfdep.
+#         - Several new features were added to BuildBorderGroup:
+#           - Shape File structure can be passed as the ShapeFile parameter.
+#           - Name Table data.frame can be passed as the NameTableFile parameter.
+#         - No changes except fixes to micromapST.
+#         - I continue to be amazed that R will at times when there is a .bak up image
+#           of the source code in the R directory, will take the older code version of 
+#           a module and use it instead of the .r and more resent version.  WOW!
 #
+#  2023-0103 - Corrected error messages in CheckNum related to informing user of which rows in the
+#           data have invalid data (like NA).  The list was sorted according to sortVar, so all 
+#           indexes were relative to the sorted order.  The user would never be able to 
+#           use the index to find the row with the bad data.   To fix, make the index variable 
+#           that took the sorted row's position and mapped it back to the unsorted Name Table and
+#           put the variable in the global space.  The CheckNum function could then translate
+#           the sorted row id back to the original row id and name.
+#         - Tried to added a feature to allow the checkpointed shape file to be written 
+#           with the same drivers it was originally read with. However, this became 
+#           to difficult to correctly write the shapefile and could not handle 
+#           a shapefile that is passed as a binary structure to BuildBorderGroup.
+#           This feature will be revisited in future releases, but for NOW the checkpoint
+#           shapefiles will be written in the default driver of "ESRI Shapefile".
+#           
+#  2023-0321 - To make sure the names, abbrs, etc match on any user built border group
+#           and user provided data in a data.frame.  All names, abbrs, and IDs will be 
+#           edited in the name tables and user data.frames to remove any and all punctuation
+#           marks.   This will be done in the micromapST and BuildBorderGroup functions.
+#           data <- gsub("[[:punct:]]", " ", data)  and data <- str_squish(data)
+#           The list names of the boxplot and ts data are also processed to ensure a match 
+#           to the area links.  The tables use the "rowNames" value to correct match 
+#           the name table.
 #
+#  2023-0721 - If the data frame column labels are characters and the caller uses
+#           "2020" type labels, the logic that checks to see if the value 
+#           reference provided in the parameters are correct.  However,
+#           "2020" is seen as a numeric not a character string and the value 
+#           of 2020 is much larger then the number of columns in the data frame to be 
+#           value and issues a message and stops. Logic will be changed to treat
+#           both numbers and character strings as character.  Test if the character version
+#           matches the column names.  If match, process as char. label, if not 
+#           attempt to convert to numeric. If fails conversion- error message.
+#           If fails max number of column check, error message.  Otherwise return results.
+#
+#  2023-0726 - continued release testing. Found the following problems and fixed them:
+#           1) Several call parameter are left uninitialized (thought NULL would do.) 
+#           They must be check for is.null before you can do the [[1]][1] trick to get 
+#           only the first value.
+#           2) The test for data.frame requirement on statsDFrame and panelDesc was not 
+#           working.  Turns out tibbles are part data.frame and data.frames are part list.
+#           Change the approach to test for !is.data.frame || is_tibble to weed out 
+#           non data.frame variables.  To avoid loading the tibble package, an equivant
+#           function is created  isTib().
+#           3) In the cases above, had to change the messages to "Missing or NULL" and 
+#           add a new message indicating "not data.frame". 
+#           4) In doing dataRegionsOnly feature, discovered the L3VisBorders boundaries were
+#           not being excluded when a region is excluded.  Now if areaVisBorder areas
+#           are excluded & regions, the L3VisBorders information is disabled and not included
+#           in the bounds calculation for the map.  Originally during Ireland island
+#           tests, with dataRegionsOnly=TRUE, the island was drawn to the original scale of all 
+#           of the UKIrelandBG instead of being enlarged.  Once the L3VisBorders boundaries were
+#           disabled, the island now occupies the entire mapping space.
+#           5) The area colors did not appear or appeared in the wrong areas.  After reviewing the 
+#           boundary data and the color patterns, it was determined the number of logical areas
+#           did match the number of "NA" in the X, Y data.  However, R polygon function has
+#           an interesting logic when dealing with points and lines in a points set.  So, if 
+#           the "polygon" has only one point or two points and an "NA" to signal the end of the 
+#           "polygon", the function does not step to the next color in the color vector.  There
+#           Must be at least three points (this is an area to color).  This can easily happen when 
+#           a geometry is greatly reduced or the original geometry is no complete or valid.
+#           6) The || and | operations handle comparisons differently. Variables may be single or 
+#           multiple values which impacts these comparisions.  To try and provide control of the 
+#           comparison, the uses of || operation on two or more variable has been replaced with 
+#           tests on each element (producing a single or multiple result vector) and then 
+#           use an ANY function to see if any one of the comparisons TRUE signalling a problems.
+#           For Example: if (missing(Parameter) || is.null(Parameter) || Parameter > 9 || Parameter < 0))
+#           is replaced by if (any(missing(Parameter),is.null(Parameter),(Parameter>9),(Parameter<0)))
+#	    7) Several of the data column names have "." or other special characters in the names.
+#           The label editing interduced in March, 2023 proved not to be as successful as wanted.
+#           In several situations, the removal of the punctuation marks was removed from the code.
+#           8) It is still unknown how rectangular and sphere coordinates systems will interact and how
+#           the sf and s2 packages handle the vector manipulation and maintain the geometries validity.
+#           Several cases were found that the sf st_is_valid and st_make_valid do not produce
+#           good geometries.  Although the sf package has been improving over the last year.
+#           The best results occur when the sf_set_s2 is set to FALSE disabling the use of the 
+#           s2 package.  This package always restores the sf_set_s2 setting when it exits.
+#           9) The USStatesBG border group has been updated to not use the areaUSData flag in the areaParm
+#           data.frame to request labeling of DC, AK, and HI.  This flag is retired in favor of the 
+#           the MapL, MapX, MapY columns in the name table.
+
 #
 #  Used packages: RColorBrewer, stringr, R.rsp, labeling, 
 #
@@ -622,7 +713,7 @@
 
 ########
 #
-# Copyrighted 2013, 2014, 2015, 2016, 2021, 2022 - 
+# Copyrighted 2013, 2014, 2015, 2016, 2021, 2022, 2023 - 
 #           by: Dan Carr, GMU and Linda Pickle and Jim Pearson of StatNet Consulting, LLC.
 #
 ########
@@ -634,13 +725,13 @@
 #  functions used from RColorBrewer:   brewer.pal*
 #
 #  functions used from graphics:   plot, lines*, arrows*, polygon*, axis*, text, mtext*, boxplot (greate own),
-#                                  points*, plot.new*, strheight*, strwidth*
+#                                  points*, plot.new*, strheight*, strwidth*, par
 #
 #  functions used from stats:      qnorm
 #
 #  functions used from grDevices:  rgb, col2rgb
 #
-#  functions used from stringr:    str_trim, str_split, str_replace_all, str_sub
+#  functions used from stringr:    str_trim, str_split, str_replace_all, str_sub, str_squish, str_pad,
 #
 #  functions used from labeling:   extended, wilkinson, 
 #
@@ -695,6 +786,7 @@
 #                            maps, this variable must be set to TRUE.  So far, only the U. S. 18 
 #                            Seer Areas have required this feature.  Most other border groups 
 #                            will have this set to FALSE.  (Old variable name = mapL2Borders)
+#                            The L2VisBorders data.frame must be present.
 #             Map.Aspect   = a numerical value. The micromapST package does not know what the 
 #                            correct aspect ratio is for the map boundaries.  Rather than guess,
 #                            Map.Aspect is set to the map's aspect ratio when the boundary data
@@ -715,6 +807,7 @@
 #                            areas and boundaries are the USStatesBG or USSeerBG datasets and will
 #                            overlay the first map in the column with labels for "AK", "HI", and "DC".
 #                            This variable should be set to FALSE for all other border groups.
+#                            (Retired, If Present it is ignored.)
 #
 #             enableAlias  = Some data may not contain the names or abbreviations contained in 
 #                            the border group dataset.  In the case of the U. S. Seer data, the 
@@ -728,6 +821,7 @@
 #             aP_Regions   = a logical variable - diaables or enables the regional area mapping feature.
 #                            If TRUE, the areasNamesAbbrsIDs data.frame must contain the information
 #                            to group areas by regions. Indicates dataRegionsOnly can be used.
+#                            and the RegVisBorders data.frame must be present.
 #             Map.RegBorders = Mostly an internal variable - indicated the RegVisBorders bounaries
 #                            should be drawn (TRUE).  Works with the "regionsB" call option to 
 #                            control regional area boundary overlay.  If dataRegionsOnly is TRUE,
@@ -737,7 +831,7 @@
 #
 #  All variable names in the areaParms data.frame must be unique within the micromapST package.
 #
-#  The areaNamesAbbrsIDs R object is a table of the full names, abbreviations, alternate 
+#  The areaNamesAbbrsIDs (areaNT) R object is a table of the full names, abbreviations, alternate 
 #  abbreviations, alias strings, and numeric ID for each geographical area in the 
 #  boundary dataset.  The abbreviation is used as the internal link between the data 
 #  and the boundary of the area.  The table provides a means 
@@ -786,8 +880,6 @@
 #
 #  mmSys$pDName   - name of the panelDesc data frame provided by caller. Not the data itself,
 #                  the name of the variable.
-#
-#
 #
 
 ######
@@ -845,9 +937,6 @@ suppressBindingNotes <- function(variablesMentionedInNotes) {
     }
 }
 
-#
-#
-######
 
 ######
 #
@@ -938,25 +1027,6 @@ is.Color  <- function(x) {
 
 ####
 #
-#  Color string to hex string conversion (handles vectors of values)
-#
-col2hex <- function(cname) {
-
-   res <- try(colMat <- grDevices::col2rgb(cname), silent=TRUE)  # us the color name valid?
-   if (!inherits(res,c("try-error")) ) {
-       # result is no-error - res has a good answer.
-       grDevices::rgb(red=colMat[1,]/255, green=colMat[2,]/255, blue=colMat[3,]/255)
-   } else {
-       # result is with error - return the error vectors
-       res  # recheck on outside.
-   }
- }
-  
-#
-####
-
-####
-#
 #  single value test function for colors.
 #
 #  The test is done against the standard color list and the micromapST color list.
@@ -969,10 +1039,7 @@ is.Color2 <- function(x) {
        # numeric color value - if so its a relative color number within the pallet.
        if (x < 0) {
           # can not be a negative value..
-          ErrFnd    <- TRUE
-          warnCnt()
-          xmsg      <- paste0("***0910 is.color2 The color value must be a positive number. Value seen:",x,"\n")
-          stop(xmsg,call.=FALSE)
+          StopFnd <- stopCntMsg(paste0("***0910 is.color2 The color value must be a positive number. Value seen:",x,"\n"))
        } else {
           # if value is numeric, convert to integer character string.
           x <- as.character(x)
@@ -1012,44 +1079,6 @@ is.Color2 <- function(x) {
 
 ####
 #
-# function to test if "x" is between or equal to a and b.
-#
-is.between <- function(x,a,b) {
-        # function checks x to make sure it's is between a and b
-        #  This version supports vectors.
-        if (a>b) {
-          (x >= b & x <= a)
-        } else {
-          (x >= a & x <= b)
-        }
-      }
- 
- #
- ####
- 
- ####
- #
- # functiion to test if "x" is within or equal to the range of "r".
- #    "r" must be a vector of length 2 to be evaluated.
- #
-is.between.r <- function(x,r) {
-    # the x must be within or equal to the range spacified in R
-    #
-    if (length(r) != 2) {
-         warnCnt()
-         xmsg    <- "***0491 INB is.between.r The r range value is not a vector with length of 2. FALSE returned.\n"
-         warning(xmsg, call.=FALSE)
-         return(rep(FALSE,length(x)))   # not valid range
-    } else {
-         return(is.between(x,r[1],r[2]))
-    }
-  }
-
-#
-####
-
-####
-#
 # Testing function - print out key par() plot parameters
 #
 
@@ -1077,65 +1106,12 @@ printPar <- function() {
 
 ####
 #
-#  odd - check if number is odd (TRUE) or even (FALSE)
+#  Test to see if variable is a tibble.  
+#  This function provides the ability to test for tibble structions without
+#  loading the tibble package.
 #
+isTib <- function(x) any( class(x) == "tbl" | class(x) == "tbl_df" )
 
-odd <- function(x) {
-    x%%2 == 1
-}
-
-#
-####
-
-####
-#
-#  CleanString - clean up character string - remove extra spaces, all punctuation, control characters and 
-#     make all caps.   Replaces all "space", "control", "punctuation" with "space".
-#
-CleanString <- function(wstr) {
-   nstr <- stringr::str_to_upper(stringr::str_trim(stringr::str_replace_all(wstr,"[[:space:][:cntrl:][:punct:]]+"," ")))
-   return(nstr)
-}
-
-#
-####
-
-####
-#
-#  Clean up strings - remove 
-#    1) special single and double quotes (open and closed)
-#    2) tick mark
-#    3) general punctuation (periods, etc.)
-#
-#    Designed to allow strings that may have different times of quotes, apos. to be compared.
-#
-ClnStr <- function(x) {
-
-    z <- gsub("[[:punct:]\u2018-\u201F]", "", x, perl=TRUE)
-    z <- stringr::str_trim(z)
-    return(z)
-}
-
-#
-####
-
-####
-#
-# simpleCap - capitalize each word in a phrase and removes "."s, "_"s, and extra blanks.
-#     Not good on vectors - must apply
-#
-
-simpleCap <- function (x)
-   {
-      s  <- stringr::str_split(x,"[ ._]")[[1]]    # split on boundaries " ", "." or "_".
-      s1 <- s[s != ""]                 # skip empty strings
-      
-      paste0(stringr::str_to_upper(stringr::str_sub(s1,1,1)),stringr::str_to_lower(stringr::str_sub(s1,2)),collapse=" ")
-   }
-      
-#
-# Alternative:
-#   gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", name, perl=TRUE)
 #
 ####
 
@@ -1474,6 +1450,8 @@ Scaler2 <- function(var,lower=FALSE) {
 #  end of point ploter.
 #
 #####
+
+
 ####
 #
 #  micromapSEER  - to support previous users of micromapSEER NCI package.
@@ -1491,7 +1469,7 @@ micromapSEER <- function(statsDFrame,panelDesc,...) {
 #
 #   Get micromapST Version
 #
-micromapST.Version <- function() { return ("micromapST V2.0.1 built 2022-09-26 11:20 am") }
+micromapST.Version <- function() { return ("micromapST V3.0.0 built 2023-08-09 02:40 pm  ") }
 
 #
 ####
@@ -1548,7 +1526,7 @@ micromapST = function(
 #  Updated and Extended by:  Jim Pearson, September, 2015 and February, 2016
 #  Updated and Extended by:  Jim Pearson, November, 2016
 #  Updated and Extended by:  Jim Pearson, November, 2021
-#  Updated and Extended by:  Jim Pearson, April, 2022 to September, 2022
+#  Updated and Extended by:  Jim Pearson, April, 2022 to December, 2022 to September, 2023
 #
 #  Packaged by: Jim Pearson
 #
@@ -1570,14 +1548,14 @@ micromapST = function(
 #                  SeoulSKoreaBG - net setup for borders and behavior for the districts in the city of Seoul South Korea.
 #                  AfricaBG      - net setup for borders and behavior for the countries of Africa.
 #
-#   Each contain the following DataFrames, Lists and Vectors::
+#   Each contain the following DataFrames, Lists and Vectors:
 #      Run Parameters:                             areaParms     
 #      Data Level Names, Abbrs. IDs, and Labels:   areaNamesAbbrIDs       (Old stateNamesFips)
 #      Data Level Boundaries:                      areaVisBorders         (Old stateVisBorders)
 #      L3 (national) Level Boundaries              L3VisBorders           (Old stateNationVisBorders)
 #
 #      L2 (state) Level Boundaries  (Optional)     L2VisBorders           (Old stateNationVisBorders)
-#      Reg Level Boundaries (Optional-Regions)     regVisBorders          (<NA>)
+#      Reg Level Boundaries (Optional-Regions)     RegVisBorders          (<NA>)
 #
 #   Each level draws there boundaries a little wider then the previous level.
 #   The area level starts with the width at 
@@ -1635,7 +1613,7 @@ micromapST = function(
 #
 #             The statsDFrame must have the area's abbr, name or ID code (like fips code) as 
 #             the rownames of the data.frame.  As an alternate a column can contain the 
-#             area's identifier and the "rowNameCol" parameter can be used to point to 
+#             area's identifier and the "rowNamesCol" parameter can be used to point to 
 #             the column.  Once the column is verified, it is assigned to the rownames 
 #             of the statsDFrame.
 #     
@@ -1838,7 +1816,7 @@ micromapST = function(
 #      for the entry and the related data in the structure. 
 #.
 #      Used to link graphic to additional data beyond the 3 data elements 
-#      provided in col1, col2, col3 indexes into the statsDFrame..
+#      provided in col1, col2, col3 indexes into the statsDFrame.
 #
 #      For boxplot graphics, a list of "boxplot" function values for each area and DC
 #        with the names (2 characters) used as the row.names. 
@@ -1913,7 +1891,8 @@ micromapST = function(
 #           contains the link names associated with the rows.  If not specified,
 #           the row.names of of the statsDFrame are used as the area names.
 #           Using the row.names is the default method of linking the data to the 
-#           border data.
+#           border data.  Once the column is identified the values are moved to $RN 
+#           and the row.names in the data.frame.
 #
 # rowNames: Type of area id used as row.names in statsDFrame data.frame. 
 #           Acceptable values are: "ab", "alt_ab", "full", "id",   Two additional options
@@ -1945,6 +1924,8 @@ micromapST = function(
 #           in sorting.  Can be a vector of column subscripts to break ties.
 #           Warning: The sortVar parameter cannot be used to sort a boxplot 
 #           or time series, since data is not contained in the statsDFrame.
+#           If no value if provided, the order of the areas in the name table is used.
+#           This does not imply an alphabetic order - depends on the border group builder.
 #
 # ascend    TRUE default sorts in ascending order.  FALSE indicated descending order.
 #
@@ -2120,7 +2101,6 @@ on.exit(options(WrkOptions))
 #
 # Set up global variables values.
 #
-
 #
 #   create warning and stop counters - must be in .GlobalEnv so the panelXXXX functions can use them.
 #
@@ -2143,6 +2123,7 @@ errCntMsg  <- function(xmsg) {
    warning(xmsg,call.=FALSE)
    return(TRUE)
 }
+
 #
 #   this should get the global variables set up so they can be referenced within all functions.
 #
@@ -2213,8 +2194,8 @@ var  <- "pDName"
 wstr <- paste0("assign(var,callVL$panelDesc,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
-#print(paste0("statsDFrame=",sDFName))
-#print(paste0("panelDesc  =",pDName ))
+cat("statsDFrame = ",as.character(sDFName),"\n")
+cat("panelDesc   = ",as.character(pDName),"\n")
 
 #
 #  callVarList is now a names list with the names of the parameter variables the the list content the 
@@ -2269,29 +2250,26 @@ UserBordGrpLoad <- FALSE             # FALSE, load from package with data(),  TR
 #    of a new or modified border group.
 #
 
-bordDir   <- bordDir[[1]][1]
-
-if ( is.null(bordDir) ) {
+if ( missing(bordDir) || is.null(bordDir) ) {
    bordDir  <- NULL   # make sure
 } else {
    if (length(bordDir)>1) { bordDir <- bordDir[[1]][1] }
+
    if ( is.na(bordDir) || bordDir == "" ) {
       bordDir <- NULL
    } else {
       if (!is.character(bordDir)) {
          # bordDir path is not a character string.
-         xmsg <- paste0("***0150 BGBD The directory specified in the bordDir call parameter is not a valid character string.\n")
-         stopCnt()
-         stop(xmsg,call=FALSE)
+         StopFnd <- stopCntMsg(paste0("***0150 BGBD The directory specified in the bordDir call parameter \n",
+                                      "        is not a valid character string.\n"))
       } else {
          bordDir <- stringr::str_trim(bordDir)                   # trim spaces.
          # validate the directory exists and is referencable.
     
          if (!dir.exists(bordDir))  {
             # bordDir path does not exist.
-            xmsg <- paste0("***0151 BGBD The directory specified in the bordDir call parameter does not exist. Value=",bordDir,"\n")
-            stopCnt()
-            stop(xmsg,call=FALSE)
+            StopFnd <- stopCntMsg(paste0("***0151 BGBD The directory specified in the bordDir call parameter does not exist.\n",
+                                         "        Value=",bordDir,"\n"))
          } else {
             UserBordGrpLoad = TRUE    # load() from directory don't data()
             xc <- stringr::str_sub(bordDir,-1,-1)  # get last character
@@ -2306,7 +2284,7 @@ if ( is.null(bordDir) ) {
 
 callVL$bordDir <- bordDir
 
-bordGrp             <-  str_trim(bordGrp[[1]][1])  # get first value only and clean it up.
+bordGrp             <-  stringr::str_trim(bordGrp[[1]][1])  # get first value only and clean it up.
 BordGrpName         <-  bordGrp 
 bgFile              <-  NA
 
@@ -2314,7 +2292,7 @@ def_bordGrp         <-  "DeFaUlT"
 # no valid bordDir directory -> the bordGrp must be a .rda in this package. 
 # If no bordGrp parameter, set default to USStatesBG.
 
-if ( is.null(bordGrp) ) {
+if ( missing(bordGrp) || (is.null(bordGrp) )) {
    # if NULL - set to default.
    bordGrp          <- def_bordGrp           # indicates which structure .rda file in package to load.
    
@@ -2343,7 +2321,7 @@ if (!UserBordGrpLoad) {
    if (bordGrp == def_bordGrp)  bordGrp <- "USStatesBG"
 
    # this point we have something in bordGrp
-   BordGrpName    <- str_trim(bordGrp)
+   BordGrpName    <- stringr::str_trim(bordGrp)
    #cat("bordGrp:",bordGrp,"  len:",length(bordGrp),"\n")
    #cat("BordGrpName:",BordGrpName," len:",length(BordGrpName),"\n")
 
@@ -2391,7 +2369,7 @@ if (!UserBordGrpLoad) {
          bordGrp     <- paste0(bordGrp,".rda")
       } else {
          # if extension is present - must be .rda or .RData
-         fnSplit[2]   <- str_to_upper(fnSplit[2])
+         fnSplit[2]   <- stringr::str_to_upper(fnSplit[2])
          if (fnSplit[2] != "RDA" && fnSplit[2] != "RDATA") {
             # error - extension must be .rda or .RData.
             xmsg <- paste0("***0155 BGBN The bordGrp filename must have an '.rda' or '.RData' file extension.\n")
@@ -2406,8 +2384,7 @@ if (!UserBordGrpLoad) {
 
    if (!file.exists(bgFile)) {
       xmsg       <- "***0156 BGBN The bordGrp file in the bordDir directory does not exist.\n"
-      stopCnt()
-      stop(xmsg, call = FALSE)
+      StopFnd <- stopCntMsg(xmsg)
    }
 }
 
@@ -2426,7 +2403,7 @@ eval(parse(text=wstr))
 #cat("bgFile      = ",bgFile,"\n")
 
 #
-######
+######  01Mx
 #
 #   load micromap border and names tables based on type of run
 #      Currently supported: USStatesBG and USSeerBG
@@ -2471,63 +2448,361 @@ if (!UserBordGrpLoad) {
   res <- try(load(bgFile),silent=TRUE)                    # only error should be a lock or error in reading file.
   if (inherits(res,"try-error",which=FALSE)) {
      # TRUE - error occurred during user border group file loading.
-     stopCnt()
-     xmsg     <- paste0("***0160 BGBD System error encountered when loading the border group. See error message:\n")
-     ymsg     <- paste0("***0160 >>",res[1])  # get message from error
+     xmsg     <- paste0("***01M0 BGBD System error encountered when loading the border group. See error message:\n")
+     ymsg     <- paste0("***01M0 >>",res[1])  # get message from error
      warning(xmsg, call.=FALSE)
-     stop(ymsg,    call.=FALSE)
+     StopFnd <- stopCntMsg(ymsg)
      # stopped.  
      rm(ymsg)
   }
 }
 
 #
-#  Basic Verify that all of the bordGrp data.frames have been loaded.
+#  Step 1 after getting the Border Group in memory
+#    Verify all needed boundary data sets were loaded. Based on the Map.xxx variables.
 #
 
-MissInBG   <- NULL
-ErrFnd     <- FALSE
-if (is.null(areaParms)) { 
-   ErrFnd   <- TRUE
-   MissInBG <- paste0(MissInBG,", areaParms")
-}
-if (is.null(areaNamesAbbrsIDs)) { 
-   ErrFnd   <- TRUE 
-   MissInBG <- paste0(MissInBG,", areaNamesAbbrsIDs")
-}
-if (is.null(areaVisBorders)) { 
-   ErrFnd   <- TRUE
-   MissInBG <- paste0(MissInBG,", areaVisBorders")
-}
-if (is.null(L3VisBorders)) { 
-   ErrFnd   <- TRUE
-   MissInBG <- paste0(MissInBG,", L3VisBorders")
-}
-#if (is.null(L2VisBorders)) { 
-   # No action at this time.  Check later when processing areaParms.  
-   #   L2VisBorders is only needed if Map.L2Borders is TRUE. 
-   #   If there is no L2VisBorders data.frame, set L2VisBorders to L3VisBorders, 
-   #   or is equal to NA, then the Map.L2Borders are set to FALSE 
-   #   and a warning message generated.
-#}
-#if (is.null(RegVisBorders)) { 
-   # No action at this time.  Check later when processing areaParms.  
-   #   RegVisBorders is only needed if aP_Regions or Map.RegBorders are set to TRUE. 
-   #   If there is no RegVisBorders data.frame, it is set to L3VisBorders, 
-   #   then Map.RegRegions is set to FALSE.  It is possible to do regional mapping without
-   #   regional boundaries.
-#}
+MissInBG            <- NULL
+ErrFnd              <- FALSE
 
-#str(areaNamesAbbrsIDs)
+NoAreaParms         <- FALSE
+NoAreaNamesAbbrsIDs <- FALSE
+NoAreaVisBorders    <- FALSE
+NoL3VisBorders      <- FALSE
+Map.L3Borders       <- FALSE
+
+#
+#  areaParms, areaNamesAbbrsIDs, areaVisBorders
+#
+
+#  areaParms
+
+if (!exists("areaParms")) { 
+   ErrFnd      <- TRUE
+   MissInBG    <- paste0(MissInBG,", areaParms")
+   NoAreaParms <- TRUE
+}
+
+# areaNamesAbbrsIDs
+
+if (!exists("areaNamesAbbrsIDs")) { 
+   MissInBG            <- paste0(MissInBG,", areaNamesAbbrsIDs")
+   NoAreaNamesAbbrsIDs <- TRUE
+   #xmsg   <- paste0("***01M1 The areaNamesAddrsIDs (Name Table) is missing from the border group.\n")
+   #ErrFnd <- errCntMsg(xmsg)
+} else {
+   rlAreaNamesAbbrsIDs <- areaNamesAbbrsIDs
+   # remainder of processing done below.
+
+   ##########
+   #
+   #  areaNamesAbbrsIDs fill out, back fill, and fix up...
+   #
+   #  All location IDs must be upper case, have punctation removed, leading and trailing
+   #  blanks removed, and internal blanks reduced to a single blank.
+   #
+   #cat("Code: 2444 Dim of rlAreaNamesAbbrsIDs:",dim(rlAreaNamesAbbrsIDs),"\n")
+   #cat("names of rlAreaNamesAbbrsIDs:",names(rlAreaNamesAbbrsIDs),"\n")
+   row.names(rlAreaNamesAbbrsIDs) <- rlAreaNamesAbbrsIDs$Key   # ensure row.names match the keys
+   rlAreaNamesAbbrsIDs$NotUsed    <- FALSE
+  
+   #print(str(rlAreaNamesAbbrsIDs))
+  
+   NTNames         <- names(rlAreaNamesAbbrsIDs)  # get names of each NameTable Column.
+
+   # start modifying code focus on areaNT data.frame instead of name table.  These variables
+   # have been editted to the requirements for matching.
+    
+   # fix up Name Table for area matching.
+    
+   areaNT         <- rlAreaNamesAbbrsIDs       # get working copy of Name Table (areaNT)
+    
+   #    Matching strings  - use areaNT$xxx variables
+   areaNT$Abbr    <- ClnStr(areaNT$Abbr)       # Get list of abbrevations cleaned. (All CAPS, no punct, single blanks)
+    
+   areaNT$Name    <- ClnStr(areaNT$Name)       # get list of full area names in uppercase (All CAPS, no punct, single blanks)
+    
+   areaNT$Alt_Abbr<- ClnStr(areaNT$Alt_Abbr)   # get list of alternate abbreviations. (All CAPS, no punct, single blanks)
+    
+   # alias values are left un-editted in case they contain symbols needed for the wildcard match.
+    
+   areaNT$ID      <- ClnStr(areaNT$ID)         # ID   (All CAPS, no punct, single blanks)
+    
+   # Done = areaNT$Key <- ClnStr(areaNT$Key)  # get key as uppercase. (links into VisBorder files.)  Where was this done?
+      
+   # L2_ID and regID variable are processed below.
+    
+   #    Presentation strings
+   ID.Abbr        <- areaNT$Abbr             #    (All CAPS, no punct, single blanks)
+   # for ID.Name force proper capitalization on the name
+   ID.Name        <- as.vector(sapply(areaNT$Name,function(x) simpleCap(x))) # proper cap.  Not matched on but should look neat.
+    
+   NTColList <- c("Name","Abbr","ID","Alt_Abbr","Alias","Key","NotUsed")
+   #cat("Code: 2496 - Adjusted Name Table variable:\n")
+   #print(areaNT[,NTColList])
+   #cat("Original:\n")
+   #print(rlAreaNamesAbbrsIDs[,NTColList])
+}   
+
+NTNames <- names(rlAreaNamesAbbrsIDs)
+#print (NTNames)
+#print (names(areaNT))
+#print (areaNT)
+#cat("Code:  2552 \n")
+#
+#####
+
+# areaVisBorders
+
+if (!exists("areaVisBorders")) { 
+   ErrFnd           <- TRUE
+   MissInBG         <- paste0(MissInBG,", areaVisBorders")
+   NoAreaVisBorders <- TRUE  
+   #cat("***01M2 The areaVisBorders does not exist in memory!\n")
+   xmsg <- "***01M2 The areaVisBorders boundary data set is missing from the border group.\n"
+   StopFnd <- stopCntMsg(xmsg)
+} else {
+   if (is.null(areaVisBorders)) {
+      # null VisBorders - ERROR, a value of NULL is not acceptable.
+      xmsg <- "***01M3 The areaVisBorders boundary data set has a NULL value from the border group.\n"
+      StopFnd <- stopCntMsg(xmsg)
+   } else {
+      # areaVisBorders exists in memory.
+      DimAVB <- dim(areaVisBorders)
+      #cat("areaVisBorders - Original Dim:",DimAVB[1]," ",DimAVB[2],"\n")
+      
+      rlAreaVisBorders      <- areaVisBorders                     # get border group's areaVisBorder
+      #rlAreaVisBorders$Key  <- ClnStr(rlAreaVisBorders$Key)       # fix and clean keys.
+      rlAreaVisBorders$hole <- as.logical(rlAreaVisBorders$hole)  # make adjustment for numeric vs logical.
+      #
+      #uAVBKeys    <- unique(areaVisBorders$Key)                  # debug output - list of unique keys in areaVisBorder
+      #cat("Unique areaVisBorders Keys: Code: 2530 \n")
+      #print(uAVBKeys)
+ 
+      #cat("Dim of areaVisBorder:",dim(rlAreaVisBorders),"\n")
+      #print(head(rlAreaVisBorders,40))
+   }
+}
 
 if (ErrFnd) {
    # if ErrFnd, the MissInBG must contain at least one entry.
    MissInBG  <- substr(MissInBG,3,nchar(MissInBG))  # Kill leading ", "
-   stopCnt()
-   xmsg      <- paste0("***0162 BGBN After loading ",BordGrpName," border group data set, the following objects are missing: ",MissInBG,"\n")
-   stop(xmsg, call.=FALSE)
+   xmsg      <- paste0("***01M9 BGBN After loading ",BordGrpName," border group, the following critical objects are missing: ",MissInBG,"\n")
+   StopFnd <- stopCntMsg(xmsg)
 }
+
+ErrFnd <- FALSE
+MissInBG <-""
+
+#
+#  Now on to the optional datasets: L3VisBorders, L2VisBorders, and RegVisBorders tables  
+#
+
+#  L3VisBorders
+
+if (is.null(areaParms$Map.L3Borders) || !exists("areaParms$Map.L3Borders")) {
+   Map.L3Borders    <- TRUE   # for TRUE, because it is not there.
+} else {
+   Map.L3Borders    <- as.logical(areaParms$Map.L3Borders[[1]][1])
+   if (length(Map.L3Borders) == 0) Map.L3Borders <- FALSE   # another form of NULL.
+}
+if (Map.L3Borders) {
+   # L3 desired.
+   if (!exists("L3VisBorders")) { 
+      # if boundaries don't exist, then turn Map.L3Borders - OFF .
+      ErrFnd           <- TRUE
+      MissInBG         <- paste0(MissInBG,", L3VisBorders")
+      Map.L3Borders    <- FALSE
+      xmsg <- "***01M4 The L3VisBorders boundary dataset is does not exist in memory from the Border Group.\n"
+      errCntMsg(xmsg)
+   } else {
+      # L3VisBorders and Map.L3Borders    
+      if (is.null(L3VisBorders)) {
+         Map.L3Borders       <- FALSE    # disable ploting L3 
+         cat("***01M7 The L3VisBorders is NULL. Ploting the L3 outline is disabled.\n")
+      } else {
+         # have L3 boundaries
+         DimL3VB <- dim(L3VisBorders)
+         #cat("L3VisBorders - Original Dim:",DimL3VB[1]," ",DimL3VB[2],"\n")
+         
+         rlL3VisBorders      <- L3VisBorders 
+         # we have L3VisBorders - what do we do.
+     
+         rlL3VisBorders$Key  <- ClnStr(rlL3VisBorders$Key)
+         rlL3VisBorders$hole <- as.logical(rlL3VisBorders$hole)  # make adjustment for numeric vs logical.
+         #cat("dim of rlL3VisBorders     :",dim(rlL3VisBorders),"\n")
+         #print(head(rlL3VisBorders,30))
+      }
+   }
+}
+if (!Map.L3Borders) {
+   NoL3VisBorders   <- TRUE
+   L3VisBorders     <- NULL
+   rlL3VIsBorders   <- NULL
+}
+
+
+# L2VisBorders    
+
+L2Feature           <- FALSE
+NoL2VisBorders      <- FALSE
+Map.L2Borders       <- FALSE
+
+#  Layer 2 Boundary parameters.
+if (is.null(areaParms$Map.L2Borders))  {
+    # have areaParms value - Map.L2Borders is missing in the data.frame
+    Map.L2Borders   <- FALSE
+} else {
+    Map.L2Borders   <- as.logical(areaParms$Map.L2Borders[[1]][1])
+}
+
+if (Map.L2Borders) {  
+   # if L2 should be drawn,    
+   #   L2VisBorders is only needed if Map.L2Borders is TRUE. 
+   #   and a warning message generated.
+
+   if (!exists("L2VisBorders")) {
+      # but no boundary data - turn it off.
+      Map.L2Borders    <- FALSE      # Disable L2 drawing
+      MissInBG         <- paste0(MissInBG,", L2VisBorders")
+      #cat("L2Borders Mapping requested, but no borders.\n")
+      xmsg <- paste0("***01M5 The L2Borders is set to be drawn, but no L2 border data is present. L2 Feature disabled.")
+      cat(xmsg,"\n")
+      #errCntMsg(xmsg)
+   } else {
+      #  L2VisBorders exist is some form and wanted.
+      if (is.null(L2VisBorders)) {
+         Map.L2Borders    <- FALSE
+         #cat("L2VisBorders is NULL\n")
+         #should not happen - just change map.l2border to false.
+         
+      } else {
+         # have L2 boundary data.
+         DimL2VB <- dim(L2VisBorders)
+         #cat("L2VisBorders - Original Dim:",DimL2VB[1]," ",DimL2VB[2],"\n")
+         
+         rlL2VisBorders      <- L2VisBorders
+      
+         # Map.L2Borders  - draw L2 borders   (option - also turned off if limited regional drawing is done.) 
+         if (is.null(areaNT$L2_ID)) {
+            # name table does not have L2 information
+            Map.L2Borders    <- FALSE    # disable
+            cat("***01MA L2Border was requested, but the Name Table does not have a L2_ID column.  Disable drawing of L2.\n")
+         } else {
+            # have column in Name Table and L2 borders.
+            NoL2VisBorders   <- FALSE
+            L2Feature        <- TRUE
+            Map.L2Borders    <- TRUE
+            rlL2VisBorders$Key  <- ClnStr(rlL2VisBorders$Key)
+            rlL2VisBorders$hole <- as.logical(rlL2VisBorders$hole)  # make adjustment for numeric vs logical.
+            areaNT$L2_ID     <- ClnStr(areaNT$L2_ID)      # L2_ID 
+            #cat("dim of rlL2VisBorders     :",dim(rlL2VisBorders),"\n")
+            #print(head(rlL2VisBorders,30))
+         }
+      }
+   }
+} else {
+   # no Map.L2Border was equal to FALSE or null
+   if(Map.L3Borders) rlL2VisBorders <- rlL3VisBorders  #   (place holder for code)
+}
+if (!Map.L2Borders) {    # if no borders, turn off other flags and the VisBorder data.
+   L2Feature        <- FALSE
+   NoL2VisBorders   <- TRUE
+   L2VisBorders     <- NULL
+   rlL2VisBorders   <- NULL
+}
+
+       
+# Reg Boundaries
+
+RegFeature          <- FALSE
+NoRegVisBorders     <- FALSE
+Map.RegBorders      <- FALSE
+
+#  Regional Boundary parameters.   (a couple of flags.)
+MapRegAccum <- FALSE
+#       areaParms$Regions       (not set in BuildBorderGroup code) (old parameter-keep)
+if (!is.null(areaParms$Regions))         MapRegAccum <- MapRegAccum || areaParms$Regions
+#       areaParms$aP_Regions
+if (!is.null(areaParms$aP_Regions))      MapRegAccum <- MapRegAccum || areaParms$aP_Regions
+#       areaParms$Map.RegBorders
+if (!is.null(areaParms$Map.RegBorders))  MapRegAccum <- MapRegAccum || areaParms$Map.RegBorders
+
+areaParms$aP_Regions     <- MapRegAccum
+areaParms$Map.RegBorders <- as.logical(MapRegAccum[[1]][1])
+Map.RegBorders           <- areaParms$Map.RegBorders
+aP_Regions               <- Map.RegBorders
+
+if (Map.RegBorders) {
+   # If regional boundary should be draw,    
+   #   RegVisBorders is only needed if aP_Regions or Map.RegBorders are set to TRUE. 
+   
+   if (!exists("RegVisBorders")) { 
+      #  but don't exist.
+      Map.RegBorders           <- FALSE    # disable
+      MissInBG                 <- paste0(MissInBG,", RegVisBorders")
+
+      #cat("RegBorders-YES, but no borders.\n")
+      xmsg <- paste0("***01M6 The RegBorders is set to be drawn, border data is not present. Reg Feature disabled.")
+      cat(xmsg,"\n")
+      #errCntMsg(xmsg)
+   } else {
+      # have RegVisBorders - Reg boundaries - and wanted.
+      if (is.null(RegVisBorders)) {
+         # another form of does not exist.
+         Map.RegBorders       <- FALSE
+         #cat("RegVisBorders is NULL.\n") # should not happen, if Map.RegBorders is TRUE, there should be boundary data.
+         #    so just turn off the Map.RegBorders <- FALSE
+      } else {  
+         DimRegVB <- dim(RegVisBorders)
+         #cat("RegVisBorders - Original Dim:",DimRegVB[1]," ",DimRegVB[2],"\n")
+         
+         rlRegVisBorders    <- RegVisBorders   # exists and not null
+         # Have RegVisBorder boundary data
+         # Check name table Regional columns
+         if (is.null(areaNT$regID)) {   
+            # current name table does not have regional information.
+            Map.RegBorders  <- FALSE    # disable
+            cat("***01MB Regional boundaries have been requested, but the Name Table has no regID column. The feature is disabled.\n")
+         } else {
+            RegFeature           <- TRUE
+            rlRegVisBorders$Key  <- ClnStr(rlRegVisBorders$Key)
+            rlRegVisBorders$hole <- as.logical(rlRegVisBorders$hole)  # make adjustment for numeric vs logical.
+ 
+            areaNT$regID         <- ClnStr(areaNT$regID)      # regID 
+            #cat("dim of rlRegVisBorders     :",dim(rlRegVisBorders),"\n")
+            #print(head(rlRegVisBorders,40))
+         }
+      }
+   }
+} else {
+   # no Map.RegBorder was equal to FALSE or null
+   if(Map.L3Borders) rlRegVisBorders <- rlL3VisBorders  #   (place holder for code)
+}
+
+if (!Map.RegBorders) {
+   # no RegVisBorders or NULL, if so reset all other flags.
+   areaParms$aP_Regions     <- FALSE
+   areaParms$Map.RegBorders <- FALSE
+   aP_Regions               <- FALSE
+   regionsB                 <- FALSE
+   dataRegionsOnly          <- FALSE	 
+   RegFeature               <- FALSE
+   NoRegVisBorders          <- TRUE
+   RegVisBorders            <- NULL
+   rlRegVisBorders          <- NULL
+}
+
+if (ErrFnd) {
+   # if ErrFnd, the MissInBG must contain at least one entry.
+   MissInBG  <- substr(MissInBG,3,nchar(MissInBG))  # Kill leading ", "
+   xmsg      <- paste0("***01M8 BGBN After loading ",BordGrpName," border group, the following optional objects are missing: ",MissInBG,"\n")
+   errCntMsg(xmsg)
+}
+
 rm(MissInBG,ErrFnd)
+
+#cat("Code: 2747 - Map.L2Borders:",Map.L2Borders,"  Map.RegBorders:",Map.RegBorders,"  aP_Regions:",aP_Regions,"\n")
 
 # Clean up and move data into old structures
 
@@ -2555,8 +2830,10 @@ if (UserBordGrpLoad) {
    #
 
 }
+#
+#####
 
-##########
+#####    
 #
 #  Merge the "areaParms" variables into the global variables.  
 #
@@ -2598,39 +2875,51 @@ if (UserBordGrpLoad) {
     Id.Hdr2       <- Id.Hdr2[[1]][1]
     if (any(is.na(Id.Hdr2))) Id.Hdr2 <- ""
     
-    # Map.L2Borders  - draw L2 borders
-    if (is.null(areaParms$Map.L2Borders)) {
-       Map.L2Borders <- FALSE
-    } else {
-       Map.L2Borders <- as.logical(areaParms$Map.L2Borders)
-    }
+    
+    #cat("Code: 2806 - bordGrp:",bordGrp,"\n",
+    #    "             Map Var-Hdr1:",Map.Hdr1,"  Hdr2:",Map.Hdr2,
+    #    "  MinH:",Map.MinH,"  MaxH:",Map.MaxH,"  Aspect:",Map.Aspect,"\n",
+    #    "             Id Var-Hdr1:",Id.Hdr1,"  Hdr2:",Id.Hdr2,"\n")        
 
-    # Map.L3Borders  - draw L3 borders   (option - also turned off if limited regional drawing is done.) 
-    if (is.null(areaParms$Map.L3Borders)) {
-       Map.L3Borders <- TRUE
-    } else {
-       Map.L3Borders <- as.logical(areaParms$Map.L3Borders)
-    }
+#   
+#####
 
-    areaUSData    <- as.logical(areaParms$areaUSData)
+#####
+#
+#   areaUSData and MapLabels are Retiring in favor of MapL Name Table columns
+
+    # retiring in favor of MapL
+    areaUSData    <- as.logical(areaParms$areaUSData[[1]][1])
     areaUSData    <- areaUSData[[1]][1]      # Can only be true with the USStatesBG border Group.
     if (any(is.na(areaUSData)))  areaUSData <- FALSE
+
+    if(BordGrpName == "USSeerBG") {
+       areaUSData <- FALSE
+       # turn off the DC, HI, AK old logic.
+    }
+   
     
-    enableAlias   <- as.logical(areaParms$enableAlias)
+####
+#
+#   Enable Alias feature
+#
+    enableAlias   <- as.logical(areaParms$enableAlias[[1]][1])
     enableAlias   <- enableAlias[[1]][1]     # should only be TRUE when the Alias field is properly implemented.
     if (any(is.na(enableAlias))) enableAlias <- FALSE
-    
+
     #print("areaParms:")
     #print(str(areaParms))
 
-# fix up areaParms to unique names
+#
+#####
+
+#####
+#
+# fix up areaParms to unique names   (old to new)
     
     # check for old field names.  If present - copy to new names.
+    #  If Regions is present, the other parameters should not be.
     
-    if (!is.null(areaParms$Regions)) {
-       areaParms$aP_Regions     <- as.logical(areaParms$Regions)
-       areaParms$Regions        <- NULL
-    }
     if (!is.null(areaParms$Units)) {
        areaParms$aP_Units       <- as.character(areaParms$Units)
        areaParms$Units          <- NULL
@@ -2639,51 +2928,31 @@ if (UserBordGrpLoad) {
        areaParms$aP_Proj        <- as.character(areaParms$Proj)
        areaParms$Proj           <- NULL
     }
-    
-    #  Check regions, and boundary overlay flags.
-    #
-    #  aP_Regions - feature enabler - if RegVisBorder is present and information in name table.
-    #    Referres to name table information, not regional boundaries
-    #
-
-    if (is.null(areaParms$aP_Regions)) {
-       areaParms$aP_Regions     <- FALSE         # no regional mapping feature
-    }
-    if (is.na(areaParms$aP_Regions[[1]][1])) {
-       areaParms$aP_Regions     <- FALSE
-    }
-    
-    #  region borders can be drawn or not.   If regions feature enable, default = TRUE.  If not, FALSE 
-    #        
-    
-    if (is.null(areaParms$Map.RegBorders)) {
-       areaParms$Map.RegBorders <- FALSE         # no regional boundaries available
-    }
-    if (is.na(areaParms$Map.RegBorders[[1]][1])) {
-       areaParms$Map.RegBorders <- FALSE         # no regional boundaries available
-    }
-    
-    # copy from data frame into work variables.
-    
-    aP_Regions           <- as.logical(areaParms$aP_Regions)
     aP_Units             <- areaParms$aP_Units
     aP_Proj              <- areaParms$aP_Proj
-    
-    Map.RegBorders       <- as.logical(areaParms$Map.RegBorders)
-    
-    #cat("Initial areaParms - Map. L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"  aP_Regions:",aP_Regions,"\n")   
-    #print(str(areaParms))
-
+     
+    #  Check regions, and boundary overlay flags.
+    #
+    #  aP_Regions - Reg feature enabler - set TRUE, 
+    #    if RegVisBorders is present and regID information is in the name table then
+    #    reflect as RegFeature = TRUE.
+    #    If not TRUE, regions and Map.RegBorders will be set FALSE.  
+    #    The regID is also required in the Name Table.
+    #
+    #    Summary:  RegVisBorders - Present
+    #              aP_Regions    - TRUE
+    #              regID column in name table - Present and no NA and more than one regID.
+    #      Than -> RegFeature  - TRUE
+    #              aP_Regions  - TRUE
+    #              Map.RegBorders - TRUE
+    #
+         
 #
-#  after this point we do not reference areaParms again.
+#  After this point we do not reference areaParms again.
 #
 ####
 
-if(BordGrpName == "USSeerBG") {
-   areaUSData <- FALSE
-   # turn off the DC, HI, AK old logic.
-}
-   
+if (is.null(areaParms$Ver))  areaParms$Ver <- c("0")  # set areaParms version to 0
 
 ####
 #
@@ -2693,99 +2962,29 @@ if(BordGrpName == "USSeerBG") {
 
 detailExtra <- colnames(areaParms)   # get list of parameters from areaParms
 
-x           <- match("bordGrp",detailExtra)   # if list contains "bordGrp"
+# remove list of unused items - like "bordGrp", etc.
 
+RmList      <- c("bordGrp")
+
+x           <- match(RmList,detailExtra)   # if list contains "bordGrp"
 if (!is.na(x)) {
    detailExtra <- detailExtra[-x]             # remove it from the list. 
 }
 
     # When "bordGrp" is excluded, this would leave:
-    #  "Id.Hdr1","Id.Hdr2", "Map.Hdr1", "Map.Hdr2", "Map.MinH", "Map.MaxH", "Map.L2Borders", 
-    #  "areaUSData", "enableAlias", "aP_Regions" , "aP_Proj" , "aP_Units"
-           
+    #  "OrigProj4",     "NewProj4",       "OrigWkt",    "NewWkt",   "Driver",   
+    #  "ShapeFName",    "ShapeFDir",      "BGDir",      "BGBase",
+    #  "areaUSData",    "enableAlias",    
+    #  "Map.MinH",      "Map.MaxH",       "MapLData",   "LabelCex", "Map.Aspect", 
+    #  "Map.L2Borders", "Map.Hdr1",       "Map.Hdr2",   "Id.Hdr1",  "Id.Hdr2",
+    #  "aP_Regions",    "Map.RegBorders", "aP_Units",   "aP_Proj",  
+    #  "xLimL",         "xLimH",          "yLimL",      "yLimH",
+    
 #
 # This list is appended to the colname list derived from the default details data.frame to 
 # create a list of valid variables.
 #
 ##########
-
-##########
-#
-#  areaNamesAbbrsIDs and xxxVisBorders tables
-#
-    #cat("dim of areaNamesAbbrsIDs:",dim(areaNamesAbbrsIDs),"\n")
-    #cat("names of areaNamesAbbrsIDs:",names(areaNamesAbbrsIDs),"\n")
-    row.names(areaNamesAbbrsIDs) <- areaNamesAbbrsIDs$Key   # ensure row.names match the keys
-    areaNamesAbbrsIDs$NotUsed    <- FALSE
-    NTNames  <- names(areaNamesAbbrsIDs)
-    #str(areaNamesAbbrsIDs)
-    
-    if (is.null(areaNamesAbbrsIDs$regID)) {   
-       # current name table does not have regional information.
-       areaNamesAbbrsIDs$regID   <- "<NA>"
-       areaNamesAbbrsIDs$regName <- "<NONE>"
-       aP_Regions      <- FALSE
-       regionsB        <- FALSE
-       dataRegionsOnly <- FALSE	 
-       Map.RegBorders  <- FALSE
-    }
-
-    rlAreaNamesAbbrsIDs <- areaNamesAbbrsIDs                # save copy of name table
-    #cat("dim of rlAreaNamesAbbrsIDs:",dim(rlAreaNamesAbbrsIDs),"\n")
-    #print(str(areaNamesAbbrsIDs))
-#    
-#####
-
-#####
-#
-    # area boundaries
-    areaVisBorders$hole <- as.logical(areaVisBorders$hole)  # make adjustment for numeric vs logical.
-    rlAreaVisBorders    <- areaVisBorders                   # save copy of sub-area boundaries
-    #cat("dim of rlAreaVisBorders   :",dim(rlAreaVisBorders),"\n")
-    #print(str(areaVisBorders))
-
-    # total area boundaries
-
-    rlL3VisBorders      <- L3VisBorders                     # save copy of area boundary
-    #cat("dim of rlL3VisBorders     :",dim(rlL3VisBorders),"\n")
-    #print(str(L3VisBorders))
-    
-    # Check on L2VisBorder and complete set up.
-    
-    if (Map.L2Borders) {
-       if ( is.null(L2VisBorders) || identical(L2VisBorders,L3VisBorders) ) {
-          # no L2VisBorders or L2VisBorders is the same as L3VisBorders
-          # Map.L2Borders set on - but no boundaries to draw.
-          xmsg             <- paste0("***0164 BGBG In the areaParms data.frame the Map.L2Borders is TRUE, but no level 2 boundaries are provided,  Level 2 overlay is disabled.\n")        
-          warnCnt()
-          warning(xmsg,call.=FALSE)
-          L2VisBorders     <- L3VisBorders   # copy L3 to L2 data.frame (Place holder)
-          Map.L2Borders    <- FALSE
-       }
-    }
-    
-    rlL2VisBorders      <- L2VisBorders
-    
-    #print(str(rlL2VisBorders))  
-    #
-    
-    # Check on RegVisBorder and complete set up.
-
-    if (Map.RegBorders) {
-       if ( is.null(RegVisBorders) || identical(RegVisBorders,L3VisBorders) ) {
-          # no RegVisBorders or RegVisBorders == L3VisBorders
-          xmsg           <- paste0("***0166 BGBG The areaParms variable aP_Regions is TRUE and/or Map.RegBorders is TRUE, but no regional boundaries exist in border group. Regions overlay is disabled.\n")
-          warnCnt()
-          warning(xmsg,call.=FALSE)
-          Map.RegBorders <- FALSE
-          RegVisBorders  <- L3VisBorders   # copy L3 to L2 data.frame (placeholder)
-       }
-    }
-    
-    #
-    rlRegVisBorders      <- RegVisBorders
-    
-    #print(str(rlRegVisBorders))  
     
 #
 # Implementation change note:  The regions feature will be implemented using the 
@@ -2796,95 +2995,80 @@ if (!is.na(x)) {
 #   sub mapping of its boundaries - hopefully they will 
 #   match up with the area boundaries.
 #
-#  Map.L2Borders  > controls if L2VisBorders is drawn.
-#  Map.RegBorders > controls if RegVisBorders is drawn.
+#  Map.L2Borders  > controls if L2VisBorders is drawn.  (L2Feature)
+#  aP_RegBorders and Map.RegBorders > controls if RegVisBorders is drawn.
 #  Map.L3Borders  > controls if L3VisBorders is drawn.
 #
-#  Map.L3Borders is TRUE by default, but reset to FALSE when a sub-set of regions are drawn.
-#  Map.RegBorders is only TRUE when there is a valid RegVisBorders data.frame.  This is not 
-#    independent of the aP_Regions feature control flag.
+#  Map.L3Borders is TRUE by default, but reset to FALSE when a sub-set of regions are drawn
+#     or the borders are not present.
+#
+#  aP_RegBorders (or Map.RegBorders, RegFeature) is only TRUE when there is a valid 
+#        RegVisBorders data.frame.  This is not independent of the aP_Regions 
+#        feature control flag.
+#
 #  Map.L2Borders is TRUE when a valid L2VisBorders data.frame is present.
 #
 #  When a subset of the regions in a border group are to be drawn,
 #    a) The areaNamesAbbrsIDs name table is not modified.
-#    b) L2VisBorders, RegVisBorders data.frames are edited to the limited group of areas.
+#    b) L2VisBorders and RegVisBorders data.frames are edited to the limited group of areas.
 #         It is assumed L2 is a subset of Reg.
 #    c) Map.L3Borders is set to FALSE to not draw the outline of the total space.
 #
 
 #
-#  If both L2 and Reg are persent,  The name table is used to know witch L2 boundaries to draw.
+#  If both L2 and Reg are persent,  The name table is used to know which L2 boundaries to draw.
+#
 #  In regions mode:   
 #
-#        listUsedArea      <- areaNamesAbbrsIDs[IndexDFtoNT,"Key"]
-#        listUsedL2        <- unique(areaNamesAbbrsIDs[IndexDFtoNT,"L2_ID"])
-#        listUsedRegions   <- unique(areaNamesAbbrsIDs[IndexDFtoNT,"regID"])
+#     x) if L2Feature = TRUE (Map.L2Borders) 
+#           Still only reference L2 spaces within the Regions being mapped.
 #
-#     a) if dataRegionsOnly=TRUE - enable regions feature.
+#        listUsedArea      <- areaNT[IndexDFtoNT,"Key"]   # for areas with data.
+#        listUsedL2        <- unique(areaNT[IndexDFtoNT,"L2_ID"])   # all L2s with data
+#        listUsedRegions   <- unique(areaNT[IndexDFtoNT,"regID"])   # all regions with data
 #
-#        regMatch          <- !is.na(match(areaNamesAbbrsIDs$regID,listUsedRegions))  # list of areas in regions
-#        listAllAreas      <- areaNamesAbbrsIDs[regMatch,"Key"]
-#        listAllL2         <- unique(areaNamesAbbrsIDs[regMatch,"L2_ID"])
-#        listAllRegions    <- unique(areaNamesAbbrsIDs[regMatch,"regID"]) 
+#     y) If Map.RegBorder = TRUE
 #
-#     b) if dataRegionsOnly=FALSE or not enabled.
+#       a) if dataRegionsOnly=TRUE - enable regions feature 
 #
-#        listAllAreas      <- areaNamesAbbrsIDs[,"Key"]
-#        listAllL2         <- unique(areaNamesAbbrsIDs[,"L2_ID"])
-#        listAllRegions    <- unique(areaNamesAbbrsIDs[,"regID"]) 
+#          regMatch          <- !is.na(match(areaNT$regID,listUsedRegions))  # areas with data areas.
+#          listAllAreas      <- areaNT[regMatch,"Key"]                       # keys of all areas.
+#          listAllL2         <- unique(areaNT[regMatch,"L2_ID"])             # L2_ID for all L2s
+#          listAllRegions    <- unique(areaNT[regMatch,"regID"])             # regID for all Regions 
+#
+#       b) if dataRegionsOnly=FALSE or not enabled.
+#
+#          listAllAreas      <- areaNT[,"Key"]                               # all areas
+#          listAllL2         <- unique(areaNT[,"L2_ID"])                     # all L2s
+#          listAllRegions    <- unique(areaNT[,"regID"])                     # all regions  
 #                
-# ensure Abbreviations are all CAPS.
+# ensure strings (Key and IDs) are all CAPS, no punct, single blanks.
 #
 # The package carries two sets of names for each area
 #     (in the areaNamesAbbrsIDs table and areaVisBorders matrix.)
 #
-#    abbreviated - always in CAPS.
+#    abbreviated - always in CAPS, no punct, single blanks.
 #    fullname    - always with proper capitalization.
-#                  but is CAP'd for all comparisons.
+#                  but in CAPs, no punct, single blanks for all comparisons.
+#
+#  Name Table values were cleaned above.
 
-    # fix up Name Table for sub-area matching.
-    
-    #cat("dim of areaNamesAbbrsIDs:",dim(areaNamesAbbrsIDs),"\n")
+#  Gather MapL variables
 
-    #    Matching strings
-    rlAreaNamesAbbrsIDs$Abbr <- stringr::str_to_upper(rlAreaNamesAbbrsIDs$Abbr)   #  Abbr Must be uppercase.
-    areaNTAbbr   <- (rlAreaNamesAbbrsIDs$Abbr)               # Get list of abbrevations. (All CAPS)
-
-    areaNTName   <- (stringr::str_to_upper(rlAreaNamesAbbrsIDs$Name))      # get list of full area names in uppercase (All CAPS)
-    
-    areaNTAAbbr  <- (stringr::str_to_upper(rlAreaNamesAbbrsIDs$Alt_Abbr))  # get list of alternate abbreviations. (All Caps)
-    
-    areaNTKey    <- (stringr::str_to_upper(rlAreaNamesAbbrsIDs$Key))       # get key as uppercase. (links into VisBorder files.)
-    
-    #    Presentation strings
-    ID.Abbr      <- areaNTAbbr                               #                           (All CAPS)
-    # for ID.Name force proper capitalization on the name
-    ID.Name      <- as.vector(sapply(areaNTName,function(x) simpleCap(x))) # proper cap.  Not matched on but should look neat.
-
-    areaNTName   <- ClnStr(areaNTName)     # Name
-    areaNTAbbr   <- ClnStr(areaNTAbbr)     # Abbr
-    areaNTAAbbr  <- ClnStr(areaNTAAbbr)    # Alt_Ab
-    areaNTID     <- ClnStr(stringr::str_to_upper(rlAreaNamesAbbrsIDs$ID))   # ID
- 
-    # fix up areaVisBorders data frame
-    
-    rlAreaVisBorders$Key  <- stringr::str_to_upper(rlAreaVisBorders$Key)    # Match upper case to match name table 
-    rlRegVisBorders$Key   <- stringr::str_to_upper(rlRegVisBorders$Key)
-    rlL2VisBorders$Key    <- stringr::str_to_upper(rlL2VisBorders$Key)
- 
+    # cat("Code: 2991 \n")
     # Working vectors for PRINT out.
     
-    areaNTMapLabels = FALSE
-    NTNames    <- names(rlAreaNamesAbbrsIDs)
+    areaNTMapLabels <- FALSE
+    NTNames         <- names(areaNT)
     if (any("MapL" == NTNames)) {
        # is the MapL column present in the Name Table?
        #  YES.
-       yna <- (is.na(rlAreaNamesAbbrsIDs$MapL) | str_trim(rlAreaNamesAbbrsIDs$MapL) == "" )   # get list of MapL with NA or ""
+       yna <- (is.na(areaNT$MapL) | stringr::str_trim(areaNT$MapL) == "" )   # get list of MapL with NA or ""
        if (any(!yna))  {
           # it appears there are map labels to be printed for the border group
           areaNTMapLabels = TRUE
-          x <- sum(!yna)
-          y <- areaNamesAbbrsIDs[!yna,c("MapL","MapX","MapY")]
+          x         <- sum(!yna)
+          y         <- areaNT[!yna,c("MapL","MapX","MapY")]
           #print(y)
           #  With MapL, X, and Y, no need to look for MapLabel.
        }
@@ -2897,9 +3081,11 @@ xps  <- par("ps")
 xpin <- par("pin")
 xdin <- par("din")
 
-#cat("check point on par - ps:",xps," pin:",xpin," din:",xdin,"\n")
+#cat("check point 3029 on par - ps:",xps," pin:",xpin," din:",xdin,"\n")
 
 #print("Border Group Read and Setup")
+
+#  Script and code skips around the glyph subroutines.
 
 
 ####
@@ -2916,6 +3102,8 @@ xdin <- par("din")
 #####################
 #
 #  Border Group now loaded and name table initial setup completed.
+#
+#  Loading glyph function - execution continues at line 10606 about.
 #
 #####################
 #
@@ -3396,16 +3584,12 @@ rlAreaBoxplot  <- function(j, boxnam){
    if (inherits(boxlist,"error")) {   
       # could not find object named in boxnam.   which=false
       ErrFnd   <- TRUE
-      warnCnt()
-      xmsg     <- paste0("***02B1 BOXPLOT ",pdColNum," The panelData value of ",boxnam," in the ", pDName," data frame does not exist or is not accessible.\n")
-      warning(xmsg, call.=FALSE)
+      errCntMsg(paste0("***02B1 BOXPLOT ",pdColNum," The panelData value of ",boxnam," in the ", pDName," data frame does not exist or is not accessible.\n"))
       
    } else {
       if (!is.list(boxlist)) {
         ErrFnd    <- TRUE
-        warnCnt()
-        xmsg      <- paste0("***02B3 BOXPLOT ",pdColNum," The ", boxnam, " data for the boxplot is not a list.\n")
-        warning(xmsg, call.=FALSE)
+        errCntMsg(paste0("***02B3 BOXPLOT ",pdColNum," The ", boxnam, " data for the boxplot is not a list.\n"))
 
       } else {
           
@@ -3413,9 +3597,7 @@ rlAreaBoxplot  <- function(j, boxnam){
         
         if ( is.null(lnam) || any(is.na(lnam)) ) {
            ErrFnd     <- TRUE
-           warnCnt()
-           xmsg       <- paste0("***02B4 BOXPLOT ", pdColNum, " The ", boxnam, " structure does not have any name attributes for the boxplot data.\n")
-           warning(xmsg, call.=FALSE)
+           errCntMsg(paste0("***02B4 BOXPLOT ", pdColNum, " The ", boxnam, " structure does not have any name attributes for the boxplot data.\n"))
            
         } else { 
            #  The correct structure should have 6 names of elements in the list.
@@ -3423,9 +3605,7 @@ rlAreaBoxplot  <- function(j, boxnam){
            if (length(lnam) != 6) {    
               # must have at least 1 element and name
               ErrFnd    <- TRUE
-              warnCnt()
-              xmsg      <- paste0("***02B5 BOXPLOT ", pdColNum, " The ", boxnam, " boxplot data is not a valid structure. Must contain 6 boxplot sub lists.\n")
-              warning(xmsg, call.=FALSE)
+              errCntMsg(paste0("***02B5 BOXPLOT ", pdColNum, " The ", boxnam, " boxplot data is not a valid structure. Must contain 6 boxplot sub lists.\n"))
 	
            } else {
            
@@ -3435,23 +3615,19 @@ rlAreaBoxplot  <- function(j, boxnam){
               if (any(is.na(match(lnam,nbox)))) {
                  # at least one of the list names does not match or is missing.
                  ErrFnd      <- TRUE
-                 warnCnt()
-                 xmsg        <- paste0("***02B6 BOXPLOT ", pdColNum, " The ", boxnam," boxplot data does not contain all of the lists of boxplot function output. ","Invalid structure.\n")
-                 warning(xmsg, call.=FALSE)
+                 errCntMsg(paste0("***02B6 BOXPLOT ", pdColNum, " The ", boxnam," boxplot data does not contain all of the lists of boxplot function output. ","Invalid structure.\n"))
         
               } else {
                  
                  # check on the number of rows/etc.   - the $names list must be present after the last check.
           
-                 boxlist$names <- stringr::str_to_upper(boxlist$names)   # force to upper case for match with areaNamesAbbrsIDs table (name table).
+                 boxlist$names <- ClnStr(boxlist$names)   # force to upper case for match with areaNamesAbbrsIDs table (name table).
                  goodn         <- !is.na(boxlist$names)
-                 nNams         <- length(boxlist$names)    # get number of names in structure
+                 nNams         <- length(boxlist$names)   # get number of names in structure
                  
                  if (any(!goodn)) {
                     # one of the boxlist names is "NA" - no match
-                    warnCnt()
-                    xmsg       <- paste0("***02B7 BOXPLOT ", pdColNum, " In the ",boxnam, " boxplot data, the $name named list contains one or more missing values.\n")
-                    warning(xmsg, call.=FALSE)
+                    errCntMsg(paste0("***02B7 BOXPLOT ", pdColNum, " In the ",boxnam, " boxplot data, the $name named list contains one or more missing values.\n"))
                  }
                  
                  # how to find and edit out entries not being used.  ---- boxlist2 <- boxlist[good,]                # get only the entires with names != NA
@@ -3461,31 +3637,24 @@ rlAreaBoxplot  <- function(j, boxnam){
                  nn2           <- length(boxlist$names)
 
                  if (nn != nn2) {
-                    warnCnt()
-                    xmsg       <- paste0("***02B8 BOXPLOT ", pdColNum, "There are duplicate sets of boxplot data for the same sub-area. ","Only the first one will be used.\n")
-                    warning(xmsg, call.=FALSE)
+                    errCntMsg(paste0("***02B8 BOXPLOT ", pdColNum, "There are duplicate sets of boxplot data for the same sub-area. ","Only the first one will be used.\n"))
                  }
    
    
                  ##  how to edit out duplicates.  - search may be from ID to boxlist, if so only first found will be used.
-   
-   
+      
                  bpNumRows     <- nn                       # number of unique rows of data.
                  
                  nr = dim(boxlist$stat)[1]                 # get number of data elements per area
                  if (nr != 5) {
                     ErrFnd    <- TRUE
-                    warnCnt()
-                    xmsg      <- paste0("***02BA BOXPLOT ", pdColNum, " The $stats matrix in the ", boxnam, " boxplot data does not have 5 values per area.\n")
-                    warning(xmsg,call.=FALSE)
+                    errCntMsg(paste0("***02BA BOXPLOT ", pdColNum, " The $stats matrix in the ", boxnam, " boxplot data does not have 5 values per area.\n"))
                  }
                     
                  nc            <- dim(boxlist$stat)[2]     # number of rows in boxplot stats data list (is this needed?).
                  if (nc != nNams) {
                     ErrFnd    <- TRUE
-                    warnCnt()
-                    xmsg      <- paste0("***02BB BOXPLOT ", pdColNum, " The $stats matrix in the ", boxnam, " boxplot data must have ", nNams, " elements.\n")
-                    warning(xmsg, call.=FALSE)                       
+                    errCntMsg(paste0("***02BB BOXPLOT ", pdColNum, " The $stats matrix in the ", boxnam, " boxplot data must have ", nNams, " elements.\n"))
                  }
                  
                  goods <- !is.na(colSums(boxlist$stat))    # good rows from a missing value view point.
@@ -3493,19 +3662,16 @@ rlAreaBoxplot  <- function(j, boxnam){
                  if (any(!goods)) {
                     # data contains missing values
                     #ErrFnd   <- TRUE  not used - not a stopping warning.
-                    warnCnt()
-                    xmsg      <- paste0("***02BC BOXPLOT ", pdColNum, " The $stat matrix in the ", boxnam, " boxplot data has missing values. ", "Sub-areas with missing values will not be drawn.\n")
-                    warning(xmsg, call.=FALSE)
+                    errCntMsg(paste0("***02BC BOXPLOT ", pdColNum, " The $stat matrix in the ", boxnam, " boxplot data has missing values. ", "Sub-areas with missing values will not be drawn.\n"))
                  }
                  
                  tnn = is.na(match(listUNames,areaDatKey))   # match should be against the plotNames variable.
                  
                  if (any(tnn))  {  # test to see if any did NOT match
                     ErrFnd    <- TRUE
-                    warnCnt()
                     lnn       <- paste0(nn[tnn],collapse=" ")
-                    xmsg      <- paste0("***02BD BOXPLOT ", pdColNum, " The area names/abbreviations found in the ", boxnam, " boxplot data $names values do not match the border group names: ",lnn,"\n")
-                    warning(xmsg, call.=FALSE)
+                    errCntMsg(paste0("***02BD BOXPLOT ", pdColNum, " The area names/abbreviations found in the ", boxnam, " boxplot data $names values do not match the border group names: ",lnn,"\n"))
+   
                  } # end of missing sub-areas.
               }  # end of look at boxplot lists.
            }  # end of number of boxplot lists check.
@@ -3568,15 +3734,16 @@ rlAreaBoxplot  <- function(j, boxnam){
    #
    
    stats   <- boxlist$stats         # statistics: 1-low,2-25%,3-median,4-75%,5-high 
-                                    #   - 5 variables for each sub-area.
+                                    #   - 5 variables for each area.
    #  indexes to boxplot values.   (pull values into thin and thick)  (set up for "boxes")
    thin    <- stats[c(1,5,5,1),]    # a column for each area - thin line - outliers (Lower, upper wickers)
                                     #   - columns in boxlist (1,5,5,1)
    thick   <- stats[c(2,4,4,2),]    # a column for each area - thick line - 25% to 75% (lower and upper hinge)
                                     #   - columns in boxlist(2,4,4,2)
-   med     <- stats[3,]             # a single value for each sub-area (median data value)
+   med     <- stats[3,]             # a single value for each area (median data value)
   
    nam     <- boxlist$names         # area name list of boxplots
+   nam     <- ClnStr(nam)             # upper case, no punct, single blanks.
   
    # conf  <- boxlist$conf          # matrix of extremes - not used.  Don't check for.
      
@@ -3603,12 +3770,9 @@ rlAreaBoxplot  <- function(j, boxnam){
    
    if (any(is.na(zBPord))) {
        ErrFnd    <- TRUE
-       warnCnt()
-       xmsg      <- paste0("***02BE BOXPLOT ",pdColNum," There are one or more of rows in the ",sDFName, " that does not have matching boxplot data, (", boxnam, ") entries.\n")
-       warning(xmsg, call.=FALSE)
+       errCntMsg(paste0("***02BE BOXPLOT ",pdColNum," There are one or more of rows in the ",sDFName, " that does not have matching boxplot data, (", boxnam, ") entries.\n"))
        wx        <- is.na(zBPord)
-       xmsg      <- paste0("***02BF BOXPLOT ",pdColNum," The missing sub-areas are: ", paste0(areaDatAbbr[wx],collapse=", "),"\n" )
-       warning(xmsg, call.=FALSE)
+       errCntMsg(paste0("***02BF BOXPLOT ",pdColNum," The missing sub-areas are: ", paste0(areaDatAbbr[wx],collapse=", "),"\n" ))
    }
    
    # what about missing values  -  if NA do not plot on that line
@@ -3827,19 +3991,17 @@ rlAreaCtrBar = function(j) {
     
       if (col1[j] >= col2[j]) {
          ErrFnd    <- TRUE
-         warnCnt()
-         xmsg      <- paste0("***020A CTRBAR ", pdColNum, " The first column name/number (", stColName1, ") ","must proceed the last column name/number (", stColName2, ") in the ", sDFName," data frame.\n")
-         warning(xmsg, call.=FALSE)
-          
+         errCntMsg(paste0("***020A CTRBAR ", pdColNum, " The first column name/number (", stColName1, ") ",
+                          "must proceed the last column name/number (", stColName2, ") in the ", sDFName,
+                          " data frame.\n")
+                   )
       } else {
    
          wD        <- ( col2[j] - col1[j] + 1 )  # corrected to properly calculate the number of data columns.
 
          if ( wD < 2 || wD > 9 ) {
             ErrFnd    <-  TRUE
-            warnCnt()
-            xmsg      <- paste0("***020B CTRBAR ", pdColNum, " The number of segments is ", wD, ". It must be between 2 and 9.  If over 9, only the first 9 will be used.\n")
-            warning(xmsg, call.=FALSE)
+            errCntMsg(paste0("***020B CTRBAR ", pdColNum, " The number of segments is ", wD, ". It must be between 2 and 9.  If over 9, only the first 9 will be used.\n"))
          }
       }
    }
@@ -4092,7 +4254,7 @@ rlAreaCtrBar = function(j) {
 #    set in the glyphs call.
 #
 
-rlAreaDot = function(j,dSignif=FALSE){
+rlAreaDot = function(j,dSignif=FALSE){           # 022x 
 
    #
    # j = current panel column number
@@ -4167,9 +4329,7 @@ rlAreaDot = function(j,dSignif=FALSE){
          if (any(xdat2[good2] > Dot.Signif.range[2] | xdat2[good2] < Dot.Signif.range[1] )) {
             # some values are out of range
             # ErrFnd  <- TRUE   # allow missing values in data column, send warning but do not stop plotting glyph.
-            warnCnt()
-            xmsg      <- paste0("***022Q", dotMsgHdr, " ", pdColNum, " One or more P_value data entries in the ", stColName2, " for the panelDesc ", pdVarName2 ," variable are out of range.\n" )
-            warning(xmsg, call.=FALSE)
+            errCntMsg(paste0("***022Q", dotMsgHdr, " ", pdColNum, " One or more P_value data entries in the ", stColName2, " for the panelDesc ", pdVarName2 ," variable are out of range.\n" ))
          }
          
       }
@@ -4963,17 +5123,23 @@ rlAreaMap = function(j) {
   #  bnd.ord is a list of Keys (one per polygon) in the border file.  
   #    Each polygon ends with NA,NA as X,Y.
   bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
-  #cat("bnd.ord:",bnd.ord,"\n")
-  
+  #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
+  #cat("unique bnd:",unique(bnd.ord),"\n")
   #cat("Map-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+  #cat("Map-Overlays exist area:",exists("areaVisBorders")," L2:",exists("L2VisBorders")," Reg:",exists("RegVisBorders")," L3:",exists("L3VisBorders"),"\n")
+  #cat("Map-Overlays exist 'rl' area:",exists("rlAreaVisBorders")," L2:",exists("rlL2VisBorders")," Reg:",exists("rlRegVisBorders")," L3:",exists("rlL3VisBorders"),"\n")
   
   # the x,y limits must be based on the biggest area plotted, if the data level 
   #   does not cover the entire area, check the L2 and L3 borders.
-
-  rPoly   <- MapPolySetup("map",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders,Map.L3Borders)
+  #   Question if REGIONS active - smaller number of boundaries.
+  #   Get coordinates ranges.
+  # if dataRegionsOnly active, these data frames have already been edited to only the allow areas to map.
+  
+  rPoly   <- MapPolySetup("map", panels, rlAreaVisBorders, rlL2VisBorders, rlRegVisBorders, rlL3VisBorders)
 
   rxpoly2 <- rPoly$rxpoly2
   rypoly2 <- rPoly$rypoly2
+  #cat("Code: 5073 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
 
   # must be done before panel is scaled.
   
@@ -4987,6 +5153,7 @@ rlAreaMap = function(j) {
   par(xpd=T)
   xpin   <- par("pin")
  
+  #cat("Select panel 1\n")
   #printPar()
 
      
@@ -5007,29 +5174,66 @@ rlAreaMap = function(j) {
 
   lastLab2Space  <<- - ( xpin[1] - graphics::strwidth(xLab2,units="inch",cex=Text.cex) ) / 2
   
+  # switch from rlAreaNamesAbbrsIDs to areaNT data,frame for name table
+  
+  #
+  # A color for a polygon must be in the color vector - 1 entry per polygon.
+  # To draw the polygon, you must have all of the points for the polygon.
+  # One or more polygons can represent an areas.  Some can be holes.
+  # Holes are drawn as a polygon within a polygon and is filled with the background paper
+  # color. 
+  #
+  #   There are the foreground areas represented by foreKeys representing the Key names 
+  #   of the fore areas and the collection of points by a T/F "fore" list equal in length 
+  #   to the full areaVisBorders data.frame.  The VisForeCol track which
+  #   polygons are members of the foreground group. The T/F list is equal the number
+  #   of polygons in the map marking the polygons in the foreground areas.
+  #   VisCol starts out set to #11 and is back filled as each color is assigned.
+  #   VisForeCol and the matching between VisKeys and foreKeys provide
+  #   the basic 1-6 color value.
+  #
+  #   The background color is filled in the VisCol vector with 12 at the beginning.
+  #
+  #   Areas that are not referenced by the data are then filled in with the value of 11.
+  #  
+  #   When a list of highlighted areas (from past or future passes) are seen,
+  #   the area points are T in the high vector and the highKey hold the Key names
+  #   of all of the highlighted list. 
+  #
+  #
   # Put the initial colors for all areas into a vector.
   #print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
-  # per VisBorder point/vecter
-  VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of polygons in VisBorders
+  # per VisBorder polygon (point/vector)
+  VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of polygons in VisBorders (indexes)
+  
+  #    NA entries in VisBorders (TRUE)    # one entry per point in polygons.
   #cat("VisNodes:\n")
   #print(VisNodes)
   
-  # per polygon end point
-  VisKeys        <- rlAreaVisBorders$Key[VisNodes]       # key at end points of all polygons
+  # per polygon (end point) (decode VisBorders by polygon)  # pull key and hole info for each polygon.
+  VisKeys        <- rlAreaVisBorders$Key[VisNodes]       # key at end points of a polygons
   VisHoles       <- rlAreaVisBorders$hole[VisNodes]      # hole indicator at end points of all polygons
-  #cat("VisKeys:\n")
+     # one entry per end of polygon. Multi-polygons per area.
+  
+  #cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
   #print(VisKeys)
-  #cat("VisHoles:\n")
+  
+  #cat("Basic list of VisHoles (zero or more per polygon):\n")
   #print(VisHoles)
   
-  # per Visborder point/vector
-  NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys)) # list of not used points.
-  NotUsedFlag    <- any(NotUsed)                                # flag to indicate not used exists 
+  # per Visborder all point/vector
+  # NotUsedKeys created above after reviewing the data.
+  NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys)) # list of not used polygons - no data.
+  NotUsedFlag    <- any(NotUsed)  # flag to indicate not used exists 
+  
+  #cat("NotUsedKeys:\n")    # global.
+  #print(NotUsedKeys)
   #cat("NotUsed:\n")
   #print(NotUsed)
  
-  # per polygon end point.
-  VisNU          <- !is.na(match(VisKeys,NotUsedKeys))          # T/F list of not used polygons.
+  # per polygon (end point).  # not used area Key lost.
+  VisNU          <- !is.na(match(VisKeys,NotUsedKeys))   # T/F list of not used polygons.
+  
   #cat("VisNU:\n")
   #print(VisNU)
   
@@ -5042,6 +5246,8 @@ rlAreaMap = function(j) {
   #   medRow      - the number of the median row            (if number of rows is odd, othersize = 0)
   #   medRowBlw   - the number of the row just below the median
   #   medRowAbv   - the number of the row just above the median
+  #
+  #   dat has the numerics and the order of the rows.
   #   
   #
   #cat("numGrps:",numGrps," medGrp:",medGrp," medGrpSize:",medGrpSize,"\n")
@@ -5049,169 +5255,194 @@ rlAreaMap = function(j) {
 
   # Drawing Loop   # down the page - each group/row
   for (i in 1:numGrps) {
-    #cat("In Loop - panel:",j," ",i,"\n")
+     #cat("In Loop - panel:",j," ",i,"\n")
     
-    if ( i == medGrp & medGrpSize == 1 ){                   # line break in maps.   Group n/2 - middle group of n (odd)
+     if ( i == medGrp & medGrpSize == 1 ){                   # line break in maps.   Group n/2 - middle group of n (odd)
     
-       # Setup Panel for single row median group
+        # Setup Panel for single row median group
 
-       panelSelect(panels,i,j)
-       x <- panelScale()
-       panelFill (col=Panel.Fill.col)
-       panelOutline()
+        panelSelect(panels,i,j)
+        x <- panelScale()
+        panelFill (col=Panel.Fill.col)
+        panelOutline()
        
-       # inform
-       xmsg  <- banner["map","M1"]
+        # inform
+        xmsg  <- banner["map","M1"]
        
-       # Insert median - single group/row - centered on the middle of the rectangle (0.5, 0.5)
-       text (.5,.5,xmsg,cex= Text.cex*0.8)   # center around 0.5, 0.5 (center)
+        # Insert median - single group/row - centered on the middle of the rectangle (0.5, 0.5)
+        text (.5,.5,xmsg,cex= Text.cex*0.8)   # center around 0.5, 0.5 (center)
 
-       next  # skip to next FOR item
-       ###  EXIT to end of loop - next group/row
-    }
+        next  # skip to next FOR item (single median0
+        ###  EXIT to end of loop - next group/row
+     }
     
-    # handle groups with 2 or more rows
+     # handle groups with 2 or more rows
+     #cat("map setup-> rxpoly2:",rxpoly2,"  rypoly2:",rypoly2,"\n")
+     panelSelect(panels,i,j)             # Do map in - Panels by group...
+     x  <- panelScale(rxpoly2,rypoly2)   # apply the required scaling   (x contains the rx and ry values.
+     #cat("rx & ry:\n")
+     #print(x)
+     #cat("par-> fin:",par("fin"),"  pin:",par("pin"), "\n      plt:",par("plt"),"\n      fig:",par("fig")," usr:",par("usr"),"\n")
+     #xdis <- c(min(rlAreaVisBorders$x,na.rm=TRUE),max(rlAreaVisBorders$x,na.rm=TRUE))
+     #ydis <- c(min(rlAreaVisBorders$y,na.rm=TRUE),max(rlAreaVisBorders$y,na.rm=TRUE))
     
-    panelSelect(panels,i,j)             # Do map in - Panels by group...
-    x  <- panelScale(rxpoly2,rypoly2)   # apply the required scaling
     
-    gsubs      <- ib[i]:ie[i]           # get the index range for this panel
-    #cat("area index - gsubs:",gsubs,"\n")    
+     gsubs      <- ib[i]:ie[i]           # get the index range for this panel into "dat"
+     #cat("area index - gsubs:",gsubs,"   The area index.\n")    
     
-    blkAreaCol <- 0
+     blkAreaCol <- 0
     
-    if (medGrp > 0 & medGrpSize == 1) {   
+     if (medGrp > 0 & medGrpSize == 1) {   
     
-       # If this setup has a median group with only 1 row with an odd number of groups > 1
-       # Note the groups above and below to highlight the medRow item in black.
-       # You can't have a median group with even number of group/rows
+        # If this setup has a median group with only 1 row with an odd number of groups > 1
+        # Note the groups above and below to highlight the medRow item in black.
+        # You can't have a median group with even number of group/rows
       
-       # Add median area coloring to the row above and below the median line.
+        # Add median area coloring to the row above and below the median line.
 
-       # if current row is one above the median, add medRow to this group for coloring.  
-       if (i == (medGrp-1)) {
-          gsubs      <- c(gsubs,medRow)  # slot med-1 - add med-row to this group
-          blkAreaCol <- length(gsubs)    # indicate median/black area flag saves the "color" number the will be seen in the final.
-       }
-       # if current row is one below the median, add medRow to this group for coloring.
-       if (i == (medGrp+1)) {
-          gsubs      <- c(gsubs,medRow)  # slot med+1 - add med-row to this group
-          blkAreaCol <- length(gsubs)    # indicate median/black area and the length of the gsubs vector
-       }
+        # if current row is one above the median, add medRow to this group for coloring.  
+        if (i == (medGrp-1)) {
+           gsubs      <- c(gsubs,medRow)  # slot med-1 - add med-row to this group
+           blkAreaCol <- length(gsubs)    # indicate median/black area flag saves the "color" number the will be seen in the final.
+        }
+        # if current row is one below the median, add medRow to this group for coloring.
+        if (i == (medGrp+1)) {
+           gsubs      <- c(gsubs,medRow)  # slot med+1 - add med-row to this group
+           blkAreaCol <- length(gsubs)    # indicate median/black area and the length of the gsubs vector
+        }
        
-       # blkAreaCol uses length(gsubs) as key - 2,3,4,5,6 used the index to match up later.
-       # The number is the index to the area to color.
-    }
+        # blkAreaCol uses length(gsubs) as key - 2,3,4,5,6 used the index to match up later.
+        # The number is the index to the area to color.
+     }
     
-    #print(paste0("modified gsubs:",paste0(gsubs,collapse=" ")))
-    
-    #    medRow - the median row, if number of rows is old.
-    #         will always be in the medGrp group
-  
-    gnams    <- areaDatKey[gsubs]        # index to area keys (translation)
-    #cat("gnams:",paste0(gnams,collapse=", "),"\n")
+     #print(paste0("modified gsubs:",paste0(gsubs,collapse=" ")))
+     
+     #    medRow - the median row, if number of rows is old.
+     #         will always be in the medGrp group
+   
+     gnams    <- areaDatKey[gsubs]        # index to area keys (translation) (based on dat order) ????
+     #cat("gnams:",paste0(gnams,collapse=", "),"\n")
  
-    #
-    #  Even though a hole in a sub-area may be later filled with a color or grey,
-    #  it is always filled with tthe background map color.  The order of the 
-    #  Polygons in the VisBorder files always have the holes following the basic area
-    #  and areas filling other sub-areas holes after that's area's polygons.
-    #
-    #  The order of the gnams (names/keys) is the order of the presentation and coloring.
-    #
-    #  mstColors = 1-6  -> active area colors
-    #  mstColors = 7    -> median area color in panels above and below the median
-    #  mstColors = 8-10 -> highlighted colors used in mapcum, mapmedian and maptail
-    #  mstColors = 11   -> unreferenced area
-    #              12   -> background   area (non-active)
-    #           
-    #  Run: sequence
-    #       VisCol length = number of polygons (NA)
-    #       Set all VisCol to background color to 11
-    #       Set VisCol to unused colors based on NotUsedKeys matches to 12.
-    #       Separate highlight area borders (2) (None for "map")
-    #
-    #       Separate foreground area borders (current set)
-    #       Get list of Keys in this Group/Row.
-    #       Set all colors in VisCol (based on NA and Keys match) position in Keys is color index.
-    #
-    #       draw fill colors for all (VisCol)
-    #
-    #       draw background/Not Referenced lines
-    #       draw highlighted lines (if any)
-    #       draw foreground lines
-    #
-    #  Get set up T/F vector for each type of group of sub-areas to plot
+     #
+     #  Even though a hole in a sub-area may be later filled with a color or grey,
+     #  it is always filled with the background map color.  The order of the 
+     #  Polygons in the VisBorder files always have the holes following the basic area
+     #  and areas filling other sub-areas holes after that's area's polygons.
+     #
+     #  The order of the gnams (names/keys) is the order of the presentation and coloring.
+     #
+     #  mstColors = 1-6  -> active area colors
+     #  mstColors = 7    -> median area color in panels above and below the median
+     #  mstColors = 8-10 -> highlighted colors used in mapcum, mapmedian and maptail
+     #  mstColors = 11   -> unreferenced area
+     #              12   -> background   area (non-active)
+     #           
+     #  Run: sequence
+     #       VisCol length = number of polygons (NA)
+     #       Set all VisCol to background color to 11
+     #       Set VisCol to unused colors based on NotUsedKeys matches to 12.
+     #       Separate highlight area borders (2) (None for "map")
+     #
+     #       Separate foreground area borders (current set)
+     #       Get list of Keys in this Group/Row.
+     #       Set all colors in VisCol (based on NA and Keys match) position in Keys is color index.
+     #
+     #       draw fill colors for all (VisCol)
+     #
+     #       draw background/Not Referenced lines
+     #       draw highlighted lines (if any)
+     #       draw foreground lines
+     #
+     #  Get set up T/F vector for each type of group of sub-areas to plot
+     
+     #cat("length(NotUsedKeys):",length(NotUsedKeys)," with keys:",paste0(NotUsedKeys,collapse=", "),"\n")
+       
+     #####
+     #
+     #  Colors for map
+     #    Get every copy assigned to its area
+     #  Setup:
+     VisCol            <- rep(11,length(VisKeys))       # reduced size - color per polygon - not ref
+     #cat("Loop: ",i,"  VisCol:\n")
+     #print(VisCol)
     
-    #cat("length(NotUsedKeys):",length(NotUsedKeys)," with keys:",paste0(NotUsedKeys,collapse=", "),"\n")
+     #
+     #     Forground
+     #
+                                                        # everyone get color # 11 (no data) (check)
+     #  isolate foreground (active) areas. (Colors)
+     foreKeys          <- gnams                         # get list of current keys (in order)
+     #cat("Loop ",i,"  foreKeys:",foreKeys,"\n")
+    
+     fore     <- !is.na(match(rlAreaVisBorders$Key,foreKeys)) # find points in each fore areas and assign color based on order in gnams
+     
+     #  fore -- na entries are not foreground points.   Otherwize, it's the polygons color indx.
+     #cat("   fore - match foreKeys at vertex points level:\n")
+     #print(fore)
+     
+     foreFlag          <- any(fore)                      # set flags if any found
+     
+     # Get index for color (1-6) using match of all keys against foreKeys
+     
+     VisForeCol        <- match(VisKeys,foreKeys)        # get color index for each foreg polygon (1-6)  (foreKeys is 6 long in order)
+     #cat("VisForeCol - match foreground at end of polygon(NA) level: (color index, T/F) \n")
+     #print(VisForeCol)
+    
+     # get list of VisBorder point belonging to fore areas.
+     VisFore           <- !is.na(VisForeCol)             # T/F for each polygon that a current foreground
+     #cat("VisFore - NOT NAs at the Col/NA.\n")          # T = color to draw (1-5/6)
+     #print(VisFore)
+   
+     # replace background color with area color..
+     VisCol[VisFore]   <- VisForeCol[VisFore]            # transfer color index for each foreground polygon.
+     
+     #cat("VisCol at the polygon NA level from VisForeCol with background color.\n")
+     #print(VisCol)
+     
+     if (bitwAnd(MST.Debug,256) != 0) {
+        cat("fore:",fore,"\n")
+        cat("VisForeCol:",VisForeCol,"\n")               #   NA=not foreground, #=foreground and order (foreKeys 1 to 6)
+        cat("VisFore:",VisFore,"\n") 
+     }
       
-    #####
-    #
-    #  Colors for map
-    #
+     if (blkAreaCol>0) {
+        xm <- match(blkAreaCol,VisCol)
+        #cat("BlackAreaCol:",blkAreaCol," assigned to ",xm,"\n")
+        VisCol[VisCol == blkAreaCol] <- 7   # set to black # if VisCol ==  BlkAreaCol set previously - reset to "black" index (7)
+     }
     
-    #     Forground
-    VisCol            <- rep(11,length(VisKeys))       # reduced size - color per polygon - not ref
-    #cat("Loop: ",i,"  VisCol:\n")
-    #print(VisCol)
+     # highlight area keys...    
     
-    #  isolate foreground (active) areas. (Colors)
-    foreKeys          <- gnams             # get list of current keys
-    #cat("Loop ",i,"  foreKeys:",foreKeys,"\n")
-    
-    fore              <- !is.na(match(rlAreaVisBorders$Key,foreKeys))    # find points in each fore areas and assign color based on order in gnams
-    #  fore -- na entries are not foreground points.   Otherwize, it's the polygons color indx.
-    #cat("   fore - match foreKeys at vertex level:\n")
-    #print(fore)
-    
-    foreFlag          <- any(fore)                      # set flags if any found
+     # Previously active for a Group/Row, no just highlighted.
+     # not really used - can we delete or set to empty?   Trying to standardize code??
+     highKeys          <- NA                             # clear high light vector - always none for "map"
+     
+     high              <- !is.na(match(rlAreaVisBorders$Key,highKeys))
+     
+     highFlag          <- any(high)
+     highKeys          <- unique(rlAreaVisBorders$Key[high])
    
-    VisForeCol        <- match(VisKeys,foreKeys)        # get color index for each foreg polygon (1-6)  (foreKeys is 6 long in order)
-    #cat("VisForeCol - match foreground at NA level:\n")
-    #print(VisForeCol)
-    
-    VisFore           <- !is.na(VisForeCol)                              # T/F for each polygon that a current foreground
-    #cat("VisFore - NOT NAs at the Col/NA.\n")
-    #print(VisFore)
-    
-    VisCol[VisFore]   <- VisForeCol[VisFore]                             # transfer color index for each foreground polygon.
-    #cat("VisCol at the polygon NA level from VisForeCol.\n")
-    #print(VisCol)
-    
-    if (bitwAnd(MST.Debug,256) != 0) {
-       cat("fore:",fore,"\n")
-       cat("VisForeCol:",VisForeCol,"\n")                                   #   NA=not foreground, #=foreground and order (foreKeys 1 to 6)
-       cat("VisFore:",VisFore,"\n") 
-    }
-    #cat("BlackAreaCol:",blkAreaCol,"\n")
-    if (blkAreaCol>0) {
-       VisCol[VisCol == blkAreaCol] <- 7   # set to black                 # if VisCol ==  BlkAreaCol set previously - reset to "black" index (7)
-    }
-    
-    # Previously active for a Group/Row, no just highlighted.
-    # not really used - can we delete or set to empty?   Trying to standardize code??
-    highKeys          <- NA                                              # clear high light vector - always none for "map"
-    high              <- !is.na(match(rlAreaVisBorders$Key,highKeys))
-    highFlag          <- any(high)
-  
-    VisHigh           <- !is.na(match(VisKeys,highKeys))   # should be none.
-    VisCol[VisHigh]   <- 8
-    
-    # what is left - the background areas.
-    back              <- !(fore | high | NotUsed)                  # background is anything not active and not used.   T/F list
-    backFlag          <- any(back)
-    backKeys          <- unique(rlAreaVisBorders$Key[back])
-  
-    VisBack           <- !is.na(match(VisKeys,backKeys))
-    VisCol[VisBack]   <- 12  
+     VisHigh           <- !is.na(match(VisKeys,highKeys))   # should be none for "map"
+     VisCol[VisHigh]   <- 8                                 # set to color 8
+     
+     # background colors - not anything else.
+     
+     # what is left - the background areas.   (list if any points not matching other categories.)
+     
+     back              <- !(fore | high | NotUsed)        # background points is anything not active and not used.   T/F list
+     backFlag          <- any(back)
+     backKeys          <- unique(rlAreaVisBorders$Key[back])
    
-    #cat("Final VisCol string.\n")
-    #print(data.frame(n=VisKeys,c=VisCol))
+     VisBack           <- !is.na(match(VisKeys,backKeys))
+     VisCol[VisBack]   <- 12                              # background color (grey)
     
-    VisCol2           <- mstColors[VisCol]   # translate to real colors
-  
-    VisCol2[VisHoles] <- Map.Bg.col       # set all holes to the panels background color.
-    
+     #cat("Final VisCol string.\n")
+     #print(data.frame(n=VisKeys,c=VisCol))
+     
+     VisCol2           <- mstColors[VisCol]     # translate to real colors
+   
+     VisCol2[VisHoles] <- Map.Bg.col            # set all holes to the panels background color.
+     
      #cat("VisCol2 List for each area:\n")
      #xs <- seq(1,length(VisCol2), by=10)
      #
@@ -5225,156 +5456,179 @@ rlAreaMap = function(j) {
      #print(VisHigh)
      #print(VisBack)
     
-    #cat("VisCol2:\n")
-    #print(VisCol2)
-    # colors are ready for ploting polygons
+     #cat("VisCol2:\n")
+     #print(VisCol2)
+     # colors are ready for ploting polygons
     
-    ####
-    #  Map background - Layer 2 borders   (regional areas  (US -> states))
-    #
-    if (Map.L2Borders) {    # area area overlay
+     ######
+     ##
+     #
+     #  draw the micro map - 
+     #     a) Layer 2 boundaries and outlines.
+     #     b) Colors for active areas
+     #    
+     
+     ####
+     #  Map background - Layer 2 borders   (regional areas  (US -> states))
+     #
+     if (Map.L2Borders) {    # area area overlay
         # map fill areas
-      graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
               density=-1, col=Map.L2.Fill.col, border=FALSE)        # color fill
         # map borders of areas
-      graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
               density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)  # white lines
-      #cat("Drew L2 Borders\n")
-    }
-    #
-    ####
+        #cat("Drawing L2 Borders\n")
+     }
+     #
+     ####
     
-    ####
-    #
-    #  Map areas
-    #
-    #  Draw the colors for all active areas.   VisCol2 contains colors for everyone.  Only one color per polygon.
-    #
-    #    Draw Color of area (shading)
-    graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,    # draw polygons with color specified (fills)
+     ####
+     #
+     #  Map areas
+     #
+     #  Draw the colors for all active areas.   VisCol2 contains colors for everyone.  Only one color per polygon.
+     #
+     #    Draw Color of area (shading)
+     
+     graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,    # draw polygons with color specified (fills/bg)
                   density=-1, col=VisCol2, border=FALSE)
     
-    #cat("Drew active area colors.\n")
-    
-    #####
-    #'
-    #     draw lines
-    #
-    #  setup each group of areas and draw polygons.  (boundaries)
-    #    Not Referenced areas  
-    
-    if (NotUsedFlag) {
-       wVisBorders   <- NULL
-       wVisBorders   <- rlAreaVisBorders[NotUsed,]
+     #cat("Drawing active area colors.\n")
      
-       # map areas without data (not used)
-       graphics::polygon(wVisBorders$x,wVisBorders$y,
-               density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)   # white lines
-       #cat("Drew not used sub-areas borders.\n")
-    }
+     #####
+     #
+     #     draw lines
+     #
+     #  setup each group of areas and draw polygons.  (boundaries)
+     #    Not Referenced areas  
+     #    draw Not Used area line
     
-    #
-    #    Background (not-active) sub-areas
-    #
-    #  In VisBorder but does not have data .
-    if (backFlag) {
-       wVisBorders   <- NULL
-       wVisBorders   <- rlAreaVisBorders[back,]
-       graphics::polygon(wVisBorders$x,wVisBorders$y,
-               density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)    # white
-       #cat("Drew not-active sub-areas borders.\n")
-    }
-
-    #
-    #    Highlighted sub-areas
-    #
-    #   Area priviously highlighted or menstioned.
-    if (highFlag) {
-       wVisBorders   <- NULL
-       wVisBorders   <- rlAreaVisBorders[high,]
-       graphics::polygon(wVisBorders$x,wVisBorders$y,
-               density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
-       #cat("Drew highlighted sub-areas borders.\n")
-    }
-
-    # 
-    #    Foreground (active) sub-areas
-    #
-    if (foreFlag) {
-       wVisBorders   <- NULL
-       wVisBorders   <- rlAreaVisBorders[fore,]
-       graphics::polygon(wVisBorders$x,wVisBorders$y,
-               density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
-       #cat("Drew Active sub-areas borders.\n")
-    }
-        
-    ####
-    #
-    #  map boundaries for regions.
-    #
+     if (NotUsedFlag) {
+        wVisBorders   <- NULL
+        wVisBorders   <- rlAreaVisBorders[NotUsed,]  # pull out with T/F
+     
+        # map areas without data (not used)
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)   # white lines
+        #cat("Drawing not used areas borders.\n")
+        wVisUn <- unique(wVisBorders$Key)
+        #cat("Not Used areas:\n")
+        #cat(paste0(wVisUn,collapse=", ",sep=" "),"\n")
+     }
     
-    if (Map.RegBorders && regionsB) {       # regions boundaries overlay
-       graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
+     #
+     #    Background (not-active) areas
+     #
+     #  In VisBorder but does not have data .
+     if (backFlag) {
+        wVisBorders   <- NULL
+        wVisBorders   <- rlAreaVisBorders[back,]   # pull out with T/F
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)    # white
+        #cat("Drawing not-active areas borders.\n")
+        wVisBK <- unique(wVisBorders$Key)
+        #cat("back areas:\n")
+        #cat(paste0(wVisBK,collapse=", ",sep=" "),"\n")
+     }
+
+     #
+     #    Highlighted areas
+     #
+     #   Area priviously highlighted or mentioned.
+     if (highFlag) {
+        wVisBorders   <- NULL
+        wVisBorders   <- rlAreaVisBorders[high,]     # pull out with T/F
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
+        #cat("Drawing highlighted areas borders.\n")
+        wVisH <- unique(wVisBorders$Key)
+        #cat("high areas:\n")
+        #cat(paste0(wVisH,collapse=", ",sep=" "),"\n")
+      }
+
+     # 
+     #    Foreground (active) areas
+     #
+     if (foreFlag) {
+        wVisBorders   <- NULL
+        wVisBorders   <- rlAreaVisBorders[fore,]      # pull out with T/F
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
+        #cat("Drawing Active areas borders.\n")
+        wVisF <- unique(wVisBorders$Key)
+        #cat("Fore areas:\n")
+        #cat(paste0(wVisF,collapse=", ",sep=" "),"\n")
+      }
+         
+     ####
+     #
+     #  map boundaries for regions.
+     #
+    
+     if (Map.RegBorders && regionsB) {       # regions boundaries overlay
+        graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)     # black
-       #cat("Drew Region Borders\n")
-    }
-    #
-    ####
+        #cat("Drawing Region Borders\n")
+     }
+     #
+     ####
     
-    ####
-    #
-    #    Outline L3 (total) area (complete area boundary)
-    #
-    if (Map.L3Borders) {
-       graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
-           density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside boundary
-    }
-    #
-    #####
-    #
-    #####
-    #
-    NTNames <- names(areaNamesAbbrsIDs)
-    #cat("NTNames:",NTNames,"\n")
-    #
-    #  Map Labels
-    #str(areaNamesAbbrsIDs)
-    #  If U. S. map, add extra labels for sub-areas moved.
-    #
- 
-    if (areaUSData) {                                             ##### replace with feature based code.
-       if (i == 1) {   # first map      # added code to watch out for regional mapping.
-          # if first map in column
-          if(!areaNamesAbbrsIDs["DC","NotUsed"]) {
-             graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
-          }
-          if(!areaNamesAbbrsIDs["AK","NotUsed"]) {
-             graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
-          }
-          if(!areaNamesAbbrsIDs["HI","NotUsed"]) {
-             graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
-          }
-       }
-    } else {
-       if(areaNTMapLabels) {
-          if (i==1) {   # this is only for the first map.
-             MapUsed     <- !areaNamesAbbrsIDs[,"NotUsed"]                       # get on used area labels.
-             MapLData    <- areaNamesAbbrsIDs[MapUsed,c("MapL","MapX","MapY")]   # get the elements of Map Labeling
-             MapLabel    <- MapLData[!is.na(MapLData$MapL),]
-             lenMapLabel <- dim(MapLabel)[1]
-             if (lenMapLabel >= 1 ) {         # will do 1 to "n" labels.
-                for (ip in 1:lenMapLabel) {
-                   graphics::text(MapLabel[ip,"MapX"], MapLabel[ip,"MapY"], MapLabel[ip,"MapL"],cex=Map.Area.Spec.cex, adj=.5, col=1)
-               }
-             }     
-          }
-       }
-    } 
-    #
-    #####
+     ####
+     #
+     #    Outline L3 (total) area (complete area boundary)
+     #
+     if (Map.L3Borders) {
+        graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
+            density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside boundary
+        #cat("Drawing L3 Borders\n")
+     }
+     #
+     #####
+     #
+     #####
+     #
+     NTNames <- names(areaNT)
+     #cat("NTNames:",NTNames,"\n")
+     #
+     #  Map Labels
+     #str(areaNT)
+     #  If U. S. map, add extra labels for sub-areas moved.
+     #
+  
+     if (areaUSData) {                        ##### replace with feature based code.
+        if (i == 1) {   # first map      # added code to watch out for regional mapping.
+           # if first map in column
+           if(!areaNT["DC","NotUsed"]) {
+              graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
+           }
+           if(!areaNT["AK","NotUsed"]) {
+              graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
+           }
+           if(!areaNT["HI","NotUsed"]) {
+              graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
+           }
+        }
+     } else {
+        if(areaNTMapLabels) {
+           if (i==1) {   # this is only for the first map.
+              MapUsed     <- !areaNT[,"NotUsed"]                       # get on used area labels.
+              MapLData    <- areaNT[MapUsed,c("MapL","MapX","MapY")]   # get the elements of Map Labeling
+              MapLabel    <- MapLData[!is.na(MapLData$MapL),]
+              lenMapLabel <- dim(MapLabel)[1]
+              if (lenMapLabel >= 1 ) {         # will do 1 to "n" labels.
+                 for (ip in 1:lenMapLabel) {
+                    graphics::text(MapLabel[ip,"MapX"], MapLabel[ip,"MapY"], MapLabel[ip,"MapL"],cex=Map.Area.Spec.cex, adj=.5, col=1)
+                }
+              }     
+           }
+        }
+     }  
+     #
+     #####
     
    
-    # no reference values for this type of column. If present - ignor.
+     # no reference values for this type of column. If present - ignor.
    
   }  # i loop
   #   as we finish i loop, we end up in the last panel
@@ -5413,16 +5667,19 @@ rlAreaMapCum = function(j) {
   #
   
   #  bnd.ord is a list of Keys (one per polygon) in the border file.
-  bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)]   # area abbrev for areas with boundaries
+  bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
+  #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
+  #cat("unique bnd:",unique(bnd.ord),"\n")
+  #cat("MapCum-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
   # the x,y limits must be based on the biggest area plotted, if the data level 
   #   does not cover the entire area, check the L2 and L3 borders.
 
-
-  rPoly   <- MapPolySetup("mapcum",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders,Map.L3Borders)
+  rPoly   <- MapPolySetup("map",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders)
 
   rxpoly2 <- rPoly$rxpoly2
   rypoly2 <- rPoly$rypoly2
+  #cat("Code: 5626 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
 
   # must be done before panel is scaled.
   
@@ -5631,32 +5888,32 @@ rlAreaMapCum = function(j) {
      #
      #####
      #
-     NTNames <- names(areaNamesAbbrsIDs)
+     NTNames <- names(areaNT)
      #cat("NTNames:",NTNames,"\n")
      #
      #  Map Labels
-     #str(areaNamesAbbrsIDs)
+     #str(areaNT)
      #
      #  If U. S. map, add extra labels for sub-areas moved.
      
      if (areaUSData) {                                             ##### replace with feature based code.
         if (i == 1) {   # first map      # added code to watch out for regional mapping.
            # if first map in column
-           if(!areaNamesAbbrsIDs["DC","NotUsed"]) {
+           if(!areaNT["DC","NotUsed"]) {
               graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
            }
-           if(!areaNamesAbbrsIDs["AK","NotUsed"]) {
+           if(!areaNT["AK","NotUsed"]) {
               graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
            }
-           if(!areaNamesAbbrsIDs["HI","NotUsed"]) {
+           if(!areaNT["HI","NotUsed"]) {
               graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
            }
         }
      } else {
         if(areaNTMapLabels) {
            if (i==1) {     # this is only for the first map
-              MapUsed     <- !areaNamesAbbrsIDs[,"NotUsed"]
-              MapLData    <- areaNamesAbbrsIDs[MapUsed,c("MapL","MapX","MapY")]
+              MapUsed     <- !areaNT[,"NotUsed"]
+              MapLData    <- areaNT[MapUsed,c("MapL","MapX","MapY")]
               MapLabel    <- MapLData[!is.na(MapLData$MapL),]
               lenMapLabel <- dim(MapLabel)[1]
               if (lenMapLabel >= 1 ) {
@@ -5711,15 +5968,20 @@ rlAreaMapMedian = function(j){
    #   shading are done as a cross over.
    #
 
-   bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # area abbrev
+   #  bnd.ord is a list of Keys (one per polygon) in the border file.
+   bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
+   #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
+   #cat("unique bnd:",unique(bnd.ord),"\n")
+   #cat("MapMedian-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+  
    # the x,y limits must be based on the biggest area plotted, if the data level 
    #   does not cover the entire area, check the L2 and L3 borders.
-   
-   rPoly   <- MapPolySetup("mapmedian",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders,Map.L3Borders)
-   
+
+   rPoly   <- MapPolySetup("map",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders)
+
    rxpoly2 <- rPoly$rxpoly2
    rypoly2 <- rPoly$rypoly2
-
+   #cat("Code: 5914 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
    
    # ____________labeling and axes_______________
 
@@ -5818,7 +6080,7 @@ rlAreaMapMedian = function(j){
       #    1) background,   2) Above Median with data   3) Below Median with data,  4) Active 
       #       Whats left        1:medRowAbv                  medRowBlw:numRows         gsubs
       #    note: medRowBlw:numRows will catch NA data items.  (ignore is sorted column and NA (st bottom.)
-      #    note: non-data sub-area will not any row in the data, but will have a row in the areaNamesAbbrsIDs.
+      #    note: non-data sub-area will not any row in the data, but will have a row in the rlAreaNamesAbbrsIDs.
       #          if we don't reference them, then boundaries may not be completely drawn.
       #
      
@@ -5948,30 +6210,30 @@ rlAreaMapMedian = function(j){
       #
       #####
       #
-      NTNames <- names(areaNamesAbbrsIDs)
+      NTNames <- names(areaNT)
       #cat("NTNames:",NTNames,"\n")
       #
       #  Map Labels
-      #str(areaNamesAbbrsIDs)
+      #str(areaNT)
     
       if (areaUSData) {                                             ##### replace with feature based code.
          if (i == 1) {   # first map      # added code to watch out for regional mapping.
             # if first map in column
-            if(!areaNamesAbbrsIDs["DC","NotUsed"]) {
+            if(!areaNT["DC","NotUsed"]) {
                graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
             }
-            if(!areaNamesAbbrsIDs["AK","NotUsed"]) {
+            if(!areaNT["AK","NotUsed"]) {
                graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
             }
-            if(!areaNamesAbbrsIDs["HI","NotUsed"]) {
+            if(!areaNT["HI","NotUsed"]) {
                graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
             }
          }
       } else {
          if(areaNTMapLabels) {
             if (i==1) {
-               MapUsed     <- !areaNamesAbbrsIDs[,"NotUsed"]
-               MapLData    <- areaNamesAbbrsIDs[MapUsed,c("MapL","MapX","MapY")]
+               MapUsed     <- !areaNT[,"NotUsed"]
+               MapLData    <- areaNT[MapUsed,c("MapL","MapX","MapY")]
                MapLabel    <- MapLData[!is.na(MapLData$MapL),]
                lenMapLabel <- dim(MapLabel)[1]
                if (lenMapLabel >= 1 ) {
@@ -6026,13 +6288,21 @@ rlAreaMapTail = function(j){
  
    #browser()
  
-   bnd.ord <- rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)]         # area Key
-   
-   rPoly   <- MapPolySetup("maptail",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders,Map.L3Borders)
-    
+   #  bnd.ord is a list of Keys (one per polygon) in the border file.
+   bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
+   #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
+   #cat("unique bnd:",unique(bnd.ord),"\n")
+   #cat("MapTail-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+  
+   # the x,y limits must be based on the biggest area plotted, if the data level 
+   #   does not cover the entire area, check the L2 and L3 borders.
+
+   rPoly   <- MapPolySetup("map",panels,rlAreaVisBorders,rlL2VisBorders,rlRegVisBorders,rlL3VisBorders)
+
    rxpoly2 <- rPoly$rxpoly2
    rypoly2 <- rPoly$rypoly2
-   
+   #cat("Code: 6248 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+ 
    #cat("maptail - areaDatKey:",areaDatKey,"\n")
 
    # ____________labeling and axes_______________
@@ -6233,30 +6503,30 @@ rlAreaMapTail = function(j){
       #
       #####
       #
-      NTNames <- names(areaNamesAbbrsIDs)
+      NTNames <- names(areaNT)
       #cat("NTNames:",NTNames,"\n")
       #
       #  Map Labels
-      #str(areaNamesAbbrsIDs)
+      #str(areaNT)
       
       if (areaUSData) {                                             ##### replace with feature based code.
          if (i == 1) {   # first map      # added code to watch out for regional mapping.
             # if first map in column
-            if(!areaNamesAbbrsIDs["DC","NotUsed"]) {
+            if(!areaNT["DC","NotUsed"]) {
                graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
             }
-            if(!areaNamesAbbrsIDs["AK","NotUsed"]) {
+            if(!areaNT["AK","NotUsed"]) {
                graphics::text(22, 17,'AK',cex=Map.Area.Spec.cex, adj=.5, col=1)
             }
-            if(!areaNamesAbbrsIDs["HI","NotUsed"]) {
+            if(!areaNT["HI","NotUsed"]) {
                graphics::text(47, 8, 'HI',cex=Map.Area.Spec.cex, adj=.5, col=1)
             }
          }
       } else {
          if(areaNTMapLabels) {
             if (i==1) {
-               MapUsed     <- !areaNamesAbbrsIDs[,"NotUsed"]
-               MapLData    <- areaNamesAbbrsIDs[MapUsed,c("MapL","MapX","MapY")]
+               MapUsed     <- !areaNT[,"NotUsed"]
+               MapLData    <- areaNT[MapUsed,c("MapL","MapX","MapY")]
                MapLabel    <- MapLData[!is.na(MapLData$MapL),]
                lenMapLabel <- dim(MapLabel)[1]
                if (lenMapLabel >= 1 ) {
@@ -6678,18 +6948,15 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
       if (col1[j] >= col2[j]) {
           
           ErrFnd    <- TRUE
-          warnCnt()
-          xmsg      <- paste0("***020A ", gName, " ", pdColNum, " The first column name/number (", stColName1,") must proceed the last column name/number (", stColName2,") in the ", sDFName," data frame.\n")
-          warning(xmsg, call.=FALSE)
-         
+          errCntMsg(paste0("***020A ", gName, " ", pdColNum, " The first column name/number (", stColName1,
+                           ") must proceed the last column name/number (", stColName2,") in the ", sDFName," data frame.\n"))
+          
       } else {
    
           wD      <- ( col2[j] - col1[j] + 1 )   # corrected to calculate the number of data columns
           if ( wD < 2 || wD > 9 ) {
              ErrFnd  <- TRUE
-             warnCnt()
-             xmsg <- paste0("***020B", gName, " ", pdColNum, " The number of segments is ", wD, ". It must be between 2 and 9. If over 9, only the first 9 will be used.\n")
-             warning(xmsg, call.=FALSE)
+             errCntMsg(paste0("***020B", gName, " ", pdColNum, " The number of segments is ", wD, ". It must be between 2 and 9. If over 9, only the first 9 will be used.\n"))
           }
       }
    }
@@ -7005,9 +7272,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    if (inherits(DataList,"error")) {    # default where = FALSE
         # error could not find the data.frame name in memory.
         ErrFnd  <- TRUE
-        warnCnt()
-        xmsg    <-paste0("***02T1", TSMsgLabel, " ", pdColNum, " column in data.frame ", dataNam, " does not exist or is not valid.\n")
-        warning(xmsg, call.=FALSE)
+        errCntMsg(paste0("***02T1", TSMsgLabel, " ", pdColNum, " column in data.frame ", dataNam, " does not exist or is not valid.\n"))
         
    } else {
      
@@ -7017,28 +7282,22 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
   
         if (!is.array(workDArr))  {
             ErrFnd  <- TRUE
-            warnCnt()
-            xmsg    <- paste0("***02T2", TSMsgLabel, " ", pdColNum, " The ", dataNam, " data structured in the panelData field is not an array.\n")
-            warning(xmsg, call.=FALSE)
+            errCntMsg(paste0("***02T2", TSMsgLabel, " ", pdColNum, " The ", dataNam, " data structured in the panelData field is not an array.\n"))
         }
    
         dimDArr <- dim(workDArr)
    
         if (dimDArr[2] < 2 ) {
             ErrFnd   <- TRUE
-            warnCnt()
-            xmsg     <- paste0("***02T4", TSMsgLabel, " ", pdColNum," The ", dataNam, " array\'s 2nd dimension (time periods) must have at least 2 points.  It is ", dimDArr[2], ".\n")
-            warning(xmsg, call.=FALSE)
-        }
+            errCntMsg(paste0("***02T4", TSMsgLabel, " ", pdColNum," The ", dataNam, " array\'s 2nd dimension (time periods) must have at least 2 points.  It is ", dimDArr[2], ".\n"))
+         }
   
         if (conf) {   # TSCONF option.  
           
             # Time Series with Confidence Bands
             if (dimDArr[3] !=4) {
                 ErrFnd  <- TRUE
-                warnCnt()
-                xmsg    <- paste0("***02T5", TSMsgLabel, " ", pdColNum, " The ", dataNam, " array\'s 3rd dimension is not 4.  It is ", dimDArr[3], ",\n")
-                warning(xmsg, call.=FALSE)
+                errCntMsg(paste0("***02T5", TSMsgLabel, " ", pdColNum, " The ", dataNam, " array\'s 3rd dimension is not 4.  It is ", dimDArr[3], ",\n"))
             }
        
         } else {
@@ -7046,34 +7305,26 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
             
             if (dimDArr[3] < 2) {
                 ErrFnd  <- TRUE
-                warnCnt()
-                xmsg <- paste0("***02TA", TSMsgLabel, " ", pdColNum, " The time series array\'s 3nd dimension must be at least 2.  It is ", dimDArr[3], ".\n")
-                warning(xmsg, call.=FALSE)
+                errCntMsg(paste0("***02TA", TSMsgLabel, " ", pdColNum, " The time series array\'s 3rd dimension must be at least 2.  It is ", dimDArr[3], ".\n"))
             }
             
             if (dimDArr[3] != 2 && dimDArr[3] != 4) {
                # accept confidence data - don't stop run.
                 ErrFnd  <- TRUE
-                warnCnt()
-                xmsg    <- paste0("***02T6", TSMsgLabel, " ", pdColNum, " The time series array\'s 3rd dimension must be 2 or 4. It is ", dimDArr[3], ".\n")
-                warning(xmsg,call.=FALSE)
-            }
+                errCntMsg(paste0("***02T6", TSMsgLabel, " ", pdColNum, " The time series array\'s 3rd dimension must be 2 or 4. It is ", dimDArr[3], ".\n"))
+             }
         }
   
         if (is.null(wDArrNames)) {  # names are not present
             ErrFnd  <- TRUE 
-            warnCnt()
-            xmsg    <- paste0("***02TB", TSMsgLabel, " ", pdColNum, " The time series array does not have rownames assigned to the 1st dimension. Data cannot be paired up with area.\n")   
-            warning(xmsg, call.=FALSE)
-        } else {
+            errCntMsg(paste0("***02TB", TSMsgLabel, " ", pdColNum, " The time series array does not have rownames assigned to the 1st dimension. Data cannot be paired up with area.\n") )  
+         } else {
             tnn <- is.na(match(wDArrNames,areaDatKey))
             if (any(tnn)) {   # non-match found.
                  ErrFnd  <- TRUE
-                 warnCnt()
                  lnn     <- paste0(wDArrNames[tnn],collapse=" ")
-                 xmsg    <- paste0("***02T7", TSMsgLabel, " ", pdColNum," Rownames on array do not match subarea ID list. The bad area IDs are:\n",
-                                        lnn)
-                 warning(xmsg, call.=FALSE)
+                 errCntMsg(paste0("***02T7", TSMsgLabel, " ", pdColNum," rowNames on array do not match area ID list. The bad area IDs are:\n",
+                                        lnn))
             }
         } 
    }
@@ -7366,6 +7617,8 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
 
 #print("Glyph functions loaded")
 
+
+
 #############################
 #############################
 #
@@ -7387,7 +7640,7 @@ AddRefLine <- function (wRefVal, wKe, wRx) {
   }
 
 #
-#_________ function to pattern match alias names
+#_________ function to pattern match alias names_______019x________
 #
 AliasToIndex <- function(xR,aNAIAlias) {
    #
@@ -7415,7 +7668,7 @@ AliasToIndex <- function(xR,aNAIAlias) {
    
    wIndex[xoutb[,2]]  <- xoutb[,1]
    
-   wMissing <- is.na(wIndex)
+   wMissing     <- is.na(wIndex)
    wMissingList <- paste0(xR[wMissing],collapse=", ")
    
    #if (any(wMissing)) {
@@ -7556,156 +7809,59 @@ BuildSegColors <- function(NumSegs) {
 #
 ###
 
-###
-#
-#  Subroutine to take values in the col<x> vectors (panelDesc variable), 
-#   convert numerics to integer, convert character (column names)  
-#   by matching with statsDFrame column names to statsDFrame column numbers.   
-#   NA's (no name match) and out of range numbers are set to "0" - NOT VALID. 
-#
-#  Used to check column specifications for sortVar, rowNamesCol and colx variables during 
-#  initial setup.   By the time the glyphs runs, the col1,...,col3 variables are translated
-#  into column numbers and no long needs to be checked.  Except to validate they exist when needed.
-#
-#  This routine takes any number/name of columns provided by user and validates it and translates to 
-#  column number.   Will not translate "NA", missing, "" or "0" values.  glyph will test if 
-#  data is missing.
-#
-#  This routine does a general check of a named list of statsDFrame column names or numbers. 
-#  At the end of the verification, the names are translated into statsDFrame column numbers.
-#  
-#  The caller should save the original named list vectors for diagnostic messages.
-#
-#  Used mostly used by sortVar, rowColName, and other arguments.
-#
-#####
-#
-#    CheckColx appears to not be used any more.   Verify.
-#
-#####
-#
-#
-CheckColx <- function(wcol, colname, wnam2, len_wnam) 
-   {
-     # wcol     = col vector of names/number in statsDFrame from panelDesc
-     # colname  = literal character name of col vector for error message.(panelDesc variable name (col1, col2, col3))
-     # wnam2    = character list of column names and row numbers (in character format)
-     # len_wnam = number of original set of columns. (length(wcol)
-     #
-     # Results Rules:  "0" means invalid number, out of range number or invalid name.
-     #                 NAs are converted to "0" values.
-     #                 glyphs check for valid values based on need.  
-     #
-     #
-     xwcol   <- wcol
-     l_wcol  <- length(wcol)
-     ErrFnd  <- FALSE
-          
-     if (is.factor(xwcol)) 
-       { xwcol <- as.character(xwcol) }
-        
-     if ( is.numeric(xwcol) || is.logical(xwcol) ) {  # have number (double, single, integer, or logical)
-         # we are dealing with numeric or logical
-         
-         rcol              <- as.integer(xwcol)  # convert numeric to integer.
-         rcol[is.na(rcol)] <- 0     # get rid of NA.  Turn to zeros doesn't get rid of negatives.
-      
-         if (any(rcol < 0))
-           {
-             ErrFnd  <-  TRUE
-             xmsg    <-  paste0("***0201 PDCOL In the ",colname," named list in the ", pDName," panelDesc structure there are one or more negative values: ",paste0(rcol,collapse=", ")," Literal:",wcol,"\n")
-             warnCnt()
-             warning(xmsg,call.=FALSE)
-           } else {
-             if (any(rcol > len_wnam))
-               {
-                 ErrFnd  <- TRUE
-                 xmsg    <- paste0("***0202 PDCOL One or more of the values in the \var{<pdVarName>} named list in the \var{<panelDesc>} structure is greater than the columns in the \var{<statsDFrame>} data.frame: ",paste0(rcol,collapse=", "),"\n")
-                 warnCnt()
-                 warning(xmsg,call.=FALSE)
-               } 
-           
-           }
-         # if ErrFnd = FALSE, the all number in vector are within range.
-         # check valid range in glyph  (NA become zeros.) Leave the final check to the glyphs.
-       } else {     
-         if (is.character(xwcol))
-           {  # have character - may be name or number - check each
-              # get number for other code, if column name.
-
-              xcol <- match(xwcol,wnam2,nomatch=0)             # match against column names and numbers (as characters)          
-              rcol <- ifelse(xcol > len_wnam, xcol-len_wnam, xcol)  # adjust matches to row numbers to real row numbers.       
-
-              # name and character number converted to integer       
-              # bad and NA values are "0" and will be caught in the glyph    
-           
-           } else {
-              # invalid variable type
-              ErrFnd  <- TRUE
-              xmsg    <- paste0("***CCOL-03 The type of ",colname," panelDesc variable is invalid. ",typeof(xwcol),".  Must be integer or character.\n")
-              warnCnt()
-              warning(xmsg,call.=FALSE)
-           } 
-      }
-     if (ErrFnd)
-       { 
-         return (rep.int(0,l_wcol))
-       } else {
-         # clean up any NAs in list, set to 0
-         rcol[is.na(rcol)]  <- 0   # set NA to 0 (invalid)
-         return (rcol)
-         #print(rcol)
-       }
-        
-   }        
-
-#
-###
 
 ###
 #
 #
 
-CheckColx2 <- function(colValues, varName, varNum, gNameList, stColNames, len_sCN)  {
+CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN)  {
    
-     # xx  <- gsub(",","",<value>,fixed=TRUE)
-     # gc4real <- "^[-+]?[ ]?[0-9]{1,3}(,[0-9]{3})*(\\.[0-9]*)?$|^[-+]?[ ]?[0-9]*(\\.[0-9]*)?$"  # is real number with commas
-     
-     gc4int  <- "^[-+]?[ ]?[0-9]{1,3}(,[0-9]{3})*$|^[-+]?[ ]?[0-9]*$"                          # is integer number with commas
-     
      #cat("colValues:",paste0(colValues,collapse=", "),"\n")
      #cat("varName  :",varName,"\n")
      #cat("varNum   :",varNum,"\n")
      #cat("gNameList:",paste0(gNameList,collapse=", "),"\n")
-     #cat("stColNames:",stColNames,"\n")
+     #cat("wSDFNames:",wSDFNames,"\n")
      #cat("len_sCN  :",len_sCN,"\n")
      #
      #
      # Routine is used to check out the information provided by the user.  If 
      # vector contains a number or a character string, it will validate the number against
-     # the column number range of statsDFrame.  If a character string vector is provided,
-     # each items is checked for being a number or non-number string.  If numeric,
-     # the value is converted to integer and validated for <= 0 and range.  If a non-numeric
-     # string, the string to match against the column names on statsDFrame and translated to 
-     # the column number.  "" and NA values are ignored and not translated or matched.
-     # If a string does not match, then it resolves to NA.  "" are converted to NA.
+     # the column labels of statsDFrame.  If a character string vector is provided,
+     # each items is compared as a character first, then converted to numeric (integer).
+     #
+     # If a character string, the string to match against the column names on statsDFrame 
+     # and translated to the column number.  If a string does not match, 
+     # the value is converted to an integer.  If it can't convert, then it is assigned NA.
+     #
+     # If numeric, the value is converted to integer and validated for <= 0 and range.  
+     # 
+     # "" and NA values are ignored and not translated or matched.
      #
      # The glyphs are left to determine if all of the needed data columns are provided.
      # This only validates the information present.  If the data column is not used, we don't care.
      #
      # pdVarData - colValues  = character or numeric vector of column names/numbers in statsDFrame.  
      #               Can be a list from sortVar, rowColName, or panelDesc col1, col2, or col3..
-     # pdVarName    = name of variable - vector being checked. (used in messages.). (example: col1, col2, sortVar, rowColName, etc.)
-     # pdVarNum     = 3rd character in message identifiers: "0" for sortVar and rowColNames and 1 to 3 for panelDesc columns
-     # gNameList  = associated "type" list of glyphs per entry in vector.  Used in messages.  Must be the same length as
-     #               colValues.  For sortVar and rowColName, this parameter is set to "".
-     # stColNames = character list of column names and numbers (in character format) (statsDFname column names)
-     # len_sCN    = number of original number of columns.  dim(statsDFrame)[2]  The stColNames list is 2 x this value.
+     # pdVarName    = name of variable - vector being checked. (used in messages.). 
+     #                (example: col1, col2, sortVar, rowColName, etc.)
+     # pdVarNum     = 3rd character in message identifiers: "0" for sortVar and rowColNames 
+     #                and 1 to 3 for panelDesc columns
+     #
+     # gNameList  = associated "type" list of glyphs per entry in vector.  Used in messages.  
+     #                Must be the same length as colValues. For sortVar and rowColName, 
+     #                this parameter is set to "".
+     #
+     # wSDFNames  = character list of column names and numbers (in character format) 
+     #               (statsDFname column names)
+     #
+     # len_sCN    = number of original number of columns.  dim(statsDFrame)[2]  
+     #               The stColNames list is 2 x this value.
      #
      # Rules:   Not provided = "" and NA.  
      #          "0" means invalid number or name.  Error message already generated.
-     #          glyphs check for valid values based on need. We just make sure the column has a 
-     #           a valid reference and can be accessed. Not valid content.
+     #		>0  means match, valid number or name.  Column index in statsDFrame data.frame.
+     #          Glyphs check for valid values based on need. We just make sure 
+     #            the column has a valid reference and can be accessed. Not valid content.
      #
      #  Working variables:
      #    FvarNum = 1 character version of varNum (if positive) othersize set to "0"  (single value)
@@ -7715,138 +7871,92 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, stColNames, len_sC
      #
      #cat("len_sCN:",len_sCN,"  varNum:",varNum,"\n")
      
-     
      ErrFnd      <- FALSE                    # no errors indicator
      
-     xwcol       <- colValues                # get working copy of panelDesc contains of a variable list.
-     l_xwcol     <- length(colValues)        # length of variable contents vector
-     l_gNameList <- length(gNameList)        # length of type list (number of glyphs)
+     xwcol       <- as.character(colValues)  # get working copy of panelDesc contains of a variable list.
+     xwcol       <- ClnStr2(xwcol)           # clean strings.
+     l_xwcol     <- length(colValues)        # length of column list to check - variable contents vector
+     l_gNameList <- length(gNameList)        # length of "type" list (number of glyphs)
+     #cat("CheckColx:  colValues:",paste0(xwcol,collapse=", ",sep=""),"\n",
+     #   "            len:",l_xwcol,"  len gNameList:",l_gNameList,"\n")
+         
+     res         <- rep(0,l_xwcol)          # results column number list. Set Default, no match
 
-     rcol        <- rep(NA,l_xwcol)          # results column number list.
-
-     if (varNum >= 0) {
+     if (varNum >= 0) {	   # format variable for messages.
          FvarNum <- formatC(varNum,format="f",digits=0,width=1)
      } else {
          FvarNum <- "0"
      }
-
+     #cat("FvarNum:",FvarNum,"\n")
+        
+     #
      if (l_xwcol != l_gNameList) {
-        # panelDesc variable not same length as number of types
+        # panelDesc value list not same length as list of types
         if (l_gNameList == 0)  { 
            # gNameList is absent - possible sortVar or rowColNames arguments.
            l_gNameList <- l_xwcol
+     	   #cat("l_gNameList was length 0.\n")
+     	   
         } else {
            # error - they should be the same length, possible type-o in variable list.
            ErrFnd <- TRUE
-           warnCnt()
-           xmsg <- paste0("***0205 ",gNameList," The length of the glyph type list is different the\n",
+           errCntMsg(paste0("***0205 ",gNameList," The length of the glyph type list is different the\n",
                           "        length of the variables list.\n")
+                    )
+           return(res)
         }
      }
     
      #cat("l_xwcol:",l_xwcol,"  len_sCN:",len_sCN,"  varNum:",varNum," FvarNum:",FvarNum,"\n")
-     #print(stColNames)
+     #print(wSDFNames)
      
-     FndNames <- rep(TRUE,l_xwcol)
+     res <- rep(0,l_xwcol)  # one per value in panelDesc column (col1).
      
-     skipList <- (is.na(xwcol) | xwcol == "")   # no values provided in entry  ("", "" from ,,  or NA)
+     #skipList <- (is.na(xwcol) | xwcol == "")   # no values provided in entry  ("", "" from ,,  or NA) => TRUE
      
-     if (is.factor(xwcol))  {
-        # if a factor convert to character  - should not be a factor if it's a numeric,
-        xwcol <- as.character(xwcol)    # remove factor index.
-     }
-     if (is.numeric(xwcol)) {  
-        # have number (double, single, integer)
-        
-        rcol              <- as.integer(xwcol)     # convert numeric to integer (column indexes are integers)
-                                                   # NA values still show up as NA.   Still need to validate.
-    
-        #print("numeric")
-     } else {
-        if (is.character(xwcol)) {
-    
-           xTcol           <- grepl(gc4int,xwcol)  # T/F vector of type of string   T=Numeric
-           xTcol[skipList] <- FALSE
-    
-           if (any(xTcol)) {
-              rcol[xTcol]  <- as.integer(xwcol[xTcol])   # convert chars to numbers 
+     #if (!skipList) { 
+        # Check each value in put input list.
+        for (ind in c(1:l_xwcol)) {
+           # check each value.
+           pdColNum <- formatC(ind, format="f",digits=0, width=2, flag="0")
+           xycol    <- xwcol[ind]                # get value
+           if (!(is.na(xycol) || xycol == "")) {
+              # values to check
+              
+              xm       <- match(xycol, wSDFNames)   # check match.
+              #cat("pdColNum:",pdColNum,"  value:",xycol,"  xm:",xm,"\n")
+                  
+              if (is.na(xm)) {
+                 # no match
+                 res[ind] <- 0
+                 ErrFnd      <- TRUE
+                 errCntMsg(paste0("***02",FvarNum,"1 PDCOL ",gNameList[ind]," ",pdColNum," The column name of ",
+                                xwcol[ind],"\n",
+                                "        in '",varName,"' does not exist in the statsDFrame data.frame.\n")
+                          )
+              } else {
+                 if (xm > len_sCN) {
+                    # match is to number not name.
+                    res[ind] <- xm - len_sCN
+                 } else {
+               
+                    res[ind] <- xm
+                 }
+              }
+           } else {
+              res[ind] <- NA
            }
-     
-           xTcol           <- !xTcol               #  reverse flags     T = character
-           xTcol[skipList] <- FALSE                # don't check any NA fields.
-       
-           if (any(xTcol)) {
-     
-              #  check all, but we will only update the character ones.
-              xcol         <- match(xwcol,stColNames)                   # match against column names and numbers (as characters)
-                 # and translate column names and numbers to integers.
-              
-              xcol2        <- ifelse(xcol>len_sCN,xcol-len_sCN,xcol)    # adjust matches to verified/matched column numbers to real column numbers.       
-              
-              rcol[xTcol]  <- xcol2[xTcol]
-              
-              FndNames[xTcol] <- !is.na(xcol)[xTcol]  
-           }
-        } else {
-           # invalid type of vector, numeric, integer, or character
-           
-           # is this possible because prior checks???
-           stopCnt()
-           StopFnd    <- TRUE
-           xmsg       <- paste0("***02",FvarNum,"0 PDCOL The ",varName," named list is type ",typeof(xwcol),"\n",
-                                "        is invalid. Must be a numeric, integer or character vector.\n")
-           stop(xmsg, call.=FALSE)
-          
         }
-     }
-     # validate
+     #}
+ 
      #print("xwcol")
      #print(xwcol)
-     #print("rcol")
-     #print(rcol)
-     #cat("FndNames:",FndNames,"\n")
+     #print("res")
+     #print(res)
+     #cat("wSDFNames:",wSDFNames,"\n")
      #cat("len_sCN:",len_sCN,"\n")
     
-     for (ind in c(1:l_xwcol)) {
-        # validate each one - rcol.
-        pdColNum <- formatC(ind, format="f",digits=0, width=2, flag="0")
-        
-        xRcol <- rcol[ind]
-        if (!is.na(xRcol)) {
-           #cat("ind:",ind,"  xRcol:",xRcol,"\n")
-        
-           if (xRcol <= 0) {
-              warnCnt()
-              ErrFnd      <- TRUE
-              xmsg        <- paste0("***02",FvarNum,"2 PDCOL ",gNameList[ind]," ",pdColNum," The column number of ",xwcol[ind],"\n",
-                                    "        in '",varName,"' is negative or zero. Must be a positive integer or the name of a\n",
-                                    "        column in statsDFrame.\n")
-              warning(xmsg,call.=FALSE)
-              rcol[ind]   <- 0
-           } else {
-              if(xRcol > len_sCN) {
-                 warnCnt()
-                 ErrFnd      <- TRUE
-                 xmsg        <- paste0("***02",FvarNum,"3 PDCOL ",gNameList[ind]," ",pdColNum," The column number of ",xwcol[ind],"\n",
-                                       "        in '",varName,"' is greater than the number of columns ",len_sCN,"\n",
-                                       "        in the statsDFrame data.frame.\n")
-                 warning(xmsg,call.=FALSE)
-                 rcol[ind]   <- 0
-              }
-        
-           }
-        }
-        if (!FndNames[ind]) {
-           # did not find the name in statsDFrame
-           warnCnt()
-           ErrFnd      <- TRUE
-           xmsg        <- paste0("***02",FvarNum,"1 PDCOL ",gNameList[ind]," ",pdColNum," The column name of ",xwcol[ind],"\n",
-                                 "        in '",varName,"' does not exist in the statsDFrame data.frame.\n")
-           warning(xmsg,call.=FALSE)
-           rcol[ind]   <-  0
-        }      
-     } 
-     return(rcol)
+     return(res)
 }
      
 #
@@ -7854,6 +7964,7 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, stColNames, len_sC
      
 CheckParmColx <- function(colNames, parmCode, wSDFNames, len_wSDFNames) 
    {
+     #
      #  This function validates the statsDFrame column name/numbers for call arguments/parameters.
      #  It is essentually the same function as CheckColx, but does not generate error messages
      #  related to panelDesc variables or lists.  If the list of names/numbers is limited to "N", 
@@ -7862,13 +7973,14 @@ CheckParmColx <- function(colNames, parmCode, wSDFNames, len_wSDFNames)
      #  Used by sortVar and rowNamesCol argument checks
      #
      # colNames     = col Name vector of names/number in statsDFrame from panelDesc
+     #           This could be a vector of names or numbers...
      # parmCode     = is a vector containing the error message identifier and string and the parameter name. 
      #     parmCode[1] = second part of the "CARG-" tag. 
      #     parmCode[2] = name of the calling argument/parameter
      #           c("RNC","rowNamesCol")
      #     Any invalid names/numbers are passed by as 0. 
-     # wSDFNames    = character list of column names and numbers (in character format)
-     # len_wSDFNames= number of original set of columns. (length(wcol)
+     # wSDFNames    = character list of column names and numbers (in character format) (2 x len_wSDFNames in length.)
+     # len_wSDFNames= number of original set of columns. (length(wcol))
      #
      # Results Rules:  "0" means invalid number, out of range number or invalid name.
      #                 NAs are converted to "0" values.
@@ -7876,116 +7988,55 @@ CheckParmColx <- function(colNames, parmCode, wSDFNames, len_wSDFNames)
      #
      # The check for zero length value is done before the call to this routine.
      #
+     # First routine to be modified for numbers as characters.
+     # "" or NA values are returned as NA instead of 0 or a column number.
+     #
      
-     xColNames   <- colNames
+     xColNames   <- ClnStr2(as.character(colNames))   # convert any numeric to characters and clean
      l_wcol      <- length(colNames)  # number of values
      ErrFnd      <- FALSE
     
      if (l_wcol == 0) {
         ErrFnd   <- TRUE
-        xmsg     <- paste0("***0124 CARG-",parmCode[1]," The ",parmCode[2]," call argument is empty.  Argument ignored.\n")
-        warnCnt()
-        warning(xmsg, call.=FALSE)
+        errCntMsg(paste0("***0124 CARG-",parmCode[1]," The ",parmCode[2],
+                           " call argument is empty.  Argument ignored.\n")
+                 )
         res      <- NA
      } else {
         # number of values are 1 or more
         
-        res      <- rep(0,l_wcol)   # default results are none found.
+        res      <- rep(0,l_wcol)   # default results if none found.
      
-        if (is.factor(xColNames)) 
-           { xColNames <- as.character(xColNames) }   # if factors make then non-factored..
+        #print("parameter value to check:")
+        #print(xColNames)
            
-        if ( is.character(xColNames) || is.numeric(xColNames) ) {
-    
-           # what are each element in the vector - a number or name?
-        
-           xColType <- unlist(gregexpr("^[ \t]*[+-]?[0-9]*[ \t]*$",xColNames))    # find out number or name
-        
-           #  NA - NA (missing)
-           #  -1 - Character
-           #   1 - Number
+        # Loop through list and check each one based on its type.
+        for (ind in c(1:l_wcol)) {
+           # get value type
+           wCName <- xColNames[ind]   # get value
            
-           #print("parameter value to check:")
-           #print(xColNames)
-           #print(xColType)
-           
-           # Loop through list and check each one based on its type.
-           for (ind in c(1:l_wcol)) {
-              # get value type
-              wCT    <- xColType[ind]    # get type
-              wCName <- xColNames[ind]   # get value
-           
-              if (is.na(wCT)) {
-                # NA value - pass it back to caller as 0 - not found.
-                res[ind] <- 0
+           xm <- match(wCName,wSDFNames)   # see if single value is in the list.
+              
+           if (is.na(xm)) { 
+              # no match..
+              res[ind] <- 0   # no match for this value
+              ErrFnd     <- TRUE
+	      errCntMsg(paste0("***0123 CARG-",parmCode[1]," A column names/numbers in the ",
+	                       parmCode[2], " call argument\n",
+	                       "        does not exist in the ",sDFName," data.frame:", wCName, "\n")
+	               )
+           } else {
+              # match..
+              if (xm > len_wSDFNames) { 
+                 # not a named column..  It matched a "number" column.
+                 res[ind]  <- xm - len_wSDFNames   # adjust to the "number column"
               } else {
-                if (wCT < 0) {
-                
-                  # have character type value (not a just numbers) - should be column name
-                  
-                  wColN   <- match(wCName,wSDFNames,nomatch=0)                          # match against column names and numbers (as characters)          
-                  wColN   <- ifelse(wColN > len_wSDFNames, wColN-len_wSDFNames, wColN)  # adjust matches to row numbers to real row numbers.       
-
-                  res[ind] <- wColN     # save resulting column index number
-                  
-                  # check if column name found.       
-                  
-                  if (wColN <= 0) { 
-                     # if it was a no match ...
-                     ErrFnd     <- TRUE
-                     xmsg       <- paste0("***0123 CARG-",parmCode[1]," A column names in the ",parmCode[2], " call argument\n",
-                                          "        does not exist in the ",sDFName," data.frame:", wCName, "\n")
-                     warnCnt()
-                     warning(xmsg,call.=FALSE)
-                  }  # end of name valid check.   
-                
-                } else {
-                
-                  # numeric value - (integer, numeric, or character format) - convert and check                 
-  
-                  wColN <- as.integer(wCName)      # convert to number
-                  
-                  if (is.na(wColN)) {
-                    # string did not convert to integer - Error.  (unexpected since we validated character string first.
-                    ErrFnd  <-  TRUE
-                    xmsg    <-  paste0("***0125 CARG-",parmCode[1]," A column index number in the ",parmCode[2]," call argument\n",
-                                       "        did not convert from character to integer: ",wColN,"\n")
-                    warnCnt()
-                    warning(xmsg, call.=FALSE)
-                 
-                  } else {
-                    if (wColN < 0) {
-                      ErrFnd  <-  TRUE
-                      xmsg    <-  paste0("***0120 CARG-",parmCode[1]," A column index number in the ",parmCode[2], " call argument\n",
-                                         "        is a negative or zero: ",wColN,"\n")
-                      warnCnt()
-                      warning(xmsg, call.=FALSE)
-                    } else {
-                      if (wColN > len_wSDFNames) {
-                        ErrFnd  <- TRUE
-                        xmsg    <- paste0("***0121 CARG-",parmCode[1]," A column index number in the ",parmCode[2]," call argument\n",
-                                          "        is a greater than the number of columns in ",sDFName," data.frame: ", wColN,"\n")
-                        warnCnt()
-                        warning(xmsg, call.=FALSE)
-                      } else {
-                       
-                        res[ind] = wColN   # save the column number
-                      }  #  end of range check.
-                    }  #  end of neg check.
-                  }  # end of integer convert error check
-                }  # end of char vs numeric check
-              } # end of NA vs other type check
-           }  # end of for loop
+                 # named column
+                 res[ind]  <- xm
+              }  # end processing match labels.
+           } # end of NA vs other type check
+        }  # end of for loop
        
-        } else {
-           # invalid variable type
-           ErrFnd     <- TRUE
-           xmsg      <- paste0("***0122 CARG-",parmCode[1]," The call argument/parameter, ",parmCode[2]," is not a valid variable type.\n",
-                               "        It must be a numeric or character type value.\n")
-           warnCnt()
-           warning(xmsg,call.=FALSE)
-        
-        }  # end of type check.
      }  # end of zero length check
      
      #cat("CheckParmColx Results:",paste0(res,collapse=", "),"\n")
@@ -8026,10 +8077,11 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
         if (length(xd) == 0) {
            # invalid vector - length = 0 -> no data
            ErrFnd   <- TRUE
-           warnCnt()
-           xmsg     <- paste0("***02", xn, "D ", gName, " gCol:", pdColNum, " The ", stColName, " data column in the ", sDFName, "\n",
-                              "        data frame does not contain any data. Data vector length has length of zero. ", pdUsage,"\n") 
-           warning(xmsg, call.=FALSE)
+           errCntMsg(paste0("***02", xn, "D ", gName, " gCol:", pdColNum, " The ", stColName, 
+                              " data column in the ", sDFName, "\n",
+                              "        data frame does not contain any data. Data vector length has length of zero. ", 
+                              pdUsage,"\n")
+                     )        
         
            # can't process or check return NULL vector
            xdr      <- xd    # return short vector
@@ -8053,49 +8105,61 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
            # check for missing values in the vector
            #   Check # 1 - all missing
            if (all(is.na(xd))) {
-              warnCnt()
               ErrFnd    <- TRUE   # no data can be converted.  ALL NA.  could be all blanks.
-              xmsg      <- paste0("***02", xn, "A ", gName, " gCol:", pdColNum, " The data provided in the ", stColName, "\n",
-                                  "        column of the ", sDFName, " data frame does not contain any numerical data.\n",
+              errCntMsg(paste0("***02", xn, "A ", gName, " gCol:", pdColNum, " The data provided in the ", 
+                                  stColName, "\n",
+                                  "        column of the ", sDFName, 
+                                  " data frame does not contain any numerical data.\n",
                                   "        No rows will be drawn. ", pdUsage,"\n")
-              warning(xmsg,call.=FALSE)
+                       )
               # return all NA vector
               #print("all are NA")
            } else {        
               #   have list of numbers in xd from caller.
               #   They are not ALL NA, so their may be some numbers to check
               #
-              #   Check # 2 - one or more missing.
+              #   Entry could be NA, numeric, or character - or any other type of variable.  (xd)
+              #
+              #   Check # 2 - one or more are NA
               if (any(is.na(xd))) {
                	 # if any are NA, document them to the user.
                  lenxd     <- length(xd)
-                 seqxd     <- seq(1,lenxd)
+                 seqxd     <- seq(1,lenxd)          # row numbers:   1 to end
                  BadSeqNum <- seqxd[is.na(xd)]	    # get the position number (row) of the number 
                  # one or more entires are NA (missing) - This check should be done before manipulating the vectors.
                  #    check is primarily if user leaves entries missing, not is the translation to numeric leaves them NA.
-                 warnCnt()
-                 xmsg   <- paste0("***02", xn, "B ", gName, " gCol:", pdColNum, " The ", stColName, " data column in the ", sDFName,"\n",
+                 errCntMsg(paste0("***02", xn, "B ", gName, " gCol:", pdColNum, " The ", stColName, 
+                                  " data column in the ", sDFName,"\n",
                                   "        data frame contains one or more missing values. Rows with missing values will\n",
                                   "        not be drawn. ", pdUsage,"\n")
-                 warning(xmsg, call.=FALSE)
-                 xmsg   <- paste0("***02", xn, "C ", gName, " gCol:", pdColNum, "   The row numbers with missing data are:\n",
-                                  "        ",paste0(BadSeqNum,collapse=", "),"\n")
+                          )
+                 ListIDs <- areaDatIDNames[BadSeqNum]
+                 
+                 xmsg   <- paste0("***02", xn, "C ", gName, " gCol:", pdColNum, 
+                                  "   The row numbers with missing data are:\n")
+                 for (ic in seq(from=1,to=length(ListIDs),by=10)) {
+                     icend <- ic + 9    # put 10 entries per line.
+                     if (icend > length(ListIDs))  icend <- length(ListIDs)
+                     xmsg <- paste0(xmsg,paste0(ListIDs[ic:icend],collapse=", "),"\n")
+                     ic = icend + 1
+                 }
                  warning(xmsg, call.=FALSE)
                  #print("one or more are NA")
               }
       
               # we may have missing values, but we can still check the vector.
   
-              if (!is.numeric(xd)) { 
+              if (!methods::is(xd,"numeric")) { 
                  #print("not numeric")
                  # no numeric - better be character type..
 
-                 if (is.character(xd)) {
+                 if (methods::is(xd,"character")) {
 
                  is   #print("character")
                     # its character (from factor or has always been character)
            
-                    # check character string for valid numerical format and allow for commas.  Any NA values are passed through as NA in the results.
+                    # check character string for valid numerical format and allow for commas.  
+                    # Any NA values are passed through as NA in the results.
                     xd  <- gsub(",","",xd)           # eliminate commas in number
          
                     x   <- gregexpr("^[ \t]*[+-]?((([0-9]{1,3}[,])?([0-9]{3}[,])*[0-9]{3})|([0-9]*))?(([.][0-9]*)|)([eE][-+]?[0-9]+)?[ \t]*$",xd)      # verify characters are all numeric  (not scientific notation)
@@ -8165,8 +8229,8 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
                     # all checking for missing numbers has already been done.
            
                     xdr[xtf] <- as.numeric(xd[xtf])  # Try to convert "good" numbers (xtf - true) and same 
-                                                  # results in xdr on top of NAs    as.numerics' NA will be hidden in 
-                                                  # in the vector.
+                                      # results in xdr on top of NAs    as.numerics' NA will be hidden in 
+                                      # in the vector.
                    
                     xtf2 <- is.na(xdr[xtf])       # check status of the conversion of the "Good" numbers.
                                                   #  xtf2 is the list of good numbers that didn't convert.
@@ -8184,10 +8248,10 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
                     # not a numeric or character type vector  
              
                     ErrFnd <- TRUE
-                    warnCnt()
-                    xmsg <- paste0("***02", xn, "9 ", gName, " gCol:", pdColNum, " The ", stColName, " data column in the ", sDFName, "\n",
-                                   "        data frame is not a character or numeric vector. ", pdUsage,"\n") 
-                    warning(xmsg, call.=FALSE)
+                    errCntMsg(paste0("***02", xn, "9 ", gName, " gCol:", pdColNum, " The ", stColName, 
+                                   " data column in the ", sDFName, "\n",
+                                   "        data frame is not a character or numeric vector. ", pdUsage,"\n")
+                             )
           
                  } # end of character/invalid
               } else {
@@ -8241,21 +8305,21 @@ CheckPDCol <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarNum,
       #  pdVarName is not present in the panelDesc data.frame variable lists.
       
       xr$Err  <- TRUE
-      warnCnt()
-      xmsg    <- paste0("***02",xn,"5 ", gName," gCol:",pdColNum," The required panelDesc variable \n",
+      errCntMsg(paste0("***02",xn,"5 ", gName," gCol:",pdColNum," The required panelDesc variable \n",
                         "        ",pdVarName, " is missing from the ", pDName, " data.frame. ", pdUsage,"\n")
-      warning(xmsg, call.=FALSE)
+               )
    }
 
    if (!xr$Err) { 
       # no error found yet....
       if (is.na(stColNum)) {  # missing stColName 
          xr$Err   <- TRUE
-         warnCnt()
-         xmsg     <- paste0("***02", xn, "4 ", gName, " gCol:", pdColNum, " The specified ",sDFName, " column \n",
-                            "         name or number in ", pdVarName, " panelDesc column (",stColName, ") does \n",
+         errCntMsg(paste0("***02", xn, "4 ", gName, " gCol:", pdColNum, " The specified ",sDFName, 
+                            " column \n",
+                            "         name or number in ", pdVarName, " panelDesc column (",stColName, 
+                            ") does \n",
                             "         not exist or is out of range. ", pdUsage,"\n")
-         warning(xmsg, call.=FALSE)
+                  )
       } else {
          if ( (stColNum == 0) ) {
             xr$Err      <- TRUE
@@ -8297,27 +8361,30 @@ CheckPDColnCN <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarN
    if (is.na(match(pdVarName, PDUsed))) {
 
       xr$Err  <- TRUE
-      warnCnt()
-      xmsg    <- paste0("***02",xn,"5 ", gName, " gCol:", pdColNum, " The required panelDesc variable ", pdVarName, " is missing\n",
+      errCntMsg(paste0("***02",xn,"5 ", gName, " gCol:", pdColNum, " The required panelDesc variable ", pdVarName, " is missing\n",
                         "        from the ", pDName, " data.frame. ", pdUsage,"\n")
-      warning(xmsg, call.=FALSE)
+               )
    }
    if (!xr$Err) { 
       # no error found yet....
-      # Check to see if statsDFrame column in the panelDesc variable was found to be valid by CheckColx function earlier.
+      # Check to see if statsDFrame column in the panelDesc variable was found to be 
+      # valid by CheckColx function earlier.
       if ( is.na(stColNum) ) {
          xr$Err   <- TRUE
-         warnCnt()
-         xmsg    <- paste0("***02",xn,"5 ", gName, " gCol:", pdColNum, " The specified ",sDFName," column name or number in \n",
-                           "        ",pdVarName, " panelDesc column (", stColName, ") does not exist or is out of range. ", pdUsage,"\n")
-         warning(xmsg, call.=FALSE)
+         errCntMsg(paste0("***02",xn,"5 ", gName, " gCol:", pdColNum, " The specified ",sDFName,
+                           " column name or number in \n",
+                           "        ",pdVarName, " panelDesc column (", stColName, 
+                           ") does not exist or is out of range. ", pdUsage,"\n")
+                  )         
       } else {       
          if (  stColNum == 0 ) {  # invalid name or column number in statsDFrame
             xr$Err  <- TRUE
-            warnCnt()
-            xmsg    <- paste0("***02",xn,"6 ", gName, " gCol:", pdColNum, " The specified column name or number in ", pdVarName, "\n",
-                              "        panelDesc variable (", stColName, ") does not exist in the for ", sDFName, " data frame or is out of range. ", pdUsage,"\n")
-            warning(xmsg, call.=FALSE)      
+            errCntMsg(paste0("***02",xn,"6 ", gName, " gCol:", pdColNum, 
+                              " The specified column name or number in ", pdVarName, "\n",
+                              "        panelDesc variable (", stColName, 
+                              ") does not exist in the for ", sDFName, 
+                              " data frame or is out of range. ", pdUsage,"\n")
+                      )  
          }
       }
    }
@@ -8437,12 +8504,12 @@ ConvertDV <- function(DV) {
         
                  "colors"  = { is.Color(vValue) },
                  "numeric" = { 
-                       if (is.numeric(vValue)) {
+                       if (methods::is(vValue,"numeric")) {
                           (is.between(vValue,as.numeric(varData$v1),as.numeric(varData$v2)))
                        }
                    },
                  "integer" = {
-                       if (is.numeric(vValue)) {
+                       if (methods::is(vValue,"numeric")) {
                           (is.between(as.integer(vValue),varData$v1,varData$v2))
                        }
                    },
@@ -8453,7 +8520,7 @@ ConvertDV <- function(DV) {
                        !is.na(xIdx)
                    },
                  "logical" = { 
-                       is.logical(vValue) 
+                       methods::is(vValue,"logical") 
                    },
                  "match"   = {
                        wS     <- eval(parse(text=varData$v1))  # must do this to build vector.
@@ -8462,7 +8529,7 @@ ConvertDV <- function(DV) {
                        !is.na(xIdx)
                    },
                  "text"    = { 
-                       if (is.character(vValue)) {
+                       if (methods::is(vValue,"character")) {
                           (is.between(nchar(vValue),as.integer(varData$v1),as.integer(varData$v2)))
                        }
                    },
@@ -8899,29 +8966,40 @@ CleanXLabels2 <- function(rx, atRx) {
 #####
 #
 TestOverlap <- function(Acex, atLab, atRx, nSp) {    
+
+     #  Acex    = font multiplier - size
+     #  atLab   = X-Axis labels to eval.
+     #  atRx    = X-Axis positions of labels
+     #  nSp     = Number of spaces between (minimum = 1)
     
-     lAtLab      <- length(atLab)
-     widthSp     <- graphics::strwidth("0",cex=Acex,units="user")        
-     widthSpN    <- widthSp * nSp
-     #cat("TestOverlap-cex:",Acex," nSp:",nSp,"  widthSpN:",widthSpN," len(atLab):",lAtLab,"\n")
+     lAtLab      <- length(atLab)             # Number of labels
+     widthSp     <- graphics::strwidth("0",cex=Acex,units="user")   # character width of '0' char-our standard.
+     widthSpN    <- widthSp * nSp             # width of open space between labels
      
+     #cat("TestOverlap-cex:",Acex," nSp:",nSp,"  widthSpN:",widthSpN," len(atLab):",lAtLab,"\n")
+     # width of each label / 2 (half)
      widthAtLabH <- graphics::strwidth(atLab,cex=Acex,units="user")/2
+     # calculate the reach of the characters on each side of the atRx point.
      SrtLab      <- atRx - widthAtLabH
      EndLab      <- atRx + widthAtLabH
      
-     #cat("SrtLab:",SrtLab,"\n")
+     #cat("SrtLab:",SrtLab,"\n")    # should be a start and end for each label.
      #cat("EndLab:",EndLab,"\n")
      
      #  number of labels 1 to n, so check space between 1-2, 2-3, ... , nm1-n
      OverLapFnd <- FALSE
      #  Check to see if any labels would overlap each other based on width and grid point location.
-     for (ind in c(1:(lAtLab-1)) )  {
-        wX <- SrtLab[ind+1] - EndLab[ind]  # get space between two labels (ind and ind+1)
-        #cat("ind:",ind,"  wX:",wX,"\n")
-        if (wX < widthSpN) {               # 
-           OverLapFnd <- TRUE              # LABEL IN X-AXIS WILL OVERLAP
+     
+     if (lAtLab > 1) {
+        for (ind in c(1:(lAtLab-1)) )  {
+           wX <- SrtLab[ind+1] - EndLab[ind]  # get space between two labels (ind and ind+1)
+           #cat("ind:",ind,"  wX:",wX,"\n")
+           if (wX < widthSpN) {               # 
+              OverLapFnd <- TRUE              # LABEL IN X-AXIS WILL OVERLAP
+           }
         }
      }
+     
      #cat("OverLapFnd:",OverLapFnd,"\n")
      return(OverLapFnd)
   }
@@ -9414,7 +9492,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #cat("axisMethod:",axisMethod, "  rx:",rx,"\n")
      
      if ( axisMethod < 1 || axisMethod > 5 ) {
-        #cat("***01X1 CARG-AX The Value for axisMethod internal variable is out of range 1-5 : ",axisMethod,"\n")
+        cat("***01X1 CARG-AX The Value for axisMethod internal variable is out of range 1-5 : ",axisMethod,"\n")
         axisMethod <- 4
      }
      
@@ -9498,7 +9576,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         # do requested label generation and scaling.
         # Label Generation:    o = panelInbounds,  e = extended.
         # Scaling Methods :    None,  Scale range,  Scale individual number.
-     
+        #cat("axisMethod:",axisMethod,"\n")
+        
         switch (axisMethod,  
               { # method 1 - pretty - the "original"           "o"   # Basic X-Axis - one line.
                 #cat("Method 1-atRx:",atRx,"\n")
@@ -9688,7 +9767,6 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #cat("atRx1 :", atRx1  ,"\n")
         #cat("atLab2:", atLab2 ,"\n")
         #cat("atRx2 :", atRx2  ,"\n")
-        
         #
         # test to see how axis may draw the labels.
         # if they will not fit our calculations, then must likely
@@ -9749,7 +9827,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
            #  Note: if single line fits, it's still drawn as two overlapping label sets.
             
         } # end of single line checks.
-         
+        #cat("FndFit:",FndFit,"\n")
+        
         #
         #  Step 4 - if not fit as single or staggerLab requested, test a staggered label style
         #
@@ -9841,7 +9920,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      if (!FndFit) {
         # no solution found????
         
-        cat("no XAxis labels fit found!!!\n")
+        #cat("no XAxis labels fit found!!!\n")
         MakeStag <- TRUE
      }
   
@@ -9886,7 +9965,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #       atRx[1] - rx[1], is units from edge to grid for label
      #       colSepGap can also be used as working space.
      #
-   
+     #cat("Step 5 - X-Axis \n")
+     
      #cat("par('usr'):",par("usr"),"\n")
      #cat("par('pin'):",par("pin"),"\n")
      #cat("atRx      :",atRx,"\n")
@@ -10363,13 +10443,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
   ###
   #
-  #   MapDrawer
+  #   MapDrawer   - Not Used....
   #
   MapDrawer <- function(wAreaVisBorders, wL2VisBorders, wRegVisBorders, wL3VisBorders, WorkList) {
      #
-     #
-     #
-     
+      
      wLen <- dim(WorkList)[1]   # get number of entries
      
      for (ind in c(1:wLen)) {
@@ -10415,21 +10493,91 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   #  MapPolySetup function - used by all areaMap... glyphs to process the panel dimensions 
   #   and adjust the x and y ranges and scales for the particular map used.
   #
+  #  This function assumes any adjustments needed for a regional map have been made and 
+  #  only areas to be drawn are included in the Visborder data.frames.
   #
 
-  MapPolySetup <- function(mapType,wPanels,wAreaVisBorders,wL2VisBorders,wRegVisBorders, wL3VisBorders, DL3) {
+  MapPolySetup <- function(mapType, wPanels, wAreaVisBorders=NULL, wL2VisBorders=NULL, wRegVisBorders=NULL, wL3VisBorders=NULL) {
      # entire area..  (what if subset is used.)
-     # all but L3VisBorders
+     #cat("Enter MapPolySetup:\n")
      
-     if (DL3) {
-        # all sets of boundaries  - Level 3 size ranges.
-        rxpoly   <- range(wL3VisBorders$x,wRegVisBorders$x,wL2VisBorders$x,wAreaVisBorders$x,na.rm=TRUE)
-        rypoly   <- range(wL3VisBorders$y,wRegVisBorders$y,wL2VisBorders$y,wAreaVisBorders$y,na.rm=TRUE) 
-     } else {  
-        # no Level 3 - get range check for Reg, L2, and Area.
-        rxpoly   <- range(wRegVisBorders$x,wL2VisBorders$x,wAreaVisBorders$x,na.rm=TRUE)
-        rypoly   <- range(wRegVisBorders$y,wL2VisBorders$y,wAreaVisBorders$y,na.rm=TRUE) 
+     rxpolyVB <- NULL
+     rypolyVB <- NULL
+     
+     if (missing(wAreaVisBorders) || is.null(wAreaVisBorders)) {
+        cat("Missing: areaVisBorders\n")
+     } else {
+        if (exists("wAreaVisBorders")) {
+           if (dim(wAreaVisBorders)[1] > 0) {
+              rnX  <- range(wAreaVisBorders$x,na.rm=TRUE)
+              rnY  <- range(wAreaVisBorders$y,na.rm=TRUE)
+              #cat("areaV range-x:",rnX,"  y:",rnY,"\n")
+              rxpolyVB <- c(rxpolyVB, rnX)
+              rypolyVB <- c(rypolyVB, rnY)
+              #cat("MapPolySetup - Have areaVisBorder\n")
+           }
+        }
+     } 
+     
+     if (missing(wL2VisBorders) || is.null(wL2VisBorders)) {
+        cat("Missing: L2VisBorders\n")
+     } else {
+        if (exists("wL2VisBorders")) {
+           if (dim(wL2VisBorders)[1] > 0) {
+              rnX  <- range(wL2VisBorders$x,na.rm=TRUE)
+              rnY  <- range(wL2VisBorders$y,na.rm=TRUE)
+              #cat("L2V range-x:",rnX,"  y:",rnY,"\n")
+              rxpolyVB <- c(rxpolyVB, rnX)
+              rypolyVB <- c(rypolyVB, rnY)
+              #cat("MapPolySetup - Have L2VisBorder\n")
+           } else {
+              Map.L2Borders <- FALSE
+           }
+        }
      }
+     
+     if (missing(wRegVisBorders)|| is.null(wRegVisBorders)) {
+        cat("Missing: RegVisBorders\n")
+     } else {
+        #cat("Not-Missing: RegVisBorders == typeof:",typeof(wRegVisBorders),"  class:",class(wRegVisBorders),"\n")
+        #cat(" dimensions:",dim(wRegVisBorders),"  ",length(wRegVisBorders), "  ",is.null(wRegVisBorders),"\n")
+        #print(wRegVisBorders)
+        if (exists("wRegVisBorders")) {
+           if (dim(wRegVisBorders)[1] > 0) {
+              rnX  <- range(wRegVisBorders$x,na.rm=TRUE)
+              rnY  <- range(wRegVisBorders$y,na.rm=TRUE)
+              #cat("RegV range-x:",rnX,"  y:",rnY,"\n")
+              rxpolyVB <- c(rxpolyVB, rnX)
+              rypolyVB <- c(rypolyVB, rnY)
+              #cat("MapPolySetup - Have RegVisBorder\n")
+           } else {
+              Map.RegBordes <- FALSE
+           }
+        }
+     }
+     
+     if (missing(wL3VisBorders)|| is.null(wL3VisBorders)) {
+        cat("Missing: L3VisBorders\n")
+     } else {
+        if (exists("wL3VisBorders")) {
+           if (dim(wL3VisBorders)[1] >0) {
+              rnX  <- range(wL3VisBorders$x,na.rm=TRUE)
+              rnY  <- range(wL3VisBorders$y,na.rm=TRUE)
+              #cat("L3V range-x:",rnX,"  y:",rnY,"\n")
+              rxpolyVB <- c(rxpolyVB, rnX)
+              rypolyVB <- c(rypolyVB, rnY)
+              #cat("MapPolySetup - Have L3VisBorder\n")
+           } else {
+              Map.L3Borders <- FALSE
+           }
+        }
+     }
+     
+     # all existing sets of boundaries.  Now calculate the boundaries (BBox)
+     rxpoly   <- range(rxpolyVB)
+     rypoly   <- range(rypolyVB) 
+     #cat("MapPolySetup Results - rxpoly:",rxpoly,"   rypoly:",rypoly,"\n")
+   
      #  Expand range of X to make sure the edges can be seen.  2% should do it.
      rxadj    <- diff(rxpoly) * 0.02   # adjust x by + and - 2% of the size of the range
      rxVadj   <- c(-rxadj,rxadj)       # vector to - and + a matrix.
@@ -10442,14 +10590,14 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      yxA      <- diff(rypoly) / diff(rxpoly)  # calculated aspect of the MAP.
      #cat("Map yxAspect:", yxA, "\n")
   
-     #print(paste0("rxpoly:",paste0(rxpoly,collapse=" "),"   rypoly:",paste0(rypoly,collapse=" ")))
+     #cat("Adjusted poly:","  rxpoly:",rxpoly,"  rypoly:",rypoly,"\n")
  
      # aspect ratio is y / x...
      # size of space in panel =
      panelW    <- diff(wPanels$coltabs[j+1,])   # width (X) of panel     (inches)
      panelH    <- diff(wPanels$rowtabs[2,])     # height (Y) of grab first row as model
                                                 # All should be the same except median row
-     #cat("Panel W:",panelW,"  H:",panelH,"\n")
+     #cat("Panel    W:",panelW,"  H:",panelH,"\n")
      #cat("banner.max:",banner.max[mapType,"width"],"\n")
 
      #  adjustments have been made. Recalculate    
@@ -10494,7 +10642,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         vfy     <- c(-wfyd/2, wfyd/2)
         rypoly2 <- rypoly + vfy
      }
-     #cat("rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+     #cat("Final=rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
 
      return(list(rxpoly2=rxpoly2, rypoly2=rypoly2))
   }
@@ -10505,7 +10653,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   #
   #  Function to split numeric X,Y coordinate vectors based on NA. 
   #
-  #  Return is a list of parts of the original vector up to the NA.
+  #  Return is a list of parts(data.frames) of the original vector up to the NA.
   #
   MMVSplit <- function(wX,Brks) {
    
@@ -10523,7 +10671,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
   ###
   #
-  #  printPanelsParms - prints the associated parameter in creating a panel.
+  #  printPanelParms - prints the associated parameter in creating a panel.
   #
   printPanelParms <- function(t) {
      print(t)
@@ -10613,6 +10761,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   ###########################
 
   #print("micromapST functions loaded")
+  
+  
 
   ################################################################################
   #
@@ -10626,6 +10776,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   #
   #  Call Argument validation  
   #
+  #cat("Code: 10780  back to validating call parameters.\n")
 
    #  
    # Previously Checked:
@@ -10647,7 +10798,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #  7) Handle dataRegionsOnly call parameter - sub-map Setup
    #  8) Set values for regional or full mapping.
    #
-   #  9) rowName
+   #  9) rowNames
    #  
    #  Basic checks to make sure statsDFrame and panelDesc arguments are present and usable.
    #     More detailed checks done later.
@@ -10666,11 +10817,16 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #
    #  check to see if the statsDFrame was provided and is the correct datatype
 
-   if ( missing(statsDFrame) || is.null(statsDFrame) || !is.data.frame(statsDFrame) ) { 
-       stopCnt()
+   if ( missing(statsDFrame) || is.null(statsDFrame) ) { 
        StopFnd   <- TRUE
-       xmsg      <- paste0("***0101 CARG-DF First argument (statsDFrame) is missing or not a data.frame.\n")
-       warning(xmsg, call. = FALSE)
+       stopCntMsg(paste0("***0101 CARG-DF First argument (statsDFrame) is missing or NULL.\n"))
+   }
+   # it can still slip by as a tibble, matrix, array or list. Only let data.frames through.
+   #   Test changed to is not a data.frame or is a tibble - fail and warn user.
+   
+   if (!is.data.frame(statsDFrame)||isTib(statsDFrame)) {
+      #StopFnd  <- stopCntMsg(paste0("***0101 CARG-DF First argument (statsDFrame) is missing or not a data.frame.\n"))
+      StopFnd   <- stopCntMsg(paste0("***0102 CARG-DF The statsDFrame data.frame is not data.frame class. \n"))
    }
    
    #
@@ -10678,18 +10834,18 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #
    #  check to see if the panelDesc was provided and is the correct datatype.
 
-   if ( missing(panelDesc) || is.null(panelDesc) || !is.data.frame(panelDesc) || !is.list(panelDesc) ) { 
-       stopCnt()
-       StopFnd   <- TRUE
-       xmsg      <- paste0("***0111 CARG-PD The second argument, the panelDesc structure, is missing or not a data.frame or list.\n")
-       warning(xmsg, call. = FALSE)
+   if ( missing(panelDesc) || is.null(panelDesc) ) { 
+       StopFnd   <- stopCntMsg(paste0("***0111 CARG-PD The second argument, the panelDesc structure, is missing or NULL.\n"))
+   }
+   
+   if ( !is.data.frame(panelDesc) || isTib(panelDesc) ) {
+       StopFnd <- stopCntMsg(paste0("***0112 CARG-DF The second argument, the panelDesc structure, is not a data.frame.\n"))
    }
    
    #
-
    if (StopFnd) {
       stopCnt()
-      xmsg     <- paste0("***01Z0 CARG Key call arguments are missing, NULL, wrong type, or NA, Execution stopped.\n")
+      xmsg     <- paste0("***01Z0 CARG Key call arguments are missing, NULL, wrong type, or NA, Execution stopped 10795.\n")
       stop(xmsg, call. = FALSE)
    }
    
@@ -10698,30 +10854,28 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #print("statsDFrame and panelDesc variables are present and the correct type.")
    
    #
-   #  Now get the column names of the statsDFrame and verify the match up of the rownames with 
+   #  Now get the column names of the statsDFrame and verify the match up of the rowNames with 
    #   the border group names, abbreviations or IDs.
    #
 
    #_________ Get list of column name in statsDFrame for parameter verification
 
-   wSFName      <- names(statsDFrame)        # get the column names from data.frame
+   wSFName      <- names(statsDFrame)        # get the column names from data.frame character
+   wSFName      <- ClnStr2(wSFName)          # Clean up data column names.
 
    len_wSFName  <- length(wSFName)           # record the number of "named" rows in list (at front.)
 
-   wSFNameList  <- c(wSFName,seq(from=1, to=len_wSFName))   # add valid row numbers to the list.
-
    numRows      <- nrow(statsDFrame)         # get number of rows in statsDFrame
+   wSFmin       <- 1                         # minimum columns in data.frame  (no rowNamesCol)
+      
 
-   if (numRows == 1 && len_wSFName == 1) {  # we have a singular element variable
-      # We only have one item in structure - is it a NA?
-      if (is.na(statsDFrame[[1]][1])) {  # NA value was provided.
-         stopCnt()
-         xmsg     <- paste0("***01Z0 CARG Key call arguments are missing, NULL, wrong type, or NA, Execution stopped.\n")
-         stop(xmsg, call. = FALSE)
-      }
-   }
+   # The above code should work even if the data.frame has 0 rows and 0 columns
+   # The statsDFrame must have at least one column, two if rowNameCol is specified.
+   # The number of rows will be checked against the name table, later.
   
    #
+   wSFNameList  <- c(wSFName,seq(from=1, to=len_wSFName))   # add valid row numbers to the list.
+
    #  wSFNameList now contains a list of the column names and column numbers 
    #      as character strings. This string will be used to verify any user 
    #      provided column names or character column numbers.
@@ -10736,48 +10890,39 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #print(mmSys)
    
    #
-   #  Check to make sure user provide data frame has at least 1 row and at least 1 column.
-   #
-   if ( len_wSFName == 0 || numRows == 0 ) {
-
-      xmsg      <- paste0("***0103 CARG-DF The ",sDFName," statsDFrame data.frame has no columns or rows. \n")
-      StopFnd   <- TRUE
-      stopCnt()
-      stop(xmsg, call. = FALSE)
-   }
-
-   #
    #  statsDFrame - data rows
    #
-   #  headers or total area rate rows should not be included in data.format structure.. 
+   #     headers or total area rate rows should not be included in data.format structure.. 
    #
 
-   #
    #______________statsDFrame - data frame - verify row links/names______________
    #
    
-   numRowsBG   <- nrow(areaNamesAbbrsIDs)      # get number of rows in name table
+   numRowsBG   <- nrow(areaNT)      # get number of rows in name table
    
    #
-   #  Must validate statsDFrame row names against the area list - process rowNamesCol to be able to proceed with 
+   #  Must validate statsDFrame row names against the NameTable.
+   #  Process rowNamesCol to be able to proceed with 
    #  the link verification.
    #
    
    #
-   #  Step 1 - find out where the row names for the sub-area are in the statsDFrame data.frame.
+   #  Step 1 - find out where the row names for the area are in the statsDFrame data.frame.
    #
    
    ###
-   ###  If user provided a column with the sub-area "names", then we have to check to make
-   ###  sure there are no duplicates in the statsDFrame data.frame.  If they were in the row.names, 
-   ###  R already makes sure there are no duplicates.
+   ###  If user provided a column with the area "names", then we have to 
+   ###  check to make sure there are no duplicates in the statsDFrame 
+   ###  data.frame.  If they were in the row.names, R already makes 
+   ###  sure there are no duplicates.
    ###
    ###  Dont care what type of link it is at this point.
    ###
     
    #
-   #_____________Check and Process the rowNamesCol call argument/parameter option___________________
+   #_____________Check and Process the rowNamesCol call argument/parameter option__________017x_________
    #
+   #cat("Code: 10925 - Process rowNamesCol.\n")
    
    StopFnd     <- FALSE
    ErrFnd      <- FALSE
@@ -10785,121 +10930,131 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    len_rowNamesCol <- length(rowNamesCol)
    rowNamesColx    <- rowNamesCol[[1]][1]   # get first item
    
-   if ( missing(rowNamesCol) || is.null(rowNamesCol) || is.na(rowNamesColx) ) { 
+   if ( missing(rowNamesCol) || is.null(rowNamesCol) ) { 
   
-      #  rowNamesCol is missing or not provided - no action - use the row.names on statsDFrame for the sub-area names.
+      #  rowNamesCol is missing or not provided - no action - use the row.names 
+      #  on statsDFrame for the sub-area names.
       
-      statsDFrame$RN <- rownames(statsDFrame)            # get a copy of the rownames.  (row.names)
+      statsDFrame$RN <- rownames(statsDFrame)   # get a copy of the rownames.  (row.names) ***
       
-      #  If no rowNamesCol provided, then we must assume the row names (sub-area names) are being
-      #  provided in the row.names of the data.frame.  If the row.names were not assigned a sub-area 
-      #  identifier (full name, abbr, alias, or ID) by the user, then the row.names will be 
-      #  then we will just get "1", "2", ... as the row.names and they will not match anything.
+      #  If no rowNamesCol provided, then we must assume the row names (area names) are being
+      #  provided in the row.names of the data.frame.  If the row.names were not assigned a area 
+      #  identifier (full name, abbr, alias, or ID) by the user, then the row.names will be used. 
+      #  If no row.names were present then we will just get "1", "2", ... as the row.names 
+      #  and they will not match anything.
       
-      #  could be dangerous - later it may be best to STOP.
+      #  Could be dangerous - later it may be best to STOP.
   
       #print("No rowNamesCol provided - must be in row.names")
   
    } else  {
    
-      #  Have the rowNameCol call argument/parameter and a statsDFrame column name/number retrievve the sub-area links.
+      if ( !is.na(rowNamesColx) ) {
       
+         #  Have the rowNamesCol call argument/parameter and a statsDFrame column name/number retrievve the sub-area links.
+      
+         # 
+         if (len_rowNamesCol > 1) {
+      
+            # rowNamesCol can only be a vector of length 1. 
+            ErrFnd <- errCntMsg(paste0("***0173 CARG-RNC The rowNamesCol argument value must have a length = 1.",
+                          " Only first value used.\n")
+                  )
+      
+            # we already did a [[1]][1] to get the first items in the variable.
+            # we are just reporting on the length saved eariler.
+         }
+      
+         # Look up the name and covert it into a column number - or - verify column number..
+      
+         # Convert parameter value to character.  Then it's up to normal checks to validate it.
+      
+         litrowNamesCol = rowNamesColx    # Save the original literal value from rowNamesColx (could be number or name)
+      
+         #cat("rowNamesColx-precheck:",paste0(rowNamesColx,collapse=", ",sep=""),"\n")
+      
+         # parameter is cleaned inside of routine.
+         rowNamesColx  <- CheckParmColx(litrowNamesCol, c('RNC','rowNamesCol'), wSFNameList, len_wSFName)   # see if value is good.
+         #      if error, CheckParmColx issues the warning message and return 0.
+      
+         #cat("rowNamesColx-results:", paste0(rowNamesColx,collapse=", ",sep=""),"\n")
+         #
+         # got column number(s) if good. Multiple columns doesn't make sense. 
+        
+         if (!all(rowNamesColx>0)) {  # check to see if the value is good (>0 -> a valid column number) (one value)
+      
+            #  Bad column name or column number found. Error message was generated by CheckColx.
+            ErrFnd      <- TRUE         # again stop because user specified, but its wrong.
+            errCntMsg(paste0("***0175 CARG The rowColNames value specified does not exist in the data.frame. ",
+                          "The row.names values on the data.frame will be used.\n"))
+            rowNamesCol   <- 0   
+            #
+            # User provided rowNamesCol, so must have a valid column 
+            # name/number and a valid list of links. If not, then looking at the row.names 
+            # of the data.frame does not make sense.  Why would they specify a rowNameCol?
+            #
+         } else {
+            # a valid row is specified.  Now make sure a data row is also present.
+            wSFmin = 2   # minimum number of columns
+         }
+      
+         #
+         #	 if problems are identified prior to this line, the package has stopped.
+         #
+         #  At this point, the rolColName exists and is a valid column name.
+         #
+      
+         #cat("rowNamesCol is valid : ",rowNamesColx,"\n") 
+      
+         if (len_wSFName < wSFmin) {   # min is 1 or 2.
+            StopFnd <- stopCntMsg(paste0("***0103 CARG-DF The ",sDFName," statsDFrame data.frame must have at least 1 or 2 columns.\n"))
+         }
+      } else {
+         ErrFnd      <- TRUE         # again stop because user specified, but its wrong.
+         errCntMsg(paste0("***0173 CARG The rowColNames is NA. The row.names values on the data.frame will be used.\n"))
+      }
+      ####
+      ##
+      #  If the rowNamesCol column exists the column can not contain any duplicate labels
+      #  and must match the name table location ID selected.
       # 
-      if (len_rowNamesCol > 1) {
-      
-         # rowNamesCol can only be a vector of length 1. 
-         warnCnt()
-         ErrFnd      <- TRUE
-         xmsg        <- paste0("***0173 CARG-RNC The rowNamesCol argument value must have a length = 1. Only first value used.\n")
-         warning(xmsg, call. = FALSE)
-         
-         # we already did a [[1]][1] to get the first items in the variable.
-         # we are just reporting on the length saved eariler.
+      if (rowNamesCol>0) {
+          # have valid column for row names
+          dupNames   <- duplicated(statsDFrame[,rowNamesCol])
+          dupRows    <- c(seq_along(dupNames))[dupNames]
+          #
+          if (any(dupNames)) {
+             ErrFnd  <- errCntMsg(paste0("***0171 CARG-RNC The row names in column ",rowNamesCol, " of the ",sDFName,
+                              " statsDFrame data frame contain duplicates. Only one row per area is permitted.",
+                              " Duplicate rows are:", paste0(dupRows,collapse=","),".\n",
+                              " The rowNamesCol will be ignored and the data.frame row.names values will be used.\n" )
+                       )      #  
+             statsDFrame$RN <- row.names(statsDFrame)
+          
+          } else {
+          
+             statsDFrame$RN <- statsDFrame[,rowNamesCol]
+          }
       }
+      #
       
-      # Look up the name and covert it into a column number - or - verify column number..
-      if (!is.character(rowNamesCol) && !is.numeric(rowNamesCol) && !is.integer(rowNamesCol)) {
          
-         # rowNamesCol is not the correct type of vector.   
-         stopCnt()
-         StopFnd    <- TRUE           # stop because user did specify, but its wrong.
-         
-         xmsg       <- paste0("***0172 CARG-RNC The rowNamesCol argument value must be a character or numeric value. ", "It was found to be: ",class(rowNamesCol),".\n")
-         stop(xmsg, call. = FALSE)
-      }
- 
-      litrowNamesCol = rowNamesCol    # Save the original literal value from rowNamesCol (could be number or name)
-     
-      rowNamesCol  <- CheckParmColx(litrowNamesCol, c('RNC','rowNamesCol'), wSFNameList, len_wSFName)   # see if value is good.
-      #      if error, CheckParmColx issues the warning message and return 0.
-        
-      # got column number(s) if good. Multiple columns doesn't make sense. 
-        
-      if (!all(rowNamesCol>0)) {      # check to see if the value is good (>0 -> a valid column number)
-      
-         #  Bad column name or column number found. Error message was generated by CheckColx.
-         
-         stopCnt()
-         StopFnd      <- TRUE         # again stop because user specified, but its wrong.
-         xmsg         <- paste0("***01Z1 CARG Errors found in call arguments. Execution stopped.\n")
-         stop(xmsg, call.=FALSE)
-         #
-         # Cant continue.  User provided rowNamesCol, so must have a valid column 
-         # name/number and a valid list of links. If not, then looking at the row.names 
-         # of the data.frame does not make sense.  Why would they specify a rowNameCol?
-         #
-      } 
-      
-      #
-      #	 if problems are identified prior to this line, the package has stopped.
-      #
-      #  At this point, the rolColName exists and is a valid column name.
-      #
-      
-      #cat("rowNamesCol is valid : ",rowNamesCol," - Now check for duplicates.","\n") 
-      
-      ###
-      #
-      #  get copy of column, convert column into row.names, but first
-      #  need to check for duplicates before we do this.  Dont have to do this 
-      #  check if sub-area names are in row.names of the data.frame.
-      #
-      
-      dupNames   <- duplicated(statsDFrame[,rowNamesCol])
-      dupRows    <- c(seq_along(dupNames))[dupNames]
-      
-      if (any(dupNames)) {
-    
-         StopFnd    <- TRUE
-         stopCnt()
-         xmsg       <- paste0("***0171 CARG-RNC The row names in column ",rowNamesCol, " of the ",sDFName," statsDFrame data frame contain duplicates. Only one row per sub-area is permitted. Duplicate rows are:", paste0(dupRows,collapse=","),".\n")
-         stop(xmsg, call. = FALSE)
-         
-         #  possible work a round - later - is to delete the second occurance.
-            
-      }
-      
-      #
-      #  No duplicate sub-area row names in the statsDFrame data provided by user and 
-      #  column name or number is good -  move column to $RN  
-      #
-      
-      #print("Moved to $RN")
-      
-      statsDFrame$RN <- statsDFrame[,rowNamesCol]
-       
    }
-   
    statsDFrame$rawRN      <- statsDFrame$RN           # save raw format of row name.
-   statsDFrame$RN         <- stringr::str_to_upper(statsDFrame$RN)  # upper case for comparisons.
+   statsDFrame$RN         <- as.character(statsDFrame$RN)  # make character 
+   statsDFrame$RN         <- ClnStr(statsDFrame$RN)   # clean up, upper case, no punct, single blanks for comparisons.
    row.names(statsDFrame) <- statsDFrame$RN           # save in statsDFrame$RN as the row.names 
+   
+   #cat("Code: 10993 - statsDFrame$RN:\n")
+   #print(statsDFrame$RN)
+   #print(statsDFrame)
       
    #
    ###
    
    ###
    #
-   #   At this point the sub-area names from the row.names on statsDFrame or 
+   #   At this point the area names from the row.names on statsDFrame or 
    #   the sub-area names in a column of the statsDFrame have been added to the 
    #   internal statsDFrame data.frame in the $RN column.  If the values were
    #   checked for duplicates if provided in a data.frame column.
@@ -10946,22 +11101,23 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
    par(fin = par("din"))   # safety value to get moving.
    graphics::plot.new()
-
+   
+   #cat("Code: 11101 - par values- din:",par("din")," fin:",par("fin")," \n   pin:",par("pin")," plt:",par("plt")," usr:",par("usr"),"\n")
+   
    #
    # ________________Load Colors and Details defaults_______________________________
    #
-
    #print("Calling micromapGSetDefaults")
 
    micromapGDefaults <- micromapGSetDefaults()  # get master list of variables and defaults
 
    #print("Got data.frame from micromapGSetDefaults")
+   #print(micromapGDefaults)
+   #cat("MST.Debug-New:",micromapGDefaults$MST.Debug,"  11116 \n")
    
    #####
-   #
    #_________________colors _______________________________________
    #
-
    #  Must do after completing the details list processing
    #
    #  Verify "colors=" argument
@@ -10976,85 +11132,79 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    colFull      <- TRUE                  # control logical = TRUE doing Color, FALSE doing Greys
    NoErrs       <- TRUE
    doDotOutline <- FALSE
+   mstColors    <- NULL
    
-   mstColors    <- colors                # Multiple values none should be an NA.
-   
-   if ( missing(colors) || is.null(mstColors) || is.na(mstColors[[1]][1]) ) {
- 
+   if ( missing(colors) || is.null(colors) )  {
       mstColors  <- micromapGDefaults$colors    # use package defaults.
 
    } else {
-
-      if (typeof(mstColors) == "character") {
+      if (any(is.na(colors))) {
+         mstColors <- micromapGDefaults$colors
+      
+      } else {
+         mstColors <- colors                # Multiple values none should be an NA.
+   
+         if (typeof(mstColors) == "character") {
     
-         if (length(mstColors) != 24) {
-      
-            if (length(mstColors) == 12)  {  # check for the basic colors.
+            if (length(mstColors) != 24) {
+               if (length(mstColors) == 12)  {  # check for the basic colors.
           
-               # we have the basic 12 colors. Expand to the list of 24.
-               colorlab      <- names(mstColors)
-               TransColors   <- grDevices::adjustcolor(mstColors,0.2)
-               mtColors      <- c(mstColors, TransColors)
+                  # we have the basic 12 colors. Expand to the list of 24.
+                  colorlab      <- names(mstColors)
+                  TransColors   <- grDevices::adjustcolor(mstColors,0.2)
+                  mtColors      <- c(mstColors, TransColors)
             
-               if (!is.null(colorlab)) { names(mstColors) <- c(colorlab,paste0("l_",colorlab)) }
+                  if (!is.null(colorlab)) { names(mstColors) <- c(colorlab,paste0("l_",colorlab)) }
         
-            } else {
-      
-               if (length(mstColors) == 1) {
-                  wStr <- stringr::str_to_upper(mstColors)
-             
-                  if ( wStr == "BW" || wStr == "GRAYS"  ||  wStr == "GREYS" ) {
-              
-                     #  set up the colors for printing in BW or Gray tones
-                   
-                     #  Get the main greys for the 6 colors (the middle 3-7/8 grays in the RColorBrewer scale.
-                     #    and add the black for the median and a grey for the area highlight color.
-                     xbw          <- RColorBrewer::brewer.pal(name="Greys",9)
-                     greyColors   <- c(xbw[c(3:8)],"#000000","#E8E8E8")
-                   
-                     #  Build the transparent colors for the segmented bar charts.
-                     TransColors  <- grDevices::adjustcolor(greyColors,0.2)
-                  
-                     #  Set up the grey color vector as requested.
-                     mstColors       <- c(greyColors,TransColors)
-                   
-                     #  Set up running parameters.
-                     colFull          <- FALSE
-                     Dot.Outline      <- TRUE
-                     Dot.Conf.Outline <- TRUE
-                     Dot.SE.Outline   <- TRUE
-                     doDotOutline     <- TRUE  # outline dots in dot glyphs.
-                  
-                  } else {
-                   
-                     mstColors  <- micromapGDefaults$colors
-                     warnCnt()
-                     xmsg    <- paste0("***01K0 COLORS A invalid single value is provided for the colors argument. It must be 'BW', 'greys', or 'grays'. The argument is ignored.\n")
-                     warning(xmsg,call.=FALSE)         
-                  }
                } else {
+      
+                  if (length(mstColors) == 1) {
+                     wStr <- stringr::str_to_upper(mstColors)
                
-                  warnCnt()
-                  xmsg    <- paste0("***01K1 COLORS The colors vector has the incorrect number of elements. It must have 1 or 24 entries. ",length(mstColors)," provided.\n")
-                  warning(xmsg,call.=FALSE)
-               
+                     if ( wStr == "BW" || wStr == "GRAYS"  ||  wStr == "GREYS" ) {
+              
+                        #  set up the colors for printing in BW or Gray tones
+                      
+                        #  Get the main greys for the 6 colors (the middle 3-7/8 grays in the RColorBrewer scale.
+                        #    and add the black for the median and a grey for the area highlight color.
+                        xbw          <- RColorBrewer::brewer.pal(name="Greys",9)
+                        greyColors   <- c(xbw[c(3:8)],"#000000","#E8E8E8")
+                   
+                        #  Build the transparent colors for the segmented bar charts.
+                        TransColors  <- grDevices::adjustcolor(greyColors,0.2)
+                  
+                        #  Set up the grey color vector as requested.
+                        mstColors       <- c(greyColors,TransColors)
+                   
+                        #  Set up running parameters.
+                        colFull          <- FALSE
+                        Dot.Outline      <- TRUE
+                        Dot.Conf.Outline <- TRUE
+                        Dot.SE.Outline   <- TRUE
+                        doDotOutline     <- TRUE  # outline dots in dot glyphs.
+                  
+                     } else {
+                   
+                        mstColors  <- micromapGDefaults$colors
+                        errCntMsg(paste0("***01K0 COLORS A invalid single value is provided for the colors argument. It must be 'BW', 'greys', or 'grays'. The argument is ignored.\n"))
+                     }
+                  } else {
+                     errCntMsg(paste0("***01K1 COLORS The colors vector has the incorrect number of elements. It must have 1 or 24 entries. ",length(mstColors)," provided.\n"))
+                  
+                  }
                }
             }
+         } else {
+            mstColors   <- micromapGDefaults$colors
+            errCntMsg(paste0("***01K2 COLORS The colors vector type is invalid.  It must be a character vector.\n"))
          }
-      } else {
- 
-         mstColors   <- micromapGDefaults$colors
-         warnCnt()
-         xmsg     <- "***01K2 COLORS The colors vector type is invalid.  It must be a character vector.\n"
-         warning(xmsg,call.=FALSE)
-
       }
    }
 
    assign("mstColors",as.character(mstColors))
    mstColorNames <- names(mstColors)
 
-   rm(colors)
+   #rm(colors)
    #____ end of color check and adjustments.___
    #
   
@@ -11076,17 +11226,17 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    
    oldDefNam = "none"
    defNam = names(wDetails)
+   #print(defNam)
    
    for (i in 1:length(wDetails))
       {
         if (nchar(defNam[i]) <= 0) {
-           warnCnt()
-           xmsg     <- paste0("***01N3 DETS Zero length variable name found in the details list after the ", oldDefNam, " variable.\n")
-           warning(xmsg,call.=FALSE)
+           errCntMsg(paste0("***01N3 DETS Zero length variable name found in the details list after the ", 
+                            oldDefNam, " variable.\n")
+                     )
         }
         oldDefNam    <- defNam[i]
-        assign(defNam[i],wDetails[[i]])    # assign default values.
-   
+        assign(defNam[i],wDetails[[i]])    # assign default values into their own variable names.
       }
    
    # All details names must be in the globalVariable call to be visible to CRAN checks.
@@ -11097,6 +11247,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    DetailNames    <- c(defNam,detailExtra)
    #print(DetailNames)
    
+   #cat("MST.Debug:",MST.Debug,"   at 11204 \n")
    #
    # The defaults have been moved to the individual variables.
    # Keep the list of names around to be to verify user supplied names.
@@ -11135,10 +11286,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
              if (is.na(nam_match[i])) {
                 
                 # invalid variable name in details
-                warnCnt()
-                xmsg    <- paste0("***01N2 DETS Invalid details variable name: ",nam[i], " in the details list. Variable is IGNORED.\n")
-                warning(xmsg,call.=FALSE)
-
+                ErrFnd <- errCntMsg(paste0("***01N2 DETS Invalid details variable name: ",nam[i], 
+                                 " in the details list. Variable is IGNORED.\n")
+                         )
              } else {
                 # valid name
                 numOverlaid <- numOverlaid + 1
@@ -11147,19 +11297,13 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
              }
          }
       } else {
-         stopCnt()
-         xmsg    <- "***01N1 DETS The details parameter is not a list.\n"
-         stop(xmsg, call.=FALSE)
+         StopFnd <- stopCntMsg( "***01N1 DETS The details parameter is not a list.\n" )
       }
    }
    
    #cat("envir=Id.Dot.pch:",find("Id.Dot.pch"),"\n")
    #cat("envir=topMar:",find("topMar"),"\n")
    
-   #if (numOverlaid>0) {
-   #  xmsg <- paste0("***0501 PANEL Number of parameters overlaid = ",numOverlaid,"\n")
-   #  message(xmsg)
-   #} 
    #
    #   Verify and adjust details variables
    #
@@ -11167,6 +11311,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #cat("envir=warnCnt:",find("warnCnt"),"\n")
    #cat("envir=staggered:",find("staggered"),"\n")
    #cat("envir=lastLab2Space:", find("lastLab2Space"), "\n")
+
+   #cat("MST.Debug:",MST.Debug,"   at 11269 after merge with users \n")
+
 
    ####
    #
@@ -11190,9 +11337,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
        
        Id.Dot.pch    <<-  22  # set to default
 
-       warnCnt()
-       xmsg    <- paste0("***01NA DETS The Id.Dot.pch variable can only be set to a range from 1 to 25.  Using the default of 22.\n")
-       warning(xmsg,call.=FALSE)
+       errCntMsg(paste0("***01NA DETS The Id.Dot.pch variable can only be set to a range from 1 to 25.",
+                        "  Using the default of 22.\n")
+                )
    }  
    
    # 
@@ -11201,6 +11348,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    
    #
    #####
+   
+   #cat("MST.Debug = ",MST.Debug,"   11306 \n")
 
 # Need to get ID width values before setting the panel defaults
 
@@ -11323,7 +11472,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     Id.OverH <- Id.Dot.width*(Id.Dot.cexm * Id.Cex.mod) + Id.Space*2.5  # two spaces left and right of symbol.
                         #  box is 1.15 cex.   (1.5 * 0.75)
        
-    #cat("ID overhead (Id.Start, space, Id.Dot.width, space , <letters>, space (letter to edge):",Id.OverH,"\n")
+    #cat("ID overhead - Id.Start, space, Id.Dot.width, space , <letters>, space (letter to edge):",Id.OverH,"\n")
     #cat("banner.max ID:",banner.max["id","width"],"   IDName:",Id.OverH+ID.Name.width,"  IDAbbr:",Id.OverH+ID.Abbr.width,"\n")
    
     #  width of ID glyph with border Group names/abbreviations
@@ -11354,117 +11503,152 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 def_rowNames <- "ab"
 rowNames     <- rowNames[[1]][1]
 
-if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
+if ( missing(rowNames) || is.null(rowNames) )  {
    # no rowNames provided up front.  Set to default
    rowNames             <- def_rowNames
 }
 
-#cat("Validate rowNames : ", rowNames,"\n")
+if ( is.na(rowNames) ) {
+   rowNames <- def_rowNames   # value is NA for set it to the default.
+}
 
-#__________________
+#cat("Code: 11515 - Validate rowNames : ", rowNames,"\n")
+
+xm <- match(rowNames,c("ab","abbr","full","seer","alias","id","FIPS","alt_ab"))
+if (is.na(xm)) { # invalid rowNames value
+   xmsg <- paste0("***0192 CARG-RN Invalid rowNames call parameter value of ",
+                  rowNames,"\n")
+   StopFnd <- stopCntMsg(xmsg)
+} else {
+   #  you have a valid rowNames
+
+   #__________________
 
    #
    #  Verify the rownames are valid and can be translated into abbrevation versions.
    #
+   #  The user can enter abbr, full, alt_ab, alias, or ID with the data.
+   #  Which everone is picked, it must be the string in the data.frame and the panelData-data.frames to 
+   #  allow matching to the boundaries VisBorderr data.
    #
-   # The user can enter abbr, full, alt_ab, alias, or ID with the data.
-   # Which everone is picked, it must be the string in the data.frame and the panelData-data.frames to 
-   # allow matching to the boundaries VisBorderr data.
+   #  Each value is translated to the Key that is used to link the data to the 
+   #  key in the boundary data in areaVisBorders.
    #
-   # Each value is translated to the Key that is used to link the data to the 
-   # key in the boundary data in areaVisBorders.
-   #
-   
    #  AD.link is the user value in the order of the data table.
    #
    #  areaIndex is in the order of the data table (AD.link) and points to the 
    #  matching entry in the name table, based on the proper match for the type of value.
    #
 
-   #print("Clean up rownames in $RN")
-   #cat("Border Group Name:",BordGrpName,"\n")
-   
-   statsDFrame$RN <- ClnStr(as.character(statsDFrame$RN))
-   
-   AD.link <- (as.character(statsDFrame$RN))   # get rownames.information (link to borders)  (all CAPS)
+   AD.link <- (statsDFrame$RN)   # get row_names.information (link to borders) (all CAPS, no punct, no multiple blanks)
    
    ##### may be changed.
    
-   #cat("Initial AD.link:",AD.link,"\n")
+   #cat("Initial AD.link (statsDFrame$RN):",AD.link,"\n")    # the statsDFrame$RN
    
-   if (BordGrpName == "USStatesBG") {
+   if (BordGrpName == "USStatesBG" || BordGrpName == "USstBG" ) {
    
-      ### If US States Patterns - look for the many ways Washington DC is possibly enter in the user data..                   ###
-   
-      #  Compare against common "DC" names and replace with "DC"
-      if (rowNames == "full") {
-         AD.Test <- stringr::str_to_upper(AD.link)   # get capitalized version for the DC conversion.
-         #  Build DC name table (all caps)
-         DCnames = c("WASHINGTON, D. C.", "WASHINGTON D. C.", 
-                     "WASHINGTON, D C",   "WASHINGTON D C",
-                     "WASHINGTON, DC",    "WASHINGTON DC",       
-                     "DISTRICT COLUMBIA", "DISTRICT OF COLUMBIA",
-                     "DC", "D C", "D, C.","D.C","D C.","D.C.")
-         # only clean up full names.         
-         AD.link[!is.na(match(AD.Test,DCnames))] <- "DC"  ###  match short form in border group
-      }
+      # only do this check for specific border groups (us with DC)
+      # this may become a call parameter option.
       
-      #cat("Updated AD.link:",AD.link,"\n")
+      #
+      # problems: name table has name and abbr fields,  shape file has link as name, key=abbr.
+      #           data is full with name   name table name as DC or District of Columbia?
+      #           when data is full and you are matching against name in name table,
+      #             all matches should force data to the "full" name in the name table, not DC.
+      #           when data is abbr and you are matching against abbr in name table,
+      #             all matches should force data to the "abbr' string of DC.
+      #
+      
+      ### If US States Patterns - look for the many ways Washington DC is possibly 
+      ### enter in the user data..                 
+
+      if (rowNames == "full") {
+         # row names are the full (Name) type..
+         # first check to see if there are any unmatched names
+         
+         #  Compare against common "DC" names and replace with "DC"
+         #  problem comes if the 'name' field or row.names values used for 'full' are not
+         #  abbreviations "DC".  How to know the correct adjustment is to 'District of Columbia'?
+         
+         xm <- match(AD.link, areaNT$Name)   # change from unedited areaName..$Name
+         
+         if (any(is.na(xm))) {
+            # if any row does not match, we try to find and adjust DC.
+            AD.Test <- stringr::str_to_upper(AD.link)   # get capitalized version for the DC conversion.
+            
+            #  Build DC name table (all caps)
+            #DCnames = c("WASHINGTON, D. C.", "WASHINGTON D. C.", 
+            #         "WASHINGTON, D C",   "WASHINGTON D C",
+            #         "WASHINGTON, DC",    "WASHINGTON DC",       
+            #         "WASHINGTON, D.C.",  "WASHINGTON, D.C",  "WASHINGTON, DC.",
+            #         "WASHINGTON D.C.",   "WASHINGTON D.C",   "WASHINGTON DC.",
+            #         "DISTRICT COLUMBIA", "DISTRICT OF COLUMBIA",
+            #         "DC", "D C", "D, C.","D, C","D.C.","D.C","DC.","D. C.","D C.","D. C")
+            
+            #   Build DC name table (all caps, no punct, or multiple blanks)
+	    DCnames = c("WASHINGTON D C", "WASHINGTON DC", 
+	                "DISTRICT COLUMBIA", "DISTRICT OF COLUMBIA",
+	                "DC", "D C")
+            
+            # only clean up full names.         
+            AD.link[!is.na(match(AD.Test,DCnames))] <- "DISTRICT OF COLUMBIA"  ###  match name in border group
+            #  RULE for us Border Groups micromapST builds -> $Name should be DC to use this feature.
+         } 
+      }
    }
-   
-   
-   #
+  
+   #cat("Updated AD.link:",AD.link,"\n")
+   #cat("Current areaNT$Key:",areaNT$Key,"\n")
+     
    if (rowNames == "alias" && enableAlias == FALSE) {
-       stopCnt()
-       StopFnd <- TRUE
-       xmsg    <- paste0("***0191 CARG-RN rowNames='alias' is not supported for this bordGrp.\n")
-       stop(xmsg, call.=FALSE)
+       StopFnd <- stopCntMsg(paste0("***0191 CARG-RN rowNames='alias' is not supported for this bordGrp.\n"))
    }
    if (rowNames == "seer" && BordGrpName != "USSeerBG") {
-       stopCnt()
-       StopFnd <- TRUE
-       xmsg    <- paste0("***0192 CARG-RN rowNames='seer' is only supported for the 'USSeerBG' bordGrp.\n")
-       stop(xmsg, call.=FALSE)
+       StopFnd <- stopCntMsg(paste0("***0192 CARG-RN rowNames='seer' is only supported for the 'USSeerBG' bordGrp.\n"))
    }
    
    #  areaIndex pointer to Name Table is order of the user data.frame based on the rowNames parameter.
    #  IndexDFtoNT is based on the type and column of the location id used in the data.
+   #cat("Parm Processing:",rowNames,"\n")
    
    IndexDFtoNT = switch(rowNames,  # find the correct list to match user provide links.
   
-      # if "ab", use current name - get index  /  rowNames=="ab"
-      "ab"    = {match(AD.link, areaNTAbbr)},     # get index of AD.link into the name table.
+      # if "ab", use current name - get index    /  rowNames=="ab"
+      "ab"    = {match(AD.link, areaNT$Abbr)},     # get index of AD.link into the name table.
       
       # if "abbr", use current name - get index  /  rowNames=="ab"
-      "abbr"  = {match(AD.link, areaNTAbbr)},     # get index of AD.link into the name table.
+      "abbr"  = {match(AD.link, areaNT$Abbr)},     # get index of AD.link into the name table.
       
-      # if "id", convert to index              /  rowNames=="id"
-      "id"    = {match(as.integer(AD.link), as.integer(rlAreaNamesAbbrsIDs$ID))},
+      # if "id", convert to index                /  rowNames=="id"
+      "id"    = {match(as.integer(AD.link), as.integer(areaNT$ID))},
       
       # if "FIPS", convert to index (alias for "id")  / rowNames=="FIPS"
-      "FIPS"  = (match(as.integer(AD.link), as.integer(rlAreaNamesAbbrsIDs$ID))),
+      "FIPS"  = (match(as.integer(AD.link), as.integer(areaNT$ID))),
       
-      # if "full" sub-area name, convert index  /  rowNames = "full"
-      "full"  = {match(AD.link, areaNTName)},
+      # if "full" sub-area name, convert index   /  rowNames = "full"
+      "full"  = {match(AD.link, areaNT$Name)},
       
       # if "seer"  seer sub-area names from SeerStat (read and convert to index )  / rowNames == "seer"
-      "seer"  = {AliasToIndex(AD.link,rlAreaNamesAbbrsIDs$Alias)},
+      "seer"  = {AliasToIndex(AD.link,areaNT$Alias)},
       
       # if "alias"  seer sub-area names from SeerStat (read and convert to index.)
-      "alias" = {AliasToIndex(AD.link,rlAreaNamesAbbrsIDs$Alias)},
+      "alias" = {AliasToIndex(AD.link,areaNT$Alias)},
       
       # if "alt_ab" alternate name abbreviation used in data, convert to index.
-      "alt_ab" = {match(AD.link, rlAreaNamesAbbrsIDs$Alt_Abbr)},
+      "alt_ab" = {match(AD.link, areaNT$Alt_Abbr)},
       
       #  No match..
       {
-         stopCnt()
-         StopFnd <- TRUE
-         xmsg    <- paste0("***0190 CARG-RN Invalid rowNames call parameter value. The value must be 'ab', 'alt_ab', 'id', 'alias', or 'full'.\n")
-         stop(xmsg, call.=FALSE)
+         StopFnd <- stopCntMsg(paste0("***0190 CARG-RN Invalid rowNames call parameter value of ",rowNames,"\n",
+                           " The value must be 'ab', 'alt_ab', 'id', 'alias', or 'full'.\n")
+                   )
       }
    )
-   if (rowNames == "ab") rowNames = "abbr"
+   # if entry in IndexDFtoNT = NA, then have data, but no name table entry.  (nomatch and delete.)
+   
+   if (rowNames == "abbr") rowNames = "ab"
+   
    #
    #  IndexDFtoNT is index from caller's data location ID row to the Name Table row. 
    #      It is the Name Table row number the data location ID matches up with.
@@ -11473,13 +11657,19 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    #  By default, we will handle cases where statsDFrames does not contain 
    #       areas in the border group.   This is how dataRegionsOnly feature works.
    #
+}
 
-   callVL$rowNames      <- rowNames
-   var  <- "callVarList"  
-   wstr <- paste0("assign(var,callVL,envir=.GlobalEnv)")
-   eval(parse(text=wstr))
+callVL$rowNames  <- rowNames
+var              <- "callVarList"  
+wstr             <- paste0("assign(var,callVL,envir=.GlobalEnv)")
+eval(parse(text=wstr))
+   
+#cat("IndexDFtoNT:\n")
+#print(IndexDFtoNT)
 
-   #cat("Initial IndexDFtoNT:",IndexDFtoNT,"\n")
+#cat("Code: 11663 - Initial IndexDFtoNT:",IndexDFtoNT,"\n")
+#cat("Reverse Check:",areaNT$Key[IndexDFtoNT],"\n")
+
    
    ######
    #
@@ -11489,18 +11679,21 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    #  This also deals with when data rows don't match boundary information.
    #
    #    a) all match - data loc id and boundaries
-   #    b) all data loc id provided has a matching boundary (all data is matched, but not all boundaries are used.)
-   #         b1) dataRegionsOnly option enabled - find regions used, draw regions containing areas with data.
-   #                Other regions are not drawn.
-   #         b2) disabled - draw all areas and regional boundaries. Draw all.
-   #    c) not all data loc ids matches boundaries (data without boundary,) 
-   #        (due to typo, or wrong information, or boundary is missing.)
-   #        c1) ignoreNoMatches = false  -> issue warning message and stop.
-   #        c2) ignoreNoMatches = true   -> issue warning message, delete data rows, continue.
-   #    d) no data loc id matches in boundaries. (total miss match).  Warning and stop.
-   #        ?? difference from "c" ??
+   #    b) all data loc id provided has a matching boundary (all data is matched, 
+   #       but not all boundaries are used.) (more areas than referenced by data.)
+   #         b1) dataRegionsOnly = TRUE  -> find regions used, draw regions containing 
+   #                areas with data. Other regions are not drawn.
+   #         b2) dataRegionsOnly = FALSE -> draw all areas and regional boundaries. 
+   #                Draw all.  Area's with no data are not colored. 
+   #    c) not all data loc ids matches boundaries (Name Table) (data without boundary,) 
+   #        (due to typo, or wrong information, or boundary is missing.)  
+   #         c1) ignoreNoMatches = FALSE  -> issue warning message and stop.  Must have boundary.
+   #         c2) ignoreNoMatches = TRUE   -> issue warning message,  can't map it or
+   #             do linked micromap, delete data rows, and continue.
+   #    d) no data loc id matches in boundaries (NTable). (total miss match).  Warning and stop.
+   #        Nothing in common between data and Name Table.  
    #
-   #   #  Check and Implement delete last row (blank) as no match ignore option 
+   #   # Check and Implement delete last row (blank) as no match ignore option 
    #
    
    # set defaults for ignoreNoMatches call parameter
@@ -11518,28 +11711,36 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    
    #
    #  areaUKey is list of abbreviation for each area.  If there is no match
-   #  between the data links and areaNamesAbbrsIDs table, then it shows up as an NA.
+   #  between the data links and rlAreaNamesAbbrsIDs (areaNT) table, then it shows up as an NA.
    #
    if (any(DFtoNTMissed)) {     # T/F - T=match value was NA.
+   
       # one or more of the data rows didn't match the name table  (==NA)
       
       #
-      #  if ignoreNoMatches in data, strip rows that don't match name table.
+      #  if ignoreNoMatches=TRUE strip data rows that don't match name table.
       #  Have data row with loc id.
       #
       BadList <- statsDFrame[DFtoNTMissed,"rawRN"]         # get list of rows that did not match.  User's loc id.
-      xmsg    <- paste0("***0106 CARG-DF The following rows in the ",sDFName," data.frame do not match any boundary name:\n")
+      
+      xmsg    <- paste0("***0106 CARG-DF The following rows in the ",sDFName,
+                        " data.frame do not match any boundary name:\n")
       warning(xmsg,call.=FALSE)
+      
       xmsg    <- paste0("***0107 ",paste0(BadList,collapse=", "),"\n")
       warning(xmsg,call.=FALSE)
+      
       # this can be caused by:  a) no boundary for data loc id, b) typo in data' loc id, or c) typo in name of boundary. 
       #
       if (ignoreNoMatches) {
-         # 
+         #
+         # ignoreNoMatch = TRUE
+         #
          # ignore data rows that do not match match the name table.
-         # remove row from data.frame
+         # remove data row(s) from data.frame
          # 
-         # delete unused rows.
+         # delete unused (unmatched) data rows in statsDFrame.
+         #
          xmsg  <- paste0("***0108 CARG-DF The rows not matched to boundaries will be removed and not mapped.\n")
          warning(xmsg,call.=FALSE)
          
@@ -11554,8 +11755,11 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
          AD.link     <- AD.link[KeepList]               # clean up AD.link 
       
          # if ignoreNoMatches set - this has removed the rows from the user's data table.
+         
       } else {
+      
          #   ignoreNoMatches = NULL or FALSE
+         
          # stop if a missing match
          # at least one NA in list
          xmsg <- paste0("***0109 CARG-DF Data row names in the ",sDFName," data.frame must match the location ids in the name table. Call stopped.\n")
@@ -11570,12 +11774,12 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    
    numRows <- length(IndexDFtoNT)      # update number of rows in data frame User Loc ID to Name Table.
    
-   #cat("numRows:",numRows,"\n")
+   #cat("IndexDFtoNT-numRows:",numRows,"\n")
    
    #
-   ####
+   ###
    
-   ####
+   ###
    #
    #  Validate call parameter: 
    #
@@ -11587,26 +11791,24 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    if (!( missing(grpPattern) || is.null(grpPattern) )) {
    
       # we have a user specifed grpPattern
-      if (!is.numeric(grpPattern)) {   
-         warnCnt()
+      if (!methods::is(grpPattern,"numeric")) {   
+     
          ErrFnd  <- TRUE
-         xmsg    <- paste0("***01C0 CARG-GP The grpPattern call parameter must be an integer vector.  grpPattern ignored.\n")
-         warning(xmsg, call.=FALSE)
+         errCntMsg(paste0("***01C0 CARG-GP The grpPattern call parameter must be an integer vector.  grpPattern ignored.\n"))
          grpPattern <- NULL
       } else {
          if (any(is.na(grpPattern))) {
             # grpPattern contains NA or non-numeric value.
-            xmsg    <- paste0("***01C4 CARG-GP The one of the values in the grpPattern call parameter is non-numeric or an NA.  grpPattern ignored.\n")
-            warning(xmsg, call.=FALSE)
-            grpPattern <- NULL
+            errCntMsg(paste0("***01C4 CARG-GP The one of the values in the grpPattern call parameter is non-numeric or an NA. ",
+                       " grpPattern ignored.\n"))
+             grpPattern <- NULL
          } else {       
             xg <- sum(grpPattern, na.rm=TRUE)
             if (xg != numRows) {
                # grpPattern number of rows does not match the statsDFrame data.frame
-               warnCnt()
                ErrFnd  <- TRUE
-               xmsg    <- paste0("***01C1 CARG-GP The total number of rows in the grpPattern call parameter must be equal to the number of rows in the ", sDFName," data.frame.  grpPattern ignored.\n")
-               warning(xmsg, call.=FALSE)
+               errCntMsg(paste0("***01C1 CARG-GP The total number of rows in the grpPattern call parameter must",
+                                " be equal to the number of rows in the ", sDFName," data.frame.  grpPattern ignored.\n"))
                grpPattern <- NULL
             
             } else {
@@ -11615,10 +11817,9 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
                xg      <- max(grpPattern)
                if (xg > 5) {
                   # grpPattern number of rows does not match the statsDFrame data.frame
-                  warnCnt()
                   ErrFnd  <- TRUE
-                  xmsg    <- paste0("***01C2 CARG-GP Each value in grpPattern call parameter vector must be <= 5 (rows per group). A value of ",xg," was found.\n")
-                  warning(xmsg, call.=FALSE)
+                  errCntMsg(paste0("***01C2 CARG-GP Each value in grpPattern call parameter vector must be <= 5 (rows per group).",
+                                   " A value of ",xg," was found.\n"))
                   grpPattern <- NULL
             
                } else {
@@ -11630,10 +11831,9 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
                   if ( !all(grpL == sort(grpL,decreasing=TRUE)) || !all(grpU == sort(grpU)) ) {   # correction.
                      # if the sorted order of either half of the groups does not match the 
                      # pattern provided, warning and ignore the grpPattern.
-                     warnCnt()
                      ErrFnd  <- TRUE
-                     xmsg    <- paste0("***01C3 CARG-GP The grpPattern call parameter is not properly ordered. ", "The number of rows per group must be in desending order toward the median sub-area.\n")
-                     warning(xmsg, call.=FALSE)
+                     errCntMsg(paste0("***01C3 CARG-GP The grpPattern call parameter is not properly ordered. ", 
+                                      "The number of rows per group must be in desending order toward the median sub-area.\n"))
                      grpPattern <- NULL
                   }
                }
@@ -11643,12 +11843,13 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    }
    
    #
-   #####
+   ####
   
-   #####
+   ####
    #
    #  regionsB argument  - default = FALSE.
    #     regionsB=TRUE -> draw used regional borders.
+   #     This is difference from dataRegionOnly.  It says - draw regional boundaries.
    #
       
    #print("regionsB parameter Check.")
@@ -11657,7 +11858,7 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    regionsBFlag    <- def_regionsB
    regionsB        <- regionsB[[1]][1]    
    
-   if (! (is.null(RegVisBorders) || identical(RegVisBorders,L3VisBorders)) ) {
+   if (! (is.null(RegVisBorders) || !exists("RegVisBorders") || identical(RegVisBorders,L3VisBorders)) ) {
    
       # RegVisBorders boundary data.frame is present and different from L3.
    
@@ -11671,12 +11872,11 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
           
       } else {
 
-          if ( !is.logical(regionsB) ) {
+          if ( !methods::is(regionsB,"logical") ) {
        
-             ErrFnd      <- TRUE
-             warnCnt()
-             xmsg        <- "***01G0 CARG-RB The regionsB call argument is not a logical variable.  The default of FALSE will be used.\n"
-             warning(xmsg,call. = FALSE)
+             ErrFnd       <- TRUE
+             errCntMsg(paste0("***01G0 CARG-RB The regionsB call argument is not a logical variable. ",
+                              " The default of FALSE will be used.\n"))
           
              regionsBFlag <- def_regionsB
              regionsB     <- def_regionsB
@@ -11700,35 +11900,41 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    def_dataRegionsOnly  <- FALSE
    dataRegionsOnlyFlag  <- def_dataRegionsOnly
    
-   if ( aP_Regions ) {
+   if ( Map.RegBorders ) {
    
       # border group supports regions (feature enabled)
       # validate parameter
-      if ( is.null(dataRegionsOnly) || any(is.na(dataRegionsOnly)) ) {
+      if ( missing(dataRegionsOnly) || is.null(dataRegionsOnly) ) {
       
           #  argument is missing or not provided
           dataRegionsOnly     <- def_dataRegionsOnly
           dataRegionsOnlyFlag <- def_dataRegionsOnly    # default
-          #cat("regions support enabled - but no regions call parameter provided - regions set to TRUE.\n")
+          #cat("regions support enabled - but no regions call parameter provided 
+          #     - regions set to TRUE.\n")
           
       } else {
           dataRegionsOnly <- dataRegionsOnly[[1]][1]
-          if ( !is.logical(dataRegionsOnly) ) {
-       
-             ErrFnd      <- TRUE
-             warnCnt()
-             xmsg        <- "***01G5 CARG-DRO The dataRegionsOnly call argument is not a logical variable.  The default of FALSE will be used.\n"
-             warning(xmsg,call. = FALSE)
-          
+          if ( is.na(dataRegionsOnly) )  {
              dataRegionsOnlyFlag <- def_dataRegionsOnly
              dataRegionsOnly     <- def_dataRegionsOnly
           } else {
-             dataRegionsOnlyFlag <- dataRegionsOnly
+          
+             if ( !methods::is(dataRegionsOnly,"logical") ) {
+       
+                ErrFnd      <- TRUE
+                errCntMsg(paste0("***01G5 CARG-DRO The dataRegionsOnly call argument is not a logical variable.  The default of FALSE will be used.\n"))
+          
+                dataRegionsOnlyFlag <- def_dataRegionsOnly
+                dataRegionsOnly     <- def_dataRegionsOnly
+             } else {
+                dataRegionsOnlyFlag <- dataRegionsOnly
+             }
           }
       }
    }
    
    #cat("dataRegionsOnlyFlag parameter:",dataRegionsOnlyFlag,"  dataRegionsOnly:",dataRegionsOnly,"\n")
+   
    if (dataRegionsOnlyFlag) {regionsB = TRUE}   # Since dataRegionsOnly may not have a L3 image, draw the regional bounderies.
       
    #
@@ -11737,18 +11943,22 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    #  Is this now a duplicate test to the previous test???    Yes it is.   (retire)
    #
    
-   #print("check for duplicate statsDF rows - duplicate?")
+   #print("check for duplicate statsDF rows - location ids - duplicate?")
+   #
+   #  statsDFrame$RN (AD.link) is the cleaned up strings initially used for link
+   #  Should be able to re-use this field to link to any panelData structure.
    
    dupL <- duplicated(IndexDFtoNT)   # check for duplicate references to Name Table
    
    if (any(dupL)) {   
-      # some of the matches are duplicates - not allowed.  One row per sub-area.
+      # some of the matches are duplicates - not allowed.  One row per area.
       DupList <- paste0(AD.link[dupL],collapse=", ")
-      stopCnt()
-      xmsg    <- paste0("***0104 CARG-DF There are duplicate entries in the statsDFrame data.frame.  Duplicate entries are ignored.\n",
+      errCntMsg(paste0("***0104 CARG-DF There are duplicate entries in the statsDFrame data.frame.  Duplicate entries are ignored.\n",
                         "***0105 CARG-DF The duplicate rows are: ",DupList,"\n")
-      stop(xmsg, call.=FALSE)
+                )
       rm(DupList)
+      NotDupL <- !dupL
+      # how to delete duplicates?  Not tested.
    }
    rm(dupL)
    
@@ -11758,106 +11968,123 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
 
    # What link to use for boxplot and TS type data?
    
-   #print("Get panelData Key.")
+   #cat("Get panelData Key for ",rowNames,"\n")
    
+   ###### should change to areaNTxxx ClnStr versions. #####
+   
+   ###### Following is duplicate of other code.  The panelData order is known. The row.names
+   # values are linked to the name table and then to the statsDFrame.
+   # 
+   
+   # based on the rowNames values, pick up the data to use as key for the panelData in the panelDesc
+      
    panelDataKey <- switch(rowNames,
    
-                         "ab"    =  areaNamesAbbrsIDs$Abbr[IndexDFtoNT],  
-                         "full"  =  areaNamesAbbrsIDs$Name[IndexDFtoNT],
-                         "id"    =  areaNamesAbbrsIDs$ID[IndexDFtoNT],
-                         "alias" =  areaNamesAbbrsIDs$Abbr[IndexDFtoNT],
-                         "seer"  =  areaNamesAbbrsIDs$Abbr[IndexDFtoNT],
-                         "alt_ab"=  areaNamesAbbrsIDs$Alt_Abbr[IndexDFtoNT]
+                         "ab"    =  areaNT$Abbr[IndexDFtoNT], 
+                         "full"  =  areaNT$Name[IndexDFtoNT],
+                         "id"    =  areaNT$ID[IndexDFtoNT],
+                         "alias" =  areaNT$Abbr[IndexDFtoNT],
+                         "seer"  =  areaNT$Abbr[IndexDFtoNT],
+                         "alt_ab"=  areaNT$Alt_Abbr[IndexDFtoNT]
                          )
-
-   #cat("panelDataKey:",panelDataKey,"\n")
    
-   #  IndexDFtoNT is an index list to name/abbr/ID rows that match the 
-   #       ADFrame rows -> position = ADFrame Row, value = abbr 
-
-   #  Still need to check for duplicates.
+   # The TS and Boxplot data structure contain the area location ID and must match
+   # the values for the specified rowNames parameter.  This get the list of values in the order
+   # of the DF.
+   
+   #cat("panelDataKey:",panelDataKey,"\n")
+   #cat("NT Key:",areaNT$Key[IndexDFtoNT],"\n")
+   #cat("May not be the same...\n")
+   
+   #  IndexDFtoNT is an index from statsDFrame rows to name/abbr/ID rows,
+   #  The panelDataKey is the location ID based on the statsDFrame of what is expected
+   #    in the panelData based on the rowNames parameters.
+   
+   
+   
    #
    #  Setup for IndexDFtoNT checks
    
-   #  areaDatKey is the abbreviation in order of data.frame
+   #  areaDatKey is the key (based on rowNames) in sorted order of data.frame
+   #    or areaNT$Key[IndexDFtoNT].
    
-   #
-   #  statsDFrame$RN (AD.link) is the cleaned up strings initially used for link
-   #  Should be able to re-use this field to link to any panelData structure.
-   #
-
    #
    #  areas to regions to Area processing 
    #
-   #  Get list of areas in regions referenced by the data.j
+   #  Get list of areas in regions referenced by the data.
    #  Set up used regions as the only spaces to map.
    #  Get list of all areas in the data in the regions referenced.
    #
    
-   areaNamesAbbrsIDs$NotUsed <- FALSE     # set all areas to "USED"
+   areaNT$NotUsed <- FALSE     # set all areas to "USED"    # duplicate instruction
    
    #  List of all regions and L2 keys         
    #print("Build regions lists from NT regIDs and NT L2_IDs")   
 
-   listAllL2         <- unique(areaNamesAbbrsIDs$L2_ID) # get list of unique L2 IDs 
+   listAllL2         <- unique(areaNT$L2_ID) # get list of unique L2 IDs 
    #cat("listAllL2:",listAllL2,"\n")
 
-   listAllRegions    <- unique(areaNamesAbbrsIDs$regID) # get list of unique region IDs
+   listAllRegions    <- unique(areaNT$regID) # get list of unique region IDs
    #cat("listAllRegions:",listAllRegions,"\n")
    
    # get list of all NameTable Keys by definition-unique
-   listAllAreas      <- areaNamesAbbrsIDs$Key  
+   listAllAreas      <- areaNT$Key  
    listAllAreaKeys   <- listAllAreas
    #cat("listAllAreas:",listAllAreas,"\n")
    
    #  Now handle the selective REGIONAL situations.
    
-   #cat("dataRegionsOnlyFlag:",dataRegionsOnlyFlag,"\n")
+   cat("dataRegionsOnlyFlag:",dataRegionsOnlyFlag,"\n")
    
    #  IndexDFtoNT is a list of data rows present mapping to the NameTable. No data no mapping.
  
    if (dataRegionsOnlyFlag) {
-      # Only use L2_IDs andn regIDs with data.   
+      # data may only contain a subset of the areas.  Find the associated L2 and Regs if present.
+   
+      # Only use L2_IDs and regIDs with data (in data.frame)
+      
       #  save L2_ID for each data row in statsDFrame
-      statsDFrame$L2_ID <- areaNamesAbbrsIDs$L2_ID[IndexDFtoNT] 
+      statsDFrame$L2_ID <- areaNT$L2_ID[IndexDFtoNT] 
       #  Get list of used L2_IDs areas.
       listUsedL2        <- unique(statsDFrame$L2_ID)  # unique list.
       #cat("listUsedL2:",listUsedL2,"\n")
    
       #  Pick up regID for each data row.
-      statsDFrame$regID <- areaNamesAbbrsIDs$regID[IndexDFtoNT] 
+      statsDFrame$regID <- areaNT$regID[IndexDFtoNT] 
       #  Get list of used Regions
       listUsedRegions   <- unique(statsDFrame$regID)  # unique list
       #cat("listUsedRegions:",listUsedRegions,"\n")
       
       # find all areas in regions to be mapped-NT match indicate area in region
-      areaRegMatch      <- match(areaNamesAbbrsIDs$regID,listUsedRegions)
+      areaRegMatch      <- match(areaNT$regID,listUsedRegions)
       #   name table rows without data rows, show up as NA (one entry per NT row).
       areaRegKeep       <- !is.na(areaRegMatch)  # no NA is a keeper.
       #   Same as SubAallR_Good below.
       
-      areaNamesAbbrsIDs$NotUsed[!areaRegKeep] <- TRUE 
+      areaNT$NotUsed[!areaRegKeep] <- TRUE   # mark name table entries without data and out of region.
       
       # Get the list of area keys in used regions. Someone had data.
       # If NT area = NA then no data in its region. 
       # If NT area <> NA, then they may or may not have data. (list of areas in used regions)
-      listUsedAreas      <- areaNamesAbbrsIDs[areaRegKeep,"Key"]  
+      listUsedAreas      <- areaNT[areaRegKeep,"Key"]  
       #listAllAreas      <- listUsedAreas
-      #listNTKeysUsed    <- ListUsedAreas
+      #listNTKeysUsed    <- listUsedAreas
       listUsedAreaKeys   <- listUsedAreas
       
       ###  Should I remake the L3 outline??  Right now, using the Region boundaries (regionB=TRUE)
   
    } else {
       #   dataRegionsOnly = FALSE
+      
       listUsedRegions    <- listAllRegions
       listUsedL2         <- listAllL2
       listUsedAreas      <- listAllAreas
       listUsedAreaKeys   <- listAllAreas
+      
       #cat("regionsFlag=FALSE -> reset listUsed to listAllxx\n")
    }
    
-   # Have all areas in areaNamesAbbrsIDs (name table), areaVisBorders, L2VisBorders, 
+   # Have all areas in rlAreaNamesAbbrsIDs (areaNT) (name table), areaVisBorders, L2VisBorders, 
    # and RegVisBorders.  If used #s are less the totals and regionsB is TRUE, 
    # reduce the tables to only the used regions.
    
@@ -11870,40 +12097,17 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    if (length(listUsedRegions) != length(listAllRegions)) {
        
       # number of used regions is less that number of all regions in border group.
-      #  This only happens if dataRegionsOnly=TRUE and aP_Regions is TRUE.
+      #  This only happens if dataRegionsOnly=TRUE and Map.RegBorders is TRUE.
       
-      #  The rlXXXX tables must be sub-divided
-      
-      ## get index to areas in used regions (all areas, not just what matched data.)
-      ##    mark not used name table entries
-      ## find all area enters within regions used
-      #SubAallR_Match      <- match(areaNamesAbbrsIDs$regID,listUsedRegions) # areaRegMatch by area row
-      ## list of valid name table entries.
-      #SubAallR_Good       <- !is.na(SubAallR_Match)   # areaRegKeep  (matches at row)
-      ##cat("SubAallR_Good:",SubAallR_Good,"\n")
-      
-      ## get keys to areas in all subset of regions (no match against used regions list)
-      ## set not used flag in all sub-area not in regions referenced
-      #areaNamesAbbrsIDs$NotUsed[!SubAallR_Good] <- TRUE      # !areaRegKeep
-    
-      ## get list of area keys in region      
-      # listUsedAreas (same)  listAllAreas = ListNTKeysUsed.
-      # get which sub-area keys are in region
-      #listAllAreas        <- listNTKeysUsed <- areaNamesAbbrsIDs$Key[SubAallR_Good]   
-      ##cat("listAllAreas(in Reg.):",listAllAreas,"\n")
-      
-      ## get keys to areas that match data rows   # listUsedAreas
-      # get list of sub-areas in data (used)
-      #listUsedAreas       <- areaNamesAbbrsIDs$Key[IndexDFtoNT]     
-      ##cat("listUsedAreas:",listUsedAreas,"\n")
-           
       #  sub-divide areaVisBorders - keys equal areas in NT
       
       # get list of VisBorders for used areas.
       rlAreaVM             <- match(rlAreaVisBorders$Key,listUsedAreaKeys)  
+      
       # identify polygons to remove.
       rlAreaKeep           <- !is.na(rlAreaVM)    
       #cat("rlAreaKeep:",rlAreaKeep,"\n")
+      
       # Reduce size of areaVisBorder.  no data no plot
       rlAreaVisBorders     <- rlAreaVisBorders[rlAreaKeep,]    
    
@@ -11939,7 +12143,10 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
  
       #  Handle L3VisBorders 
       #  Turn off overlaying L3
-      Map.L3Borders <- FALSE     # if map is sub-divided.
+      Map.L3Borders <- FALSE     # Can't divide L3, turn off L3 drawing.
+      rlL3Keep            <- rep(FALSE,dim(rlL3VisBorders)[1])
+      rlL3VisBorders      <- rlL3VisBorders[rlL3Keep,]   # not using L3, don't keep any rows.
+      
          
       #  Report status
       
@@ -11956,9 +12163,16 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    
    #cat("Overlays - L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
    
+   
+   
+   
    #print("Completed regions subsetting of boundary data.")
    #
    #  Can't do much more until after the sortVar is handled.
+   #
+   #  AT this point based on the data loc ids, the dataRegionOnly parameter and the 
+   #  regID or regName in the Name Table; the VisBorders data.frames have been 
+   #  split into used and non-used.  Only the used portion will be plotted.
    #
    
 #   
@@ -11975,21 +12189,30 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    if ( missing(plotNames) || is.null(plotNames) || is.na(plotNames[[1]][1]) ) {
        plotNames = def_plotNames
    }
+   len_plotNames <- length(plotNames)
+   
+   if (len_plotNames > 1) {
+      ErrFnd <- errCntMsg(paste0("***0126 CARG-plotNames The call parameter contains more than one value.",
+                                 " Only the first value will be used.\n"))
+   }
    plotNames     <- plotNames[[1]][1]
+   
    # areaIDNames are used in the ID glyph as the literal for the area.
    #  Get list of names to use in glyph and the width required.
-   if (!is.character(plotNames)) {
+   
+   if (!methods::is(plotNames,"character")) {
       # not charactor
       plotNames = def_plotNames
-      warnCnt()
-      xmsg <- paste0("***01B2 CARG-PN The plotNames argument value is not a character string.\n",
+      errCntMsg(paste0("***01B2 CARG-PN The plotNames argument value is not a character string.\n",
                      "        The default of 'ab' will be used.\n")
-      warning(xmsg,call.=FALSE)
+               )
    }    
 
+   if (plotNames == "abbr") plotNames="ab"   # accept "abbr" but convert to "ab".
+
    # Default - abbreviations
-   areaUAbbr   <- areaNamesAbbrsIDs$Abbr[IndexDFtoNT]
-   areaUFull   <- areaNamesAbbrsIDs$Name[IndexDFtoNT]
+   areaUAbbr   <- areaNT$Abbr[IndexDFtoNT]
+   areaUFull   <- areaNT$Name[IndexDFtoNT]
    
    areaIDNames <- areaUAbbr
    IdW         <- Id.width[2]  # temp initialization  (abbreviation)
@@ -11997,26 +12220,21 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    #  Get width of ID gryphics column
    areaIDNames = switch(plotNames,
    
-          "ab"  = {IdW <- Id.width[2]; areaUAbbr},    # set IdW to value and return vector of names.
+          "ab"  = {IdW <- Id.width[2]; areaUAbbr},    # set IdW to value and return vector of names or "abbr"
           
-          "abbr" = {Idw <- Id.width[2]; areaUAbbr},
-
           "full"= {IdW <- Id.width[1]; areaUFull},
 
           {  # no match
 
              plotNames = def_plotNames
 
-             warnCnt()
-             xmsg <- "***01B0 CARG-PN Invalid plotNames argument value.  The value must be 'ab' or 'full'. The default of 'ab' will be used.\n"
-             warning(xmsg,call.=FALSE)
-
+             errCntMsg(paste0("***01B0 CARG-PN Invalid plotNames argument value.  The value must be 'ab' or 'full'. The default of 'ab' will be used.\n"))
           }
         )
+        
    # IdW is now the longest string to be used.
-   # areaIDNames are in statsDFrame order containing the ab or full name associated with the row in statsDFrame
-   
-   if (plotNames == "abbr") plotNames="ab"   
+   # areaIDNames are in statsDFrame order containing the ab or full name associated 
+   #   with the row in statsDFrame - used by ID glyph.
    
    statsDFrame$IDNames <- as.character(areaIDNames)   # set IDNames for sorting and ID into statsDFrame
   
@@ -12030,11 +12248,14 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    
    #  areaIDNames is a list of name/abbr literals based on the plotNames specified and 
    #   the areaUIndex values.  The name or abbreviation values are pulled from the Name Table
-   #   incase an alias or alt_abbreivation was used to link the data to boundaries.
+   #   incase an alias or alt_abbreviation was used to link the data to boundaries.
    #
-   #cat("areaIDNames:",areaIDNames,"\n")
+   
+   #cat("statsDFrame$IDNames:\n")
+   #print(statsDFrame$IDNames)
+   
 
-#_______________title option (mstTitle)______________________
+#_______________title option (mstTitle)_______01Ax_______________
 #
 
    #print("title validation.")
@@ -12049,9 +12270,7 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
 
    if (length(mstTitle) < 1) {
       mstTitle <- c("")
-      warnCnt()
-      xmsg    <- "***01A2 CARG-TL The title parameter is empty. Recommend providing a title for the linked micromap.\n"
-      warning(xmsg,call.=FALSE)
+      errCntMsg("***01A2 CARG-TL The title parameter is empty. Recommend providing a title for the linked micromap.\n")
    }
    if (length(mstTitle) == 1) { 
       if (is.na(mstTitle)) {
@@ -12059,48 +12278,53 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
          mstTitle <- c("")
      }
    }
-   if ( !is(mstTitle,"character") ) {
+   if ( !methods::is(mstTitle,"character") ) {
       mstTitle   <- as.character(unlist(mstTitle))
-      warnCnt()
-      xmsg    <- paste0("***01A1 CARG-TL The title parameter is not character. ","Only character vectors are supported. The 'title' argument is ignored.\n")
-      warning(xmsg,call.=FALSE)
+      errCntMsg(paste0("***01A1 CARG-TL The title parameter is not character. ",
+                       "Only character vectors are supported. The 'title' argument is ignored.\n"))
    }
    if (length(mstTitle) > 2) {
       mstTitle   <- mstTitle[1:2]
-      warnCnt()
-      xmsg    <- paste0("***01A0 CARG-TL The title argument contains more than 2 items. ", "Only the first two will be used.\n")
-      warning(xmsg,call.=FALSE)
+      errCntMsg(paste0("***01A0 CARG-TL The title argument contains more than 2 items. ", "Only the first two will be used.\n"))
    }
 
 
    #print("statsDFrame before sort")
    #print(str(statsDFrame))
 
-#_______________ascend option_____________________
+#_______________ascend option________018x_____________
 #
 #   default value is ascending.  (TRUE)
 
    #print("Validate ascend")
-
+   def_ascend <- TRUE
    ordDecr <- FALSE
-   ascend <- ascend[[1]][1]   # get first element.
-
-      if (!( missing(ascend) || is.null(ascend) || is.na(ascend))) {
-          if (is.logical(ascend)) {
+  
+   if (missing(ascend) || is.null(ascend) ) {
+      # parameter is missing or null
+      ascend <- def_ascend
+   } else {
+      len_ascend <- length(ascend)
+      if (len_ascend > 1) {
+         ErrFnd <- errCntMsg(paste0("***0126 CARG-ascend The call parameter contains more than one value.",
+                                 " Only the first value will be used.\n"))
+      }
+      ascend <- ascend[[1]][1]   # get first element.
+      if (!is.na(ascend)) {
+          if (methods::is(ascend,"logical")) {
              ordDecr <- !(unlist(ascend)[[1]])
           } else {
-             warnCnt()
-             xmsg    <- "***0186 CARG-AS The ascend parameter is not a logical variable.  Must be TRUE or FALSE.\n"
-             warning(xmsg,call.=FALSE)
+             errCntMsg("***0186 CARG-AS The ascend parameter is not a logical variable.  Must be TRUE or FALSE.\n")
           }
-      }    
+      } 
+   }
 
-#_______________sortVar option____________________
+#_______________sortVar option________19x____________
 #
 
    #print("Validate sortVar")
 
-   # sort and store statsDFrame, areaID, and areaNames____________
+   # sort and store statsDFrame, areaID, and rlAreaNames____________
 
    # rules for sortVar data columns.
    #    a) list of columns collected from sortVar parameter
@@ -12120,55 +12344,66 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    # data data.frame must be edited by now or sort will not work.
    #
    # names table must stay the same from now on.
+   # sortVar can be a vector of column numbers/names...  OUCH!
    #
    
    # process sortVar
-   sortVar <- sortVar[[1]][1]   # get first element.
+   #sortVar <- sortVar[[1]][1]   # get first element.  (no, use more than one column.)
    
-   if ( missing(sortVar) || is.null(sortVar) || is.na(sortVar) ) {
+   if ( missing(sortVar) || is.null(sortVar) || any(is.na(sortVar)) ) {
      
       # if field omitted (null) sort use default values
       sortVar <- NULL
    
    } else  {
    
-      # value/name provides - verify it.
-      litsortVar <- sortVar
-      sortVar    <- CheckParmColx(litsortVar,c('SORT','sortVar'),wSFNameList,len_wSFName)
+      if (!methods::is(sortVar,"vector")) {
+         # not a vector of numbers or characters
+         xmsg <- paste0("***0181 CARG-SV The sortVar parameter is not a numerical",
+                        " or character vector variable.\n",
+                        "  Matrix, arrays, data.frames and tibbles are not supported.\n",
+                        "  Will use the default of alpha sort on area names.\n")
+         ErrFnd <- errCntMsg(xmsg)
+         
+         # can't use sortVar - set to NULL      
+         sortVar <- NULL   # no good values - NULL argument as if it was not present.
+      } else {
+         # verify the values/names provided.
+         litsortVar <- sortVar
+      
+         sortVar    <- CheckParmColx(litsortVar,c('SORT','sortVar'),wSFNameList,len_wSFName)
            # column names and numbers are verified and converted to column numbers.
            # column 0 represents a no match, can't find.
  
-      #print("sortVar returned by CheckParmColx")
-      #print(sortVar)
+         #print("sortVar returned by CheckParmColx")
+         #print(sortVar)
   
-      wSortVar <- sortVar[sortVar > 0]   # keep good column indexes
+         wSortVar <- sortVar[sortVar > 0]   # keep good column indexes
      
-      if (length(wSortVar) > 0) {
+         if (length(wSortVar) > 0) {        # get list of good indexes to sort order of DF. 
+                                         # should have at least one or more columns
          
-         wSv      <- lapply(wSortVar, function(x) stringr::str_trim(statsDFrame[,x]))   # pull one or more rows and trim blanks
-         wSv2     <- lapply(wSv, function(y) as.numeric(gsub(",","",y)))      # kill "," and convert to numeric
+            wSv      <- lapply(wSortVar, function(x) stringr::str_trim(as.character(statsDFrame[,x])))   # pull one or more rows, make character, and trim blanks
+            wSv2     <- lapply(wSv, function(y) gsub(",","",y))           # kill "," 
+            wSv3     <- lapply(wSv2, function(y) as.numeric(y))           # convert to numeric
+            wSv9Test <- lapply(wSv3, function(z) all(is.na(z)))           # did data get converted to numeric?
+         
+            # check on the conversion to numeric - if fails, keep as character.
+            wSv4     <- lapply(c(1:length(wSv9Test)), function(a) if(wSv9Test[[a]]) 
+                           {
+                              # TRUE - All entries are NA - most likely a character column
+                              wSv[[a]]    # return original text version trimmed
+                           } else {
+                              wSv3[[a]]   # return numeric version 
+                           }
+                         )
        
-         wSv9Test <- lapply(wSv2, function(z) all(is.na(z)))                  # did data get converted to numeric?
+            wSv4$na.last    <- TRUE               # set na.last = TRUE option
+            wSv4$decreasing <- ordDecr            # set sort order
          
-         # check on the conversion to numeric - if fails, keep as character.
-         wSv3 <- lapply(c(1:length(wSv9Test)), function(a) if(wSv9Test[[a]]) 
-                         {
-                            # TRUE - All entries are NA - most likely a character column
-                            wSv[[a]]    # return original text version trimmed
-                         } else {
-                            wSv2[[a]]   # return numeric version 
-                         }
-                       )
-      
-         wSv3$na.last    <- TRUE               # set na.last = TRUE option
-         wSv3$decreasing <- ordDecr            # set sort order
-         
-         ord             <- do.call(order,wSv3)
-         rankOrd         <- rank(statsDFrame[,sortVar[1]],ties.method="min",na.last=TRUE)
-
-      } else {
-         # can't use sortVar - set to NULL      
-         sortVar <- NULL   # no good values - NULL argument as if it was not present.
+            ord             <- do.call(order,wSv4)
+            rankOrd         <- rank(statsDFrame[,sortVar[1]],ties.method="min",na.last=TRUE)
+         }
       }  
    } 
    #cat("sortVar - ord:",ord,"\n")
@@ -12191,61 +12426,75 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
 #_______________SORT the data array as requested____________
 #
 
-   ###  are assigns needed in our mode?    Data area for all calls below...
+   ###  are assigns needed in our mode?    Data area for all calls below...   dat$RN ..
 
-   assign("dat",statsDFrame[sortedOrd,])                    # data fields    "dat" has sorted data frame of the statsDFrame
+   assign("dat",statsDFrame[sortedOrd,])  # data fields    "dat" has sorted version of statsDFrame
    #cat("dim(dat):",dim(dat),"\n")
    
    # 
    #  From now on, the "dat" structure is the primary data.frame containing the user's data.
    #
-   IndexDattoNT           <- IndexDFtoNT[sortedOrd]    # index list from "dat" to Name table
-   #cat("IndexDFtoNT:",IndexDFtoNT,"\n")
-   #cat("IndexDattoNT:",IndexDattoNT,"\n")
+   IndexDattoNT           <- IndexDFtoNT[sortedOrd]    # index list from "dat" (sorted) to Name table
+   #  This vector should be used in error messages to take the sorted position of the problems
+   #  and convert the # into the row name.
+   #  IndexDFtoNT still represents the mapping of the statsDFrame rows to the NT.
    
-   areaDatIDNames         <- areaIDNames[sortedOrd]
-     
+   #cat("IndexDFtoNT:",IndexDFtoNT,"\n")          # unsorted
+   #cat("IndexDattoNT:",IndexDattoNT,"\n")        # sorted
+   
+        # areaIDNames is left over from the plotnames processing.
+        # It represents the form of the row name as specified by the plotnames parameter.
+   areaDatIDNames         <- areaIDNames[sortedOrd]    # list of names for the unsorted statsDFrame to sorted order.
+                    # Use with error messages.
+                    
    #  IndexDattoNT is in data.frame order pointing to the name table
    
-   areaDatKey             <- areaNTKey[IndexDattoNT]   # keys in order of the user data.
-   areaDatAbbr            <- areaNTAbbr[IndexDattoNT]
-   areaDatFull            <- areaNamesAbbrsIDs$Name[IndexDattoNT]
-   areaDatID              <- areaNamesAbbrsIDs$ID[IndexDattoNT]
-   areaDatAlt_Abbr        <- areaNamesAbbrsIDs$Alt_Abbr[IndexDattoNT]
+   #  information related to statsDFrame (sorted order) (dat - sorted, elements from NT)
+   
+   areaDatKey             <- areaNT$Key[IndexDattoNT]   # keys in order of the sorted user data.
+   areaDatAbbr            <- areaNT$Abbr[IndexDattoNT]
+   
+   areaDatFull            <- areaNT$Name[IndexDattoNT]
+   areaDatID              <- areaNT$ID[IndexDattoNT]
+   areaDatAlt_Abbr        <- areaNT$Alt_Abbr[IndexDattoNT]
+   
+   #cat("data Keys:\n")
+   #print(dat$RN)
+   #cat("areaDatKey:\n")
+   #print(areaDatKey)
    
    #cat("dim(dat):",dim(dat),"\n")
-   #cat("length of areaID (areaDatKey): ",length(areaDatKey),"\n")
-   #cat("areaID (areaDatKey)          : ",paste0(areaDatKey,collapse=" "),"\n")
    
-   naADK       <- is.na(areaDatKey)
+   naADK                  <- is.na(areaDatKey)    # check to make sure all rows in "dat" have a "key".
    #cat("areaDatKey-NA:",naADK,"\n")
    #cat("length(naADK):",length(naADK)," any(naADK):",any(naADK),"  all:",all(naADK)," sum:",sum(naADK),"\n")
+   
    if (any(naADK)) {
-     cat("bad areaDatKey:\n")
-     print(dat[naADK,])
-     print("SHOULD not get here.")
+      cat("bad areaDatKey:\n")
+      print(dat[naADK,])
+      print("SHOULD not get here.")
    }
-   #print(dat)
    
-   #cat("areaDatKey:",areaDatKey,"\n")
-   
-   #cat("row.names(dat):",row.names(dat),"\n")
-   
+   #cat("before row.names(dat):",row.names(dat),"\n")
    row.names(dat)         <- areaDatKey            # reset the row.names to the Key
+   #cat("after row.names(dat):",row.names(dat),"\n")
  
    xDFrame                <- data.frame(Key=areaDatKey, Abbr=areaDatAbbr, 
                                  Full=areaDatFull, ID=areaDatID,
-                                 IDNames=areaIDNames, Rank=rankOrd,
+                                 DatID=areaDatIDNames,  
+                                 Rank=rankOrd,
                                  Index=IndexDattoNT)
+   # effectively a sorted DF as name table.
    
    #cat("xDFrame:\n")
    #print(xDFrame)
    
-   # build index from name table to statsDFrame
+   # build index for name table to statsDFrame (sorted - dat)
    
-   IndexNTtoDat           <- rep(NA,length(areaNamesAbbrsIDs$Key))
+   IndexNTtoDat           <- rep(NA,length(areaNT$Key))
    
-   for (ind in c(1:length(IndexDattoNT))) {
+   for (ind in c(1:length(IndexDattoNT))) {   # scan DattoNT from 1 to n
+      # and find put the DattoNT index into the related NTtoDat entry.
       IndexNTtoDat[IndexDattoNT[ind]] <- ind
    }
    
@@ -12253,16 +12502,15 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    
    #  IndexNTtoDat is in the name table order pointing to the data.frame.
    
-   NotUsedList    <- is.na(IndexNTtoDat)
-   NotUsedKeys    <- areaNTKey[NotUsedList]            # get list of unreferred sub-areas.
-   NotUsedNames   <- areaNTName[NotUsedList]           # get list of names not referenced.
+   NotUsedList    <- is.na(IndexNTtoDat)               # areas not used in data. (NT order)
+   NotUsedKeys    <- areaNT$Key[NotUsedList]            # get list of unreferred area keys.
+   NotUsedNames   <- areaNT$Name[NotUsedList]           # get list of area names not referenced.
    
    #cat("NotUsedKeys>",paste0(NotUsedKeys,collapse=", "),"<\n")
    
    #if (any(NotUsedList)) {    # better message? 
-   #   warnCnt()
-   #   xmsg    <- paste0("***0102 CARG-DF The following sub-area(s) in the name table were not referenced in the user data.\n") 
-   #   warning(xmsg,call.=FALSE)
+   #   errCntMsg(paste0("***0102 CARG-DF The following sub-area(s) in the name table were not referenced in the user data.\n"))
+   #
    #   xmsg    <- paste0("***0102 CARG-DF  >",paste0(NotUsedNames, collapse=", "),"<\n")
    #   warning(xmsg,call.=FALSE)
    #}
@@ -12277,13 +12525,14 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
    assign("areaDatFull"     ,areaDatFull)        # area Full         "area Full" in order of the dat
    assign("areaDatKey"      ,areaDatKey)         # area Key          "area Key"  in order of the dat
    assign("areaDatAlt_Abbr" ,areaDatAlt_Abbr)    # area Alt_Abbr     "area Alt_Abbr"  in order of the dat
-   assign("areaIDNames"     ,areaIDNames[sortedOrd])  # area Display Names  "areaNames in order of the dat.
+   assign("areaDatIDNames"  ,areaDatIDNames)     # area Dat ID       "area ID Names in order of dat
+   # assign("areaIDNames"     ,areaIDNames[sortedOrd])  # area Display Names  "rlAreaNames in order of the dat. (???)
    assign("NotUsedKeys"     ,NotUsedKeys)        # area keys that were not referenced in the data.
    assign("NotUsedList"     ,NotUsedList)        # T/F list of not used sub-areas.
 
-   assign("datOrder",sortedOrd)                # data order for use with panelData back to statsDFrame
+   assign("datOrder",sortedOrd)                  # data order for use with panelData back to statsDFrame
 
-
+ 
 #  Note:  sDFdat is the statsDFrame in sorted order.  All areaDatxxx are in the same sorted order.     
 #
 
@@ -12322,9 +12571,8 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
       }
       if (axisMethod == 0) {
          # if still set, but bad value
-         warnCnt()
-         xmsg    <- paste0("***01D0 CARG-SC The axisScale argument set to ",axisScale,", must be set to 'o', 'e', 's', or 'sn'.  The default of 'e' will be used.\n")
-         warning(xmsg,call.=FALSE)
+         errCntMsg(paste0("***01D0 CARG-SC The axisScale argument set to ",axisScale,
+                        ", must be set to 'o', 'e', 's', or 'sn'.  The default of 'e' will be used.\n"))
          axisScale       <- "e"    # extended algorithm
          axisMethod      <- 4
       }
@@ -12334,9 +12582,8 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
       axisMethod      <- 4
    }
    if (axisMethod == 0) {
-      warnCnt()
-      xmsg    <- "***01D1 CARG-SC The axisScale argument is Missing, NULL or NA. It must be set to 'o', 'e', 's', or 'sn'.  The default of 'e' will be used.\n"
-      warning(xmsg,call.=FALSE)
+      errCntMsg(paste0("***01D1 CARG-SC The axisScale argument is Missing, NULL or NA. It must be set to 'o', 'e', 's', or 'sn'.",
+                "  The default of 'e' will be used.\n"))
       axisScale       <- "e"    # extended algorithm
       axisMethod      <- 4
    }
@@ -12345,30 +12592,33 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
 #
 #  staggerLab
 #
-#   Default Call = NULL,  Default value = FALSE  
+#   Default Call = NULL,  Default value = FALSE 
 #
+   def_staggerLab <- FALSE
+   
    #print("Validating staggered:")
-   
-   staggerLab <- staggerLab[[1]][1]
-
-   staggered  <<- FALSE    # start with a lower value.
-
-   if (!( missing(staggerLab) || is.null(staggerLab) || is.na(staggerLab) )) {
-      if (!is.logical(staggerLab)) {
-         staggerLab <- FALSE
-         warnCnt()
-         xmsg       <- "***01E0 CARG-SL The staggerLab argument is not a logical value. Setting staggerLab to FALSE.\n"
-         warning(xmsg,call.=FALSE)
-      }
+   if ( missing(staggerLab) || is.null(staggerLab) ) {
+      staggerLab <- def_staggerLab     
    } else {
-      # parameter not present or set to NULL/NA
-      staggerLab    <- FALSE    # default = FALSE - don't stagger axis labels.
-   }
+      staggerLab <- staggerLab[[1]][1]
+
+      staggered  <<- FALSE    # start with a lower value. (lower line of staggered set.)
+
+      if (any(is.na(staggerLab)) ) {
+      
+         if (!methods::is(staggerLab,"logical")) {
+            staggerLab <- FALSE
+            errCntMsg("***01E0 CARG-SL The staggerLab argument is not a logical value. Setting staggerLab to FALSE.\n")
+         }
+      } else {
+         # parameter not present or set to NULL/NA
+         staggerLab    <- FALSE    # default = FALSE - don't stagger axis labels.
+      }
    
-   #cat("staggerLab:",staggerLab,"\n")
-
-   #cat("staggered:",staggered,"\n")
-
+      #cat("staggerLab:",staggerLab,"\n")
+   
+      #cat("staggered:",staggered,"\n")
+   }
 #
 ######
 
@@ -12388,15 +12638,12 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
       maxAreas <- as.numeric(maxAreasPerGrp)   # convert to numeric and see if it is valid.
       if (is.na(maxAreasPerGrp)) {
          maxAreasPerGrp <- def_maxAreasPerGrp
-         warnCnt()
-         xmsg       <- "***01E4 CARG-SL The maxAreasPerGrp argument is not a numeric value. Setting to the default of 5.\n"
-         warning(xmsg,call.=FALSE)
+         errCntMsg("***01E4 CARG-SL The maxAreasPerGrp argument is not a numeric value. Setting to the default of 5.\n")
       } else {
          # have numeric value
          if(!( maxAreasPerGrp == 5 || maxAreasPerGrp == 6 )) {
            # not 5 or 6
-           xmsg <- "***01E5 CARG-AL The maxAreaPerGrp call parameter is not 5 or 6. Value set to 5.\n"
-           warning(xmsg,call.=FALSE)
+           errCntMsg("***01E5 CARG-AL The maxAreaPerGrp call parameter is not 5 or 6. Value set to 5.\n")
            maxAreasPerGrp = def_maxAreasPerGrp
          }
       }
@@ -12416,6 +12663,7 @@ if ( missing(rowNames) || is.null(rowNames) || is.na(rowNames) )  {
 #  panels can finally be setup.
 #
 numRows     <- nrow(dat)
+#cat("numRows in data.frame:",numRows,"  12590 \n")
 #
 ######
 
@@ -12428,6 +12676,9 @@ numRows     <- nrow(dat)
 #   use details in memory - now that we have merged them with users.
 
 micromapGPanelDefaults <- micromapGSetPanelDef(numRows,rowSizeMaj,rowSizeMin,rowSepGap, 5, grpPattern)
+
+#cat("micromapGPanelDefaults - 12580 \n")
+#print(micromapGPanelDefaults)
 
 #__________________________ Save Panel Defaults to memory 
  
@@ -12477,15 +12728,16 @@ StopFnd <- FALSE
 
 #______________Check for panelDesc$type validity______________
 
-valid = c("map","mapcum","maptail","mapmedian",
-          "rank","id","arrow","bar",
-          "dot","dotse","dotconf","dotsignif",
-          "ts","tsconf",
-          "scatdot",
-          "segbar","normbar","ctrbar",
-          "boxplot")              # idDot and rank are not currently implemented
+valid <-    c("map","mapcum","maptail","mapmedian",
+              "rank","id","arrow","bar",
+              "dot","dotse","dotconf","dotsignif",
+              "ts","tsconf",
+              "scatdot",
+              "segbar","normbar","ctrbar",
+              "boxplot")              # idDot and rank are not currently implemented
 
-#____________________ List of expected and valid parameters in the panelDesc
+#____________________ List of expected and valid parameters in the panelDesc  
+#           Should these be upper case?
 
 PDParms <- c('type',
              'lab1','lab2','lab3','lab4',
@@ -12498,18 +12750,16 @@ PDParms <- c('type',
 
 # get list of names/options in panelDesc 
 
-PDUsed   <- names(panelDesc)         # used by every glyph function to check for parameters
-PDSize   <- dim(panelDesc)           # [1] number of rows (options)  [2] number of columns (attributes)
+PDUsed          <- names(panelDesc)         # used by every glyph function to check for parameters
+PDSize          <- dim(panelDesc)           # [1] number of rows (options)  [2] number of columns (attributes)
 
-PDPmatch <- match(PDUsed,PDParms)    # is if all entries in panelDesc are valid
+PDPmatch        <- match(PDUsed,PDParms)    # is if all entries in panelDesc are valid
 
 if (any(is.na(PDPmatch))) {
    #  one of more panelDesc parameters are bad
-   stopCnt()
-   StopFnd      <- TRUE
    #PDErrorList <- paste0(PDUsed[is.na(PDPmatch)],collapse=" ")
-   xmsg         <- paste0("***0113 CARG-PD The following named lists in ",pDName," panelDesc data.frame are not valid: ",paste0(PDUsed[is.na(PDPmatch)],collapse=" "),"\n")
-   warning(xmsg,call.=FALSE)
+   StopFnd <- stopCntMsg(paste0("***0113 CARG-PD The following named lists in ",pDName," panelDesc data.frame are not valid: ",
+                      paste0(PDUsed[is.na(PDPmatch)],collapse=" "),"\n"))
 }
 
 #___________________the panelDesc parameters (column names) are good _____
@@ -12591,7 +12841,7 @@ NAList   <- rep(NA,numCol)  # NA vector
 oneList  <- rep(1,numCol)   # numeric vector of all 1s.
 zeroList <- rep(0,numCol)
 
-# a NULL column cannot exist in a data.frame.  If the name is present, it exist!
+# a NULL column cannot exists in a data.frame.  If the name is present, it exist!
 
 # lab1   - Top label 1
 if (is.na(match('lab1',PDUsed))) { 
@@ -12640,6 +12890,8 @@ if (is.na(match('lab4',PDUsed))) {
 
 # more panelDesc checks and setups after the function definitions.
 
+#cat("panelDesc checks:  statsDFrame name list: ",len_wSFName,"\n")
+#print(wSFNameList)
 #
 #_______________________panelDesc$colx_____________________
 #
@@ -12648,13 +12900,17 @@ if (is.na(match('lab4',PDUsed))) {
 #   2) In glyph check value and get data   "CheckPDCol"
 #   3) check data vector for valid data    "CheckNum"
 #
+#   panelDesc$type is a list of the types of glyphs using a row.
+#   panelDesc$xxxx is a list of the statsDFrame column names for the column named Colxxx
+#   litcol1 = list of column names/number for col1..
+#
 
 # number of columns based on the presence of Descriptions for Column
 
   # col1     - data column name/number 1
   if (!is.na(match('col1',PDUsed))) {
      # col1 is present
-     litcol1 <- as.character(panelDesc$col1)
+     litcol1 <- as.character(panelDesc$col1)   # character vector of values in Col1
      # Check col1 - column number or names.  0 = no such.
      col1    <- CheckColx2(litcol1,"col1",1,panelDesc$type,wSFNameList,len_wSFName)  
      x <-  (col1 == 0)
@@ -12669,8 +12925,9 @@ if (is.na(match('lab4',PDUsed))) {
   # col2     - data column name/number 2
   if (!is.na(match('col2',PDUsed))) {
      # col2 is present
-     litcol2 <- as.character(panelDesc$col2)
+     litcol2 <- as.character(panelDesc$col2)   # character vector of values in Col2
      col2    <- CheckColx2(litcol2,"col2",2,panelDesc$type,wSFNameList,len_wSFName)
+     #cat("col2:",col2,"\n")
      x <- (col2 == 0)
      #print(x)
      if (any(x,na.rm=TRUE)) {  StopFnd <- TRUE }
@@ -12744,6 +13001,9 @@ if (is.na(match('lab4',PDUsed))) {
 #_____________panelDesc$panelData_______________
 #
 
+
+
+
 #  if present is the typeof correct ?   - check within the glyph - it may be different.
 
    if (is.na(match('panelData',PDUsed))) { 
@@ -12754,6 +13014,10 @@ if (is.na(match('lab4',PDUsed))) {
    assign('panelData',wPanelData)
  
    rm(wPanelData)
+   
+   
+   
+   
    #_________________-
    #
    #cat("Check on header row counts - top:",numTopHeaderRows,"  bot:",numBotHeaderRows,"\n")
@@ -12761,6 +13025,9 @@ if (is.na(match('lab4',PDUsed))) {
    #cat("  compare to 1.1 and 0.5/0.75\n")
    
    #___panelDesc$colSize_________User specificed column width processing and checking
+   
+   
+   
 
    # ____________________Column Size layout (initial)
 
@@ -12776,6 +13043,7 @@ if (is.na(match('lab4',PDUsed))) {
    
    for (j in 1:numCol) {
        # Test type of column to be built and call build routine.
+       # Get Map.Min.width from default details ; Map.MinH, Map.MaxH from areaParms
       #cat("top of loop - type=",type[j],"\n")
       cparm2 =  switch(type[j],
             #  colSize, col width, left sep, right sep, row min, row max)
@@ -12870,11 +13138,9 @@ if (is.na(match('lab4',PDUsed))) {
         # yes, invalid value by user.
         wColBadList   <- colNumID[colFlex & is.na(wColS)]
         if (length(wColBad)<=0) stop
-        warnCnt()
-        xmsg          <- paste0("***01F1 CARG-CS The colSize parameter in ",pDName,
+        errCntMsg(paste0("***01F1 CARG-CS The colSize parameter in ",pDName,
                                 " contains NA values in columns: ",
-                                 paste0(wColBadList,collapse=","),". "," Values must be numeric and > 0.\n")
-        warning(xmsg,call.=FALSE)
+                                 paste0(wColBadList,collapse=","),". "," Values must be numeric and > 0.\n"))
         
         colGood[wColBadList] <- FALSE    # mark problem column
      }
@@ -12894,12 +13160,10 @@ if (is.na(match('lab4',PDUsed))) {
         # fixed width columns have characters or numeric or logical vlaues - OUCH!
         wColBadList    <- wColS[!colFlex & !is.na(wColS)]   # get list of bad values.
         if (length(wColBad)<=0) stop  # check on programmer
-        warnCnt()
-        xmsg       <- paste0("***01F2 CARG-CS The colSize parameter in ",pDName,
+        errCntMsg(paste0("***01F2 CARG-CS The colSize parameter in ",pDName,
                              " has values for fixed width glyphs. Value(s): ",
                              paste0(wColBadList,collapse=","),".  ", 
-                             "Value(s) are ignored and set to NA.\n")
-        warning(xmsg,call.=FALSE)
+                             "Value(s) are ignored and set to NA.\n"))
         #  at this point the fixed columns are NA or can be set to NA.
         wColS[!colFlex] <- NA  
      }
@@ -12924,11 +13188,9 @@ if (is.na(match('lab4',PDUsed))) {
         # have colSize value(s) that is not numeric or are "Inf".
         wColBadList   <- wColSize[wColBad]        # get list of bad entries.
         # invalid colSize entries, not numeric, could be character, logical, etc.
-        warnCnt()
-        xmsg          <- paste0("***01F3 CARG-CS The colSize parameter in ",pDName,
+        errCntMsg(paste0("***01F3 CARG-CS The colSize parameter in ",pDName,
                                 " does not contain numeric values : ",
-                                paste0(wColBadList,collapse=","),".\n")
-        warning(xmsg,call.=FALSE)
+                                paste0(wColBadList,collapse=","),".\n"))
         #
         wColBadList          <- wColNum[wColBad]   # get index numbers
         colGood[wColBadList] <- FALSE 
@@ -12948,11 +13210,9 @@ if (is.na(match('lab4',PDUsed))) {
         # colSize values out of acceptable range.
         wColBadList   <- wColS[wColNum[wColBad]]               # get list of bad entries
         # colSize entries are out of range <= 0 or > 200.
-        warnCnt()
-        xmsg          <- paste0("***01F4 CARG-CS The colSize entries in ",pDName,
+        errCntMsg(paste0("***01F4 CARG-CS The colSize entries in ",pDName,
                                 " are out of range ( <= 0 or > 200 ). Values: ", 
-                                paste0(wColBadList,collapse=","), ".\n")
-        warning(xmsg,call.=FALSE)
+                                paste0(wColBadList,collapse=","), ".\n"))
         colGood[wColNum[wColBad]] <- FALSE   # set all out of range values as no bad.
      }
      
@@ -12984,22 +13244,18 @@ if (is.na(match('lab4',PDUsed))) {
            # we have come bad values to change to mean.
            wColBadList  <- wColS[repColS]  # get list of values being changed.
            
-           warnCnt()
-	   xmsg      <- paste0("***01F5 CARG-CS The reviewed colSize parameter in ",pDName,
+           errCntMsg(paste0("***01F5 CARG-CS The reviewed colSize parameter in ",pDName,
 	                       " has bad values (see above) and have been replaced by the mean of the good values: ", 
-	                       meanColSize,".  Bad Values:", paste0(wColBadList,collapse=","),"\n")
-	   warning(xmsg,call.=FALSE)
+	                       meanColSize,".  Bad Values:", paste0(wColBadList,collapse=","),"\n"))
            numColS[repColS] <- meanColSize
         }
         colSize     <- numColS                  # transfer back to colSize.
         litColSize  <- as.character(numColS)    # common starting point - either character or numeric.
         #cat("final colSize:",colSize,"\n")
      } else {
-        warnCnt()
-	xmsg      <- paste0("***01F6 CARG-CS The colSize parameter in ",pDName,
-	                    " contains no useful information and will be ignored.\n")
-	warning(xmsg,call.=FALSE)
-	colSize    <- NAList
+        errCntMsg(paste0("***01F6 CARG-CS The colSize parameter in ",pDName,
+	                    " contains no useful information and will be ignored.\n"))
+        colSize    <- NAList
      }
         
    } else {
@@ -13112,16 +13368,12 @@ if (is.na(match('lab4',PDUsed))) {
      if (equalCol > colSizeMax)  {  equalCol <- colSizeMax  }
    
      if (equalCol < colSizeMin) {
-        warnCnt()
         ErrFnd <- TRUE
-        xmsg    <- paste0("***0420 PANEL Calculated column widths is less than minimum ",colSizeMin," inches - too many columns specified.\n")
-        warning(xmsg,call.=FALSE)
+        errCntMsg(paste0("***0420 PANEL Calculated column widths is less than minimum ",colSizeMin,
+                         " inches - too many columns specified.\n"))
          
         if (equalCol < colSizeMin/2) {
-           stopCnt()
-           StopFnd <- TRUE
-           xmsg    <- paste0("***0421 PANEL Column width is too small to be useful, Package stopped.\n")
-           stop(xmsg,call.=FALSE)
+           StopFnd <- stopCntMsg( paste0("***0421 PANEL Column width is too small to be useful, Package stopped.\n"))
         }
      }
      
@@ -13159,23 +13411,22 @@ if (is.na(match('lab4',PDUsed))) {
    #cat("botMar:",botMar,"\n")
    
    #assign('legfactor',legfactor)  
+   
+   #cat("Flags-ErrFnd:",ErrFnd,"  StopFnd:",StopFnd,"\n")
 
    ########
    #
    #  Check for warnings or stops that should terminate the package/function
    #
    if (StopFnd) {
-      xmsg    <- paste0("***01Z9 CARG Errors have been found in parameters and data.\n",
-                        "        Please review program log and fix problems. Packaged stopped.\n")
-      stop(xmsg, call.=FALSE)
-     
+      stopCntMsg(paste0("***01Z9 CARG Errors have been found in parameters and data.\n",
+                        "        Please review program log and fix problems. Packaged stopped.\n"))
+  
    }
    if (ErrFnd) {
-      warnCnt()
-      xmsg    <- "***01Z8 CARG Warnings have been found in the parameters and data.  Package continues, but results are unpredictable. Review log and fix errors.\n"
-      warning(xmsg, call.=FALSE)
+      errCntMsg(paste0("***01Z8 CARG Warnings have been found in the parameters and data.  ",
+                "Package continues, but results are unpredictable. Review log and fix errors.\n"))
    }   
-
 
    ########
    #
@@ -13209,7 +13460,7 @@ if (is.na(match('lab4',PDUsed))) {
    #
    #  NewYorkBG     set up - 62 rows -> 13 groups (5..5,4,4,4,5...5)   
    #
-   #  UtahBG        set up - 29 rows -> (5.5.4.1.4.5.5) -> 7 groups
+   #  UtahBG        set up - 29 rows -> (5,5,4,1,4,5,5) -> 7 groups
    #
    #  ChinaBG       set up - 34 rows -> (5,5,5, <1,2,3,4> ,5,5,5) -> 7 groups
    #
@@ -13221,12 +13472,13 @@ if (is.na(match('lab4',PDUsed))) {
    #
    #
 
-   #printPanelsParms()
-   # build layout for glyphs panels  (numGrps x ncol) (Individual)
-   
    #cat("panelLayout - panels\n")
    #cat("panels-numGrps:",numGrps," rowSep:",rowSep," rowSize:",rowSize,"\n")
    #cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
+   
+   # build layout for glyphs panels  (numGrps x ncol) (Individual)
+   #    Titles, columns and top group/rows each, columns and median single or group/row if present,
+   #    bottom group/rows each, and bottom 
    
    assign("panels",panelLayout(
                         vnrow       = numGrps,               # num of Row/Groups   1 or more.   
@@ -13247,7 +13499,13 @@ if (is.na(match('lab4',PDUsed))) {
                         rDebug      = MST.Debug)
           )                                                  # c(.1,.1,.1) for 3
 
+   #printPanelParms("panels")
    
+   
+   #cat("panelLayout - panelGroup\n")
+   #cat("Group -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
+   #cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
+  
    #  Done above by "micromapSetPanelDef"
    #grounpedRowSize = details[["groupedRowSize"]]            # c(35,1.65,35) -> USStatesBG (51)
                                                              # c(7,7,7) or c(7,7,7,7) -> USSeerBG (9 -- 20)
@@ -13256,11 +13514,6 @@ if (is.na(match('lab4',PDUsed))) {
    
    #groupedRowSep   = details[["groupedRowSep"]]             # c(0,0.1,0.1,0) or c(0,0.1,0)
 
- 
-   #print("panels--->")
-   #print(panels)
-   
-   
    #cat("medGrp:",medGrp,"\n")
       
    # Major panel group  title-top, panels, title-bottom  by columns (overlays panels)
@@ -13281,13 +13534,10 @@ if (is.na(match('lab4',PDUsed))) {
       }
    }
 
-   #printPanelParms("panelGroup")
    
-   #cat("panelLayout - panelGroup\n")
-   #cat("Group -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
-   #cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
-  
    # build layout for top, median(if present) and bottom cover panels (3 or 2 x numCol)
+   #   layout for top,  top group set, median (if present), bottom group sets, bot.
+   
    assign("panelGroup",panelLayout(
                         vnrow        = panelBlocks,           #  1, 2 or 3
                         vncol        = numCol,                #  numCols
@@ -13307,14 +13557,15 @@ if (is.na(match('lab4',PDUsed))) {
                         rDebug       = MST.Debug)
         )
   
-   #print("panelGroup --->")
-   #print(panelGroup)
-  
+   #printPanelParms("panelGroup")
+   
+   
    #cat("panelLayout - panelOne\n")
-   #cat("Group -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
+   #cat("One   -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
    #cat("      -vncol      :",1," colSep: 0  colSize: 1\n")
   
    # build layout for page (3 or 2  x 1)
+   #    Build outline layout for Title, group\rows, bottom 
    assign("panelOne",panelLayout(
                         vnrow        = panelBlocks,            #  1, 2 or 3
                         vncol        = 1,                      #  1
@@ -13333,8 +13584,8 @@ if (is.na(match('lab4',PDUsed))) {
          )
   
    
-   #print("panelOne:")
-   #print(panelOne)
+   #printPanelParms("panelOne")
+  
    
    #
    #  Variables that span glyphs
@@ -13353,14 +13604,29 @@ if (is.na(match('lab4',PDUsed))) {
 #  This will change to do:  Setup, Page 1-Page Header, Glyph "n1" to "n2", and then the next page.
 #
 #####
+#cat("Main Loop\n")
+#cat("Main Loop:  MST.Debug:",MST.Debug,"\n")
+#print(statsDFrame)
+#cat("Length of areaNT:",dim(areaNT)[1],"\n")
+#print(areaNT)
+#cat("areaVisBorders sample:\n")
+#str(rlAreaVisBorders)
+#cat("  length of AVB:",dim(rlAreaVisBorders)[1]," ",dim(rlAreaVisBorders)[2],"\n")
+#head(rlAreaVisBorders,40)
+#cat("End of areaVisBorders Sample.\n")
+
+#cat("numCol:",numCol,"\n")
 
 #cat("Main Loop\n")
 
 #  Build images of each column
+#
+#    On the boxplot, ts and tsconf glyphs, the name of the data.frame is passed to the functions.
+#
 
    for (j in 1:numCol)  {
    
-      #cat("Doing Type:",type[j],"\n")
+      #cat("Doing Type:",type[j],"  column:",j,"\n")
    
       # Test type of column to be built and call build routine.
       switch(type[j],
@@ -13394,6 +13660,7 @@ if (is.na(match('lab4',PDUsed))) {
    #
    # Fill in the top Page Titles
    #
+   #cat("End of main loop.  Bottom title\n")
    
    #cat("panelSelect - panelOne - margin='top'\n")
    
@@ -13416,20 +13683,22 @@ if (is.na(match('lab4',PDUsed))) {
    # Time to report on the warnings and errors
    #
    
-   #message("End of micromapST processing.\n\n")
-   
+   message("End of micromapST processing.\n\n")
+   #cat("Getting warning counts:\n")
    warnNum <- get("i",envir=environment(warnCnt))  # get warnings counter
    if (warnNum > 0) {
       message(paste0(warnNum," warnings messages were logged.  Please review the run log and resolve any issues."))
    } else { 
       message("No warnings were logged.")
    }
+   #cat("Getting stop counts:\n")
    stopNum <- get("i",envir=environment(stopCnt))  # get stop message counter
    if (stopNum > 0) {
       message(paste0(stopNum," Stop messages were logged.  Please resolve issues and rerun."))
    } else {
       message("No stop messages were logged.")
    }
+   #cat("Getting Total Counts:\n")
    if (( warnNum + stopNum ) > 0) {
       message("If warnings and error messages did not appear on your R console, please execute",
               "'warnings()' to retrieve the messages.\n")

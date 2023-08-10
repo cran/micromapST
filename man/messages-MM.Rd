@@ -65,6 +65,43 @@
   The remainder of the message contain a text explanation of the
   issue and a list of parameters: glyph column number/name, data row
   or column, variable name, and value related to the issue.
+  
+  The abbreviation in most messages identifies the processing step 
+  in the package the message was produced:
+  \describe{
+   \item{CARG}{Call Arguments-Parameters
+    \describe{
+     \item{<blank>}{General call parameter messages}
+     \item{-RNC}{Row Name Column}
+     \item{-RN}{Row Name type}
+     \item{-AS}{Ascend sort order parameter}
+     \item{-TL}{Title parameter}
+     \item{-PN}{PlotName parameter}
+     \item{-GP}{Group Pattern parameter}
+     \item{-SC}{Scaling parameter}
+     \item{-SL}{Staggered Label parameter}
+     \item{-CS}{Column Size parameter}
+     \item{-DF}{Statistics Data Frame parameter or content}
+     \item{-PD}{Panel Description data frame parameter or content}
+     \item{-SORT}{Sort parameters}
+    }
+   }
+   \item{Alias}{Use of the Alias location ID feature}
+   \item{BGBD}{Border Group Directory parameter}
+   \item{BGBN}{Border Group Name parameter} 
+   \item{BGBG}{Border Group data set content}
+   \item{BDATA}{General Border Group boundary data}
+   \item{COLORS}{color call parameter}
+   \item{DETS}{details call parameter}
+   \item{PDCOL}{Panel Description dataframe columns. These messages relate to the columns within the panel description data frame 
+     rather than the glyph itself.}
+   \item{PANEL}{Panel Description dataframe general issues}
+   \item{DMP & INB}{Internal issues}
+   \item{<glyph name>}{Messages related to a specific glyph graphic.  The <glyph name> would be one 
+     of the following: dot, dotconf, dotse, dotsignif, ctrbar, normbar, segbar, 
+     map, mapcum, mapmedian, maptail, id, arrow, bar, boxplot, scatdot, ts, or tsconf.
+   }
+  }
 }
 \details{
  \bold{Conventions:}
@@ -181,49 +218,45 @@
 	     the minimum set of call parameters required. If either
 	     or both parameters are missing (the first two in the
 	     function call), the execution of the function is
-	     stopped. }
-          \item{01Z1}{\bold{CARG Errors found in call arguments. Execution stopped.}
-             
-             Errors are found in the micromapST calling
-	     parameters/arugments. See the log to determine the
-	     problem and fix.
-           }
-          }   
-       }  
-     
+	     stopped. 
+	   }
+         }  
+       }     
   
       \item{010x}{\bold{\var{statsDFrame} call argument (1st argument) (CARG-DF):}
       
         \describe{
-          \item{0101}{\bold{CARG-DF First argument (\var{statsDFrame}) is missing or not a data.frame.}
+          \item{0101}{\bold{CARG-DF First argument (\var{statsDFrame}) is missing or NULL.}
              
              The first calling argument/parameter must be the
 	     \var{statsDFrame} data frame containing the data to be
-	     graphed. If the first argument/parameter is missing,
-	     NULL or NA or not a data frame, the function will stop.
+	     graphed. If the first argument/parameter is missing or NULL.
 	     Provide the correctly built \var{statsDFrame} and re-
-	     run. ***
+	     run. The data structure can not be a list, tibble, matrix, 
+	     array or simple vector variable.
             }
-          \item{0102}{\bold{CARG-DF The following sub-area(s) in the name table were not referenced 
-             in the user data> <not Used Sub-Areas> <}
+          \item{0102}{\bold{CARG-DF The First argument (\var{statsDFrame}) is not a 
+             data.frame structure.}
              
-             Each row in the \var{statsDFrame} data frame represents
-	     a sub-area (county, district, etc.) in a border group.
-	     The names of the sub-areas in the \var{statsDFrame}
-	     (either in a column or as the row.names) must match the
-	     names, abbreviations or IDs in the border group's name
-	     table.  This error message lists the names in the
-	     \var{statsDFrame} that do not match the name table.
-	     Correct the sub-area name in the data frame and re-run
-	     micromapST. micromapST will attempt to use the data for
-	     matching rows, but the overall results are un-
-	     predicatable and may not provide the
-             desired results. ***
-            }
-          \item{0103}{\bold{CARG-DF The \var{<sDFName>} statsDFrame data.frame has no columns or rows.}
+             The \var{statsDFrame} variable holding the data for each area
+             (county, district, etc.) in a border group is not a data.frame structure.
+             Each column represents a data variable to micromapST.  Each row represents
+             an area being mapped and charted.  The area location ids may be located 
+             as the data.frame row.names or in a data.frame column itself.
+	     The panelDesc structure uses the col1, col2, and col3 columns to specify
+	     which column in the \var{statsDFrame} should be used for the glyph.
+	     The sortVar and rowNamesCol call parameters use the statsDFrame column
+	     name or number to identify how to sort the graphics or where the area name is 
+	     located in the data.
+	   }
+          \item{0103}{\bold{CARG-DF The \var{<sDFName>} \var{statsDFrame} data.frame 
+             must have at least 1 or 2 columns.}
           
-             The <sDFName> data frame provided as the \var{<statsDFrame>} does not have any columns or 
-             rows.  It's empty. Provide a valid \var{<statsDFrame>} and re-run the function. *** 
+             The <sDFName> data.frame provided as the \var{<statsDFrame>} must have 
+             at least one column or two if the rowNameCol call parameter is specified. 
+             One data column must be provided and if the row.names feature in the 
+             data.frame is not used for the location id, then one additional column 
+             is required and the rowNameCol must be specified.
             }
           \item{0104}{\bold{CARG-DF There are duplicate entries in the \var{statsDFrame} data.frame. 
              Duplicate entires are ignored.}
@@ -277,14 +310,20 @@
       
         \describe{
           \item{0111}{\bold{CARG-PD The second call argument, the panelDesc structure, 
-             is missing or not a data.frame or list.}
+             is missing or NULL.}
           
              The second call argument/parameter is the \var{panelDesc} data frame.  
              Without this data frame, micromapST does not know which glyphs 
              to draw or where the supporting data is located in the \var{statsDFrame} 
              data frame. The data frame is missing, NULL, NA or is not a 
-             data frame structure.   Correct and re-run micromapST. 
+             data frame structure.   The data structure can not be a list, tibble, matrix or 
+             array variable.Correct and re-run micromapST. 
            }
+          \item{0112}{\bold{"CARG-DF The second argument, the panelDesc structure, is not a data.frame.}
+            The second argument in the micromapST call must be the panelDesc structure as a data.frame.
+            No other type of variable is acceptable.  Please correct the structure and retry.
+          
+           } 
           \item{0113}{\bold{CARG-PD The following named lists in the \var{<pDName>} panelDesc 
              data.frame are not valid: \var{<PDVarList>} }
 
@@ -390,6 +429,21 @@
              but R was not able to convert it from a character string into 
              an integer.  Check the value and re-run.
            }
+          \item{0126}{\bold{CARG-\option{<callArgName>} The call parameter contains more than one value.
+             Only the first value will be used.} 
+          
+             The call parameter <callArgName> can only use a single value. More than one value was
+             specified in the function call. Only the first value will be used. 
+           }
+          \item{0128}{\bold{CARG-RNC The rolNamesCol value specified does not exist. 
+             The row.names value will be used."}
+          
+             The value in the rowNamesCol call parameter is an invalid column name or 
+             number in the statsDFrame data.frame. Since it does not point to a column
+             with valid location IDs, the statsDFrame data.frame's row.names values will
+             be used.  The for an incorrect or out of range column number or a 
+             misspelled column names and retry.
+           }
          }
        }
       \item{015x}{\bold{\option{bordGrp} and \option{bordDir} parameter (BGBx):}
@@ -463,7 +517,11 @@
              filename exists in the \option{bordDir} directory and re-run. 
              Execution is stopped..
            }
-          \item{0160}{\bold{BGBG System error encountered when loading the border group. 
+          }
+         }
+        \item{01Mx}{\bold{Boundary datasets:}
+         \describe{   
+          \item{01M0}{\bold{BGBG System error encountered when loading the border group. 
              See error message:}
           
              The package attempted to load the user/private border group.  
@@ -472,35 +530,75 @@
              message indicator.  Inspect the file and resolve the R system load() error
              mesage and re-run.  Execution was stopped.
              
-             ??? Second line to message. ???
+             The second like of error message details the loading error issued by R.
            }
-           \item{0162}{\bold{BGBN After loading <bordGrp> border group data set, the following 
-             objects are missing: <MissBGObjects>}
-
-             The border group has been located and loaded into micromapST.  
-             However, the <MissBGObjexts> are missing and the border group can not be used.  
-             The border group must be rebuilt to include the missing objects.
+          \item{01M1}{\bold{The areaNamesAbbrsIDs (Name Table) is missing from the border group.
+            }
+            The border group must contain the name table (areaNamesAbbrsIDs) to be useful.  
+            Determine why the name table is missing and retry.
            }
-          \item{0164}{\bold{BGBG In the areaParms data.frame the Map.L2Borders has 
-             been set to FALSE, because no L2 level boundaries are available.}
-          
-             The border groups areaParms Map.L2Borders variable is set to TRUE 
-             to request the overprinting of level 2 boundaries on the maps.  
-             However, there is no L2VisBorders data.frame in the border group.  
-             The variable has been set to FALSE and no level 2 
-             boundaries will be drawn.
+          \item{01M3}{\bold{The areaVisBorders boundary data set is missing from the border group.
+            }
+            The border group must contain the boundary data for all of the areas in the name table.
+            In this case, the areaVisBorders data.frame containing the area boundary point is missing.
+            Determin why the table is missing and retry.
            }
-          \item{0166}{\bold{BGBG The areaParms variable aP_Regions is TRUE, 
-             but no regional boundaries exist in border group. Regions feature disabled.}
-             
-             This warning does not impact the creation of linked micromaps.  
-             If the caller wants to use the regions feature, then the border group 
-             must be corrected to provide the appropriate regional boundary information 
-             in the RegVisBorders data.frame in the border group.
+          \item{01M4}{\bold{The L3VisBorders boundary dataset is missing from the Border Group. 
+            }
+            The Level 3 (map outline) boundary table is an optional boundary points data.frame and 
+            is missing from the border group.  The package will disable 
+             drawing the L3 borders.
            }
+          \item{01M5}{\bold{The L2Borders is set to be drawn, but no L2 border data is present. 
+             L2 Feature disabled.
+            }
+            The L2VisBorders boundary point data.frame is missing from the border group when the 
+            L2Feature is enabled.  The L2Feature will be disabled.  If you require the L2 boundaries 
+            determine why the data.frame is missing and retry.
+           }
+          \item{01M6}{\bold{The RegBorders is set to be drawn, border data is not present. 
+             Reg Feature disabled.
+            }
+            The RegVisBorders boundary point data.frame is missing from the border group when the 
+            RegFeature is enabled.  The RegFeature will be disabled. dataRegionsOnly options is also
+            disabled.  If you require the Reg boundaries 
+            determine why the data.frame is missing and retry.
+           }
+          \item{01M7}{\bold{The L3VisBorders is NULL. Ploting the L3 outline is disabled.
+            }
+            The L3 boundary data found in the border group is empty.  The drawing of the L3 outline boundary
+            has been disabled.  This may be a normal situation and only needs attention if the L3 boundary data
+            was expected to be in the border group.  Correct the problem and recreate the border group.
+           } 
+          \item{01M8}{\bold{BGBN After loading <BorderGroupName> border group, the following optional objects are missing: <list of data.frames>
+            }
+            After loading the border group specified in the function call (<BorderGroupName>), the following optional objects (data.frames)
+            were missing in the border group:  <list of data.frames>.  These are optional and any use of them has been disabled.
+            If you need one of these boundary data.sets, contact the border group builder and determine why these data.frames were excluded.  The 
+            optional boundary data.frames are:  L3VisBorders, L2VisBorders, and RegVisBorders.
+           }
+          \item{01M9}{\bold{BGBN After loading <BorderGroupName> border group, the following critical objects are missing: <list of data.frames>
+            }
+            After loading the border group specified in the function call (<BorderGroupName>), the following critical objects (data.frames)
+            were missing in the border group:  <list of data.frames>.  These boundary data.frames are required for the micromapST package
+            to run.  The execution of the package has been stopped. 
+            Contact the border group builder and determine why these data.frames were excluded.  The 
+            optional boundary data.frames are:  areaVisBorders, areaNamesAbbrsIDs, and areaParms.
+           }
+          \item{01MA}{\bold{L2Border was requested, but the Name Table does not have a L2_ID column.  Disable drawing of L2.
+            }
+            The border group indicates a Level 2 boundary should be drawn where appropriate.  However, the name table 
+            does not have the L2_ID column to like the Level 2 boundaries to the basic areas.  Correct the border 
+            group's name table, rebuild the border group and try again.
+           }
+          \item{01MB}{\bold{Regional boundaries have been requested, but the Name Table has no regID column. The feature is disabled.
+           }
+           The border group indicates the Regional boundary and the regional mapping feature has been requested,
+           but the Name Table has no regID column.  This feature is disabled.         
+          }
          }
-       }
-
+        }
+      
       \item{017x}{\bold{\option{rowNamesCol} call argument (CARG-RNC):}
       
          To be able to link up the \var{statsDFrame} rows to sub-areas in the border 
@@ -514,32 +612,25 @@
          the name, abbreviation or ID of the sub-area.
          
         \describe{
-          \item{0171}{\bold{CARG-RNC The row names in column <rowNamesCol> of 
-             the \var{<statsDFrame>} data frame contain duplicates. Only one row per sub-area 
-             is permitted. Duplicate rows are: <listRowNames>.}
-          
-             The \var{statsDFrame} data frame contains rows with the same sub-area names.  
-             Only one row is allowed per sub-area. This error message contains 
-             a list of sub-area names that are duplicated.  The execution is stopped.
-             Correct the sub-area names associated with the rows involved and re-run.  
-             
-             **Note: a possible later work-a-round is to have the package delete 
-             duplicate rows from the data.frame and continue.**
-           }
-          \item{0172}{\bold{CARG-RNC The \option{rowNamesCol} argument value must be 
-             a character or numeric value. It was found to be: <class(\option{rowNamesCol})>.}
-          
-             Value provided in the \option{rowNamesCol} must ba a character string (column name) 
-             or a numeric/integer (column number).  Any other type of value is not acceptable 
-             and reported in this error message.  Execution is stopped since the sub-area names
-             in the \var{<statsDFrame>} data.frame cannot be located.
-           }
-          \item{0173}{\bold{CARG-RNC The \option{rowNamesCol} argument value must 
+         \item{0172}{\bold{CARG-RNC The \option{rowNamesCol} argument value must 
              have a length = 1. Only first value used.}
           
              The \option{rowNamesCol} value must have a length of 1 and should be a simple vector.
              Only one column can be specified to contain the sub-area names (row names.)  If more 
              then one value is provided, only the first value in the data will be used.    
+           }
+          \item{0174}{\bold{CARG The rowColNames is NA. The row.names values on the data.frame 
+             will be used.}
+             
+             The rowColNames value is NA.  It must be a valid statsDFrame column name.  The data in
+             the column must contact data that matches one of the location IDs in the Name Table.
+             When no rowColNames is specified, the row.names values on the statsDFrame data.frame 
+             are used as the location ID. 
+           }
+          \item{0175}{\bold{CARG The rowColNames value specified does not exist in the data.frame.  
+            The row.names values on the data.frame will be used.} 
+            
+            To be documented.
            }
          }
        }
@@ -560,7 +651,17 @@
          requests descending order.
          
         \describe{
-          \item{0186}{\bold{CARG-AS The \option{ascend} parameter is not a logical variable.  
+          \item{0181}{\bold{CARG-SV The \option{sortVar} parameter is not a numerical or character
+             vector variable.  Matrix, arrays, data.frames and tibbles are not supported. 
+             Will use the default of alpha sort on area names.
+            }
+
+            The \option{sortVar} call argument/parameter must be a numeric or character vector 
+            with a length less than with 3 values. The values must be valid indexes or names of 
+            columns in the statsDFrame data.frame supplied by the user.  Only a simple vector is supported.
+            Matrixes, arrays, data.frame and tibbles are not supported.
+           }
+           \item{0186}{\bold{CARG-AS The \option{ascend} parameter is not a logical variable.  
              Must be TRUE or FALSE.}
 
             The \option{ascend} call argument/parameter must be a logical vector with 
@@ -666,7 +767,7 @@
          name to be used in the ID glyph. The allowed values are \option{ab} and \option{full}.
          
         \describe{
-          \item{01B0}{\bold{CARG-PL Invalid \option{plotNames} argument value. The value 
+          \item{01B0}{\bold{CARG-PN Invalid \option{plotNames} argument value. The value 
              must be \option{ab} or \option{full}.}\cr
              The value of the \option{plotNames} call argument/parameter is not valid, 
              The value must be \option{ab} or \option{full}. The default value of 
@@ -833,8 +934,46 @@
           }
         }
        }
-       
-       
+      \item{01Hx}{\bold{Boundary datasets:}
+        \describe{
+         \item{01H0}{\bold{BDATA The areaVisBorders boundary data set is missing from the 
+            border group.}
+            
+            The \option{areaVisBorders} dataset must be available for micromapST to 
+            functions.  Please inspect the border group you are using and ensure
+            the dataset is present and valid.
+          }
+         \item{01H2}{\bold{BDATA The L3VisBorders boundary data set is missing from the 
+            border group.}
+            
+            The \option{L3VisBorders} dataset must be available for micromapST to 
+            functions.  Please inspect the border group you are using and ensure
+            the dataset is present and valid.
+          }
+         \item{01H4}{\bold{BDATA The L2VisBorders boundary dataset is missing from the 
+            Border Group. No L2 boundaries will be drawn.}
+            
+            The \option{L2VisBorders} dataset is an optional boundary dataset in the 
+            border group. It is missing and the L2 features in micromapST will 
+            be disabled.  If the Layer 2 feature are required, re-build the border group
+            and make sure the boundary dataset is included.
+          }
+         \item{01H6}{\bold{BDATA The RegVisBorders boundary dataset is missing from the 
+            Border Group. Region Feature Disabled.}\cr
+            
+            The \option{RegVisBorders} dataset is an optional boundary dataset in the 
+            border group. It is missing and the L2 features in micromapST will 
+            be disabled.  If the Layer 2 feature are required, re-build the border group
+            and make sure the boundary dataset is included.
+          }
+         \item{01H8}{\bold{BDATA The Level 3 boundary dataset is missing from the border group.}
+            
+            The Level 3 boundary  dataset must be available for micromapST to 
+            functions.  Please inspect the border group you are using and ensure
+            the dataset is present and valid.
+          }
+        } 
+       }
       \item{01Kx}{\bold{\option{colors} call argument (COLORS):}
       
         \describe{
@@ -945,7 +1084,7 @@
      For the map, mapcum, mapmedian, maptail and id glyphs there are no additional data 
      from the user and no additional validation is required.
 
-     For the arrow, bar, dot, dotsignif, dotse, dotconf, ctrbar, norbar, segbar, and scatdot 
+     For the arrow, bar, dot, dotsignif, dotse, dotconf, ctrbar, normbar, segbar, and scatdot 
      glyphs uses data in the \var{statsDFrame} data.frame and use the \var{col1}, \var{col2}, and \var{col3} named 
      lists for the panel column to identify the \var{statsDFrame} columns with the required data. 
      The \var{col1}, \var{col2}, and \var{col3} pointers are validated and the data in the \var{statsDFrame} data.frame 
@@ -953,7 +1092,7 @@
      to identify which \var{panelDesc} variable was validated.  1 = \var{col1}, 2 = \var{col2}, 3 = \var{col3}. 
      The name of the \var{panelDesc} named list is also included in the message.
 
-     For the segmented stacked bar glyphs (CTRBAR, SEGBAR, NORBAR), \var{col1} and \var{col2} specify 
+     For the segmented stacked bar glyphs (CTRBAR, SEGBAR, NORMBAR), \var{col1} and \var{col2} specify 
      the first and last \var{statsDFrame} column of the contiguous set of columns to use for 
      the data for the segment values/sizes.  The message related to the inspection 
      of these columns use the 3rd digit of the message number to indicate the relative column number, 
@@ -1008,35 +1147,12 @@
          The following warnings relate to the \var{panelDesc} variables in general:
          
         \describe{
-          \item{0200?????}{\bold{PDCOL The the \var{<pdVarName>} named list in the \var{<panelDesc>} structure has 
-             a type of \var{<pdVarName-Type>}. It must have a type of numeric, integer or character.}
-
-             The \var{<panelDesc>} variable indicated by \var{<pdVarName>} contains one or more negative numbers.  
-             The indexes to the \var{<statsDFrame>} data frame, but be positive from 1 up to the number of 
-             columns in the data frame.  Correct and re-run. **checked**
-             ***check***
-           }
-          \item{0201}{\bold{PDCOL In the \var{<pdVarName>} named list in the \var{<panelDesc>} panelDesc structure 
-             there are one or more negative values.}
-
-             The <glyph> determined the \var{<statsDFrame>} column number of \var{<PDColOrig>} in \var{<PDVar>} 
-             for glyph column \var{cc} has a zero or negative value.  It must be a positive integer no greater 
-             than the number of columns in the user provided \var{<statsDFrame>} data.frame.
-             ***check***
-           }
-          \item{0202}{\bold{PDCOL One or more of the values in the \var{<pdVarName>} named list in the \var{<panelDesc>} structure 
-             is greater than the columns in the \var{<statsDFrame>} data.frame: \var{<valList>}}
-
-             Some of the column numbers in the \var{<pdVarName>} named list in the \var{<panelDesc>} panelDesc structure 
-             have values greater than the number of columns in the \var{<statsDFrame>} data frame.
-             The <glyph> determined the \var{<statsDFrame>} column number of \var{<PDColOrig>} in \var{<PDVar>} for glyph column "cc"
-             The \var{col1}, \var{col2}, and \var{col3} panelDesc variables (named lists) are used to point to the 
-             data columns in the \var{<statsDFrame>} data.frame.  When provided as numbers, they must be in the 
-             range from 1 to the maximum number of columns in the \var{<statsDFrame>} data.frame.  
-           }
           \item{0205}{\bold{ <gNameList> The length of the glyph type list is 
              different the length of the variables list.}
-             ***  More Information to be provided later. ***
+             The number of glyph graphs indicated in the panelDesc$Type column is different than 
+             the number of data columns for each glyph variable (col1, col2, etc.)  Even if 
+             the data column is not used by the glyph, the variable columns all must be the same
+             length as the panelDesc$Type column.
            }
           \item{020A}{\bold{ <gName> <pdColNum> The first column name/number (<stColName1>) must 
              proceed the last column name/number (<stColName2>) in the <sDFName> data frame.}
@@ -1046,18 +1162,21 @@
              proceed the last column name/number (<stColName2>) in the <sDFName> data frame.}
              ***  More Information to be provided later. ***
            }
+          \item{02y0}{\bold{ <gName> <pdColNum> The first column name/number (<stColName1>) must 
+             proceed the last column name/number (<stColName2>) in the <sDFName> data frame.}
+             ***  More Information to be provided later. ***
+           }
           \item{02y1xx}{\bold{ <gName> <pdColNum> The number of segments is <value>. It must be 
              between 2 and 9. If over 9, only the first 9 will be used.}
              ***  More Information to be provided later. ***
            }
-          \item{02y2}{\bold{PDCOL <glyph> cc The column number of <PDColOrig> in <PDVar> 
-             is negative or zero. Must be a positive integer or the name of a column 
-             in \var{statsDFrame}.}
-             ***  More Information to be provided later. ***
-           }
-          \item{02y3}{\bold{PDCOL <glyph> cc The column number of \var{<PDColOrig>} in \var{<PDVar>} is greater 
-             than the number of columns in the \var{<statsDFrame>} data.frame.}
-             ***  More Information to be provided later. ***
+          \item{02y1}{\bold{PDCOL <glyph> cc The column name/number of <PDColOrig> in <PDVar>
+             does not exist in the statsDFname data.frame.
+             }
+             The column name or number of <PDColOrig> in <PDVar> does not exist as a column name in the 
+             statsDFrame data.frame, is a negative or zero valued integer, is not an integer, 
+             or is an integer with a value greater
+             then the number of columns in the statsDFrame data.frame. 
            }
          }
          It appears the "y" is the col"y" indicator and "cc" is the glyph column number.
@@ -1130,7 +1249,18 @@
              If this is an error, correct the data in the \var{statsDFrame} data.frame and re-run.
              ***check***
            }
-          \item{02yD}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
+          \item{02yC}{\bold{<glyph> cc The row numbers with missing data are: <list of row names>}\cr
+             The <list of row names> indicates which rows in the \var{statsDFrame}
+             data.frame provided by the user is missing data values, are NA, or "".
+             Inspect the supplied data and correct.
+
+             In the <glyph> for column \var{cc}, the data column in the user provided 
+             \var{statsDFrame} pointed to by the \var{<PDVarName>} \var{panelDesc} variable 
+             contains a \var{NA} value.  The glyph for that data row will not be drawn.
+             If this is an error, correct the data in the \var{statsDFrame} data.frame and re-run.
+             ***check***
+           }
+         \item{02yD}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
              data frame does not contain any data. Data vector has length of zero. \var{<usage>}}
 
             The \var{<statsDFrame>} data frame column \var{<stColName>} has a length of zero. If the \var{<statsDFrame>} 
@@ -1389,39 +1519,68 @@
         \bold{TS and TSConf specific processing:}
         
         \describe{   
-           \item{02T0}{\bold{TSxxxx-11 cc The time series array does not have rownames assigned to the 1st 
-              dimension. Data cannot be paired up with area.}
+           \item{02T1}{\bold{TSxxxx-15 cc The variable name specified in the panelData row does not exist.}
 
-                      ***  More Information to be provided later. ***
+              The name of the array containing the area information, the series and the point information
+              (X, Y, HighY and LowY) values does not exist.  The glyph will not be drawn.
+              Check for a misspelled variable or incorrect name and retry.
             }
            \item{02T2}{\bold{TSxxxx-02 cc The data structured passed in the panelData field is not an array. 
               Structure name = <dataNam>.}
 
-               ***  More Information to be provided later. ***
+               The data structure provided the additional information to construct the time series
+               graphs MUST be a 3 dimension array.  Any other type of structure is not acceptable.
+               
             }
-           \item{02T3}{\bold{TSxxxx-03 cc The time serial array's 1st dimension is not <numRows> sub-areas 
+           \item{02T3}{\bold{TSxxxx-03 cc The time serial array's 1st dimension is not <numRows> areas 
               to match statsDFrrame. It is <dimDArr[1]>.}
-              ***  More Information to be provided later. ***
+              
+              The time series array does have enough 1st dimensional values to match the number of rows
+              in the statsDFrame and the Name Table. 
             }
            \item{02T4}{\bold{TSxxxx-04 cc The time serial array's 2nd dimension must have at least 2 values 
               (time periods 2 to "n"). It is <dimDArr[2]>.}
 
-              ***  More Information to be provided later. ***
+              The time series must cover at least 2 or more time periods.  So, the 2nd dimension 
+              must have a dimension of at least 2.
             }
            \item{02T5}{\bold{TSxxxx-05 cc The time series array's 3rd dimension is not 4 values for TSConf 
               (X, Y, LowY and HighY). It is <dimDArr[3]>.}
 
-              ***  More Information to be provided later. ***
+              See note on message "02TA" below.
             }
            \item{02T6}{\bold{TSxxxx-06 cc The time series array's 3rd dimension must be 2 or 4. It is <dimDArr[3]>. 
               (TS: X & Y, TSCONF: X, Y, LowY, HighY.}
 
-              ***  More Information to be provided later. ***
+              See notes on message "02TA" below.
             }
-           \item{02T7}{\bold{TSxxxx-10 cc The time series array's 3nd dimension must be at least 2. (TS: X & Y)  
-              It is <dimDArr[3]>.}
+           \item{02T7}{\bold{TSxxxx-10 cc rowNames on array do not match area ID list. The bad area IDs are:
+               <List of Name Table Keys>.}                                     
 
-              ***  More Information to be provided later. ***
+              In processing the time series array, several location IDs cannot be found
+              in the Name Table.  They are listed in the <List of Name Table Keys> string.
+              Determine the reason for the incorrect values, correct and retry.
+            }
+           \item{02TA}{\bold{TSxxxx-12 cc The time series array\'s 3rd dimension must be at 
+              least 2.  It is <number>.}
+              
+              The 1st dimension represents the geographical areas of the Time Service.
+              The 2nd dimension represents the time of the observation (0 to "N").  The area's
+              points are sorted by the X value provided in the 3rd dimension.
+              The 3rd dimension of the array are is the observed value on the graph for the 
+              area at the time.  For standard TS graphs this is x and y values on the chart.
+              For a TS-conf graph, the 3rd dimension contains the x and y values and the 
+              confidence interval HighY and Low Y values.  Correct the content of the 3rd 
+              dimension and retry.
+            }
+           \item{02TB}{\bold{TSxxxx-14 cc The time series array does not have rownames (location IDs)
+              assigned to the 1st dimension. Data cannout be paired up with areas.}
+              
+              The row.names tied to the 1st dimension of the Time Series array are required
+              to be able to link each time series with it geographic area.  Make sure 
+              the values used for the 1st Dimension match the select type of location IDs in 
+              the Name Table.
+           
             }
          }
        }
