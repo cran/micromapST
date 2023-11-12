@@ -1,6 +1,6 @@
 \name{wflung00and95}
-\alias{wflung00and95}
 \docType{data}
+\alias{wflung00and95}
 \title{Lung cancer mortality data for white females, 2000-4 and 1995-9}
 \description{
 Counts and rates of age-adjusted (2000 U.S. standard) lung cancer mortality data among white women, aggregated for 1995-9 and 2000-4.

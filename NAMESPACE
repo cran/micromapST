@@ -4,23 +4,23 @@ export(micromapGSetDefaults)
 export(micromapGSetPanelDef)
 export(PlotVis)
 importFrom("utils",       "globalVariables","capture.output", "read.csv", "object.size", 
-    "data", "str", "head", "write.csv", "unzip") 
+    "data", "str",        "head",       "write.csv",   "unzip") 
 importFrom("methods",     "is")
-importFrom("tools",       "file_ext", "file_path_sans_ext")
-importFrom("graphics",    "arrows",  "axis",      "legend",   "lines", 
-    "par",     "points",  "polygon", "strheight", "strwidth", "title",  
-    "text",    "mtext",   "grid",    "abline",    "segments",
+importFrom("tools",       "file_ext",   "file_path_sans_ext")
+importFrom("graphics",    "arrows",     "axis",        "legend",      "lines", 
+    "par",     "points",  "polygon",    "strheight",   "strwidth",    "title",  
+    "text",    "mtext",   "grid",       "abline",      "segments",
     "plot",    "plot.new")
-importFrom("grDevices",   "rgb",     "col2rgb",  "adjustcolor", "xy.coords",  
-    "dev.new",            "dev.off", "pdf",      "png",      "colors",      
+importFrom("grDevices",    "rgb",        "col2rgb",    "adjustcolor", "xy.coords",  
+    "dev.new",             "dev.off",    "pdf",        "png",         "colors",      
     "gray", "grey")
-importFrom("stats",     "qnorm",  "aggregate")
+importFrom("stats",        "qnorm",      "aggregate")
 importFrom("RColorBrewer", "brewer.pal")
-importFrom("stringr",  "str_trim", "str_split",  "str_sub",    "str_replace", 
-    "str_replace_all", "str_pad",  "str_locate", "str_squish", "str_to_upper",   
+importFrom("stringr",      "str_trim",   "str_split",  "str_sub",     "str_replace", 
+    "str_replace_all",     "str_pad",    "str_locate", "str_squish",  "str_to_upper",   
     "str_to_lower")
-importFrom("labeling","wilkinson",  "extended")
-importFrom("readxl",  "read_xls",   "read_xlsx")
+importFrom("labeling",     "wilkinson",  "extended")
+importFrom("readxl",       "read_xls",   "read_xlsx")
 importFrom("writexl", "write_xlsx")
 importFrom("sf",      "st_geometry",     "st_shift_longitude", "st_is_longlat", 
     "st_transform",   "st_drop_geometry","st_as_sf",           "st_as_sfc",

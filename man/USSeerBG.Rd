@@ -1,6 +1,6 @@
 \name{USSeerBG}
-\alias{USSeerBG}
 \docType{data}
+\alias{USSeerBG}
 \title{USSeerBG border group datasets to support use with U.S. 20 Seer areas/registries}
 \description{
   The \var{micromapST} function has the ability to generate linked micromaps for 
@@ -40,7 +40,7 @@ The \var{USSeerBG} border group dataset contains the following data.frames:
    }
 
 The Seer Registries border group contains 20 Seer Registry sub-areas.  
-Each registry has a row in the ]var{areaNamesAbbrsIDs} data.frame and 
+Each registry has a row in the \var{areaNamesAbbrsIDs} data.frame and 
 a set of polygons in the areaVisBorders data.frame datasets.
 
 Regions are defined in this border group as the 4 census regions 

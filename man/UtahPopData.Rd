@@ -1,6 +1,6 @@
 \name{UtahPopData}
-\alias{UtahPopData}
 \docType{data}
+\alias{UtahPopData}
 \title{Test data for the Utah state border Group}
 \description{
 This dataset contains the Utah county populations for each year from 1940 to 2011.

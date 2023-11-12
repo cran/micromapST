@@ -1,6 +1,6 @@
 \name{SeoulPopData}
-\alias{SeoulPopData}
 \docType{data}
+\alias{SeoulPopData}
 \title{Test data for the Seoul South Korea city district border Group}
 \description{
 This dataset contains the 2012 population and area data for each of the 

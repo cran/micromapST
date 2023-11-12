@@ -1,6 +1,6 @@
 \name{ChinaBG}
-\alias{ChinaBG}
 \docType{data}
+\alias{ChinaBG}
 \title{ChinaBG border group datasets to support creating micromaps for the 32 providences
 and municipalities in the country of Republic of China}
 \description{  

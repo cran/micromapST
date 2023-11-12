@@ -1,6 +1,6 @@
 \name{MarylandBG}
-\alias{MarylandBG}
 \docType{data}
+\alias{MarylandBG}
 \title{MarylandBG border group datasets to support creating micromaps for the 24
 counties in the state of Maryland}
 \description{

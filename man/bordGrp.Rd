@@ -1,4 +1,5 @@
 \name{bordGrp}
+\docType{data}
 \alias{bordGrp}
 \alias{areaParms}
 \alias{areaNamesAbbrsIDs}
@@ -6,8 +7,6 @@
 \alias{L2VisBorders}
 \alias{RegVisBorders}
 \alias{L3VisBorders}
-
-\docType{data}
 
 \title{Defining different spatial areas for Linked Micromap using
    the micromapST package}
@@ -39,80 +38,81 @@
  bordDir="c:/SavedBorderGroups"
 
  Each border group contain six (6) datasets by the same
- data.frame names. This allows the micromapST package the ability
- to quickly load a particular border group and create the
- requested micromaps. The five data.frames are: areaParms,
- areaNamesAbbrsIDs, areaVisBorders, L2VisBorders, RegVisBorders,
- and L3VisBorders. Since the same data.frame names are reused in
- each border group, the R lazyload feature is disabled in the
- package.
+ data.frame names. This allows the micromapST package the 
+ ability to quickly load a particular border group and 
+ create the requested micromaps. The five data.frames are: 
+ areaParms, areaNamesAbbrsIDs, areaVisBorders, L2VisBorders, 
+ RegVisBorders, and L3VisBorders. Since the same data.frame 
+ names are reused in each border group, the R lazyload 
+ feature is disabled in the package.
 
  The following describes the purpose and structure of each
  data.frame in the border group dataset:
  \describe{
-   \item{areaParms}{ - contains specific parameters and
+   \item{\option{areaParms}}{ - contains specific parameters and
      operational information for the border group
     }
-   \item{areaNamesAbbrsIDs}{ - containing the names (full text),
-     name abbreviations, wildcard string for name matching,
-     alternate name abbrevations, regional (Level 2) association
-     of the sub-area, and a numerical identifier for the sub-area
-     in the border group area.  If the border group is for a
-     state, the sub-areas would be the counties within the state.
-     If the border group is for a continent, then the sub-areas
-     are the countries on the continent. If the border group is
-     for a country like the United States, then the sub-areas are
-     the administrative sub-areas (like states, provinces,
-     special administrative areas, or cities) within that
-     country.
+   \item{\option{areaNamesAbbrsIDs}}{ - containing the names 
+     (full text), name abbreviations, wildcard string for name 
+     matching, alternate name abbrevations, regional (Level 2) 
+     association of the sub-area, and a numerical identifier 
+     for the areas in the border group.  If the border group 
+     is for a state, the areas would be the counties within 
+     the state.  If the border group is for a continent, then 
+     the areas are the countries on the continent. When the 
+     border group is for a country like the United States, 
+     then the areas are the administrative areas (like states, 
+     provinces, special administrative areas, or cities) 
+     within that country.
     }
-   \item{areaVisBorders}{ - the boundary point lists for each
-     sub-area in the border group area.
+   \item{\option{areaVisBorders}}{ - the boundary point lists 
+     for each area in the border group.
     }
-   \item{L2VisBorders}{ - when a border group needs to have an
-     intermediate set of boundaries drawn for clearity, the
-     border group can provide the package a layer 2 set of
-     boundaries via the \var{L2VisBorders} data.frame. The
-     structure consists of the boundary information (point lists)
-     of these areas and associated keys. Each sub-area is linked
-     to it's L2 boundary via the \var{L2_ID} variable (column) in
-     the name table (\var{areaNamesAbbrsIDs} data.frame. At this
-     time only the U. S. Seer Registry border group uses the L2
-     boundary overlays.  It uses L2VisBorders to draw the
-     boundaries of U. S. States around Seer Registries within a
-     state. The \var{areaParms$Map.L2Borders} variable in the
-     border group must be set to \var{TRUE} for the package to
-     draw the layer 2 boundaries. If a border group does not use
-     an intermediate level outline, L2VisBorders should be set to
-     L3VisBorders or NA and the \var{areaParms$Map.L2Borders}
-     variable set to FALSE. In this case, no L2 boundaries are
-     drawn.
+   \item{\option{L2VisBorders}}{ - when a border group needs 
+     to have an intermediate set of boundaries drawn for 
+     clearity, the border group can provide the package a 
+     layer 2 set of boundaries via the \var{L2VisBorders} 
+     data.frame. The structure consists of the boundary 
+     information (point lists) of these areas and associated 
+     keys. Each area is linked to it's L2 boundary via the 
+     \var{L2_ID} variable (column) in the name table 
+     (\var{areaNamesAbbrsIDs} data.frame. At this time only 
+     the U. S. States and U. S. Seer Registry border group 
+     uses the L2 boundary overlays.  It uses L2VisBorders to 
+     draw the boundaries of U. S. States around Seer Registries 
+     within a state. The \var{areaParms$Map.L2Borders} variable 
+     in the border group must be set to \var{TRUE} for the 
+     package to draw the layer 2 boundaries. If a border group 
+     does not use an intermediate level outline, L2VisBorders 
+     should be set to L3VisBorders or NA and the 
+     \var{areaParms$Map.L2Borders} variable set to FALSE. 
+     In this case, no L2 boundaries are drawn.
     }
-   \item{RegVisBorders}{ - when the border group wants to work
-     with the sub-areas on a regional basis, the \var{regID}
-     variable in the name table (\var{areaNamesAbbrsIDs}), the
-     \var{RegVisBorders} boundary information data.frame, and the
-     \var{areaParms$aP_Regions} are used to enable the feature
-     and provide the information to map only regions of sub-areas
-     and overlay areas with regional boundaries highlights. When
-     the \option{regions} call parameter is set to \var{TRUE} and
-     the selected border group has the \var{areaParms$aP_Regions}
-     set to \var{TRUE}, the package will scan the data provided
-     by the caller and determine which regions are being
-     referenced and which are not.  The package uses the
-     \var{regID} variable in the name
-     table(\var{areaNamesAbbrsIDs}) to associate a sub-area with
+   \item{\option{RegVisBorders}}{ - when the border group 
+     wants to work with the areas on a regional basis, the 
+     \var{regID} variable in the name table (\option{areaNamesAbbrsIDs}), 
+     the \option{RegVisBorders} boundary information data.frame, 
+     and the \var{areaParms$aP_Regions} are used to enable the 
+     feature and provide the information to map only regions 
+     of areas and overlay areas with regional boundaries 
+     highlights. When the \option{regions} call parameter is 
+     set to \var{TRUE} and the selected border group has the 
+     \var{areaParms$aP_Regions} set to \var{TRUE}, the package 
+     will scan the data provided by the caller and determine 
+     which regions are being referenced and which are not.  
+     The package uses the \var{regID} variable in the name
+     table(\option{areaNamesAbbrsIDs}) to associate a area with
      a region and as a key into the \var{RegVisBorders}
      data.frame to draw the region boundaries. Any region not
-     containing data and any L2 area and sub-areas within those
+     containing data and any L2 area and areas within those
      regions will not be drawn. If a border group does not use
-     the regions feature the \var{RegVisBorders} data.frame in
+     the regions feature the \option{RegVisBorders} data.frame in
      the border group should be set to the L3VisBorders
      data.frame or NA and the \var{areaParms$aP_Regions}
      variablel set to \var{FALSE}. This will disable the regions
      feature for the border group.
     } 
-   \item{L3VisBorders}{ - the boundary point list for an outline
+   \item{\option{L3VisBorders}}{ - the boundary point list for an outline
      of the entire geographica area referenced by the border
      group.   For the U.S. or a country border group, this is the
      outline of the country. For a state border group like
@@ -129,7 +129,7 @@
   This section provide the data frame structural details of each
   of data.frame and variables in the border group dataset.  
   \describe{
-    \item{areaParms data.frame}{ The \var{areaParms} data.frame
+    \item{areaParms data.frame}{ The \option{areaParms} data.frame
       contains specific information about and in support of its
       border group. It provides column headers for the map and id
       glyphics and controls several features that related to
@@ -188,7 +188,8 @@
 	  regional information ignored.  \cr
 	  The \var{RegVisBorders} should still exist, but should
 	  be set to equal the \var{L3VisBorders} 
-	  data.frame. The \option{regions} call parameter will 
+	  data.frame. 
+	  The \option{regions} call parameter will 
 	  be ignored. As an example: In the USStatesBG and 
 	  USSeerBG border groups,
 	  the regions are set up using the 4 U. S. census regions
@@ -371,7 +372,18 @@
 	 group is fully constructed, the \var{Link} field is not
 	 use.
         }
-       \item{MapLabel}{- when a sub-area is moved or enlarge on a
+       \item{MapL, MapX, and MapY}{These three columns have replaced
+         the MapLabel column outlined below.  The MapL column
+         provides the label to be drawn at the coordinates provided 
+         for the area.  Only a few areas should require labels.  
+         To many labels will make the map unreadable in a linked 
+         micromap.  The MapX and MapY columns in the name table 
+         provide the x and y coordinates for the label on the map.
+         The coordinates are in the same units as the boundary 
+         coordinates used.
+        } 
+       \item{MapLabel}{(The use of this column has been retired.)
+         When a area is moved or enlarge on a
 	 map for better visibility, it may not be clear to the
 	 user what sub-area is being represented.  In the U. S.
 	 border groups, the states of Alaska, Hawaii and the
@@ -394,26 +406,25 @@
         }
        }
      }
-    \item{areaVisBorders, L2VisBorders, RegVisBorders, and
-	L3VisBorders}{There are four boundary \cr
-	dataset - The boundaries of the areas being micromapped 
-	(counties) are in areaVisBorders. The boundaries of 
-	an intermediate	level (2) for general orientation 
-	are in L2VisBorders. The boundaries of regional 
-	areas for highlight overlays
-	and regional only mapping and are in RegVisBorders. The
-	boundaries of the an outline of the entire mapping area
-	is in L3VisBorders. \cr
+    \item{areaVisBorders, L2VisBorders, RegVisBorders, and 
+        L3VisBorders}{There are four boundary dataset - The boundaries 
+        of the areas being micromapped (counties) are in areaVisBorders. 
+	The boundaries of an intermediate level (2) for general 
+	orientation are in L2VisBorders. The boundaries of regional 
+	areas for highlight overlays and regional only mapping and 
+	are in RegVisBorders. The boundaries of the an outline of 
+	the entire mapping area is in L3VisBorders. 
 
-      These four data.frames contain the boundary point lists for
-      the area, regions and sub-areas. The L2VisBorders,
-      RegVisBorders, and L3VisBorders data.frames are used to
-      outline groups of sub-areas, regions of the area and the
-      entire area. The areaVisBorders data.frame contains the
-      point lists for each sub-areas and are keyed to the name
-      table (\var{areaNamesAbbrsIDs}).
+        These four data.frames contain the boundary point lists for
+        the areas, regions and total map space. The L2VisBorders,
+        RegVisBorders, and L3VisBorders data.frames are used to
+        outline groups of areas, regions of the area and the
+        entire space. The areaVisBorders data.frame contains the
+        point lists for each sub-areas and are keyed to the name
+        table (\var{areaNamesAbbrsIDs}).
      
-      The data structure for each of the following four boundary data.frames is:
+        The data structure for each of the following four boundary
+        data.frames is:
 
           seq Key  x      y      hole
             

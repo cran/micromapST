@@ -1,6 +1,6 @@
 \name{SeoulSKoreaBG}
-\alias{SeoulSKoreaBG}
 \docType{data}
+\alias{SeoulSKoreaBG}
 \title{Seoul South Korea border group datasets to support creating micromaps for the 25 districts 
 in the Korean city of Seoul.}
 \description{

@@ -1,6 +1,6 @@
 \name{wmlung5070}
-\alias{wmlung5070}
 \docType{data}
+\alias{wmlung5070}
 \title{
   Lung cancer mortality data for white males, 
   1950-69 and 1970-94

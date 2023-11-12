@@ -1,7 +1,7 @@
 \name{UKIrelandPopData}
+\docType{data}
 \alias{UKIrelandPopData}
 \alias{UKIrelandPopData2}
-\docType{data}
 \title{Test data for the UK-Ireland border Group}
 \description{
 The UKIrelandPopData and UKIrelandPopData2 datasets contain the county populations and area statistics for the UK and Ireland..

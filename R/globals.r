@@ -191,8 +191,10 @@ utils::globalVariables(c(
             # functions
                 "GetMColors",         "mchr",               "masc",               "NewCounter",
                 "PlotVis",            "Plotsf",             "is.between.r",       "is.between",
-                "errCntMsg",          "stopCntMsg"
+                "errCntMsg",          "stopCntMsg",         "TS_Date",            
+                "ClnStr",             "ClnStr2"
                 
+           
                 ), add=TRUE)
 
 #
@@ -553,10 +555,6 @@ PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
     #print(par("pin"))    # plot in inches
     #print(par("usr"))    # plot in user scale
      
-    #Asp          <- diff(yLim)/diff(xLim)   # get aspect ratio (y/x) of map.
-    #cat("PlotVis: xLim:",xLim,"  yLim:",yLim,"  Asp:",Asp,"\n")
-    
-    
     # polygon function steps to the next color on each "NA" ending
     # a polygon in the data.frame.  Since multtiple polygons 
     # can make up an area, logic must be added to get 
@@ -572,12 +570,6 @@ PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
     # Draw the VisBorder using the polygon function for the group/row.
     # The entire VisBorder data.frame can be drawn with 
     # one polygon function call.
-    #xl <- length(VisBrd$x)
-    #yl <- length(VisBrd$y)
-    #ku <- unique(VisBrd$Key[is.na(VisBrd$x)])
-    #kul <- length(ku)
-    ##cat("xl:",xl,"  yl:",yl,"  ku:",ku,"  kul:",kul,"\n")
-    #Pomark <- is.na(VisBrd$x)
     
     graphics::polygon(VisBrd$x, VisBrd$y ,border="black", col=VisCol, lwd=xLwd)  
     

@@ -1,6 +1,6 @@
 \name{statePop2010}
-\alias{statePop2010}
 \docType{data}
+\alias{statePop2010}
 \title{US State Population for 2010}
 \description{
    US State 2010 population data by race and Hispanic ethnicity.

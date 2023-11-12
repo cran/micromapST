@@ -1,6 +1,6 @@
 \name{UtahBG}
-\alias{UtahBG}
 \docType{data}
+\alias{UtahBG}
 \title{UtahBG border group datasets to support creating micromaps for the 
 counties in the state of Utah}
 \description{

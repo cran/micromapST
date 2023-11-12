@@ -1,15 +1,18 @@
 \name{BuildBorderGroup}
 \alias{BuildBorderGroup}
-\title{Building new border groups for special areas for Linked Micromap created 
-by the micromapST package}
+\title{Building new border groups for Linked Micromap created by the micromapST package}
 \description{
  The package's \var{micromapST} function created linked micromaps for 
  any geographic region. The information related to the selected 
- regions is provided \var{micromapST} via a \var{bordergrp} dataset
- that contains all of the operational information and the boundary 
- data in a single dataset.  The dataset consists of several data.frames
- of the boundary data and a name table to map the builder's location IDs to 
- the area's boundary data. The border groups were originally created 
+ regions is provided to the \var{micromapST} function via a \var{bordergrp} 
+ dataset.  This dataset contains all of the operational information, the 
+ needed boundary dataset and a name table required for \var{micromapST} to
+ draw the linked micromaps for the desired region of the world or elsewhere.
+ The dataset must contain the general information data.frame (areaParms), the 
+ area boundary data.frame (list of points for each area in the boundery) and 
+ a name table that provide the the "Name", "Abbr", and "ID" location names for 
+ each area in the boundary group.  The Name Table also assists in providing
+ the L2 and Regional features. The border groups were originally created 
  manually, one by one. \cr
  The \var{BuildBorderGroup} function is a compilation 
  of the learning from building past border groups. The function 
@@ -27,34 +30,38 @@ by the micromapST package}
  primary location identifiers. \cr
  In two special cases \var{micromapST} has been extended to support an 
  "Alt_Abbr" and an "Alias" form of the location identifiers.  The "Alt_abbr"
- form was added to handle geographic area that have two sets of commonly used 
- abbreviations.  The name table was expanded to contain both sets of abbreviations
- and allows the user of the border group to select the abbreviation that matches
- data frame location ids.  The "Alias" identifier was implement to handle a special case
- where the source of the statistical data did not use the accepted "Name" or 
- "Abbr" ids, but used a more generallized string.  To keep the matching as flexiable 
- as possible, a wildcard matching alias was introduced.  As each identifier in the data
- is examined, it is compared against the alias string with leading and traiing "*" matching
- character.  As long as the Alias strings are unique and do not appear in two data rows,
- the matching provide the link between the data and the geographical area. Over the past 
- 10 years, the source program has been changed many times, but the location id 
- label matches has continued to work.\cr
+ form was added to handle geographic area that have two sets of commonly 
+ used abbreviations.  The name table was expanded to contain both sets 
+ of abbreviations and allows the user of the border group to select the 
+ abbreviation that matches data frame location ids.  The "Alias" identifier 
+ was implement to handle a special case where the source of the statistical 
+ data did not use the accepted "Name" or "Abbr" location ids, but used 
+ a more generallized string.  To keep the matching as flexiable 
+ as possible, a wildcard matching alias was introduced.  As each 
+ identifier in the data is examined, it is compared against the alias 
+ string with leading and traiing "*" matching character.  As long as 
+ the Alias strings are unique and do not appear in two data rows,
+ the matching provide the link between the data and the geographical 
+ area. Over the past 10 years, the source program has been changed many 
+ times, but the location id label matches has continued to work.\cr
  The user created name table also provides additional information 
  regional identification and sub-setting of the map, and area labeling. 
  During the border group building process, the name table 
  The Name Table also provides parameters to the \var{BuildBorderGroup} 
- function to make specific modifications to areas. The modifications to areas 
- include shifting it location, scaling it size, and rotating the area. 
- These modifiers were used to scale Alaska to 35% of it's normal size and move it 
- to below California to reduce the size of the total map.  Hawaii was also moved 
- below the U. S. to reduce the total size of the map. \cr  
- The name table also allows the builder to assocate areas with regions in their map and 
- Level 2 border outlining. Check the \var{micromapST} documentation on 
- how the Level 2 and Region boundaries are to be used.  The most important 
- task the name table does is help provide the linkage between the rows in the user's
- data frames to the an area's collection of polygons from the shapefile.
- The Name Table also provide multiple location ids to allow the user to provide the 
- full formal name ("Name"), one of two abbreviates (if available), or the numerical ID 
+ function to make specific modifications to areas. The modifications to 
+ areas include shifting it location, scaling it size, and rotating 
+ the area. These modifiers were used to scale Alaska to 35% of 
+ it's normal size and move it to below California to reduce the size 
+ of the total map.  Hawaii was also moved below the U. S. to reduce 
+ the total size of the map. \cr  
+ The name table also allows the builder to assocate areas with regions 
+ in their map and Level 2 border outlining. Check the \var{micromapST} 
+ documentation on how the Level 2 and Region boundaries are to be used.  
+ The most important task the name table does is help provide the linkage 
+ between the rows in the user's data frames to the an area's collection 
+ of polygons from the shapefile.  The Name Table also provide multiple 
+ location ids to allow the user to provide the full formal name ("Name"), 
+ one of two abbreviates (if available), or the numerical ID 
  assigned to each area.\cr
  When the processing is completed, the user has a border group .RDA file 
  ready for use with \var{micromapST} with boundaries usable in the 
@@ -67,6 +74,11 @@ by the micromapST package}
  requested, ensures the +unit= parameter in the projection is set to 
  meters, The function performs the following steps to construct a border 
  group: may different spatial areas by using different border groups.
+ 
+ In Version 3.0.0 of the \var{BuildBorderGroup} function, the function was 
+ upgraded to retire and package functions from the rgdal, rgeos and 
+ maptools packages as of October 16th, 2023.  The spatial functions are 
+ not done by the "sf" package.
  
  The following describes the process of conconstructing a border group dataset:
   \itemize{
@@ -654,7 +666,7 @@ data.frame and variables in the border group dataset.
      }
 
     \item{areaVisBorders, L2VisBorders, RegVisBorders, and L3VisBorders}{There 
-        are four boundary dataset:
+        are four boundary dataset for each border group:
         The boundaries of the areas being micromapped (counties). (areaVisBorders)
         The boundaries of an intermediate level for general orientation. 
         (L2VisBorders)
@@ -762,10 +774,10 @@ data.frame and variables in the border group dataset.
     
     border groups.
     
-    In this version of \var{micromapST} a function is included 
-    \var{BuildBorderGroup} to assist the user in converting a 
-    shape file into their own borderGrp dataset for \var{micromapST}.  
-    Refer to the section on \var{BuildBorderGroup} for more details.
+    In this version of \var{micromapST} the \var{BuildBorderGroup} function
+    is included to assist the user in converting a shape file into  
+    their own borderGrp (Border Group) dataset for use with \var{micromapST}.  
+    This description contains the details on the operation of the function.
    }
 }
 \value{Path to the saved Border Group file.}
@@ -817,6 +829,9 @@ KYCoNT    <- as.data.frame(read_xlsx(KYNTname))
 spt1 <- Sys.time()
 cat("Time to get data and boundaries for Counties:",spt1-stt1,"\n")
 \dontrun{
+#
+#  building border group for all counties in Kentucky
+#
 stt2 <- Sys.time()
 # Build Border Group
 BuildBorderGroup(ShapeFile     = KYCoShp,
@@ -859,7 +874,9 @@ x <- dev.off()
 spt3 <- Sys.time()
 cat("Time to micromapST KY Co graph:",spt3-stt3,"\n")
 }   # end of dontrun.
+
 stt4 <- Sys.time()
+
 # Aggregate Kentucky Counties into ADD areas
 #
 # The regions in the Kentucky County Name Table (KYCoNT) are the ADD districts
@@ -908,8 +925,8 @@ cat("Time to aggregate KY ADDs from Cos:",spt4-stt4,"\n")
 stt5 <- spt4
 # Build Border Group
 
-BuildBorderGroup(ShapeFile       = KYADDShp,  # sf structure of shapefile of 
-                                         # combined counties into AD Districts
+BuildBorderGroup(ShapeFile       = KYADDShp,  
+        # sf structure of shapefile of combined counties into AD Districts
                  ShapeLinkName   = "regID",
                  NameTableFile   = "KY_ADD_NameTable.xlsx",
                  NameTableDir    = DataD,
@@ -925,8 +942,9 @@ spt5 <- Sys.time()
 cat("Time to build ADD BG:",spt5-stt5,"\n")
 stt6 <- spt5
 # Test micromapST
-KYADDData <- as.data.frame(readxl::read_xlsx(paste0(DataD,"KY_ADD_Population-2020.xlsx")),
-             stringsAsFactors=FALSE)
+KYADDData <- as.data.frame(readxl::read_xlsx(
+                            paste0(DataD,"KY_ADD_Population-2020.xlsx")),
+                           stringsAsFactors=FALSE)
 #
 KY_ADD_PD <- data.frame(stringsAsFactors=FALSE,
                  type=c("map","id","dot","dot"),
@@ -935,7 +953,8 @@ KY_ADD_PD <- data.frame(stringsAsFactors=FALSE,
                  col1=c(NA,NA,"DecC2020","Proj2030")
               )
 #
-KyTitle <- c("Ez23cx-KY Area Development Dist.","Pop 2020 and proj Pop 2023")
+KyTitle <- c("Ez23cx-KY Area Development Dist.",
+             "Pop 2020 and proj Pop 2023")
 OutPDF2 <- paste0(TempD,"Ez23cx-KY ADD Pop.pdf")
 
 grDevices::pdf(OutPDF2,width=10,height=7.5)

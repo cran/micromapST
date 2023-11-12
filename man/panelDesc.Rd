@@ -4,10 +4,10 @@
 \title{micromapST panel description data.frame structure }
 \description{
   The panelDesc data.frame provides the \var{micromapST} function with 
-  the information required to process the \var{statsFrame} data and panelData data.frames
+  the information required to process the \var{statsDFrame} data and panelData data.frames
   and to generate the required linked micromap plot.
   \cr
-  It specifies which columns in the \var{statsFrame} data.frame contain the data
+  It specifies which columns in the \var{statsDFrame} data.frame contain the data
   for each glyph column, the column types, labels, reference values and text, and when 
   more complex data is needed by a glyph (boxplot and time series) what the name of the data 
   structure..
@@ -28,18 +28,18 @@
      }
   The panelDesc data.frame (which does not have to be named "panelDesc", any name will do) 
   provides the means of defining how many columns to create, the type of glyph per column, 
-  where the data required by the glyph is located in the \var{statsFrame} (column number or name) 
-  or the name of a supplimental data structure when the glyph is boxplots or time series 
+  where the data required by the glyph is located in the \var{statsDFrame} (column number or name) 
+  or the name of a supplemental data structure when the glyph is boxplots or time series 
   (via the \var{panelData} list entry), the column titles, and the column's reference value and label
   for the link micromap generation.
   
   In the following description the term "AREA" represents the geographic unit being mapped 
-  and associated with data in the \var{statsFrame}.  The naming used must match the border group
+  and associated with data in the \var{statsDFrame}.  The naming used must match the border group
   specified.  If the border group of "USStatesDF" is used, the areas are U.S. States and DC and 
   51 data rows must be present.
   If the border group of "USSeerDF" is used, the areas are U.S. Seer areas as defined by NCI and 
   the number of data rows can be 9, 11, 13, 17 or 18.  In all cases, the abbreviations and names
-  defined in the border group dataset must be used in preparing the statsFrame and panelData structures.
+  defined in the border group dataset must be used in preparing the statsDFrame and panelData structures.
   
   \bold{Glyph Types}
   
@@ -81,9 +81,10 @@
          \item{dotsignf}{ - a dot for a single value with an indicator of its significants.}
          
          \item{ts}{ - a time series line for up to 30 sets "x" and "y" values for 
-         each area.} 
+         each area. The TS glyph can have X-Axis labels formated as numbers or dates.} 
          \item{tsconf}{ - a time series line for a up to 30 sets of "x", "y" and upper "y" 
-         and lower "y" values as a confidence interval band for each area.}  
+         and lower "y" values as a confidence interval band for each area. The TSConf glyph 
+         can have X-Axis labels formated as numbers or dates.}  
          
          \item{segbar}{ - a horizontal stacked (segmented) bar plot 
           starting at 0 for 2 to 9 bars.}
@@ -116,10 +117,10 @@
     
   Depending on the type of glyph selected for the column, 1 to 3 data 
   values for each area may be required:  The \var{col1}, \var{col2} and 
-  \var{col3} vectors serve as indexes to columns in the \var{statsFrame} 
+  \var{col3} vectors serve as indexes to columns in the \var{statsDFrame} 
   data.frame passed in the arguments of the \var{micromapST} function call.  
   The values can be either the numeric number of the row in 
-  \var{statsFrame} data.frame or the column name.  
+  \var{statsDFrame} data.frame or the column name.  
   If no index is required, the entry should be set to \var{NA}.
   
   If the glyph requires one value, then only the \var{col1} index is 
@@ -128,10 +129,10 @@
   and the \var{col3} index is set to \var{NA}, if present.
   If 3 values are required, then \var{col1}, \var{col2}, and \var{col3} indexes are used.
   
-  The \var{statsFrame} column indexes can be provided as an integer 
+  The \var{statsDFrame} column indexes can be provided as an integer 
   or the column name.  If the integer value is less than 1 or greater than  
-  the number of columns in \var{statsFrame} or a column name is used that does 
-  not exist in statsFrame, the \var{micromapST} function will stop and 
+  the number of columns in \var{statsDFrame} or a column name is used that does 
+  not exist in statsDFrame, the \var{micromapST} function will stop and 
   generate an error message.
 
   \tabular{llllll}{
@@ -222,7 +223,7 @@
   }
   
   The panelData data.frame is only used when a glyph requires more data per area than can be
-  provided by the \var{statsFrame} columns. Only glyphs using this vector are boxplots and time series.
+  provided by the \var{statsDFrame} columns. Only glyphs using this vector are boxplots and time series.
   
   In the case of the \option{boxplot} glyph, the boxplot function with plot=F is used to generate 
   the boxplot statistical details for each area. The name of the resulting list of 51 sets of boxplot 
@@ -230,10 +231,10 @@
   
   For the time series and time series with confidence interval, the glyphs require a 3 dimensional 
   array of data.  The first dimension ([\var{area},,]) represents the areas.  
-  The second dimension ([,t,]) ranges from 2 to \var{n}.  
+  The second dimension ([,\var{t},]) ranges from 2 to \var{n}.  
   There is no upper limit, but 200-250 samples is a practical limit.
   One for each data point. The third dimension ([,,\var{v}]) provides the values at 
-  data point var{t} for area \var{st}.  [,,var{1}] is the \var{x} axis value. 
+  data point \var{t} for area \var{st}.  [,,\var{1}] is the \var{x} axis value. 
   For time series, is usually 
   just the value 1 to \var{n} to order the \var{y} values. [,,\var{2}] is the median 
   \var{y} value. For time series with confidence intervals: [,,\var{3}] is 
@@ -305,10 +306,17 @@
        
         \item{ts}{ - a time series line plot for each area. 
          The glyph use the \var{panelData} vector to get the name of a three (3) dimensional array 
-         the data for the plot. The array contains one entry per area, 1 to 30 data points 
+         the data for the plot. The array contains one entry per area, 1 to 30+ data points 
          and the \var{x} and \var{y} values.
          See section on \var{panelData} below for more details.  A reasonable upper limit to the
-         number of points is between 200-300.
+         number of points is between 200-300.  Only a few will be selected to be used as X-Axis labels.
+         The format of the X-Axis label is controled by the "xIsDate" attribute on the array being set to 
+         TRUE. If the "xIsDate" attribute is not set to TRUE, the X-Axis will be formated as numeric and axisScaling 
+         can be preformed.  If the "xIsDate" attribute is TRUE, the default date format 
+         of "%Y-%m" (YYYY-MM) will be used. If the number of days in the series is equal to 
+         or less than 90, a short date format will be used of "%b-%d" (MMM-DD).  
+         The x-axis date feature will override the specification of the axisScale call parameters
+         on time series glyph columns.
         }
         \item{tsconf}{ - a time series line and confidence interval 
          band for each area.   
@@ -317,14 +325,21 @@
          and the \var{x}, \var{y}, \var{lower y} and \var{upper y} values.
          See section on \var{panelData} below for more details.  A reasonable upper limit to the
          number of points is between 200-300.
+         The format of the X-Axis label is controled by the "xIsDate" attribute on the array.  
+         If the "xIsDate" is set to TRUE, the X-Axis values will be format using the default date format 
+         of "%Y-%m" (YYYY-MM). If the number of days in the series is equal to or less than 90, a short 
+         date format of "%b-%d" (MMM-DD) will be used. If the "xIsDate" attribute is missing or not equal to 
+         TRUE, the X-Axis will be formated as numeric and axisScaling can be preformed. 
+         The x-axis date feature will override the specification of the axisScale call parameters
+         on time series glyph columns.
         }
         
         \item{segbar}{ - a horizontal stacked (segmented) bar plot 
-         starting at 0 using data in the statsFrame data.frame.  The \var{col1} and 
+         starting at 0 using data in the statsDFrame data.frame.  The \var{col1} and 
          \var{col2} columns are used to indicate the first and last columns in the 
-         statsFrame data.frame that contain the contiguous bar segment values (lengths).
+         statsDFrame data.frame that contain the contiguous bar segment values (lengths).
          For example:  The data for a 5 segment bar glyph is in columns 4 through 8 in 
-         the \var{statsFrame} (5 columns). \var{col1} is set to 4 to identify the first column 
+         the \var{statsDFrame} (5 columns). \var{col1} is set to 4 to identify the first column 
          and \var{col2} is set to 8 to identify the last column in the sequence.  Column names 
          may be used, but the column identified in \var{col1} must preceed the column 
          identified in \var{col2}.
@@ -333,7 +348,7 @@
          each area by dividing the bar segment values by the sum of the 
          values for all of the bars.  The stacked bar plot for each area
          then ranges from 0 to 100\% (edge to edge).  The \var{col1} and \var{col2} columns 
-         are used to identify the first and last columns for bar data in the \var{statsFrame} 
+         are used to identify the first and last columns for bar data in the \var{statsDFrame} 
          in the same way as for the "segbar" glyph (see above.) 
         }
         \item{ctrbar}{ - a stacked bar plot where the bar segments are 
@@ -342,14 +357,14 @@
          the segments.  If there is an odd number of segments, the center is 
          the midpoint of the middle segment. The other segments are plotted 
          to the left and right of the center point. The \var{col1} and \var{col2} columns 
-         are used to indicate the first and last columns in the \var{statsFrame} 
+         are used to indicate the first and last columns in the \var{statsDFrame} 
          data.frame that contain the contiguous bar segment values. (See "segbar" type above for 
          more information.)
         }
         
         \item{scatdot}{ - a set of 51 points with an \var{x} and \var{y} value per area. All points 
          are plotted in each panel with the key areas in the panel highlighted. 
-         \var{col1} indicates \var{statsFrame} column containing the \var{x} values and 
+         \var{col1} indicates \var{statsDFrame} column containing the \var{x} values and 
          \var{col2} indicates the column containing the \var{y} values.
         }
       }
@@ -359,41 +374,41 @@
     }
     
     \item{\var{col1=}, \var{col2=}, \var{col3=}}{Vectors of index numbers 
-     or names of columns in \var{statsFrame} data.frame to be used as data for graphics. 
+     or names of columns in \var{statsDFrame} data.frame to be used as data for graphics. 
      The uses of these three vectors are defined below:
      \describe{
           \item{any "map" type, id, boxplots, ts, and tsconf}{glyphs do 
             not use the \var{col1}, \var{col2}, or \var{col3} vectors to locate data 
-            in the \var{statsFrame} data.frame. If these vectors are present, the 
+            in the \var{statsDFrame} data.frame. If these vectors are present, the 
             corresponding entires should be \code{NA} for the respective columns.
             }
            
            \item{dot}{uses \var{col1} to specify a single data column in 
-            \var{statsFrame} data.frame to be ploted.
+            \var{statsDFrame} data.frame to be ploted.
             }
            \item{bar}{uses \var{col1} to specify the data column in 
-            \var{statsFrame} data.frame for the length of the bar.  
+            \var{statsDFrame} data.frame for the length of the bar.  
             The data value can be positive or negative.
             }
            
            \item{dotse}{uses \var{col1} and \var{col2} to 
-            specify the data columns in \var{statsFrame} data.frame 
+            specify the data columns in \var{statsDFrame} data.frame 
             to be used as the estimate and standard error values, respectively.
             }
            \item{dotsignf}{uses \var{col1} and \var{col2} to specify the data columns
-            in \var{statsFrame} data.frame to be used as the value for the dot and
+            in \var{statsDFrame} data.frame to be used as the value for the dot and
             its associated P value.
             }
            \item{arrow}{uses \var{col1} and \var{col2} to specify 
-            the data columns in statsFrame data.frame 
+            the data columns in \var{statsDFrame} data.frame 
             for the beginning and end values of the arrow.
             }
            
            \item{segbar, normbar, ctrbar}{uses \var{col1} and \var{col2} to specify 
-            the first and last columns in the \var{statsFrame} data.frame.
-            The \var{statsFrame} data.frame columns from \var{col1} to \var{col2} 
+            the first and last columns in the \var{statsDFrame} data.frame.
+            The \var{statsDFrame} data.frame columns from \var{col1} to \var{col2} 
             are used for the length values of each bar in the glyph. \var{col1} must 
-            preceed \var{col2} in the \var{statsFrame} data.frame.
+            preceed \var{col2} in the \var{statsDFrame} data.frame.
             The minimum number of data columns is 2 columns with a maximum of 9 columns.
             }
            \item{scatdot}{uses \var{col1} and \var{col2} to 
@@ -402,7 +417,7 @@
             }
           
            \item{dotconf}{uses \var{col1}, \var{col2}, and 
-            \var{col3} to specify the data columns in \var{statsFrame} data.frame 
+            \var{col3} to specify the data columns in \var{statsDFrame} data.frame 
             for the estimate value, lower confidence interval, and upper confidence 
             interval values.
             }
@@ -463,8 +478,9 @@
       
       For the time series glyph (ts), the data must be a three (3) dimensional array.  
       The first dimension \code{[\var{st},,]} represent one entry for each area (1 to 51).  
-      The second dimension \code{[,\var{t},]} indexes up to 30 data points for the area.  
-      The third dimension \code{[,,\var{v}]} are the data point values.  \code{[,,var{1}]} is 
+      The second dimension \code{[,\var{t},]} indexes up to 30+ data points for the area.  
+      The third dimension \code{[,,\var{v}]} are the data point values at each data point.  
+      \code{[,,var{1}]} is 
       the \var{x} value and \code{[,,\var{2}]} is the median \var{y} value for the data point.  
       The rownames associated with the first dimension must be the area location ids used
       in the statsDFrame table to link the elements of this structure the presentation 
@@ -474,9 +490,22 @@
       \code{[,,\var{3}]} and \code{[,,\var{4}]} for the \var{lower y} and \var{upper y} values.
       
       For time series data, the order of the first dimension of the array must match the 
-      area order in the \var{statsFrame}.  For example, the data in \code{dataArray[\var{1},,]} is the 
-      the area identified in \code{statsFrame[\var{1},]}
-     }
+      area order in the \var{statsDFrame}.  For example, the data in \code{dataArray[\var{1},,]} is the 
+      the area identified in \code{statsDFrame[\var{1},]}
+     
+      The Date feature allows the caller to request the TS X-Axis labels be formated at dates.
+      This requires the data in the TS array has valid date data as the X data.  These are numbers
+      based on 1970-1-1 being day zero in the computer calendar.  There are many functions in R
+      to convert to and from characters and date variable.  In the past, before this feature, users 
+      had to do work-a-rounds by using year numbers or year and faction numbers.  Once you have inserted
+      the date X values into the array [,,1], modify the class of the array to add the "Date" class.
+      micrpmapST will inspect the array and find the "Date" class, flag it for internal operations and remove it.
+      The date format of "%Y-%m" (YYYY-MM) will be setup as the default format.  If the time series contains <= 90 days,
+      the date format will be changed to "%b-%d" (MMM-DD) to provide a more useful label.==-
+      The date feature is only available on the Time Series Glyphs.
+      
+      If axisScale is set to "s" or "sn", they will be ignored for any TS glyph using the date feature.
+      }
      
   } 
 }
@@ -484,7 +513,7 @@
 \details{
    The panelDesc data.frame is used to describe the content of the 
    micromapST plot to the function. It contains the index of the data 
-   in the \code{statsFrame} data.frame, the types of graphics to be used in
+   in the \code{statsDFrame} data.frame, the types of graphics to be used in
    each column, titles, column headers, reference values and labels, etc.
 }
 \author{Daniel B. Carr, George Mason University, Fairfax VA, with contributions from Jim Pearson and Linda Pickle of StatNet Consulting, LLC, Gaithersburg, MD}

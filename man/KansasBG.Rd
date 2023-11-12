@@ -1,6 +1,6 @@
 \name{KansasBG}
-\alias{KansasBG}
 \docType{data}
+\alias{KansasBG}
 \title{KansasBG border group datasets to support creating micromaps for the 105 counties 
 in the state of Kansas}
 \description{

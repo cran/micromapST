@@ -1,6 +1,6 @@
 \name{Educ8thData}
-\alias{Educ8thData}
 \docType{data}
+\alias{Educ8thData}
 \title{Education Survey of 8th Grade Proficiency in Math}
 \description{
    Math Proficiency Survey Results for 8th Graders in 2011 by State

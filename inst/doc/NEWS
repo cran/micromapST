@@ -1,5 +1,23 @@
-micromapST - Version 3.0.0 - Beta Pre-Release Version for Testing.
-Updated: August 8, 2023
+micromapST - Version 3.0.1 - 
+Updated: 11-08-2023
+
+Enhancements:
+1) Added the capability to display date labels for the x-axis
+   for TS and TS Conf glyph without complicating the 
+   user interface.
+   The X-Axis date label feature is triggered by the user setting 
+   the "xIsDate" attribute on the time series array to TRUE.
+   If the user wants to use a unique date format structure, they can
+   build a date format string according to the strptime R function 
+   data format variables.  The xIsDate attribute of the array
+   is then set to the string.
+2) micromapST code as been corrected to remove the conflict between 
+   when the time series date feature is used and the axisScale feature
+   specifies the "s" or "sn" options for the linked micromap graphic.
+   
+
+micromapST  Version 3.0.0 -
+Updated: 7-24-2023
 
 Enhancements:
 1) Removal of all references to the retiring packages (maptools, 
@@ -40,9 +58,6 @@ Enhancements:
    the corrected versions of these packages at a future time.  Until then,
    there will be a warning banner about the retired packages and features.
    
-   
-
-
 Fixes:
 1) Correction to the method used to find the centroid of the map 
    shapefile to the micromapST boundary files.  The original 
@@ -129,7 +144,6 @@ Fixes:
    with methods::is(xxx,"type") functions. Certain check stayed is. type calls:
    is.atomic, is.recursive, is.Color, is.between, which are more 
    functional checks.
-
 
 
 micromapST - Version 2.0.0 and Version 2.0.1

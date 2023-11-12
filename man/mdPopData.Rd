@@ -1,6 +1,6 @@
 \name{mdPopData}
-\alias{mdPopData}
 \docType{data}
+\alias{mdPopData}
 \title{Test data for the Maryland border Group}
 \description{
 This dataset contains the county populations for 1970, 1980, 1990, 2000, and 2010 and 

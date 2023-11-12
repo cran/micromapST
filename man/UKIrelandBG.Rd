@@ -1,6 +1,6 @@
 \name{UKIrelandBG}
-\alias{UKIrelandBG}
 \docType{data}
+\alias{UKIrelandBG}
 \title{UKIrelandBG border group datasets contains the boundary information for the United Kingdom and 
   Ireland.}
 \description{

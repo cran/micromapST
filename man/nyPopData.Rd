@@ -1,6 +1,6 @@
 \name{nyPopData}
-\alias{nyPopData}
 \docType{data}
+\alias{nyPopData}
 \title{Test data for the New York border Group}
 \description{
 This dataset contains the 2014 population and average income per person in each of the 

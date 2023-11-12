@@ -1,6 +1,6 @@
 \name{USStatesBG}
-\alias{USStatesBG}
 \docType{data}
+\alias{USStatesBG}
 \title{USStatesBG border group datasets to support use with U.S. States amd D.C. Areas}
 \description{
  The \var{micromapST} function has the ability to generate linked micromaps for 

@@ -1,6 +1,6 @@
 \name{KansPopInc}
-\alias{KansPopInc}
 \docType{data}
+\alias{KansPopInc}
 \title{Test data for the Kansas border Group}
 \description{
 This dataset contains the 2014 population and average income per person in each of the 

@@ -1,6 +1,6 @@
 \name{NewYorkBG}
-\alias{NewYorkBG}
 \docType{data}
+\alias{NewYorkBG}
 \title{NewYorkBG border group datasets to supports building micromaps for the 62 counties in the state of New York.}
 \description{
   The \var{micromapST} function has the ability to generate linked micromaps for 

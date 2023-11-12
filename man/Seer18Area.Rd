@@ -1,6 +1,6 @@
 \name{Seer18Area}
-\alias{Seer18Area}
 \docType{data}
+\alias{Seer18Area}
 \title{Test data for 18 U.S. Seer Registries (of 20) for general dot, arrow, and bar glyphics.}
 \description{
 Randomly generated statistics to create rate, count and population data for the

@@ -2,7 +2,7 @@
 \alias{micromapST-package}
 \docType{package}
 \title{A graphics package to easily and quickly create linked micromaps for a specified geographic collection of areas.}
-\description{(Beta Pre-Release Version)
+\description{
  The micromapST package provides a means of creating multiple column
  graphics representing data for a collection of geographic areas. The originally micromapST was limited
  to creating linked micromaps for each US 50 state and the District of Columbia. With this 
@@ -14,8 +14,8 @@
     \tabular{ll}{
       Package:  \tab micromapST\cr
       Type:     \tab Package\cr
-      Version:  \tab 3.0.0\cr
-      Date:     \tab 2023-08-08\cr
+      Version:  \tab 3.0.1\cr
+      Date:     \tab 2023-11-12\cr
       License:  \tab GPL-2\cr
       LazyLoad: \tab no\cr
     } 

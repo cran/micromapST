@@ -1,7 +1,7 @@
 ######
 #####
 #
-#  date: August 9th, 2023
+#  date: November 8, 2023
 #
 #  packages used by BuildBorderGroup function
 #
@@ -688,7 +688,11 @@
 #  2023-08-08 - It appears the sfdep package does not add any value to micromapST that spdep can 
 #               provide.  Swapped out the sfdep::st_continguity function call for the spdep::poly2nb
 #               function call.
-#               
+#  2023-11-09 - Corrected logic in checking the ShapeFile to NameTable links and if numeric properly
+#               replacing them with the default name of "NAME".
+#             - Corrected the MapHdr, ReducePC, IDHdr, MapMinH, MapMaxH call parameter checks
+#               to check for "missing" as well as null and na.  For na, any() added as insurance
+#               incase a vector or list back it through the validation checks.
 #
 #
 # 
@@ -697,7 +701,7 @@
 #       1) Load support libraries
 #               sf, sfdep, stringer, tools, utils, graphics,
 #               readxl, and writexl 
-# 	2) Verify all call parameters (pathes and ranges)
+#	2) Verify all call parameters (pathes and ranges)
 #       3) If checkPointReStart = TRUE is specified on the function call, 
 #          validate only the critial call parameters to allow the function 
 #          to restart the processing using the checkpointed data files and 
@@ -759,8 +763,8 @@
 #  the X, Y points, Key for the area, indicator is the polygon is a hole,
 #  and NA,NA values for the final X, Y point in a polygon.
 #
-#  Author:  James Pearson, StatNet Consulting, Gaithersburg MD 20877
-#  Updated: July 15th, 2023
+#  Author:  James Pearson, StatNet Consulting, Gaithersburg, MD 20877
+#  Updated  July 15th, 2023
 #
 #  Version:  1.1.0 (with package V2.0.2) updated nacol
 #
@@ -774,6 +778,9 @@
 #            sf, sfc, and sfg structure formats.  This change is required to remain
 #            on CRAN for distribution.
 #
+#  Version:  3.0.0 Tested release of 2.9.0
+#
+#  Version:  3.0.1 - correction of some call parameter checks.  
 #
 #####
 
@@ -806,7 +813,7 @@
 #######
 #####
 #
-#  Main Code Call - Version 3.0.0 - 2023-07-15
+#  Main Code Call - Version 3.0.1 - 2023-11-09
 #
 
 BuildBorderGroup <- function(
@@ -939,8 +946,8 @@ BuildBorderGroup <- function(
    #                      the function into an sf structure.  The shapefile name should not 
    #                      have any extensions included.  If ".shp", ".shx", ".dpf", and-or 
    #                      ".prj" extensions are present the extension will be removed for the 
-   #                      st_read layer parameter. Generally, no file extension should 
-   #                      be included.  
+   #			  st_read layer parameter. Generally, no file extension should
+   #			  be included.
    #                      The ShapeFileDir parameter is combined with the ShapeFile 
    #                      parameter and an extension of ".shp" to test if the shape 
    #                      file exists. The value cannot be NULL or NA_character_.
@@ -1445,7 +1452,7 @@ BuildBorderGroup <- function(
   
       if (!methods::is(x,"crs"))   {
          # value is not a crs class value.
-         if (!methods::is((x),"character")) {
+         if (!methods::is(x,"character")) {
             # not a character vector - error
             ErrFnd      <- errCntMsg(paste0("***3868 The proj4 value character vector is not a valid projection.\n",
                                             "        Must be a value acceptable to st_crs(). proj4 is ignored.\n"))
@@ -1505,7 +1512,7 @@ BuildBorderGroup <- function(
       #print(res)
        
       # it should be a crs or it is invalid
-      #cat("I got to the last half.. convertPROJ4 code 1458 \n")
+      #cat("I got to the last half.. convertPROJ4 code 1515 \n")
       return(res)
       
      }  # end of convertPROJ4 function
@@ -1576,14 +1583,14 @@ BuildBorderGroup <- function(
         #  this function is not dependent on the shift and really does not want the shift
         #  to be in effect.   The first st_union and st_make_valid are also used to revert.
         #
-        #cat("Entered AEAProjection Function Code 1529 .\n")
-        wsfc <- sf::st_geometry(wsf)
+	#cat("Entered AEAProjection Function Code 1586 .\n")
+	wsfc <- sf::st_geometry(wsf)
         
         suppressMessages(
            FullMap <- sf::st_make_valid(sf::st_union(wsfc))     # now one area
         )
         # need because of trying st_centroid on LL
-        #cat("Find centroid of full map Code 1536 \n")
+        #cat("Find centroid of full map Code 1593 \n")
         suppressWarnings(
             FullMapCtr    <- sf::st_coordinates(sf::st_centroid(FullMap))
         )
@@ -1663,7 +1670,7 @@ BuildBorderGroup <- function(
       #   name table.
       # 
       #
-      #cat("BuildVisBorder Function - for ",TypeVis," file. Code 1616 \n")
+      #cat("BuildVisBorder Function - for ",TypeVis," file. Code 1673 \n")
       
       #
       # This function takes a geometry and converts it into a VisBorder structure and returns
@@ -1761,7 +1768,7 @@ BuildBorderGroup <- function(
       
       VisForm2        <- VisForm
       VBnames         <- names(VisForm2)
-      #cat("VisForm column names:",VBnames,"\n")
+      #cat("VBForm column names:",VBnames,"\n")
       
       #str(VisForm2)
       #  Clean up the column names (x,y) # convert uppercase with lowercase
@@ -1784,7 +1791,7 @@ BuildBorderGroup <- function(
       #                                               and any others not needed.
       #str(VisForm2)
       
-      #cat("Now to remove duplicates. code 1737 \n")
+      #cat("Now to remove duplicates. code 1794 \n")
       
       VisForm3        <- as.data.frame(RemoveDups(VisForm2, TypeVis))
       Lft             <- dim(VisForm3)[1]
@@ -1848,7 +1855,7 @@ BuildBorderGroup <- function(
       oldX      <- VisB[1,"x"]
       oldY      <- VisB[1,"y"]
       oldVal    <- 1
-       
+
       KeepList <- rep(TRUE,lenVis)    # initialize the Keep list to all TRUE.
       
       #  Scan the rest of the points to the end of the data.frame  
@@ -1995,7 +2002,7 @@ BuildBorderGroup <- function(
    #
    dsatur <- function (x, coloring = NULL)   # D.Brelaz (1979) ACM
    {    #   x - adj matrix for the areas.
-       #cat("Enter Dsatur function Code 1948 \n")
+       #cat("Enter Dsatur function Code 2005 \n")
        adj_mat       <- x                 # get the adjaceny matrix
        #cat("dim of adj_mat:",dim(adj_mat),"\n")
        #cat("class of adj_mat:",class(adj_mat),"\n")
@@ -2020,7 +2027,7 @@ BuildBorderGroup <- function(
                    index_maximum_degree <- index_node
                }
            }
-           #cat("calling getNeighbors Code 1973 .\n")
+           #cat("calling getNeighbors Code 2030 .\n")
            neighbors = getNeighbors(adj_mat, index_maximum_degree)
            
            for (index_neighbor in neighbors) {
@@ -2275,6 +2282,7 @@ BuildBorderGroup <- function(
          
          # This printout is only done to PDF.   Build PDF filename and title.
          PDFTest          <- paste0(BGPathName,"Test Chart - ",PPTitle,".pdf")
+         Title            <- paste0("Test Chart - ",PPTitle)
          #cat("SamplePrt -> ",PDFTest,"\n")
          
          # open PDF file for output 
@@ -2331,9 +2339,9 @@ BuildBorderGroup <- function(
       
       #  its the debug=512 that doesn't...
       if (bitwAnd(debug,512) != 0) {
-      
-      	 #cat("SamplePrt - 512 bits ...\n")
-      
+
+         #cat("SamplePrt - 512 bits ...\n")
+         
          # Starting point for mcolors.
       	 # This printout is done to png or pdf
          # The image were also hard to work with.  So, they were all scaled up to about 4 x 4.
@@ -2379,7 +2387,7 @@ BuildBorderGroup <- function(
    #
    #####
 
-  
+
    #
    #  End of Common Functions
    #
@@ -2409,9 +2417,8 @@ BuildBorderGroup <- function(
        debug <- def_debug
    } else {
        if (!methods::is(debug,"numeric")) {
-          xmsg <- paste0("***3100 debug call parameter is not a numeric value. The default value\n",
-                         "        of ",def_debug," will be used.\n")
-          errCntMsg(xmsg)
+          ErrFnd <- errCntMsg(paste0("***3100 debug call parameter is not a numeric value. The default value\n",
+                         "        of ",def_debug," will be used.\n"))
           debug <- def_debug
        }
    }
@@ -2645,7 +2652,7 @@ BuildBorderGroup <- function(
   
       missingRegList <- xReqCParms[cmna]   # get list of missing required call parameters
       StopFlag       <- stopCntMsg(paste0("***3130 Required call parameters are missing : \n",
-                                          "        ",paste0(missingRegList,collapse=", ")," - execution stopped."))
+                                          "        ",paste0(missingRegList,collapse=", ")," - execution stopped.\n"))
    }
    
    #
@@ -2696,8 +2703,8 @@ BuildBorderGroup <- function(
        if (length(NameTableDir) != 1) {
           NameTableDir <- NameTableDir[[1]][1]   # get the first value.
        }
-       NameTableDir <- str_trim(NameTableDir)
-       if ( is.na(NameTableDir) || !methods::is(NameTableDir,"character") || 
+       NameTableDir <- stringr::str_trim(NameTableDir)                   # trim spaces.
+       if ( is.na(NameTableDir) || !methods::is(NameTableDir,"character") ||
             nchar(NameTableDir)<=0 ) {
           #   value is NA or not a character string.
           StopFlag   <- stopCntMsg(paste0("***3142 NameTableDir call parameter is an 'NA', Empty or not\n",
@@ -2725,7 +2732,7 @@ BuildBorderGroup <- function(
        }
    }
    
-   #cat("NTDir:",NTDir," 2677 \n")
+   #cat("NTDir:",NTDir," 2728 \n")
    callVL$NameTableDir <- NameTableDir
    callVL$NTDir        <- NTDir		    # with /
    callVL$NTDirValid   <- NTDirValid
@@ -2743,7 +2750,7 @@ BuildBorderGroup <- function(
       BGDir          <- paste0(NameTableDir,"/")     # with /
    } else {
       BorderGroupDir <- BorderGroupDir[[1]][1]  # get single item
-      BorderGroupDir <- str_trim(BorderGroupDir)
+      BorderGroupDir <- stringr::str_trim(BorderGroupDir)
       if ( is.na(BorderGroupDir) || !methods::is(BorderGroupDir,"character") || 
             nchar(BorderGroupDir) <= 0) {
          # BorderGroupDir set to NA, '' or not a character value. - use working directory
@@ -2766,13 +2773,13 @@ BuildBorderGroup <- function(
       
          if (!dir.exists(BorderGroupDir))  {
             # BorderGroupDir path does not exist.
-            #StopFlag  <- stopCntMsg(paste0("***3150 BorderGroup directory specified in the call parameter does not exist. Value=",BorderGroupDir))
+            #StopFlag  <- stopCntMsg(paste0("***3150 BorderGroup directory specified in the call parameter does not exist. Value=",BorderGroupDir,"\n"))
             # Create the path ---  This may become optional later.
             cat(paste0("***3150 BorderGroup directory specified in the call parameter \n",
                        "        does not exist. It will be created.\n",
                        "        Value is : ",BorderGroupDir,"\n"))
             dir.create(BorderGroupDir)
-            BGDir      <- paste0(BorderGroupDir,"/")	# with /
+            BGDir      <- paste0(BorderGroupDir,"/") # with /
             BGDirValid <- TRUE
             
          } else {
@@ -2797,7 +2804,7 @@ BuildBorderGroup <- function(
       StopFlag <- stopCntMsg(paste0("***3152 The required BorderGroupName call parameter is missing."))
    } else {
       BorderGroupName   <- BorderGroupName[[1]][1]
-      BorderGroupName <- str_trim(BorderGroupName)
+      BorderGroupName <- stringr::str_trim(BorderGroupName)
       if (!methods::is(BorderGroupName,"character") || is.na(BorderGroupName) || 
            nchar(BorderGroupName) <= 0 ) {
          StopFlag <- stopCntMsg(paste0("***3154 BorderGroupName is a 'NA', Empty or is not a character string.\n",
@@ -2831,7 +2838,7 @@ BuildBorderGroup <- function(
    callVL$BorderGroupName <- BorderGroupName
    callVL$BorderGroupPath <- BorderGroupPath
    
-   cat("Border Group will be written to:",BorderGroupPath,". \n")
+   cat("Border Group will be written to:",BorderGroupPath,"\n")
    
    if (StopFlag) {
       stop(paste0("***3999 Errors have been found and noted above.  Execution stopped.\n",
@@ -2887,10 +2894,10 @@ BuildBorderGroup <- function(
             NTable   <- NameTableFile
             NTPassed <- TRUE
          } else {
-            #cat("NT testing for non-character type 2833 \n")
-            if (methods::is(NameTableFile,"tbl")     || methods::is(NameTableFile,"list") || 
-                 methods::is(NameTableFile,"tbl_df") || methods::is(NameTableFile,"matrix") ||  
-                 methods::is(NameTableFile,"array")  || methods::is(NameTableFile,"numeric")) {
+            #cat("NT testing for non-character type 2890 \n")
+            if (methods::is(NameTableFile,"tbl")    || methods::is(NameTableFile,"list") || 
+                methods::is(NameTableFile,"tbl_df") || methods::is(NameTableFile,"matrix") ||  
+                methods::is(NameTableFile,"array")  || methods::is(NameTableFile,"numeric")) {
                 # all of the above are not allowed.
                 xmsg <- paste0("***3204 The name table passed to function on NameTableFile parameter\n",
                                "        is not a valid variable type:",paste0(class(NameTableFile),collapse=", ",sep=""),"\n")
@@ -2912,12 +2919,12 @@ BuildBorderGroup <- function(
                                         "        or file name must be provided.\n")
                      StopFlag <- stopCntMsg(xmsg)
                   } else {
-                     # strip off extention and see what type of file it may be.
+                     # strip off extention and see what type of file it may be. Also check for .RDA exists.
                      fnSplit       <- stringr::str_split(NameTableFile,"[.]")[[1]]   # split up user provided name.
                      # print(fnSplit)
                      NameTableFileBase <- fnSplit[1]    # base filename only
                      ##cat("FileBase:",NameTableFileBase,"\n")
-                     
+
                      if (nchar(NameTableFileBase) <= 0) {
                         # no filename base...  No characters
                         xmsg <- paste0("***3207 The NameTableFile parameter is empty. A name table structure\n",
@@ -2925,16 +2932,16 @@ BuildBorderGroup <- function(
                         StopFlag <- stopCntMsg(xmsg)
                      } else {
                         if (nchar(fnSplit[2])<=0 || is.na(fnSplit[2])) {
-                           # if no extension ("", " ", empty) or  NA 
+                           # if no extension (missing) - then add .csv
                            ErrorFlag      <- errCntMsg(paste0("***3208 File extension on name table filename is missing.\n",
                                                               "        Assuming .csv type.\n"))
                            NameExt        <- def_NameExt         #  "csv"
                            NameTableFile  <- paste0(NameTableFileBase,".",NameExt)    # make it a CSV file
-                           NameTableType  <- def_NameTableType   #  1 - (CSV)
+                           NameTableType  <- def_NameTableType   # 1 - (CSV)
                            NameTablePath  <- paste0(NameTableDir,"/",NameTableFile)
                            #cat("no extension - NameTableFile:",NameTableFile,"  NameTablePath:",NameTablePath,"\n")
                            
-                       } else {
+                        } else {
                            # if extension is present - must be .csv, .xls, .xlsx, or .RDA
                            #cat("Found file ext of ",fnSplit[2],".\n")
                            NameExt     <- stringr::str_to_upper(fnSplit[2])  # make uppercase so only have to match uppercase versions.
@@ -2944,8 +2951,8 @@ BuildBorderGroup <- function(
              
                            if (all(is.na(xm))) {   # nor VALID TYPE OF FILE - ERROR AND STOP
                               # error - extension must be .csv, .xls, .xlsx, .RDA or .RData.
-                              StopFlag <- stopCntMsg(paste0("***3209 The NameTable file is not a .csv, Excel, or R .RDA format. "))
-                  
+                              StopFlag <- stopCntMsg(paste0("***3209 The NameTable file is not a .csv, Excel, or R .RDA format.\n"))
+                           
                            } else {
                               # have valid match, XM is type (position in table above)
                               NameTableType <- xm
@@ -2956,11 +2963,11 @@ BuildBorderGroup <- function(
                               #  NameTableType is the type of file (1=CSV, 2&3=Speadsheet, 4=RDA)
                               NameTablePath <- paste0(NameTableDir,"/",NameTableFile)
                            }
-                           #cat("rebuild 2868 - Path:",NameTablePath,"\n")
+                           #cat("rebuild 2958 - Path:",NameTablePath,"\n")
                         }#
                      }
                   }
-               }     
+               }
             } ##
          }
       }
@@ -2980,11 +2987,11 @@ BuildBorderGroup <- function(
       } else {
          # NameTableLink can now be a multiple or singluar length variable.
          NameTableLink <- NameTableLink[[1]][1]   # get singular version
-         NameTableLink <- str_trim(NameTableLink) # trime blanks
+         NameTableLink <- stringr::str_trim(NameTableLink) # trim blanks
          
          if (!methods::is(NameTableLink,"character") || is.na(NameTableLink) || 
               nchar(NameTableLink) <= 0 ) {
-            # Name Table link is not a character value, is empty ('' or ' '), or NA
+            # NameTableLink is not a character value, is empty ('' or ' '), or NA
             xmsg <- paste0("***3212 The NameTableLink call parameter is an 'NA', Empty \n",
                            "        ('' or ' ') or not a character string. Fix and rerun.\n")
             stopCntMsg(xmsg)
@@ -2997,7 +3004,6 @@ BuildBorderGroup <- function(
       #####
       
       cat("***3215 Name Table Link column is:",NameTableLink,".  \n")
-      
 
       ######  322x messages - 322x - Binary Shape Files
       #
@@ -3014,7 +3020,7 @@ BuildBorderGroup <- function(
       
       if (is.null(ShapeFile) || missing(ShapeFile) ) {
       
-         StopFlag <- stopCntMsg(paste0("***3220 ShapeFile parameter has not been provided or is NA. "))
+         StopFlag <- stopCntMsg(paste0("***3220 ShapeFile parameter has not been provided or is NA.\n"))
            
       } else {
          # see if character string or binary structure (SPDF or sf).
@@ -3025,7 +3031,7 @@ BuildBorderGroup <- function(
             StopFlag <- stopCntMsg( paste0("***3220 ShapeFile parameter has not been provided or is NA. ") )
          } else {
             if (!methods::is(ShapeFile,"character")) {
-               # not a character string.   Assume it's binary
+               # not a character string (filename).   Assume it's binary
                #cat("ShapeFile parameter is not characters, check for sf or SPDF structure.\n")
          
                #  Binary Spatial Structure
@@ -3035,7 +3041,7 @@ BuildBorderGroup <- function(
          
                if (methods::is(ShapeFile,"sf")) {
                   # sf structure with header and all geometric rows
-                  #cat("***3221 ShapeFile is a sf structure.\n")
+                  #cat("***3221 ShapeFile is a sf structure passed as a call parameter.\n")
                   BinaryPassed <- TRUE
                   WorkSf01     <- ShapeFile
                
@@ -3043,7 +3049,7 @@ BuildBorderGroup <- function(
                   # check for SPDF structures
                   if (methods::is(ShapeFile,"SpatialPolygonsDataFrame")) {
                   
-                     #cat("***3222 ShapeFile is a SPDF structure.\n")
+                     #cat("***3222 ShapeFile is a SPDF structure passed as a call parameter.\n")
                      # it is either a SPDF.  In either case convert to sf.
                   
                      ShapeFile     <- sf::st_as_sf(ShapeFile)   # convert
@@ -3052,8 +3058,8 @@ BuildBorderGroup <- function(
                      
                   } else {   # - not missing or NULL, not NA, not binary or character???
                      StopFlag <- stopCntMsg( paste0("***3223 The ShapeFile call parameter is being used to pass a full \n",
-                                                    "        spatial structure to the function. However, the structure\n",
-                                                    "        must be a SPDF or a sf class. The data was:",class(ShapeFile),"\n"))
+                                                    "spatial structure to the function.\n",
+                                                    "        However, the structure must be a SPDF or a sf class. The data was:",class(ShapeFile),"\n") )
              
                   }
                }
@@ -3070,7 +3076,7 @@ BuildBorderGroup <- function(
                                                   "        or not a character string. The filename of the Shapefile\n",
                                                   "        must be specified. \n"))                                                 
                }
-               #cat("ShapeFile:",ShapeFile,"\n")
+               #cat("ShapeFile Name:",ShapeFile,"\n")
          
                # handle the problem callers may include extension.
                x <- tools::file_ext(ShapeFile)     # ext last 4 characters of shape file name.
@@ -3110,7 +3116,7 @@ BuildBorderGroup <- function(
                      # have NameTableDir
                      ShapeFileDir    <- NameTableDir                        # no ShapeFileDir provided, use Name Table Dir.
                   } else {
-                     # no NameTableDir - try using BorderGroupDir 
+                     # no NameTableDir - try using BorderGroupDir or binary structure.
                      if (nchar(BorderGroupDir) > 0 ) { 
                         # have border group Directory - use it.
                         ShapeFileDir <- BorderGroupDir
@@ -3122,10 +3128,11 @@ BuildBorderGroup <- function(
                      # because we are following the trail to a directory/filename, not binary.
                   }
                   # back filled with other directories
-               }      
+               }
+               
                # Have a ShapeFileDir.. 
                ShapeFileDir <- ShapeFileDir[[1]][1]   # pick up only the first value.
-               ShapeFileDir <- str_trim(ShapeFileDir) # trim blanks
+               ShapeFileDir <- stringr::str_trim(ShapeFileDir) # trim blanks
                
                if ( is.na(ShapeFileDir) || nchar(ShapeFileDir) <= 0 || !methods::is(ShapeFileDir,"character") ) {
                   # the Shape Directory is NA, empty ("" or " ") or not a character string,  force to use working directory
@@ -3176,9 +3183,7 @@ BuildBorderGroup <- function(
                #cat("ShapeFileDir:",ShapeFileDir,"  ShapeFilePath:",ShapeFilePath,"  Ext:",ShapeFileExt," \n")
                
             } # error or have binary or BINARYPASSED = FALSE
-            
-         } # NA check   
-
+         } # NA check
       } #  end Missing and NULL check
       callVL$ShapeFile      <- ShapeFile
       callVL$BinaryPassed   <- BinaryPassed
@@ -3205,9 +3210,8 @@ BuildBorderGroup <- function(
       #  If it is a filename, then it is read later and checked.
       
       ######
-      
-      
-     
+
+
       ######   323x  - Shape Link name
       #
       #  Part 2.3 - ShapeLinkName
@@ -3220,7 +3224,7 @@ BuildBorderGroup <- function(
       if (missing(ShapeLinkName) || is.null(ShapeLinkName) ) { 
          ShapeLinkName = def_ShapeLinkName   # the default.
          ErrorFlag  <- errCntMsg(paste0("***3230 The ShapeLinkName call parameter is missing. The default\n",
-                                        "        value of 'NAME' will be used."))
+                                        "        value of 'NAME' will be used.\n"))
       } else {
          # check length
          # ShapeLinkName is present
@@ -3234,14 +3238,15 @@ BuildBorderGroup <- function(
             ErrorFlag <- errCntMsg(paste0("***3232 ShapeLinkName value is 'NA'. The default of 'NAME' will be used.\n"))
          } else {
             if (!methods::is(ShapeLinkName,"character")) {
-               ErrorFlag  <- errCntMsg(paste0("***3234 ShapeLinkName is not a character string. Value is ",ShapeLinkName,". \n",
+               ShapeLinkName <- def_ShapeLinkName  # replace with default value.
+               ErrorFlag  <- errCntMsg(paste0("***3234 ShapeLinkName is not a character string. Value is ",ShapeLinkName,".\n",
                                               "        The default of 'NAME' will be used.\n"))
             }
          }
       }
        
       callVL$ShapeLinkName <- ShapeLinkName
-      cat("Shape file data.frame Link column name is ",ShapeLinkName,".  \n")
+      cat("Shape file data.frame Link column name is ",ShapeLinkName,".\n")
       
       #  End of Shape file
       #
@@ -3262,37 +3267,41 @@ BuildBorderGroup <- function(
       #
       #  Part 2.4 - MapHdr  
       # 
-      def_MapHdr <- c("","Areas")
-      def_MapHdr_v <- TRUE
+      def_MapHdr   <- c("","Areas")
+      def_MapHdr_v <- TRUE   # TRUE = set to def, FALSE = user provided base.
       #
      
-      if (is.null(MapHdr) ){
-         MapHdr <- c("","Areas")
+      if (missing(MapHdr) || is.null(MapHdr) ){
+         MapHdr    <- def_MapHdr
          
       } else {
          if (!methods::is(MapHdr,"character")) {
             # MapHdr strings are not characters
-            ErrorFlag <- errCntMsg(paste0("***3240 The MapHdr parameter does not contain character strings for \n",
+            ErrorFlag <- errCntMsg(paste0("***3240 The MapHdr parameter does not contain character strings for\n",
                                           "        use as the column headers. The MapHdr will be ignored.\n"))
+            MapHdr       <- def_MapHdr   
+            def_MapHdr_v <- TRUE
          } else {
             # MapHdr is characters, check length
             if (!methods::is(MapHdr,"vector")) {
-               errCntMsg(paste0("***3242 The MapHdr parameter must be a simple vector type. \n",
+               errCntMsg(paste0("***3242 The MapHdr parameter must be a simple vector type.\n",
                                 "        MapHdr is ignored.\n"))
                ErrorFlag <- FALSE
+               MapHdr       <- def_MapHdr   
+               def_MapHdr_v <- TRUE
             } else {
          
                if (length(MapHdr) == 1) {
                   if (!is.na(MapHdr)) {
                      # character = length = 1
-                     MapHdr <- c("",MapHdr)
+                     MapHdr       <- c("",MapHdr)
                      def_MapHdr_v <- FALSE
                   }
                } else {
                   if (length(MapHdr) > 2) {
                      ErrorFlag <- errCntMsg(paste0("***3244 The MapHdr parameter has zero or more than 2 elements. \n",
                                                    "       Only the first 2 will be used.\n"))
-                     MapHdr <- MapHdr[1:2]
+                     MapHdr       <- MapHdr[1:2]
                      def_MapHdr_v <- FALSE
                   } else {
                      # We have MapHdr - length of 2 and character.  
@@ -3300,7 +3309,7 @@ BuildBorderGroup <- function(
                         warning(paste0("***3246 It is suggested the max length of the MapHdr strings be\n",
                                        "        16 characters.\n"),call.=FALSE)
                      }
-                     def_MapHdr_v <- FALSE
+                     def_MapHdr_v    <- FALSE
                   }
                }
             }
@@ -3324,13 +3333,13 @@ BuildBorderGroup <- function(
       #
       MapMinH <- MapMinH[[1]][1]
       
-      if (is.null(MapMinH) || is.na(MapMinH)) {
+      if (missing(MapMinH) || is.null(MapMinH) || any(is.na(MapMinH))) {
          # empty parameter - use default 
          MapMinH         <- def_MapMinH
       } else {
          if (!methods::is(MapMinH,"numeric")) {
             # MapMinH strings are not characters
-            ErrorFlag    <- errCntMsg(paste0("***3251 The MapMinH parameter does not contain numeric value. \n",
+            ErrorFlag    <- errCntMsg(paste0("***3251 The MapMinH parameter does not contain numeric value.\n",
                                              "        Default Value is used.\n"))
             MapMinH      <- def_MapMinH    # Use default of a def_MapMinH
          } else {
@@ -3338,7 +3347,7 @@ BuildBorderGroup <- function(
             MapMinH      <- MapMinH[[1]][1]
             # Check to make sure its within range.
             if (MapMinH < MapMinMin || MapMinH > MapMinMax ) {
-               ErrorFlag <- errCntMsg(paste0("***3252 The MapMinH minimum height value is out of range \n",
+               ErrorFlag <- errCntMsg(paste0("***3252 The MapMinH minimum height value is out of range\n",
                                              "        (0.4 to 2.5 inch). The default will be used.\n"))
                MapMinH   <- def_MapMinH
             }
@@ -3358,14 +3367,14 @@ BuildBorderGroup <- function(
       #
       MapMaxH <- MapMaxH[[1]][1]
       
-      if (is.null(MapMaxH) || is.na(MapMaxH)) {
+      if (missing(MapMaxH) || is.null(MapMaxH) || any(is.na(MapMaxH))) {
          # empty parameter - use default 
          MapMaxH         <- def_MapMaxH
       } else {
          if (!methods::is(MapMaxH,"numeric")) {
             # MapMaxH strings are not characters
             ErrorFlag    <- errCntMsg(paste0("***3254 The MapMaxH parameter does not contain numeric value.\n",
-                                             "        Default Value is used."))
+                                             "        Default Value is used.\n"))
             MapMaxH      <- def_MapMaxH    # Use default of a def_MapMaxH
          } else {
             # Pick up only the first element of the variable
@@ -3409,14 +3418,14 @@ BuildBorderGroup <- function(
       def_IDHdr <- c(BGBase,"Areas")   # use the MapHdr as the default
       #
       
-      if (is.null(IDHdr) || (length(IDHdr)==1 && is.na(IDHdr)) ) {
+      if (missing(IDHdr) || is.null(IDHdr) || (length(IDHdr)==1 && any(is.na(IDHdr))) ) {
          # empty parameter - use the default values.)
          IDHdr     <- def_IDHdr
       } else {
          if (!methods::is(IDHdr,"character")) {
             # IDHdr strings are not characters
             ErrorFlag <- errCntMsg(paste0("***3261 The IDHdr parameter does not contain character strings\n",
-                                          "        for use as the column headers. \n"))
+                                          "        for use as the column headers.\n"))
             IDHdr     <- def_IDHdr
          } else {
             # IDHdr is characters, check length
@@ -3432,7 +3441,7 @@ BuildBorderGroup <- function(
                } else {
                   if (max(nchar(IDHdr)) > 12) {
                     warning(paste0("***3266 It is suggested the max length of the IDHdr strings\n",
-                                   "         be 12 characters.\n"), call.=FALSE)
+                                   "        be 12 characters.\n"), call.=FALSE)
                   }
                }
             }
@@ -3453,7 +3462,7 @@ BuildBorderGroup <- function(
       #
       ReducePC <- ReducePC[[1]][1]
       
-      if (is.null(ReducePC) || is.na(ReducePC)) {
+      if (missing(ReducePC) || is.null(ReducePC) || any(is.na(ReducePC))) {
          # empty parameter - use default of 1.25 % keep value
          ReducePC   <- def_ReducePC
       } else {
@@ -3505,7 +3514,7 @@ BuildBorderGroup <- function(
       #
       LabelCex <- LabelCex[[1]][1]
       
-      if (is.null(LabelCex) || is.na(LabelCex)) {
+      if (missing(LabelCex) || is.null(LabelCex) || any(is.na(LabelCex))) {
          # empty parameter - use default 
          LabelCex   <- def_LabelCex
       } else {
@@ -3529,7 +3538,7 @@ BuildBorderGroup <- function(
                } else {
                   if (LabelCex < .05 || LabelCex > 10) {  # out of range  (percentage to keep)
                        ErrorFlag   <- errCntMsg(paste0("***3288 The value of LabelCex is out of range (0.05 to 10). \n",
-                                                       "        The default value of 0.25 will be used."))
+                                                       "        The default value of 0.25 will be used.\n"))
                        LabelCex    <- def_LabelCex
                   }
                }
@@ -3696,15 +3705,14 @@ BuildBorderGroup <- function(
          #  a proj4 call parameter was provided.
     
          Wproj4 <- NA  # output results of checks.
-         
-         
+
          if (any(is.na(proj4)) ) {
             # proj4 string can not be NA, "" or not a character string.
             cat("***3302 The proj4 call parameter set to NA. \n",
                 "        The parameter will be ignored.\n")
             proj4    <- NA
          } else {
-            if (!methods::is(proj4,"crs") ) {     # test for crs class.
+            if (!methods::is(proj4,"crs")) {    # test for crs class.
                # not a crs class 
                if (!methods::is(proj4,"character")) {    # test for single variable character string
                   # not crs class or character class.
@@ -3714,25 +3722,25 @@ BuildBorderGroup <- function(
                   ErrorFlag <- errCntMsg(xmsg)
                   proj4     <- NA
                } else {
-               
+
                   proj4 <- proj4[[1]][1]      # Get only first value.
-                  proj4 <- str_trim(proj4)   # Trim spaces.
+                  proj4 <- stringr::str_trim(proj4)   # Trim spaces.
          
                   #  Have character string. Is it the $input or $wkt part?
                   #  If wkt starts with PROJCRS[, GEOGCRS[, or BASEGEOGCRS[ or other.  
                   #   Best guess.
-                  
+
                   if (proj4 == "" || is.na(proj4) ) {
                      # NA or empty field - force to NA
-                     proj4 = NA
+                     proj4 <- NA
                   } else {
                      # have text in string.  STRING.
-                     p7  = str_sub(proj4,1,7)
-                     p8  = str_sub(proj4,1,8)
-                     p13 = str_sub(proj4,1,13) 
-                     p12 = str_sub(proj4,1,12)
-                     p14 = str_sub(proj4,1,14)
-                     p15 = str_sub(proj4,1,15)
+                     p7  = stringr::str_sub(proj4,1,7)
+                     p8  = stringr::str_sub(proj4,1,8)
+                     p13 = stringr::str_sub(proj4,1,13) 
+                     p12 = stringr::str_sub(proj4,1,12)
+                     p14 = stringr::str_sub(proj4,1,14)
+                     p15 = stringr::str_sub(proj4,1,15)
                      if (p7  == "ENGCRS["      ||
                          p7  == "GEOGCS["      || p7  == "PROJCS["      || p7  == "VERTCS["      ||
                          p8  == "GEODCRS["     || p8  == "GEOGCRS["     || p8  == "VERTCRS["     || 
@@ -3742,15 +3750,15 @@ BuildBorderGroup <- function(
                          p14 == "PARAMETRICCRS[" || 
                          p15 == "ENGINEERINGCRS[" 
                          # 
-                         # st_crs()$units_gdal, st_crs()$proj4string
+                         # sf::st_crs()$units_gdal, sf::st_crs()$proj4string
                         ) # if a valid CRS type.
                      {
                         # based on header characters - it looks like wkt format.
                         # try to insert into $wkt field of crs with NA $input.
                         testcrs        <- NULL
                         #   ensure the order in the crs class
-                        testcrs[[1]]   = NA
-                        testcrs[[2]]   = proj4
+                        testcrs[[1]]   <- NA
+                        testcrs[[2]]   <- proj4
                         #   ensure the lists are named properly
                         names(testcrs) <- c("input","wkt")
                         class(testcrs) <- "crs"          # set class.
@@ -3758,7 +3766,7 @@ BuildBorderGroup <- function(
                         wP4            <- sf::st_crs(testcrs)$proj4string   
                         testcrs$input  <- wP4     # place the proj.4 image in $input
                         Wproj4         <- convertPROJ4(testcrs)      # see if it's good.
-                        
+
                         DoUserProj4    <- TRUE                  # for now we have a user provided proj4.
                         #
                         #   wkt to testcrs, st_crs(testcrs)$proj4string -> newcrs <- st_crs(newInput)
@@ -3780,11 +3788,11 @@ BuildBorderGroup <- function(
             } else {
                # have crs class variable
                Wproj4 <- convertPROJ4(proj4)  # check proj4.
-               
+
                #  Have a crs structure
                # can only test with st_as_text
             } # end of processing by char or crs
-         }  # end if check for NA    
+         }  # end if check for NA
       } # end of check for missing or NULL
       
       #  proj4 - stays the same to this point. It is a vector not list.
@@ -3875,7 +3883,7 @@ BuildBorderGroup <- function(
          } 
       }
          
-      #cat("proj4 results - proj4:",proj4,".  Code 3734 \n")
+      #cat("proj4 results - proj4:",proj4,".  Code 3886 \n")
         
       #  Note if +proj=longlat, there is no units... Only if not LONGLAT
       #  In wkt world its GEOGCRS, DATUM, ELLIPSOID, LENGTHUNIT["metre",1]d
@@ -3893,7 +3901,7 @@ BuildBorderGroup <- function(
       #     only if ll, can't do anything.
        
        
-      if (!is.na(proj4)) cat("Caller requested projection at end of processing sf structure is:\n",proj4,"\n")  
+      if (!is.na(proj4)) cat("Caller requested projection transformation at end of processing sf structure to:\n",proj4,"\n")  
       
       if (StopFlag) {
          stop(paste0("***3999 Errors have been found and noted above. Execution stopped.\n",
@@ -3959,10 +3967,11 @@ BuildBorderGroup <- function(
             SFName    <- ShapeFile
          }
          #
-         #  Reading shapfile from:
+         #  Reading shapefile from:
+         #
          cat("***3311 Reading shape file from\n",
-             "        dir: ",SFDir,"\n",
-             "        file:",SFName,"\n")
+             "        dir(DSN): ",SFDir,"\n",
+             "        file(Layer):",SFName,"\n")
          #
          #  Read shapefile into sf structure.
          #   capture the output of the st_read call to get the name of the driver used.
@@ -3979,7 +3988,7 @@ BuildBorderGroup <- function(
             )
             #print(xres1)
          if (inherits(xres1, "try-error")) {
-            cat("Reading Shapefile - dsn/layer setup failed.\n")
+            cat("Reading Shapefile using dsn/layer - failed.\n")
             # first method failed.
             xText <- utils::capture.output(
               xres2 <- try(WorkSf01 <- sf::st_read(dsn=paste0(SFDir,"/", SFName),    # removed quiet= can't capture no output.
@@ -3989,8 +3998,8 @@ BuildBorderGroup <- function(
                           )
               )
             if (inherits(xres2, "try-error")) {
-               cat("     - dsn setup failed. Unable to read shapefile.\n")
-               xmsg <- paste0("***3312 The sf st_read can not import the shapefile as specified. \n",
+               cat("     - using dsn only setup failed. Unable to read shapefile.\n")
+               xmsg <- paste0("***3312 The sf::st_read can not import the shapefile as specified. \n",
                               "        The errors reported were :\n",
                               xres1,"\n",
                               xres2,"\n")
@@ -4085,7 +4094,7 @@ BuildBorderGroup <- function(
       #
       
       WorkSf01_a    <- WorkSf01
-      WorkSfc01     <- st_geometry(WorkSf01)
+      WorkSfc01     <- sf::st_geometry(WorkSf01)
       
       WorkSf01BBox  <- sf::st_bbox(WorkSf01)   # watch out different format not matrix
       MapBox        <- WorkSf01BBox
@@ -4149,6 +4158,7 @@ BuildBorderGroup <- function(
       
       # check # 1 is the proj4 long/lat 
       if (is.na(stringr::str_locate(WorkSf01Proj4,"\\+proj=longlat"))[1]) {  
+         # if found, START/END are values.  is.na comes up FALSE
          # if not found, START/END are "NA" and is.na = TRUE.
          # the st_crs(sf)$input is not a longlat projection
          #     alternate is to test using st_is_longlat() - later..
@@ -4169,20 +4179,14 @@ BuildBorderGroup <- function(
          # Get centroid of map
          #    Take centroid of all areas and sum x,y
          #cat("get centroid for shift evaluation.\n")
-         #cat("Proj4String:",st_crs(WorkSf01)$proj4string,"\n")
+         #cat("Proj4String:",sf::st_crs(WorkSf01)$proj4string,"\n")
          
-         #WorkSfc01  <- st_geometry(WorkSf01)   # sfc, but LL still throws a warning.
+         #WorkSfc01  <- sf::st_geometry(WorkSf01)   # sfc, but LL still throws a warning.
          suppressWarnings(           
            MapCtr <- sf::st_centroid(sf::st_union(WorkSfc01))   # converted to sfc or sfg
          )
          xctr     <- sf::st_coordinates(MapCtr)   # restore xctr to work with original code.
          #cat("Map's Center:",xctr,"\n")
-         
-         ##  Retired Code
-         ##allxy  <- st_coordinates(allctr)
-         ##print(allxy)
-         ##xctr   <- c(mean(allxy[,'X']),mean(allxy[,'Y']))
-         ##print(xctr)
          
          if (all(c(sign(xctr[1])==sign(xLim[1]),sign(xctr[1])==sign(xLim[2]),
                  sign(xLim[1])==sign(xLim[2])))) {
@@ -4239,7 +4243,6 @@ BuildBorderGroup <- function(
                   # within range
                   LLShift = TRUE
                }
-               
             }
          }   
       }
@@ -4299,7 +4302,7 @@ BuildBorderGroup <- function(
       
       #  The SP, SPDF, and sf are in WorkSf01 is RAW no modifications.
       
-      #cat("End of section 3.2 - Code 4152 \n")
+      #cat("End of section 3.2 - Code 4305 \n")
       #####
       #######
       #########
@@ -4315,7 +4318,8 @@ BuildBorderGroup <- function(
       #  shape file
       #
       
-      
+      #cat("***3500 Name Table Link column is:",NameTableLink,"\n")
+ 
       ##### 35xx and 36xx
       #
       #  Part 5 - read excel or .csv file and verify it. (columns and data)
@@ -4710,7 +4714,7 @@ BuildBorderGroup <- function(
       #
       #  Variable Setup
       #
-      #cat("Name Table Variable Setup - Code 4511 \n")
+      #cat("Name Table Variable Setup - Code 4717 \n")
       UserLinkCol <- c(NameTableLink)           # columns that must be present
       LinkCol   <- c("Link")
       OneCol    <- c("Abbr","Name","ID")        # columns that at least one must be present
@@ -4767,9 +4771,7 @@ BuildBorderGroup <- function(
                          load(NameTablePath)                 # .rda
                         )
       
-            cat("***3510 The Name Table was read from:\n",
-               #"        Type:",NameTableType,
-                "        ",NameTablePath,"\n")
+            cat("***3510 The Name Table was read from:",NameTablePath,"\n")
          
             # NameTable stored as .rda file.
       
@@ -4806,13 +4808,13 @@ BuildBorderGroup <- function(
       }   
       # if NTPassed, NTable is already loaded with the passed data.frame
       if (StopFlag) {
-          xmsg <-paste0("***3999 Errors have been found and noted above. Execution stopped.\n",
-                        "        Please fix problem(s) and retry.")
+          xmsg <- paste0("***3999 Errors have been found and noted above. Execution stopped.\n",
+                         "        Please fix problem(s) and retry.\n")
           stop(xmsg, call.=FALSE)
          
       }
       StopFlag = FALSE
-      #cat("End of Name Table Read - Code 4714 \n")
+      #cat("End of Name Table Read - Code 4819 \n")
      
       ##### 352x
       #
@@ -4839,7 +4841,7 @@ BuildBorderGroup <- function(
       NTNames[xmna] <- NTNamesOrig[xmna]   # restore entires that did not match
       
       if (bitwAnd(debug,64) != 0) { 
-         cat("Updated Name Table column names:  Code 4621 \n")
+         cat("Updated Name Table column names: \n")  #  Code 4846 \n")
          print(data.frame(o=NTNamesOrig, n=NTNames))   # if one is wrong it remains upper cast.
       }
       
@@ -4873,7 +4875,7 @@ BuildBorderGroup <- function(
       #  Part 5.3 is the Link column still in the table?  (required columns)
       #
       # check "link" column name (provided by user or default)
-      #cat("Part 5.3 - Code 4654 \n")
+      #cat("Part 5.3 - Code 4880 \n")
       
       NTable03    <- NTable
       
@@ -4927,7 +4929,7 @@ BuildBorderGroup <- function(
       #
       #  Part 5.5 - Remove any columns not in our acceptable list  (can delete the user named link - NOW!
       #
-      #cat("Part 5.5 - Code 4706 \n")
+      #cat("Part 5.5 - Code 4934 \n")
       
       xmM          <- TotCol %in% NTNames          # identify good columns
       KeepList     <- TotCol[xmM]
@@ -4949,7 +4951,7 @@ BuildBorderGroup <- function(
       #            Check for NA or "" Values
       #            Check for duplicate Values
       #
-      #cat("Part 5.6 - Code 4727 \n")
+      #cat("Part 5.6 - Code 4956 \n")
       
       NoDupCol   <- c(LinkCol, OneCol, OptCol1, OptCol3)   # list of columns that cant have duplicate entries.
       NoDupList  <- NTNames[NTNames %in% NoDupCol]
@@ -5441,7 +5443,7 @@ BuildBorderGroup <- function(
       
       #
       #####
-      #cat("Code 5142 - Name Table after Name, Abbr, ID, L2 and Rg columns checked.\n")
+      #cat("Code 5436 - Name Table after Name, Abbr, ID, L2 and Rg columns checked.\n")
       #print(NTable)
       
         
@@ -5878,17 +5880,15 @@ BuildBorderGroup <- function(
                next
             }
             if (nchar(xMapL) > 3) {
-               xmsg      <- paste0("***3638 The label value in the MapLabel entry for ",inxRN,"\n",
-                                   "        is > 3 char.  Only first 2 characters will be used.\n")
-               ErrorFlag <- errCntMsg(xmsg)
+               ErrorFlag <- errCntMsg(paste0("***3638 The label value in the MapLabel entry for ",inxRN,"\n",
+                                             "        is > 3 char.  Only first 2 characters will be used.\n"))
                xlen      <- nchar(xMapL)
                if (xlen > 3) xlen = 3
                xMapL     <- stringr::str_sub(xMapL,1,xlen)
             }
             if ( is.na(xMapX) || is.na(xMapY) || (xMapX=="") || (xMapY=="") ) {
-               xmsg <- paste0("***3639 One of the coordinates in the MapLabel entry for ",inxRN,"\n",
-                              "        is/are not a number. ",xMapX," or ",xMapY,"\n")
-               ErrorFlag <- errCntMsg(xmsg)
+               ErrorFlag <- errCntMsg(paste0("***3639 One of the coordinates in the MapLabel entry for ",inxRN,"\n",
+                                             "        is/are not a number. ",xMapX," or ",xMapY,"\n"))
                next
             }
             # Check Range of X,Y coordinates.
@@ -5896,9 +5896,8 @@ BuildBorderGroup <- function(
             if (xMapX < MapBox2[1,1] || xMapX > MapBox2[1,2] || 
                     xMapY < MapBox2[2,1] || xMapY > MapBox2[2,2] ) {               
                # out or range - any of the TRUE - out of range              
-               xmsg <- paste0("***3640 One of the MapLabel coordinates for ",
-                          inxRN," are out of range. Entry ignored.")               
-               ErrorFlag <- errCntMsg(xmsg)               
+               ErrorFlag <- errCntMsg(paste0("***3640 One of the MapLabel coordinates for ",
+                          inxRN," are out of range. Entry ignored.\n"))               
             } else {               
                # Every thing is fine with this entry.
                NTable[inxRN,"MapL"] <- xMapL    # put back in Name Table               
@@ -5912,14 +5911,14 @@ BuildBorderGroup <- function(
       #
       NTNames <- names(NTable)  # refresh the name list
       
-      #cat("Complete Name Table - ",NTNames,"  Code 5677 \n")
+      #cat("Complete Name Table - ",NTNames,"  Code 5916 \n")
       #print(NTable)
          
       #
       #####
       #######
       #########
-      #cat("End of Name Table Processing - Code 5684 \n")
+      #cat("End of Name Table Processing - Code 5923 \n")
       #  End of Name Table Processing and setup.
       ############
 
@@ -6018,8 +6017,7 @@ BuildBorderGroup <- function(
             if (is.na(stringr::str_locate(WorkSf01Proj4,"\\+units=m |\\+units=m$"))[[1]]) {  
                # +units not set to meters.
                cat("***3711 The projection provided in the Shape File does not have\n",
-                   "        +units=m, modify and setup for re-projection to \n",
-                   "        change to meters.\n")
+                   "        +units=m, modify and setup for re-projection to change to meters.\n")
                CurProj     <- WorkSf01Proj4    # get copy of projection string
                
                # find the +units=??? and replace with +units=m.
@@ -6088,8 +6086,7 @@ BuildBorderGroup <- function(
       if (any(!xStatus)) {
          # something is wrong
          BadStatus  <- !(xStatus == TRUE)   # find FALSE and NAs
-         cat("***3722 Shape File contains invalid polygons.  The indexes \n",
-             "        and associate reasons are :\n")
+         cat("***3722 Shape File contains invalid polygons.  The indexes and associate reasons are :\n")
          xp1        <- WorkSf02[BadStatus,]
          xp2        <- sf::st_is_valid(WorkSf02[BadStatus,], reason=TRUE) # get reasons for invalid polygons.
          xp1$reason <- xp2
@@ -6162,7 +6159,7 @@ BuildBorderGroup <- function(
       #   keys are selected in the Name Table. This is after the 
       #   polygon union.
       #
-      #cat("Part 7.4 - Code 5922 - shape file LINK \n")
+      #cat("Part 7.4 - Code 6166 - shape file LINK \n")
 
       #
       #  7.4 - Set Up Shape Link and Name Table Link for match:
@@ -6448,9 +6445,7 @@ BuildBorderGroup <- function(
       MS_Keep      <- ReducePC/100   # convert from percentage (0 to 100) to decimal (0 to 1)
       MS_Weighting <- 0.9
       
-      cat("***3772 rmapshaper parameters before simplification : \n",
-          "        Keep=",MS_Keep,"  Weight=",MS_Weighting,".\n")
-      #
+      cat("***3772 rmapshaper parameters before simplification: Keep=",MS_Keep,"  Weight=",MS_Weighting,".\n")
       
       #SizeSf03 <- utils::object.size(WorkSf03)    # Size of structure before
       #cat("Geometry size before ms_simplify:",SizeSf03," (03)\n")
@@ -6519,12 +6514,12 @@ BuildBorderGroup <- function(
       #  Part 7.7.2 - COMBINE polygons under single area entries.  
       #        (unionSpatialPolygns)  (WorkSf04-> WorkSf05)
       #
-      #cat("WorkSf04 before aggregation. Code 6277 \n")
+      #cat("WorkSf04 before aggregation. Code 6523 \n")
       #print(WorkSf04, n=40)
        
       MList           <- WorkSf04$X_Link   # List of polygon Link names
                    
-      WorkSfxx        <- st_make_valid(WorkSf04)
+      WorkSfxx        <- sf::st_make_valid(WorkSf04)
            # even though nothing reports as invalid.  We found we have to do 
            # a st_make_valid call with sf_use_s2(FALSE) to get the geometry cleaned
            # for the aggregate after the rmapshaper.
@@ -6551,7 +6546,7 @@ BuildBorderGroup <- function(
              "     04:",utils::object.size(WorkSf04),
              "     05:",utils::object.size(WorkSf05),"\n")
          cat("ShapeFile combination completed. ",length(sf::st_geometry(WorkSf04))," now ",
-                length(sf::st_geometry(WorkSf05))," areas. Code: 5582 \n")
+                length(sf::st_geometry(WorkSf05))," areas. Code: 6543 \n")
       }
       #
       #####
@@ -6595,7 +6590,7 @@ BuildBorderGroup <- function(
          x         <- grDevices::dev.off()
       }   
       if (bitwAnd(debug,64) !=0) {
-         cat("New ShapeFile Data information - WorkSf06 data: Code 6353 \n")
+         cat("New ShapeFile Data information - WorkSf06 data: Code 6599 \n")
          print(sf::st_drop_geometry(WorkSf06))
       }
       #
@@ -6609,7 +6604,7 @@ BuildBorderGroup <- function(
       #  Create an AEA projection to use for area estimation on map areas
       #
       EstAEAProj <- NULL
-      #cat("Code 6367 - ShpProjLL: ", ShpProjLL,"\n")
+      #cat("Code 6601 - ShpProjLL: ", ShpProjLL,"\n")
       
       if (ShpProjLL) {
            EstAEAProj <- AEAProjection(WorkSf06)
@@ -6674,10 +6669,6 @@ BuildBorderGroup <- function(
       #
       #
       
-      #cat("sfdep::st_contiguity.\n")  
-      #suppressWarnings(
-      #   Sf06.nb       <- sfdep::st_contiguity(WorkSf06)   # get adjacency matrix.
-      #) 
       RNList        <- row.names(WorkSf06)              # Get list to help backfile in the nb list.
       NBList        <- sapply(Sf06.nb, function(x) RNList[x])
      
@@ -6910,8 +6901,8 @@ BuildBorderGroup <- function(
                   xAdjParms$Scale = 1
                   NTable[xKey,"Scale"] = 1
                }
-               cat("***3812 Xoffset:",xAdjParms$Xoffset," Yoffset:",xAdjParms$Yoffset," Scale:",xAdjParms$Scale,"\n",
-                   "        Rotate :",xAdjParms$Rotate, " in radians:",xAdjParms$RotateR,"\n")
+               cat("***3812 Area: ",xKey," Xoffset:",xAdjParms$Xoffset," Yoffset:",xAdjParms$Yoffset,"\n",
+                   "        Scale:",xAdjParms$Scale, " Rotate :",xAdjParms$Rotate, " in radians:",xAdjParms$RotateR,"\n")
                   
                  # get sub-SF for area.
                  # pull off each areas sf structure by key.
@@ -7372,7 +7363,7 @@ BuildBorderGroup <- function(
       #    that area.
       #
       
-      #cat("Calling getColoring Code 7114 \n")
+      #cat("Calling getColoring Code 7372 \n")
       xNTCC           <- getColoring(sf::st_geometry(WorkSf08))   # color indexes assigned based on area neighbors.
                          # values are in a matrix.
       xNTCC           <- as.data.frame(xNTCC,stringsAsFactors=FALSE) # Convert matrix to DF.
@@ -7393,10 +7384,10 @@ BuildBorderGroup <- function(
          
          BCol      <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999", "green")
          WorkSf08Data <- sf::st_drop_geometry(WorkSf08)
-         WorkSf08sfc  <- st_geometry(WorkSf08)
+         WorkSf08sfc  <- sf::st_geometry(WorkSf08)
           
          if (length(WorkSf08sfc) != length(NTable$CCode)) {
-            cat("***3872 The length of Name Table and the number of areas in the \n",
+            cat("***3872 The length of Name Table and number of areas in the \n",
                 "        shape file are different.\n")
             stop()
          }
@@ -7455,7 +7446,7 @@ BuildBorderGroup <- function(
       
       #cat("xLim:",xLim,"  yLim:",yLim,"\n")
       #cat("class:",class(xLim),"  ",class(yLim),"\n")
-      #cat("Step 9.0 Code 7195 - VisAsp:",VisAsp,"  bbdx:",bbdx,"  bbdy:",bbdy,"\n")   #  get here
+      #cat("Step 9.0 Code 7455 - VisAsp:",VisAsp,"  bbdx:",bbdx,"  bbdy:",bbdy,"\n")   #  get here
      
       WorkSfMaster <- WorkSf08
       #plot(sf::st_geometry(WorkSfMaster),xlim=xLim,ylim=yLim,xaxt="n",yaxt="n",key.pos=NULL)
@@ -7478,7 +7469,7 @@ BuildBorderGroup <- function(
          SFName <- "BinaryImage"
          SFDir  <- ""
       }
-      cat("The original Shapefile name and directory are:",SFName," in ",SFDir,"\n")
+      cat("The original Shapefile name is ",SFName," in ",SFDir,"\n")
       
       # check name table to see if L2 or Reg are all the same or completely unique.
            
@@ -7643,10 +7634,8 @@ BuildBorderGroup <- function(
       areaParms$CP_ShpDSN     <- SFPCkpt   # save location of shape file information.
       areaParms$CP_ShpLayer   <- SFCkpt
       
-      cat("***3913 Checkpoint - ShapeFile collection is : \n",
-          "        ",SFCkpt,"\n",
-          "        set of ESRI Shapefiles and an RDA image : \n",
-          "        ",SFCkptRDA,"\n")
+      cat("***3913 Checkpoint - ShapeFile collection is :",SFCkpt,"\n",
+          "        set of ESRI Shapefiles and an RDA image :",SFCkptRDA,"\n")
       save(WorkSfMaster, file=SFPCkptRDA, compress="xz")
       
       #print(head(WorkSfMaster,n=20))
@@ -8014,7 +8003,7 @@ BuildBorderGroup <- function(
    
       WorkL2             <- aggregate(WorkL2,by=list(L2Grps),FUN=aggFun)
       row.names(WorkL2)  <- WorkL2$agg  # restore row.names
-      #cat("calling getColoring for L2 Code 7734 \n")
+      #cat("calling getColoring for L2 Code 8014 \n")
       
       L2_NTCC            <- as.data.frame(getColoring(sf::st_geometry(WorkL2)),stringsAsFactors=FALSE)  # Have colors for super-areas.
       row.names(L2_NTCC) <- row.names(WorkL2)             # save xNTCC table for later use. ? check point.
@@ -8024,7 +8013,7 @@ BuildBorderGroup <- function(
       #### Only if L2 flag set. 
    
       if (bitwAnd(debug,8) != 0 ) {
-         #cat("Calling getColoring - Code 7744 \n")
+         #cat("Calling getColoring - Code 8024 \n")
          WorkL2Neib   <- getColoring(sf::st_geometry(WorkL2))
          #cat("Looking at Neighbors:", WorkL2Neib, " (colors)\n")
          
@@ -8045,7 +8034,7 @@ BuildBorderGroup <- function(
       #
       #  Regional Groups create boundaries
       #
-      #cat("Regional Feature Groups Code 7765 .\n")
+      #cat("Regional Feature Groups Code 8045 .\n")
       WorkReg          <- WorkSfMst
       RegGrps          <- NTable[SfMstrows,"regID"]   # assuming one sf row per name table row.
       WorkReg$agg      <- RegGrps
@@ -8091,7 +8080,7 @@ BuildBorderGroup <- function(
    WorkL3$agg_name <- BorderGroupName
   
    if (bitwAnd(debug,8) != 0) {
-      WorkL3sfc <- st_geometry(WorkL3)
+      WorkL3sfc <- sf::st_geometry(WorkL3)
       OutPutP   <- paste0(BGPathName,"BBG-Map_outline_(L3)_map_image.pdf")
       grDevices::pdf(OutPutP,width=10, height=7)
       Sys.setFileTime(OutPutP,Sys.time())
@@ -8109,7 +8098,7 @@ BuildBorderGroup <- function(
    #
    #    Warning 3A22 = Invalid Polygons.
      
-   cat("Building VisBorders for the areas.\n")
+   cat("Building VisBorders data.frames for the areas.\n")
    areaVisBorders      <- BuildVisBorder(WorkSfMst, "area")
    #head(areaVisBorders,20)
    GrpList <- c("areaVisBorders")
@@ -8144,7 +8133,7 @@ BuildBorderGroup <- function(
    #head(L3VisBorders,20)
    GrpList <- c(GrpList,"L3VisBorders")
    #
-   cat("***3A28 Completed conversion to VisBorders format.\n")
+   #cat("***3A28 Completed conversion to VisBorders format.\n")
    #
    ####
    

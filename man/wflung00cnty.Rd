@@ -1,6 +1,6 @@
 \name{wflung00cnty}
-\alias{wflung00cnty}
 \docType{data}
+\alias{wflung00cnty}
 \title{Lung cancer mortality data for white females, by county, 2000-4}
 \description{
    Counts and rates of lung cancer mortality data among white women, 

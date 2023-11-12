@@ -1,6 +1,6 @@
 \name{AfricaPopData}
-\alias{AfricaPopData}
 \docType{data}
+\alias{AfricaPopData}
 \title{Test data for the Africa border Group}
 \description{
 This dataset contains the population and country data for the 52

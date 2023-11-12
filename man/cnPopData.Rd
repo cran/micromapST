@@ -1,6 +1,6 @@
 \name{cnPopData}
-\alias{cnPopData}
 \docType{data}
+\alias{cnPopData}
 \title{Test data for the China border Group}
 \description{
 This dataset contains the 2014 population and average income per person in each of the 

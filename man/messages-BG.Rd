@@ -49,226 +49,268 @@
     \describe{
      \item{310x}{\bold{Debug Call parameter:}\cr
       \describe{
-       \item{3100}{\bold{debug call parameter is not a numeric value. The default value of 
-         <default debug> will be used.}\cr
+       \item{3100}{\bold{debug call parameter is not a numeric value. 
+         The default value of <default debug> will be used.}\cr
          
-         The value provided for the debug call parameter is not a numeric value.  It must a 
-         number between 0 and 65535.  The debug parameter will be set to the default value of 0.
+         The value provided for the debug call parameter is not a 
+         numeric value.  It must a number between 0 and 65535.  
+         The debug parameter will be set to the default value of 0.
        }
       }
      }
      \item{312x}{\bold{checkPointRestart}\cr
       \describe{
-       \item{3120}{\bold{The checkPointReStart call parameter is not a logical value.}\cr
+       \item{3120}{\bold{The checkPointReStart call parameter is not a 
+         logical value.}\cr
  
-         The checkPointReStart call parameter must be a logical variable with a value of TRUE or FALSE.
-         The default value is FALSE.
+         The checkPointReStart call parameter must be a logical variable 
+         with a value of TRUE or FALSE. The default value is FALSE.
        }
-       \item{3122}{\bold{Check Point Restart has been requested.  Check point files\cr
-          will be read from folder: <name table directory>/Checkpoint directory.}
+       \item{3122}{\bold{Check Point Restart has been requested.  Check 
+          point files\cr will be read from folder: 
+          <name table directory>/Checkpoint directory.}
  
-          The checkPointReStart call parameter was set to TRUE and the BuildBorderGroup 
-          function will attempt a restart using the <name table directory> and the 
-          Checkpoint subdirectory to locate the check point files.  If valid, the files 
-          will be reloaded and the BuildBorderGroup process will be continued to completion.
+          The checkPointReStart call parameter was set to TRUE and 
+          the BuildBorderGroup function will attempt a restart using the 
+          <name table directory> and the Checkpoint subdirectory to locate 
+          the check point files.  If valid, the files 
+          will be reloaded and the BuildBorderGroup process 
+          will be continued to completion.
        }
       }
      }
      \item{313x}{\bold{General Call Parameter}\cr
       \describe{
-        \item{3130}{\bold{Require call parameters are missing : <list of parameters> - execution stopped.}\cr
+        \item{3130}{\bold{Require call parameters are missing : 
+            <list of parameters> - execution stopped.}\cr
        
-         BuildBorderGroup requires several call parameters to run. The <list of parameters> string 
-         presents to operate properly.  The minimum set of call parameters is:
-         NameTableFile, BorderGroupName, and ShapeFile.  If no directories are specified either the 
-         value of the NameTableDir will be used or the current working directory.  
-         The function must have enough information to locate the initial name table 
-         (.csv or spreadsheet format) and the shape file(s) (.shp, .shx, .dbf)
+         BuildBorderGroup requires several call parameters to run. The 
+         <list of parameters> string presents to operate properly.  
+         The minimum set of call parameters is: NameTableFile, BorderGroupName, 
+         and ShapeFile.  If no directories are specified either the 
+         value of the NameTableDir will be used or the current working 
+         directory. The function must have enough information to locate 
+         the initial name table (.csv or spreadsheet format) and the shape file(s) 
+         (.shp, .shx, .dbf)
        }
       }
      } 
      \item{314x}{\bold{Name Table Directory}\cr
       \describe{
-       \item{3141}{\bold{NameTableDir call parameter is missing or NULL. Correct and re-run.}\cr
-        The NameTableDir parameter must be a character string that provide the directory path 
-        information to the directory containing the Name Table file.
+       \item{3141}{\bold{NameTableDir call parameter is missing or NULL. Correct 
+        and re-run.}\cr
+        The NameTableDir parameter must be a character string that provide 
+        the directory path information to the directory containing 
+        the Name Table file.
        }
-       \item{3142}{\bold{NameTableDir call parameter is an 'NA', Empty or not a character string. 
-         Value= <NameTableDir>  Correct and re-run.}\cr
-         The NameTableDir parameter must contain a character string with length > 1 of an 
-         existing path to the directory that contains the Name Table File.  The value was found 
-         to be NA, ""(empty), or a non-character variable.  Correct the incorrect value and retry.
+       \item{3142}{\bold{NameTableDir call parameter is an 'NA', Empty or not 
+         a character string. Value= <NameTableDir>  Correct and re-run.}\cr
+         The NameTableDir parameter must contain a character string 
+         with length > 1 of an existing path to the directory that contains 
+         the Name Table File.  The value was found to be NA, ""(empty), or a 
+         non-character variable.  Correct the incorrect value and retry.
        }
-       \item{3143}{\bold{NameTableDir value specified does not exist. Value= <NameTableDir>}\cr
-         The character string provided as the NameTableDir value is not a valid path to the 
-         directory containing the Name Table File.  The path provided does not exist.
+       \item{3143}{\bold{NameTableDir value specified does not exist. 
+         Value= <NameTableDir>}\cr
+         The character string provided as the NameTableDir value is not a 
+         valid path to the directory containing the Name Table File.  
+         The path provided does not exist.
        }
       }
      }
      \item{315x}{\bold{BorderGroup Files}
       \describe{
-       \item{3150}{\bold{BorderGroup directory specified in the call parameter does not exist. 
-         It will be created. Value= <BorderGroupName>.}\cr
-         The BorderGroupDir parameter in the function call specifies a non-existing directory. 
+       \item{3150}{\bold{BorderGroup directory specified in the call parameter 
+         does not exist. It will be created. Value= <BorderGroupName>.}\cr
+         The BorderGroupDir parameter in the function call specifies a 
+         non-existing directory. 
          The path provided will be used to create the BorderGroupDir directory.
        }
        \item{3152}{\bold{The required BorderGroupName call parameter is missing.}\cr
-         The BorderGroupName parameter must be provided to be able to create the final
-         border group data set.  Provide the required parameter and rerun the function.
+         The BorderGroupName parameter must be provided to be able to create 
+         the final border group data set.  Provide the required parameter and 
+         rerun the function.
        }
-       \item{3154}{\bold{BorderGroupName is a 'NA', Empty or is not a character string. 
-         Value= <BorderGroupName>.}\cr
-         The BorderGroupName parameter is not a character string or has a value of NA. Neither can be 
-         used as the border group name.  The value must be a character string that is acceptable 
-         as a filename by operating system.  Inspect and correct.
+       \item{3154}{\bold{BorderGroupName is a 'NA', Empty or is not a character 
+         string. Value= <BorderGroupName>.}\cr
+         The BorderGroupName parameter is not a character string or has a value 
+         of NA. Neither can be used as the border group name.  The value must be 
+         a character string that is acceptable as a filename by operating system.  
+         Inspect and correct.
        }
        \item{3156}{\bold{BorderGroup directory specified in the call parameter is NA, 
          Empty or not a character vector. The parameter will be ignored and the 
          NameTable directory used. Value=<BorderGroupDir>
          }
-         The provided Border Group Directory is found to be NA, ""(empty), or a non-character 
-         variable.  The parameter is ignored and the Name Table Directory is used instead.
-         If the Border Group Directory was meant to point to a different location, correct 
+         The provided Border Group Directory is found to be NA, ""(empty), 
+         or a non-character variable.  The parameter is ignored and the 
+         Name Table Directory is used instead. If the Border Group Directory 
+         was meant to point to a different location, correct 
          the parameter and retry.
        }  
      }
      }
      \item{320x}{\bold{NameTable Files}\cr
       \describe{
-       \item{3202}{\bold{NameTableFile parameter has not been provided. Execution Stopped.}\cr
-         The name table filename for the name table data has not been provided. Add the appropriate 
-         NameTableFile call parameter.
+       \item{3202}{\bold{NameTableFile parameter has not been provided. 
+         Execution Stopped.}\cr
+         The name table filename for the name table data has not been 
+         provided. Add the appropriate NameTableFile call parameter.
        }
-       \item{3204}{\bold{The name table passed to function on NameTableFile parameter is not a 
-         valid variable type: <class of NameTable data>}\cr
-         The class of the NameTableFile parameter must be a data.frame or a character string. It was found
-         to be <class of NameTable data>.  Correct and rerun.
+       \item{3204}{\bold{The name table passed to function on NameTableFile 
+         parameter is not a valid variable type: <class of NameTable data>}\cr
+         The class of the NameTableFile parameter must be a data.frame or 
+         a character string. It was found to be <class of NameTable data>.  
+         Correct and rerun.
        }
-       \item{3206}{\bold{The NameTableFile parameter is set to 'NA', requires a valid file name or 
-         structure.}\cr
-         The name table file parameter is set to a NA value.  It must be a valid data.frame 
-         or a character string indicating the name of the name table file in the name table directory.
+       \item{3206}{\bold{The NameTableFile parameter is set to 'NA', requires 
+         a valid file name or structure.}\cr
+         The name table file parameter is set to a NA value.  It must be a 
+         valid data.frame or a character string indicating the name of the 
+         name table file in the name table directory.
        }
-       \item{3207}{\bold{The NameTableFile parameter is empty. A name table structure or filename 
-          must be provided.}\cr
-          For BuildBorderGroup to function, it must have the name or structure of a valid 
-          Name Table.  Without this, the border group can not build a name table or complete the 
-          construction of a border group dataset.  Check on how to build a name table or check 
-          for typos in the Name Table File value.
+       \item{3207}{\bold{The NameTableFile parameter is empty. A name table 
+          structure or filename must be provided.}\cr
+          For BuildBorderGroup to function, it must have the name or structure 
+          of a valid Name Table.  Without this, the border group can not build 
+          a name table or complete the construction of a border group dataset.  
+          Check on how to build a name table or check for typos in the 
+          Name Table File value.
        }
-       \item{3208}{\bold{The NameTableLink call parameter is not a character string. Fix and rerun.}\cr
-         The NameTableLink call parameter must be a character string that can be used to reference 
-         a data.frame column read in from a .csv, spreadsheet or R .rda and .RData files.  
-         Please inspect the link name and make sure it is a valid column in the initial name table.
+       \item{3208}{\bold{The NameTableLink call parameter is not a character 
+         string. Fix and rerun.}\cr
+         The NameTableLink call parameter must be a character string that can 
+         be used to reference a data.frame column read in from a .csv, spreadsheet 
+         or R .rda and .RData files. Please inspect the link name and make sure 
+         it is a valid column in the initial name table.
        }
-       \item{3209}{\bold{  The NameTable file is not a .csv, Excel, or R .RDA format.}\cr 
-         The file containing the initial NameTable data must be a .csv, Excel spreadsheet or R .rda 
-         file.  Each column must be one of the data columns required to construct the 
-         name table. (see name table section.)
+       \item{3209}{\bold{  The NameTable file is not a .csv, Excel, 
+         or R .RDA format.}\cr 
+         The file containing the initial NameTable data must be a .csv, 
+         Excel spreadsheet or R .rda file.  Each column must be one of the data 
+         columns required to construct the name table. (see name table section.)
        }
       }
      } #320x
      \item{321x}{\bold{Name Table Link}\cr
       \describe{
-       \item{3212}{\bold{The NameTableLink call parameter is an 'NA', empty (\'\' or \' \') or 
-        not a character string. Fix and rerun.}\cr
-        The NameTableLink identifies the name table column that will be used to link the 
-        name table to the information and polygons in the shape file structure.  It was found 
-        have a value of 'NA', Empty (\'\' or \' \') or was not a character type value. 
+       \item{3212}{\bold{The NameTableLink call parameter is an 'NA', empty 
+        (\'\' or \' \') or not a character string. Fix and rerun.}\cr
+        The NameTableLink identifies the name table column that will be 
+        used to link the name table to the information and polygons in the 
+        shape file structure.  It was found have a value of 'NA', 
+        Empty (\'\' or \' \') or was not a character type value. 
 
-        The NameTableLink call parameter must be a character string that can be used to reference 
-        a data.frame column read in from a .csv, spreadsheet or R .rda file.  Please inspect the 
-        link name and make sure it is a valid column in the initial name table.
+        The NameTableLink call parameter must be a character string that 
+        can be used to reference a data.frame column read in from a .csv, 
+        spreadsheet or R .rda file.  Please inspect the link name and make 
+        sure it is a valid column in the initial name table.
        }
       } 
      } # 321x
      \item{322x}{\bold{Shape File and Directory}\cr
       \describe{
        \item{3220}{\bold{Shape File parameter has not been provided or is NA.}\cr
-        The filename of the shape file has not been provided in the BuildBorderGroup function call.
-        Review the function call and make sure the ShapeFile parameter is present and identifies
-        the base filename of the shape file to be used.  The extensions of .shp, .shx, or .dbf do not
-        have to be specified.  The base filename will be used as the layer to be read. 
+        The filename of the shape file has not been provided in the 
+        BuildBorderGroup function call. Review the function call and make sure 
+        the ShapeFile parameter is present and identifies
+        the base filename of the shape file to be used.  
+        The extensions of .shp, .shx, or .dbf do not have to be specified.  
+        The base filename will be used as the layer to be read. 
         The ShapeFileDir is used as the 'dsn' value on the st_read call.
        }
-       \item{3221}{\bold{ShapeFile is a sf structure.}\cr
+       \item{3221}{\bold{ShapeFile is a sf structure passed as a call parameter.}\cr
         The ShapeFile call parameter is a sf structure.
        }
-       \item{3222}{\bold{ShapeFile is a SPDF structure.}\cr
+       \item{3222}{\bold{ShapeFile is a SPDF structure passed as a call parameter.}\cr
         The ShapeFile call parameter is a SPDF structure.
        }
-       \item{3223}{\bold{The ShapeFile call parameter is being used to pass a full spatial structure 
-        to the function. However, the structure must be a SPDF or a sf class. 
-        The data was: <ShapeFile class>}\cr
-        The ShapeFile call parameter must be a character string, sf structure or SPDF structure.  
-        The class of the ShapeFile value is <ShapeFile class> and is not usable. Fix and retry.
+       \item{3223}{\bold{The ShapeFile call parameter is being used to pass 
+        a full spatial structure to the function. However, the structure 
+        must be a SPDF or a sf class. The data was: <ShapeFile class>}\cr
+        The ShapeFile call parameter must be a character string, 
+        sf structure or SPDF structure. The class of the ShapeFile value 
+        is <ShapeFile class> and is not usable. Fix and retry.
        }
        \item{3224}{\bold{Shape file directory specified in the ShapeFileDir 
         call parameter does not exist. Value= <ShapeFileDir>}\cr
         The directory specified in the ShapeFileDir call parameter does not exist.
         The value was <ShapeFileDir>. Make sure the character string is a valid 
         path to the directory containing the Shape File and that access is 
-        permitted. When no value is provided, the directory specified for the NameTableDir will be used.
-        If no NameTableDir is provided, the current working directory is used.
+        permitted. When no value is provided, the directory specified for the 
+        NameTableDir will be used. If no NameTableDir is provided, 
+        the current working directory is used.
        }
-       \item{3225}{\bold{Shape file (dir & name) does not exist. Value= <ShapeFileDir & ShapeFile 
-        value>}\cr
-        The path to the shape file (directory and name) does not exist.  The either the 
-        directory and/or the shape file filename does not exist, is not accessible or does 
-        not reference valid ERSI Shapefile collection containing a x.shp file.  The extension 
-        of .shp is added to the path to validate the directory and filename for ESRI 
-        Shapefiles collections.  Only the base filename is required in the ShapeFile filename.  
-        If present it is removed when the shape file is read. Check the path 
-        <ShapeFileDir & ShapeFile value> and make sure it is valid and can be accessed.
+       \item{3225}{\bold{Shape file (dir & name) does not exist. 
+        Value= <ShapeFileDir & ShapeFile value>}\cr
+        The path to the shape file (directory and name) does not exist.  
+        The either the directory and/or the shape file filename does not exist, 
+        is not accessible or does not reference valid ERSI Shapefile collection 
+        containing a x.shp file.  The extension of .shp is added to the 
+        path to validate the directory and filename for ESRI Shapefiles 
+        collections.  Only the base filename is required in the ShapeFile 
+        filename. If present it is removed when the shape file is read. 
+        Check the path <ShapeFileDir & ShapeFile value> and make sure 
+        it is valid and can be accessed.
        }
-       \item{3227}{\bold{The ShapeFile call parameter is an NA, empty('' or ' '), or not a character string. 
-        The filename of the Shapefile must be specified. }\cr
-        The provided ShapeFile name has a value of NA, is empty ('' or ' '), or is not a character string.
-        A valid filename must be provide for the ShapeFile name.  Correct and retry.
+       \item{3227}{\bold{The ShapeFile call parameter is an NA, empty('' or ' '), 
+        or not a character string. The filename of the Shapefile must be specified.}\cr
+        The provided ShapeFile name has a value of NA, is empty ('' or ' '), 
+        or is not a character string.  A valid filename must be provide for the 
+        ShapeFile name.  Correct and retry.
        }
       }
      } # 322x
      \item{323x}{\bold{ShapeLinkName parameter}
       \describe{   
-       \item{3230}{\bold{The ShapeLinkName call parameter is missing. The default value of NAME 
-        will be used.}\cr
-        For the shape file polygons to be used by micromapST, a linkage between the name table
-        and shape file must be established.  The ShapeLinkName call parameter is used to 
-        identify the shape file variable the function can use to match data in the name table. 
-        The ShapeLinkName call parameter is missing. The function will attempt to use the 
-        default value of NAME to find a variable in the shape file. If this is not correct, 
-        provide the ShapeLinkName parameter with a value of the correct variable.
+       \item{3230}{\bold{The ShapeLinkName call parameter is missing. The default 
+        value of NAME will be used.}\cr
+        For the shape file polygons to be used by micromapST, a linkage between 
+        the name table and shape file must be established.  The ShapeLinkName 
+        call parameter is used to identify the shape file variable the function 
+        can use to match data in the name table. The ShapeLinkName call 
+        parameter is missing. The function will attempt to use the 
+        default value of NAME to find a variable in the shape file. 
+        If this is not correct, provide the ShapeLinkName parameter 
+        with a value of the correct variable.
        }
-       \item{3232}{\bold{ShapeLinkName value is NA.  The default of NAME will be used.}\cr
-        The value in the ShapeLinkName call parameter is an NA value. It must be a character string 
-        identifying the Shape File data column/variable to be used to link the polygons to the 
+       \item{3232}{\bold{ShapeLinkName value is NA.  The default of NAME 
+       will be used.}\cr
+        The value in the ShapeLinkName call parameter is an NA value. 
+        It must be a character string identifying the Shape File data 
+        column/variable to be used to link the polygons to the 
         name table rows.
        }
-       \item{3234}{\bold{ShapeLinkName is not a character string. Value= <ShapeLinkName>.}\cr
-        The value in the ShapeLinkName call parameter is not a character string that can 
-        be used to access a variable in the shape file header.  Review the <ShapeLinkName>
-        character string and correct.
+       \item{3234}{\bold{ShapeLinkName is not a character string. 
+        Value= <ShapeLinkName>.}\cr
+        The value in the ShapeLinkName call parameter is not a character 
+        string that can be used to access a variable in the shape file header.  
+        Review the <ShapeLinkName> character string and correct.
        }
       }
      } #323x
      \item{324x}{\bold{Map Headers and parameters}
       \describe{
-       \item{3240}{\bold{The MapHdr parameter does not contain character strings for use as the column headers.
-        The MapHdr parameter will be ignored. }\cr
-        The MapHdr call parameter does not contain character strings.  Inspect and correct.  The default of 
-        c("","Areas") will be used.
+       \item{3240}{\bold{The MapHdr parameter does not contain character strings 
+        for use as the column headers. The MapHdr parameter will be ignored. }\cr
+        The MapHdr call parameter does not contain character strings.  
+        Inspect and correct.  The default of c("","Areas") will be used.
        }
        \item{3242}{\bold{The MapHdr parameter must be a simple vector type. }\cr
-        The MapHdr call parameter must be a simple vector type variable with 1 or 2 elements.  Data types
-        of Data.frames, lists, tibbles, and other advanced structures are not allowed.  Correct and retry.
+        The MapHdr call parameter must be a simple vector type variable with 
+        1 or 2 elements.  Data types of Data.frames, lists, tibbles, and other 
+        advanced structures are not allowed.  Correct and retry.
        }
-       \item{3244}{\bold{The MapHdr parameter has zero or more than 2 elements. Only the first 2 will be used.}\cr
-        The MapHdr call parameter contains more that 2 elements. For example: c('hdr1','hdr2','hdr3')
-        Only the first 2 elements will be used.
+       \item{3244}{\bold{The MapHdr parameter has zero or more than 2 elements. 
+        Only the first 2 will be used.}\cr
+        The MapHdr call parameter contains more that 2 elements. 
+        For example: c('hdr1','hdr2','hdr3') Only the first 2 elements will be used.
        }
-       \item{3246}{\bold{It is suggested the max length of the MapHdr strings be 16 characters. }\cr
-        The MapHdr values (2) should be less than 16 character to keep the map type glyph columns 
-        from becoming too wide.  Consider shortening the character strings.
+       \item{3246}{\bold{It is suggested the max length of the MapHdr strings 
+        be 16 characters. }\cr
+        The MapHdr values (2) should be less than 16 character to keep the 
+        map type glyph columns from becoming too wide.  Consider shortening 
+        the character strings.
        }
       }
      } #324x
@@ -276,25 +318,26 @@
       \describe{
        \item{3251}{\bold{The MapMinH parameter does not contain numeric value. 
         Default Value is used.}\cr
-        The MapMinH (Map Minimum Height) parameter is provided, but does not contain a numeric value.
-        The default value of 1 inch is used. 
+        The MapMinH (Map Minimum Height) parameter is provided, but does not 
+        contain a numeric value.  The default value of 1 inch is used. 
        }
-       \item{3252}{\bold{The MapMinH minimum height value is out of range (0.4 to 2.5 inch). 
-        The default will be used.}\cr
+       \item{3252}{\bold{The MapMinH minimum height value is out of range 
+        (0.4 to 2.5 inch).  The default will be used.}\cr
         The MapMinH parameter value must be between 0.4 and 2.5 inches to be usable.  
         The default of 1 inch is used.
        }
        \item{3254}{\bold{The MapMaxH parameter does not contain numeric value. 
         Default Value is used.}\cr
-        The MapMaxH (Map Maximum Height) parameter is provided, but does not contain a numeric value.
-        The default value of 1.75 inches is used. 
+        The MapMaxH (Map Maximum Height) parameter is provided, but does not contain 
+        a numeric value. The default value of 1.75 inches is used. 
        }
        \item{3255}{\bold{The MapMaxH maximum height value is out of range 
         (1 to 2.5 inches). The default will be used.}\cr
-        The MapMaxH - value must be in the range from 1 to 2.5 inches. The default value of 1.75 inches
-        will be used.
+        The MapMaxH - value must be in the range from 1 to 2.5 inches. The default 
+        value of 1.75 inches will be used.
        }
-       \item{3257}{\bold{The MapMinH value must be less than the MapMaxH value. Will swap values.}\cr
+       \item{3257}{\bold{The MapMinH value must be less than the MapMaxH value. 
+        Will swap values.}\cr
         The MapMaxH value must higher than the MapMinH value.  The values are swapped.
        }
       }
@@ -303,184 +346,228 @@
       \describe{
        \item{3261}{\bold{The IDHdr parameter does not contain character strings 
         for use as the column headers.}\cr
-        The IDHdr call parameter must be a character string to be used for the ID glyph column 
-        headers.  The default header of the border group name and Areas will be used.
+        The IDHdr call parameter must be a character string to be used 
+        for the ID glyph column headers.  The default header of the border group 
+        name and Areas will be used.
        }
        \item{3262}{\bold{The IDHdr parameter must be a simple vector type.}\cr
-        The IDHdr parameter value must be a simple one dimensional vector with 2 value, 
-        like the MapHdr parameters. The default of the border group name and "Areas" will be used.
+        The IDHdr parameter value must be a simple one dimensional vector 
+        with 2 value, like the MapHdr parameters. The default of the border 
+        group name and "Areas" will be used.
        }
-       \item{3264}{\bold{The IDHdr parameter has more than 2 elements. Only the first 2 will be used.}\cr
-        The IDHdr parameter has more than 2 values (elements) in the vector.  Only the first 2 values 
-        will be used for the IDHdr headers.
+       \item{3264}{\bold{The IDHdr parameter has more than 2 elements. Only 
+        the first 2 will be used.}\cr
+        The IDHdr parameter has more than 2 values (elements) in the vector.  
+        Only the first 2 values will be used for the IDHdr headers.
        }
-       \item{3266}{\bold{It is suggested the max length of the IDHdr strings be 12 characters.}\cr 
-        To keep the ID glyph column from becoming too wide, it is recommended the IDHdr string be limited
-        to less than 12 characters each.
+       \item{3266}{\bold{It is suggested the max length of the IDHdr strings be 
+        12 characters.}\cr 
+        To keep the ID glyph column from becoming too wide, it is recommended 
+        the IDHdr string be limited to less than 12 characters each.
        }
       }  
      }  # 326x
      \item{327x}{\bold{Reduction Percentage Parameter}
       \describe{
-       \item{3272}{\bold{The ReducePC parameter must be a numeric value. The default of 1.25 \% will be used.}\cr
-        The ReducePC (Reduce Percentage) parameter is not a numeric value.  The default value of 1.25\% will be used. 
-        This parameter indicates how much of the original spatial information will be kept when the geometry 
+       \item{3272}{\bold{The ReducePC parameter must be a numeric value. The default 
+        of 1.25 \% will be used.}\cr
+        The ReducePC (Reduce Percentage) parameter is not a numeric value.  The 
+        default value of 1.25\% will be used. This parameter indicates how much 
+        of the original spatial information will be kept when the geometry 
         is simplified by the rmapshaper package.
        }
-       \item{3274}{\bold{The ReducePC parameter is not a simple vector. The default value of 1.25 \% will be used.}\cr
-        The ReducePC parameter can only be a single value. The default value of 1.25 \% will be used.
+       \item{3274}{\bold{The ReducePC parameter is not a simple vector. The default 
+        value of 1.25 \% will be used.}\cr
+        The ReducePC parameter can only be a single value. The default value 
+        of 1.25 \% will be used.
        }
-       \item{3276}{\bold{The ReducePC parameter has more than one value. Only the first value will be used.}\cr
-        More than one value is provided with the ReducePC parameter.  Only the first value will be used.		
+       \item{3276}{\bold{The ReducePC parameter has more than one value. Only the 
+        first value will be used.}\cr
+        More than one value is provided with the ReducePC parameter.  
+        Only the first value will be used.		
        }
-       \item{3278}{\bold{The value of ReducePC is out of range (0.01 to 100 \%). The default value of 1.25 \% will be used.}\cr
-        The value of the ReducePC parameter must be between 0.01 and 100 percent.  It is out of range.  The default value of
-        1.25 \% will be used.
+       \item{3278}{\bold{The value of ReducePC is out of range (0.01 to 100 \%). 
+        The default value of 1.25 \% will be used.}\cr
+        The value of the ReducePC parameter must be between 0.01 and 100 percent.  
+        It is out of range.  The default value of 1.25 \% will be used.
        }
       }
      }  # 326x
      \item{328x}{\bold{LabelCex Call Parameter}
       \describe{
-       \item{3282}{\bold{The LabelCex parameter must be a numeric value. The default of 0.25 will be used.}\cr
-        The value of the LabelCex call parameter must be numeric.  The default of 0.25 will be used instead.
+       \item{3282}{\bold{The LabelCex parameter must be a numeric value. The default 
+        of 0.25 will be used.}\cr
+        The value of the LabelCex call parameter must be numeric.  The default 
+        of 0.25 will be used instead.
        }
-       \item{3284}{\bold{ The LabelCex parameter must be a simple vector. The default value of 0.25 will be used.}\cr
-        The LabelCex parameter value is not a single value vector but is a more complex data type. The default value of 0.25 will
-        be used.
+       \item{3284}{\bold{ The LabelCex parameter must be a simple vector. The default 
+        value of 0.25 will be used.}\cr
+        The LabelCex parameter value is not a single value vector but is a more 
+        complex data type. The default value of 0.25 will be used.
        }
-       \item{3286}{\bold{The LabelCex parameter has more than one value. Only the first value will be used.}\cr
-        The LabelCex parameter contains more than one value. Only the first value will be used.
+       \item{3286}{\bold{The LabelCex parameter has more than one value. Only the 
+        first value will be used.}\cr
+        The LabelCex parameter contains more than one value. Only the first 
+        value will be used.
        }
-       \item{3288}{\bold{The value of LabelCex is out of range (0.05 to 10). The default value of 0.25 will be used.}\cr
-        The LabelCex parameter value must be between 0.05 and 10.  It is out of range and the default value of 0.25 will
-        be used.
+       \item{3288}{\bold{The value of LabelCex is out of range (0.05 to 10). The default 
+        value of 0.25 will be used.}\cr
+        The LabelCex parameter value must be between 0.05 and 10.  It is out of range 
+        and the default value of 0.25 will be used.
        }
       }
      } # 328x
      \item{330x}{\bold{proj4 Parameter}
       \describe{
-       \item{3301}{\bold{No projection provided in the shapefile or the proj4 call parameter, 
-        will be set to a Long/Lat projection.}\cr
-        No projection was found in the shapefile or structure provided the function or in the proj4 call
-        parameter.  The boundary data is assumed to be longitude/latitude values and the projection
+       \item{3301}{\bold{No projection provided in the shapefile or the proj4 
+        call parameter,will be set to a Long/Lat projection.}\cr
+        No projection was found in the shapefile or structure provided the 
+        function or in the proj4 call parameter.  The boundary data is 
+        assumed to be longitude/latitude values and the projection
         in the spatial structure will be set to a Long/Lat projection.
        } 
-       \item{3302}{\bold{The proj4 call parameter set to NA or Empty('') or is not a character string. 
-        The parameter will be ignored.}\cr
-        The proj4 call parameter must be a valid character string in the proj4 projection syntax.
-        A value of NA is not acceptable and the proj4 call parameter will be ignored.
+       \item{3302}{\bold{The proj4 call parameter set to NA or Empty('') or 
+        is not a character string. The parameter will be ignored.}\cr
+        The proj4 call parameter must be a valid character string in the 
+        proj4 projection syntax. A value of NA is not acceptable and the 
+        proj4 call parameter will be ignored.
        } 
-       \item{3304}{\bold{3304 The proj4 call parameter is not a valid character string or 'crs' structure 
-        for a projection. The proj4 parameter will be ignored. The default AEA projection will be 
-        used in needed.}\cr
-        The function was unable to process the provided proj4 projection character string using the st_crs
-        function.  The parameter will be ignored.  A generic AEA projection based on the center of the 
-        map and its height will be used to transform the map for use in the link micromap.
+       \item{3304}{\bold{3304 The proj4 call parameter is not a valid 
+        character string or 'crs' structure for a projection. The proj4 parameter 
+        will be ignored. The default AEA projection will be used in needed.}\cr
+        The function was unable to process the provided proj4 projection character 
+        string using the st_crs function.  The parameter will be ignored.  
+        A generic AEA projection based on the center of the map and its height 
+        will be used to transform the map for use in the link micromap.
        }       
-       \item{3305}{\bold{Invalid proj4 parameter value provided. Parameter will be ignored.}\cr
-        When trying to process the proj4 projection string using the sf package st_crs function, 
-        a error was raised. The proj4 string can not be process properly and will be ignored.
+       \item{3305}{\bold{Invalid proj4 parameter value provided. Parameter 
+        will be ignored.}\cr
+        When trying to process the proj4 projection string using the 
+        sf package st_crs function, a error was raised. The proj4 string 
+        can not be process properly and will be ignored.
        }
-       \item{3306}{\bold{The proj4 call parameter specifies a long/lat projection.\cr
+       \item{3306}{\bold{The proj4 call parameter specifies a long/lat   
+        projection.\cr
         proj4: <proj4>\cr
         The final projection can't be a longlat projection.\cr
         The proj4 parameter is ignored and a AEA projection will be created.}\cr
-        The proj4 call parameter specifies a long/lat projection (see <proj4> for details). 
-        The final projection of the map for linked micromaps should not be long/lat.  Therefore,
-        a Albers Equal Area projection is calculated based on the centroid of the map with secondary
+        The proj4 call parameter specifies a long/lat projection (see <proj4> 
+        for details). The final projection of the map for linked micromaps 
+        should not be long/lat.  Therefore, an Albers Equal Area projection 
+        is calculated based on the centroid of the map with secondary
         latitudes 1/4 the maps height above and below the centroid.
        }
-       \item{3308}{\bold{The proj4 call parameter does not have +units=m, changing string to meters.}\cr
-        The proj4 call parameter projection does not have a component of +units=m to set the projection 
-        to meters as required.  Since this projection will be the final projection of the map, 
-        the +units has been changed to m to force the final projection to be in meters.
+       \item{3308}{\bold{The proj4 call parameter does not have +units=m, 
+        changing string to meters.}\cr
+        The proj4 call parameter projection does not have a component of +units=m 
+        to set the projection to meters as required.  Since this projection 
+        will be the final projection of the map, the +units has been changed 
+        to m to force the final projection to be in meters.
        }
       }
      } # 330x 
      \item{331x & 332x}{\bold{Shape File Processing and Call Parameter}
       \describe{
-       \item{3310}{\bold{The Shape file SPDF structure was passed to the function in the call.}\cr
-        This message is an informational message to document the shape file (as a SpatialPolygonsDataFrame) was passed to 
-        the function instead of passing the directory and name of the shape file.
+       \item{3310}{\bold{The Shape file SPDF structure was passed to the function 
+        in the call.}\cr
+        This message is an informational message to document the shape file 
+        (as a SpatialPolygonsDataFrame) was passed to the function instead 
+        of passing the directory and name of the shape file.
        }
        \item{3311}{\bold{Reading shape file from dir: <SFDir>  file: <SFName>}\cr
-        The function is going to read the shape file from the directory <SFDir> and layer name <SFName> using rgdal\'s readOGR function
+        The function is going to read the shape file from the directory <SFDir> 
+        and layer name <SFName> using rgdal\'s readOGR function
         with verbose = TRUE.
        }
        \item{3312}{\bold{The sf st_read can not import the shapefile as specified. 
         The errors reported were: <res1> <res2>}\cr
          
-        In the attempt to read the shapefile, the function attempts to use the dsn= parameter
-        on the st_read for the directory to the shape files and the layer= parameter to 
-        specify the specific shape file.  This is one of two modes the st_read function can use
-        depending on the driver it selects.  If this mode does not succeed, the function
-        will attempt to use the mode where the layer= is not used and the dsn= parameter 
-        must contain the entire directory and filename, minus the extentions.  If either are
-        successful, this message is generated and the two error messages are reported in <res1> 
-        and <res2>.  Review the error messages and correct the directory name used, the filename 
-        referenced and make sure both exist.
+        In the attempt to read the shapefile, the function attempts to use 
+        the dsn= parameter on the st_read for the directory to the shape files 
+        and the layer= parameter to specify the specific shape file.  
+        This is one of two modes the st_read function can use depending on the 
+        driver it selects.  If this mode does not succeed, the function
+        will attempt to use the mode where the layer= is not used and 
+        the dsn= parameter must contain the entire directory and filename, 
+        minus the extentions.  If either are successful, this message is 
+        generated and the two error messages are reported in <res1> 
+        and <res2>.  Review the error messages and correct the directory 
+        name used, the filename referenced and make sure both exist.
          
        }  
-       \item{3314}{\bold{Spatial Driver found in boundary data file read was <SReadDriver>.}\cr
+       \item{3314}{\bold{Spatial Driver found in boundary data file read 
+        was <SReadDriver>.}\cr
         The <SReadDriver> was identified during the st_read of the Shape File.
        }
-       \item{3315}{\bold{The shape file structure was passed to the function in the call.}\cr
-        The type of data passed to the function in the ShapeFile parameter indicates the user
-        is passing a spatial structure rather than a filename.  The type of structure will be 
-        validated.
+       \item{3315}{\bold{The shape file structure was passed to the function 
+        in the call.}\cr
+        The type of data passed to the function in the ShapeFile parameter 
+        indicates the user is passing a spatial structure rather than a filename.  
+        The type of structure will be validated.
        }
-       \item{3317}{\bold{The spatial structure passed to the function via the ShapeFile parameter is not
-        a SPDF or a sf full structure.  Please correct and try again.}\cr
-        If a spatial structure is passed to the BuildBorderGroup function, it must be a SPDF or sf structure
-        containing the data information.  The data information is required to be able to match the 
+       \item{3317}{\bold{The spatial structure passed to the function via the 
+        ShapeFile parameter is not a SPDF or a sf full structure.  
+        Please correct and try again.}\cr
+        If a spatial structure is passed to the BuildBorderGroup function, 
+        it must be a SPDF or sf structure containing the data information.  
+        The data information is required to be able to match the 
         polygons in the structure to the rows in the name table.
        }
-       \item{3320}{\bold{The projection field in the shapefile is empty, set to <OrigLongLat>}\cr
-        The proj4string slot in the SpatialPolygonsDataFrame for the shape file is empty.  
-        The projection for the shape file is assumped to be a long/lat projection and will be set 
-        to a long/lat projection of <OrigLongLat>.
+       \item{3320}{\bold{The projection field in the shapefile is empty, 
+        set to <OrigLongLat>}\cr
+        The proj4string slot in the SpatialPolygonsDataFrame for the shape 
+        file is empty. The projection for the shape file is assumped to be 
+        a long/lat projection and will be set to a long/lat projection of <OrigLongLat>.
        }
        \item{3325}{\bold{Checking Shape Link Name Column: <ShapeLinkName>}\cr
-        Checking to make sure the shape file data.frame header contain a variable by the name of <ShapeLinkName> as specified 
+        Checking to make sure the shape file data.frame header contain a variable by 
+        the name of <ShapeLinkName> as specified 
         on the function call.
        }
-       \item{3326}{\bold{The ShapeLinkName provided: <ShapeLinkName> does not exist in the shape file data.}\cr
+       \item{3326}{\bold{The ShapeLinkName provided: <ShapeLinkName> does not exist in 
+        the shape file data.}\cr
         The shape file variable <ShapeLinkName> does not exist in the data.frame header. 
         Check for the existence of the variable and for possible spelling errors and return.
        }
-       \item{3327}{\bold{Shape file link variable name is valid, values will be cleaned up and 
-        stored in variable X__Link.}\cr
-        The specified Shape File link variable name was found in the SpatialPolygonsDataFrame.  
-        Its contents will be cleaned up and saved in variable X__Link for later use.
+       \item{3327}{\bold{Shape file link variable name is valid, values will be 
+        cleaned up and stored in variable X__Link.}\cr
+        The specified Shape File link variable name was found in the 
+        SpatialPolygonsDataFrame.  Its contents will be cleaned up and saved 
+        in variable X__Link for later use.
        }
       }
      }  # 331x-2x
      \item{350x to 355x}{\bold{Name Table General Issues}
       \describe{
-       \item{3510}{\bold{The Name Table was read from: <NameTableType> <NameTablePath>}\cr
-        The initial name table file will be read from <NameTablePath> containing the directory 
-        and filename.  The name table file type is <NameTableType>.
+       \item{3510}{\bold{The Name Table was read from: <NameTableType> 
+        <NameTablePath>}\cr
+        The initial name table file will be read from <NameTablePath> 
+        containing the directory and filename.  The name table file type 
+        is <NameTableType>.
        }
-       \item{3511}{\bold{The Name Table Path provided to read the Name Table does not exist. Value=<NameTablePath>.
+       \item{3511}{\bold{The Name Table Path provided to read the Name Table 
+         does not exist. Value=<NameTablePath>.
           }
-        The Name Table Directory and Filename to read the Name Table does not exist. Please check the Name Table file's
-        location and try again.  The Name Table must be accessible to run the BuildBorderGroup function.
+        The Name Table Directory and Filename to read the Name Table does 
+        not exist. Please check the Name Table file's location and try again.  
+        The Name Table must be accessible to run the BuildBorderGroup function.
        }
-       \item{3512}{\bold{The NameTable in the .rda file is not a data.frame. Please correct and 
-        retry.}\cr
-        The initial name table can be constructed and saved in the R .rda format file.  
-        When read, the contents of the file is not a data.frame structure and cant be used.  
-        Research the cause and correct.
+       \item{3512}{\bold{The NameTable in the .rda file is not a data.frame. 
+        Please correct and retry.}\cr
+        The initial name table can be constructed and saved in the R .rda 
+        format file.  When read, the contents of the file is not a data.frame 
+        structure and cant be used.  Research the cause and correct.
        }
-       \item{3514}{\bold{There are more than one data.frame in the .rda file provided for 
-        the NameTable. Provide only one data.frame table in the .rda and retry.}\cr
-        When the .rda file was opened for use as the name table data.frame, more than 
-        one was found.  The .rda should only contain one data.frame for use as the 
-        name table.
+       \item{3514}{\bold{There are more than one data.frame in the .rda 
+        file provided for the NameTable. Provide only one data.frame table 
+        in the .rda and retry.}\cr
+        When the .rda file was opened for use as the name table data.frame, 
+        more than one was found.  The .rda should only contain one data.frame 
+        for use as the name table.
        }
        \item{3215}{\bold{Name Table Link column is: <NameTableLink>}\cr
-        The function will use the <NameTableLink> column to pair up the name table rows with the 
-        collections of polygons in the shape file.       
+        The function will use the <NameTableLink> column to pair up the name 
+        table rows with the collections of polygons in the shape file.       
        }
        \item{3521}{\bold{The Name Table has no columns of data.}\cr
         The name table as read, does not contain any data columns or meaningful column 

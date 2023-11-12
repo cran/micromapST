@@ -1,6 +1,6 @@
 \name{AfricaBG}
-\alias{AfricaBG}
 \docType{data}
+\alias{AfricaBG}
 \title{AfricaBG border group datasets to support creating
 micromaps for the 52 countries in Africa}
 \description{
