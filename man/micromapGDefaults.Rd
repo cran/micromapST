@@ -400,10 +400,9 @@ safe to be modified by the user.
               glyphs:
               \describe{
                \item{SNBar.varht}{= FALSE, enables variable height bars from 
-                SBar.First.barht to SBar.Last.barht.}
+                SBar.First.barht to \cr SBar.Last.barht.}
                \item{SNBar.two.ended}{= FALSE, request two ended variable height 
-                bars be used 
-                (small to large to small).( Not implemented )}\cr            
+                bars be used (small to large to small).( Not implemented )}           
                \item{SNBar.Middle.Dot}{=FALSE, request a dot be draw in at the 
                 mid point in the segmented bars.}
                \item{SNBar.MDot.pch}{=21, type of point/symbol used as the mid 
@@ -413,11 +412,11 @@ safe to be modified by the user.
                  used as the mid point dot. SNBar.Middle.Dot must be TRUE for 
                  this parameter to function.}
                \item{SNBar.MDot.pch.size}{=0.3, size of point/symbol used 
-                 as the mid point dot. SNBar.Middle.Dot must be TRUE for this 
+                 as the mid point dot. \cr SNBar.Middle.Dot must be TRUE for this 
                  parameter to function.}\cr             
                \item{SNBar.MDot.pch.border.lwd}{=NA, line width of outline of 
-                 point/symbol used as the mid point dot. SNBar.Middle.Dot must 
-                 be TRUE for this parameter to function.}
+                 point/symbol used as the mid point dot. \cr
+                 SNBar.Middle.Dot must be TRUE for this parameter to function.}
                \item{SNBar.MDot.pch.border.col}{=NA, color of outline of 
                  point/symbol used as the mid point dot. SNBar.Middle.Dot 
                  must be TRUE for this parameter to function.}

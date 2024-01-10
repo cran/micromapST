@@ -18,7 +18,7 @@ importFrom("stats",        "qnorm",      "aggregate")
 importFrom("RColorBrewer", "brewer.pal")
 importFrom("stringr",      "str_trim",   "str_split",  "str_sub",     "str_replace", 
     "str_replace_all",     "str_pad",    "str_locate", "str_squish",  "str_to_upper",   
-    "str_to_lower")
+    "str_to_lower",        "str_remove", "str_remove_all")
 importFrom("labeling",     "wilkinson",  "extended")
 importFrom("readxl",       "read_xls",   "read_xlsx")
 importFrom("writexl", "write_xlsx")
@@ -26,8 +26,9 @@ importFrom("sf",      "st_geometry",     "st_shift_longitude", "st_is_longlat",
     "st_transform",   "st_drop_geometry","st_as_sf",           "st_as_sfc",
     "st_union",       "st_difference",   "st_intersects",      "st_intersection",          
     "st_area",        "st_coordinates",  "st_bbox",            "st_centroid",
-    "st_crs",         "st_crs<-",        "st_as_text",   
-    "st_is_valid",    "st_make_valid",   "st_read",            "st_write",           
+    "st_crs",         "st_crs<-",        "st_as_text",	       "st_boundary", 
+    "st_is_valid",    "st_make_valid",   "st_read",            "st_write",
+    "st_cast", 
     "sf_use_s2")
 importFrom("spdep",    "poly2nb")
 importFrom("rmapshaper", "ms_simplify")

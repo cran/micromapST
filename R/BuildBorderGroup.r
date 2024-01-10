@@ -1,14 +1,14 @@
 ######
 #####
 #
-#  date: November 8, 2023
+#  date: January 9, 2024
 #
 #  packages used by BuildBorderGroup function
 #
 #  base		bitwise functions; plot; load; and more.
 #  tools	CRAN_check_xxxx; file_ext; file_path_sans_ext; file_exists; dir_exists
 #  stringr	str_trim; str_split; str_to_upper; str_pad; str_locate; str_replace; str_replace_all; 
-#               str_sub; str_to_lower; str_squish; 
+#               str_sub; str_to_lower; str_squish; str_remove; str_remove_all;
 #  graphics	plot; plot.new; par
 #  graphicsR	
 #  RColorBrewer	brewer_pal
@@ -23,9 +23,9 @@
 #               st_transform; st_drop_geometry;  st_as_sf; st_as_sfc; 
 #               st_union; st_difference; st_intersects; st_intersection; 
 #               st_area; st_coordinates; st_bbox; st_centroid; 
-#		st_crs; st_as_text; 
+#		st_crs; st_as_text; st_boundary; st_cast; 
 #               st_is_valid; st_make_valid; st_read; st_write; 
-#               sf_set_s2
+#               sf_set_s2, st_buffer
 #
 #  spdep        poly2nb         # and supporting functions 
 #
@@ -39,6 +39,7 @@
 #            2023-02xx to 2023-0724 (continue to update to sf, verify code, and test for 
 #                release.)
 #   In support of release 3.0.0.
+#            2023-0724 to 2024-0103 continued updates to support book and correct problems.
 #
 #   This function takes a shapefile and name table (CSV or Excel format)
 #   and creates a border group dataset ".RDA" of the geographic 
@@ -693,7 +694,42 @@
 #             - Corrected the MapHdr, ReducePC, IDHdr, MapMinH, MapMaxH call parameter checks
 #               to check for "missing" as well as null and na.  For na, any() added as insurance
 #               incase a vector or list back it through the validation checks.
-#
+#  2023-11-28 - Masked additional messages and warnings from st_intersects and st_intersection
+#               functions from the users. 
+#  2023-11-28 - Attempted to filter all incoming "Name", "Abbr", "ID", "Alt-Abbr", "Alias",
+#               information in the Name Table with the same information in the Shape file
+#               and name table.  If all are filtered the same (Name Table at time of being 
+#               built and synced with the polygons data) and the user's location ID 
+#               information data at the time of importing it for micromapST use, then the
+#               it will be the best environment to ensure location ids will match almost
+#               99.999% of the time.  Process: Upper Case, no internal punctuation (.-=/ etc.),
+#               no internal blanks (only one), and trim external blanks.
+#  2024-01-06 - Suppressed warning and messages around rmapshaper, aggregation, and file.remove.
+#               Merge new section from 3.0.3 back into 3.0.2 as the base.
+#               Rewrote the documentation section on the BuildBorderGroup debug call parameter.
+#  2024-01-07 - Several error messages and warning started appearing in the basic tests related
+#               to the validation of the MapL column; not a character type column and the length 
+#               of the strings were over 3 characters when they were actually 2.  It was found
+#               that read.csv and possibily other reading function, will treat any quote in the 
+#               original data as a quote and not remove it.  Thus a "AK" field in the .csv file
+#               will be placed in the MapL field as "AK" with a length of 4 characters.  The quotes
+#               are considered part of the value.  The use of noquote complicates the process 
+#               by changing the class of the MapL vector, so it is no longer a character vector.
+#               It also does not actually remove the quotes, they re-appear when the string is 
+#               converted back into a character variable. The problem is resolve by manually 
+#               removing the quotes in the MapL data.
+#  2024-01-09 - Correcting column validation when characters and vectors are involved.  Lists are
+#               vectors!  If any structure is treated by str_trim, it becomes a character vector. OUCH!
+#               Package will work, but may need a lot of adjustments later.
+#  2024-01-09 - Several user suggested using the following commands to reliably 
+#               get a single boundary around a map:  st_union or aggregate, st_boundary,
+#               and st_     . The st_union returns a single area, so it's not
+#               useful.  The st_combine also returns a single area.  That leaves
+#               aggregate for building Level 2 and Regional boundary sets.  It was
+#               hoped st_union could do the Level 3 merger of all areas into one,
+#               but caused problems and could not handle interior slivers or gaps
+#               between areas.  st_buffer helped for a while, but would not scale
+#               and did modify the L3 shape.
 #
 # 
 #  Operation Sequence:
@@ -764,7 +800,7 @@
 #  and NA,NA values for the final X, Y point in a polygon.
 #
 #  Author:  James Pearson, StatNet Consulting, Gaithersburg, MD 20877
-#  Updated  July 15th, 2023
+#  Updated  January 3, 2024
 #
 #  Version:  1.1.0 (with package V2.0.2) updated nacol
 #
@@ -780,7 +816,41 @@
 #
 #  Version:  3.0.0 Tested release of 2.9.0
 #
-#  Version:  3.0.1 - correction of some call parameter checks.  
+#  Version:  3.0.1 Correction of some call parameter checks. 
+#
+#  Version:  3.0.2 Correct as.Date call; correct logic to properly 
+#                  fill-in map colors when a single median area is present and 
+#                  not mapped;  tighten up several call parameter checks to make
+#                  sure internal R error don't occur and confuse the user.
+#
+#  Version   3.0.2 updated - corrected BuildBorderGroup processing of sf structures to get 
+#                  VisBorder Files.  Changed from st_union to aggregate and added st_boundary
+#                  to processing for L3 boundaries.  
+#                  Attempt to fix bad geometries that leave slivers in 
+#                  geometry - no successful.  Must be careful when making manual adjustments.
+#                  Added the origin= option to the as.Date function call to support
+#                  old R releases.
+#                  Removed test output plots when modifying an area.  USstBG had 4 extra 
+#                  plots.
+#                  Updated documentation to only include one description of the border
+#                  group data.frames (data sets) in bordGrp chapter.
+#                  
+#                  
+#
+#
+#  functions used from sf:         sf, st_as_sf, st_as_sfc, st_geometry, st_drop_geometry,
+#                                  st_union, aggregate, st_make_valid, st_is_valid, st_buffer,
+#                                  st_transform, st_shift_longitude, st_read, st_write
+#                                  st_crs, st_coordinates, 
+#
+#  functions used from stringr:    str_trim, str_split, str_replace, str_replace_all,
+#                                  str_sub, str_squish, str_pad, 
+#
+#  functions used from spdep:      poly2nb
+#
+#  functions used from graphics:   plot line, arrows, polygon, axis, text, boxplot, mtext,
+#                                  points, plot.new, strheight, strwidth, par
+#
 #
 #####
 
@@ -813,7 +883,7 @@
 #######
 #####
 #
-#  Main Code Call - Version 3.0.1 - 2023-11-09
+#  Main Code Call - Version 3.0.2 - 2024-01-03
 #
 
 BuildBorderGroup <- function(
@@ -840,22 +910,22 @@ BuildBorderGroup <- function(
 			MapMinH         = NULL,    
 			   # Maximum Height for micromap drawing (inches) (optional)
 			MapMaxH         = NULL,      
-			   # One of two header lines for the ID Glyph column (optional) 
+			   # One of two header lines for the ID Glyph column (optional)
 			   #      (Max 12 characters each)
 			IDHdr           = NULL,	 
 			   # cex value for the Map Labels (optional)
 			LabelCex        = NULL,           
 			   # The percentage of vertex to be kept by rmapshaper (optional)
-			ReducePC        = 1.25, 		
+			ReducePC        = 1.25,       #  in % to be kept
 			   # Callers requested micromap image final projection (optional) 
 			   #     (projection string with $input and $wkt not sp::CRS)
 			proj4           = NULL,		
 	                   # Will only do a calculated AEA transformation if the 
 	                   # shape file projection is not a long/lat projection and 
-	                   # and proj4 is provided.
+	                   # and proj4 is provided and not a long/lat projection.
 	                   #
 	                   # default = FALSE, True for restart.
-			checkPointReStart = NULL,       
+			checkPointReStart = NULL,       #  FALSE - normal run, TRUE - start at check point
 			   # Debug flag (control bits) = 0 to 65535.
 			debug           = 0		
                    ) 
@@ -1094,9 +1164,11 @@ BuildBorderGroup <- function(
    #   ReducePC         - is a numeric value (1 element in a vectex) - the 
    #                      numeric is the goal reduction by rmapshaper to 
    #                      the shape file. The range of the value is from 
-   #                      0.01 to 100 percent. A value of 1.5 indicates 
+   #                      0.0001 to 100 percent. A value of 1.5 indicates 
    #                      rmapshaper will keep 1.5% of the original vectex
-   #                      in the map areas. The default value is 1.5%.
+   #                      in the map areas. The default value is 1.25%.
+   #
+   #                      
    #
    #   proj4           -  (optional) can be the character string equal to the 
    #                      $input proj4 string or the $wkt string in the st_crs results
@@ -1378,7 +1450,7 @@ BuildBorderGroup <- function(
    
    #####
    #
-   #  aggFUN - a function to inspect the data.frame columns and determine
+   #  aggFun - a function to inspect the data.frame columns and determine
    #    an appropriate aggregation method - copy or sum.
    #
    aggFun <- function(z) { if (methods::is(z[1],"character")) {
@@ -1403,6 +1475,9 @@ BuildBorderGroup <- function(
           if (x < l)  return (FALSE)
           return(TRUE)
    }
+   
+   #
+   #####
 
    #####
    #
@@ -1512,7 +1587,7 @@ BuildBorderGroup <- function(
       #print(res)
        
       # it should be a crs or it is invalid
-      #cat("I got to the last half.. convertPROJ4 code 1515 \n")
+      #cat("I got to the last half.. convertPROJ4 code 1544 \n")
       return(res)
       
      }  # end of convertPROJ4 function
@@ -1583,14 +1658,14 @@ BuildBorderGroup <- function(
         #  this function is not dependent on the shift and really does not want the shift
         #  to be in effect.   The first st_union and st_make_valid are also used to revert.
         #
-	#cat("Entered AEAProjection Function Code 1586 .\n")
+	#cat("Entered AEAProjection Function Code 1615 .\n")
 	wsfc <- sf::st_geometry(wsf)
         
         suppressMessages(
            FullMap <- sf::st_make_valid(sf::st_union(wsfc))     # now one area
         )
         # need because of trying st_centroid on LL
-        #cat("Find centroid of full map Code 1593 \n")
+        #cat("Find centroid of full map Code 1622 \n")
         suppressWarnings(
             FullMapCtr    <- sf::st_coordinates(sf::st_centroid(FullMap))
         )
@@ -1670,7 +1745,7 @@ BuildBorderGroup <- function(
       #   name table.
       # 
       #
-      #cat("BuildVisBorder Function - for ",TypeVis," file. Code 1673 \n")
+      #cat("BuildVisBorder Function - for ",TypeVis," file. Code 1702 \n")
       
       #
       # This function takes a geometry and converts it into a VisBorder structure and returns
@@ -1719,6 +1794,7 @@ BuildBorderGroup <- function(
                  z       <- wsfG[[nz]] # pull off row and get st_geometry?
                  tc      <- class(z)[2]          # get class to help make decisions.
                  m       <- sf::st_coordinates(z) # get coordinates.
+                    # may not be needed because of the cast to multipolygon....
                  if (tc == "POLYGON") {          # adjust coordinates to make them look like MULTIPOLYGON structure
                     x    <- colnames(m)
                     # adjust columns in coordinates
@@ -1791,7 +1867,7 @@ BuildBorderGroup <- function(
       #                                               and any others not needed.
       #str(VisForm2)
       
-      #cat("Now to remove duplicates. code 1794 \n")
+      #cat("Now to remove duplicates. code 1823 \n")
       
       VisForm3        <- as.data.frame(RemoveDups(VisForm2, TypeVis))
       Lft             <- dim(VisForm3)[1]
@@ -1805,7 +1881,6 @@ BuildBorderGroup <- function(
    #
    #
    #####
-   
    
    ######
    #
@@ -1941,7 +2016,9 @@ BuildBorderGroup <- function(
       #cat("Entered st_getAM.\n")
       
       suppressWarnings(
-         SFnbmat <- sf::st_intersects(xsfc, sparse=FALSE)
+         suppressMessages(
+            SFnbmat <- sf::st_intersects(xsfc, sparse=FALSE)
+         )
       )
       #print(SFnbmat)
       
@@ -1956,7 +2033,9 @@ BuildBorderGroup <- function(
                Xj <- xsfc[j]   # get feature at j
       
                suppressWarnings(
-                 stIntersection <- sf::st_intersection(Xi, Xj)   # check each intersection
+                  suppressMessages(
+                     stIntersection <- sf::st_intersection(Xi, Xj)   # check each intersection
+                  )
                )
                if (length(stIntersection[[1]]) > 0 ) { Res <- TRUE } else { Res <- FALSE }
                
@@ -2002,7 +2081,7 @@ BuildBorderGroup <- function(
    #
    dsatur <- function (x, coloring = NULL)   # D.Brelaz (1979) ACM
    {    #   x - adj matrix for the areas.
-       #cat("Enter Dsatur function Code 2005 \n")
+       #cat("Enter Dsatur function Code 2038 \n")
        adj_mat       <- x                 # get the adjaceny matrix
        #cat("dim of adj_mat:",dim(adj_mat),"\n")
        #cat("class of adj_mat:",class(adj_mat),"\n")
@@ -2027,7 +2106,7 @@ BuildBorderGroup <- function(
                    index_maximum_degree <- index_node
                }
            }
-           #cat("calling getNeighbors Code 2030 .\n")
+           #cat("calling getNeighbors Code 2063 .\n")
            neighbors = getNeighbors(adj_mat, index_maximum_degree)
            
            for (index_neighbor in neighbors) {
@@ -2281,7 +2360,7 @@ BuildBorderGroup <- function(
          #cat("SamplePrt_sf - bit 256 - Number of areas:",UniPKeyListSize,"  Number of Panels:",NumPanels,"\n")
          
          # This printout is only done to PDF.   Build PDF filename and title.
-         PDFTest          <- paste0(BGPathName,"Test Chart - ",PPTitle,".pdf")
+         PDFTest          <- paste0(BGPathName," Test Chart - ",PPTitle,".pdf")
          Title            <- paste0("Test Chart - ",PPTitle)
          #cat("SamplePrt -> ",PDFTest,"\n")
          
@@ -2732,7 +2811,7 @@ BuildBorderGroup <- function(
        }
    }
    
-   #cat("NTDir:",NTDir," 2728 \n")
+   #cat("NTDir:",NTDir," 2768 \n")
    callVL$NameTableDir <- NameTableDir
    callVL$NTDir        <- NTDir		    # with /
    callVL$NTDirValid   <- NTDirValid
@@ -2880,7 +2959,7 @@ BuildBorderGroup <- function(
       def_NameExt        <- ".csv"     #   default extension
       NameTablePath      <- ""
       
-      #cat("NTDir:",NTDir," 2811 \n")
+      #cat("NTDir:",NTDir," 2933 \n")
       
       if (missing(NameTableFile) || is.null(NameTableFile) ) {
          StopFlag   <- stopCntMsg(paste0("***3202 NameTableFile parameter has not been provided. Execution Stopped.\n"))
@@ -2889,7 +2968,7 @@ BuildBorderGroup <- function(
          if (methods::is(NameTableFile,"data.frame")) {
             # the value passed in NameTableFile is a data.frame.
             # treat as a read name table.
-            # cat("NT passed as data.frame 2820 \n")
+            # cat("NT passed as data.frame 2942 \n")
             # print(NameTableFile)
             NTable   <- NameTableFile
             NTPassed <- TRUE
@@ -3458,7 +3537,7 @@ BuildBorderGroup <- function(
       #  Part 2.7 - Reduce PC    (Range:  .01 to 100 percent)
       #    It is not a decimal, but a percent ranging from 0.01 to 100 %
       #
-      def_ReducePC   <- 1.25     # Value is remaining vectors precentage of original.
+      def_ReducePC   <- 1.25     # % Value is remaining vectors precentage of original.
       #
       ReducePC <- ReducePC[[1]][1]
       
@@ -3486,8 +3565,8 @@ BuildBorderGroup <- function(
                   ErrorFlag   <- errCntMsg(paste0("***3276 The ReducePC parameter has more than one value. Only the first\n",
                                                   "        value will be used.\n"))
                } else {
-                  if (ReducePC < .01 || ReducePC > 100) {  # out of range  (percentage to keep - .0001 TO 100 %)
-                       ErrorFlag   <- errCntMsg(paste0("***3278 The value of ReducePC is out of range (0.01 to 100 %).\n",
+                  if (ReducePC < .0001 || ReducePC >= 100) {  # out of range  (percentage to keep - .0001 TO 100 %)
+                       ErrorFlag   <- errCntMsg(paste0("***3278 The value of ReducePC is out of range (0.0001 to 100 %).\n",
                                                        "        The default value of 1.25 % will be used.\n"))
                        ReducePC  <- def_ReducePC
                   }
@@ -3929,7 +4008,7 @@ BuildBorderGroup <- function(
          sf_use_s2(FALSE)   # see if warning or error/??
       )
 
-      #######    331x   (Code: 3841)
+      #######    331x   (Code: 3982)
       #
       #  Part 3.1 - Setup to process ShapeFile and find shapefile 
       #     for areas to use.   (Read file)
@@ -4039,7 +4118,6 @@ BuildBorderGroup <- function(
             SReadDriver = "ESRI Shapefile"
          }
          
-         #str(WorkSf01) # test. 
          #  as an sf structure there is no @data slot.  All of the attrs are $ including the 
          #  geometry.  The geometry is a sfc_polygon or sfc_multipolygon with one entry per polygon(s).
          #  The number of entries must equal the number of items in each attr array.
@@ -4074,7 +4152,7 @@ BuildBorderGroup <- function(
          #
       
       }
-      #
+      #  have a shape file in sf format.
       if (StopFlag) {
          stop(paste0("***3999 Errors have been found and noted above. Execution stopped.\n",
                      "        Please fix problem(s) and retry.\n"))
@@ -4092,8 +4170,9 @@ BuildBorderGroup <- function(
       #
       #  Part 3.2 - Inspect and set projection in shapefile.
       #
-      
+            
       WorkSf01_a    <- WorkSf01
+      WorkSf01      <- sf::st_make_valid(WorkSf01)   # added 1/3/24
       WorkSfc01     <- sf::st_geometry(WorkSf01)
       
       WorkSf01BBox  <- sf::st_bbox(WorkSf01)   # watch out different format not matrix
@@ -4101,12 +4180,13 @@ BuildBorderGroup <- function(
       xLim          <- as.numeric(MapBox)[c(1,3)]
       yLim          <- as.numeric(MapBox)[c(2,4)]
        
-      WorkSf01Proj4 <- NULL                    # proj4string image
-      SFproj4       <- sf::st_crs(WorkSf01)    # get projection (input and wkt) (FULL)
-      #print(SFproj4)     # could be empty or NA or NULL
+      WorkSf01Proj4 <- NULL     # proj4string image
+      SfCrs         <- sf::st_crs(WorkSf01)    # get projection (user and wkt) (FULL)
+      Sfproj4       <- SfCrs$proj4string       # get old proj4
+      #print(Sfproj4)     # could be empty or NA or NULL
       
-      if (is.null(SFproj4) || all(is.na(SFproj4)) || any(SFproj4 == "")) {
-         # if shape file crs is empty, NA or NULL 
+      if (is.null(Sfproj4) || any(is.na(Sfproj4)) || any(Sfproj4 == "")) {
+         # if shape file crs (proj4) is empty, NA or NULL 
          # no projection supplied in ShapeFile (sf POLYGONS)
   
          #cat("***3320 The projection field in the shapefile is empty, set to \n",
@@ -4114,23 +4194,25 @@ BuildBorderGroup <- function(
          
          # Set to generic longlat projection.         
          sf::st_crs(WorkSf01)<- OrigProj            # set empty projection to def L/L
-         SFproj4             <- sf::st_crs(WorkSf01)
-         WorkSf01Proj4       <- SFproj4$proj4string # get current projection string
+         SfCrs               <- sf::st_crs(WorkSf01)# get current projection string
+         Sfproj4             <- SfCrs$proj4string   
+         WorkSf01Proj4       <- Sfproj4
          
          ShpProjLL           <- TRUE     # indicate shapefile is longlat
          DoBldAEAProj        <- TRUE     # indicate most likely will need an AEA project built.
          
       } else {
-         #cat("class of SFproj4:",class(SFproj4),"\n")   # st_crs is not empty.
-         WorkSf01Proj4       <- SFproj4$proj4string      # must assign with $ or else you transfer class.
+         # not empty or NA.
+         #cat("class of Sfproj4:",class(Sfproj4),"\n")   # st_crs is not empty.
+         WorkSf01Proj4       <- SfCrs$proj4string      # must assign with $ or else you transfer class.
          # shape file has crs..
          
       }
       WorkSf01Proj4   <- as.character(WorkSf01Proj4)
-      SFproj4$input   <- WorkSf01Proj4
+      SfCrs$input     <- WorkSf01Proj4
       
       #cat("projection check: \n")
-      #print(SFproj4)                 # class crs
+      #print(Sfproj4)                 # class crs
       
       #
       #  In this section it was found W <- SFproj4$proj4string transfered the value 
@@ -4144,8 +4226,13 @@ BuildBorderGroup <- function(
             cat("class(WorkSf01Proj4):",class(WorkSf01Proj4),"\n")
             cat("WorkSf01_projection: ",WorkSf01Proj4,"\n")
           }
-      # may have a projection string set in the shapefile (SFproj4),
+      # may have a projection string set in the shapefile (SfCrs & Sfproj4),
       # and the proj4 string type in WorkSf01Proj4.  
+      
+      #####
+      #
+      #  Need to make sure geometry is valid
+      
       
       #####
       #
@@ -4181,9 +4268,12 @@ BuildBorderGroup <- function(
          #cat("get centroid for shift evaluation.\n")
          #cat("Proj4String:",sf::st_crs(WorkSf01)$proj4string,"\n")
          
-         #WorkSfc01  <- sf::st_geometry(WorkSf01)   # sfc, but LL still throws a warning.
-         suppressWarnings(           
-           MapCtr <- sf::st_centroid(sf::st_union(WorkSfc01))   # converted to sfc or sfg
+         WorkSfc01  <- sf::st_geometry(WorkSf01)   # sfc, but LL still throws a warning.
+         suppressWarnings(   
+            suppressMessages(
+               MapCtr <- sf::st_centroid(sf::st_union(WorkSfc01))   # converted to sfc or sfg
+                    # must have valid geometry
+            )
          )
          xctr     <- sf::st_coordinates(MapCtr)   # restore xctr to work with original code.
          #cat("Map's Center:",xctr,"\n")
@@ -4246,7 +4336,7 @@ BuildBorderGroup <- function(
             }
          }   
       }
-      if(LLShift) cat("LLShift flag set indicating the st_shift_longitude function will be used.\n")
+      #if(LLShift) cat("LLShift flag indicating the st_shift_longitude function will be used.\n")
       ###
       
       if (bitwAnd(debug,4) != 0) cat("Proj Flags -ShpProjLL:",ShpProjLL, "  DoUserProj4:",DoUserProj4,
@@ -4289,20 +4379,21 @@ BuildBorderGroup <- function(
       #####
       #
           
-      #if (bitwAnd(debug,8) != 0){
+      if (bitwAnd(debug,8) != 0){
+         WorkSfc01 <- sf::st_geometry(WorkSf01)
          OutPutP   <- paste0(BGPathName, "BBG_Raw_shapefile_image.pdf")
          grDevices::pdf(OutPutP,width=10,height=7)
          Sys.setFileTime(OutPutP,Sys.time())
          plot(WorkSfc01,main='',lwd=0.2,asp=1,key.pos=NULL)     # *** CHANGe
          graphics::title("Shape file - Original raw data")
          x <- grDevices::dev.off()
-      #}  # now done via Sample Prts
+      }  # now done via Sample Prts
       
       #  fill empty projection in shape file
       
-      #  The SP, SPDF, and sf are in WorkSf01 is RAW no modifications.
+      #  The SP, SPDF, and sf are in WorkSf01 is RAW no modifications as a sf structure.
       
-      #cat("End of section 3.2 - Code 4305 \n")
+      #cat("End of section 3.2 - Code 4364 \n")
       #####
       #######
       #########
@@ -4841,7 +4932,7 @@ BuildBorderGroup <- function(
       NTNames[xmna] <- NTNamesOrig[xmna]   # restore entires that did not match
       
       if (bitwAnd(debug,64) != 0) { 
-         cat("Updated Name Table column names: \n")  #  Code 4846 \n")
+         cat("Updated Name Table column names: \n")  #  Code 4917 \n")
          print(data.frame(o=NTNamesOrig, n=NTNames))   # if one is wrong it remains upper cast.
       }
       
@@ -5482,7 +5573,9 @@ BuildBorderGroup <- function(
       
       NTable     <- as.data.frame(NTable,stringsAsFactors=FALSE)
       NTNames    <- names(NTable)
-      
+      #cat("Prior to column check - 5536\n")
+      #print(NTable)
+
       # As a coding safety measure, if a modification column does 
       # not exist, one will be created and filled with NA.
       
@@ -5595,6 +5688,9 @@ BuildBorderGroup <- function(
       #  Part 6.3 - MapLabel validation - two formats
       #      MapLabel="AK,1,2"   or MapL="AK", MapX=1, MapY=2
       #
+      #      Note -MapL should really not have the string quoted.
+      #      But since it could be, we will remove any quotes.
+      #
       #  Check for the MapL,MapX,and MapY format and columns first.
       #
       
@@ -5607,7 +5703,7 @@ BuildBorderGroup <- function(
       #  Setup up for MapL, MapX, MapY, conversion of MapLabel 
       #  and then validation
       #
-      MapLData <- FALSE
+      MapLData <- FALSE     # no MapL data, may be MapLabel data.
       NTable1  <- NTable
              
       nrNT     <- dim(NTable)[1]
@@ -5625,24 +5721,28 @@ BuildBorderGroup <- function(
          # MapL present, validate MapL, MapX, and MapY.  
          # If good, ignore MapLabel.
          # remove head and tail white space.
-         MapL    <- stringr::str_trim(NTable$MapL)   # get a copy for processing.
-         MapL[MapL==""] <- NA    # no label set to NA
+         MapL           <- stringr::str_trim(NTable$MapL)   # get a copy for processing
+         MapL[MapL==""] <- NA_character_    # no label set to NA
+         MapL1          <- str_remove_all(MapL,'\"')
+         MapL           <- str_remove_all(MapL1,"\'")
+         NTable$MapL    <- MapL
+         MapLNA         <- rep(NA_character_,length(NTable$MapL))
          
          if (all(is.na(MapL) | MapL=="")) {
             # MapL column is empty  - don't have to check MapX and MapY   
             # - go check for MapLabel.
-            MapL <- NA   #  set all to <NA>
+            MapL <- MapLNA  #  set all to <NA>
          } else {
             # Validate the MapL  - at least one is present
-            # methods::is(MapL,"character") is against the entire column, not entry.
+            # methods::is(NTable$MapL,"character") is against the entire column, not entry.
             
-            xmNoNA    <- !is.na(MapL)          # not an <NA>  * (old MapLs) have label?
-            if (!methods::is(MapL,"character")) {  # the column is character..  step 1
+            xmNoNA    <- !is.na(NTable$MapL)          # not an <NA>  * (old MapLs) have label?
+            if (!methods::is(NTable$MapL,"character")) {  # the column is character..  step 1
               # column not character - logic or numeric
-              xmsg <- paste0("***3630 The MAPL column in the name table is not character data.\n",
+              xmsg        <- paste0("***3630 The MapL column in the name table is not character data.\n",
                              "        Labeling will not be done.\n") 
-              ErrorFlag <- errCntMsg(xmsg)
-              MapL <- NA
+              ErrorFlag   <- errCntMsg(xmsg)
+              NTable$MapL <- MapLNA
             } else {
               # possible labels are in rows xmNoNA = TRUE
               
@@ -5655,7 +5755,7 @@ BuildBorderGroup <- function(
                  ErrorFlag    <- errCntMsg(xmsg)
                  NTable$MapX  <- NA
                  NTable$MapY  <- NA
-                 MapL         <- NA   # fix it later.
+                 MapL         <- MapLNA   # fix it later.
               } else {
                  # have both needed x,y coordinates columns
                  #suppressWarnings(
@@ -5682,21 +5782,26 @@ BuildBorderGroup <- function(
                        # xmMap has TRUE set for each row with MapL
                        MapList  <- seq(1,length(NTable$MapL))[xmNoNA]   # get list of rows with MapL labels.
                        # MapList should be list of index numbers of name table rows.
-                       #MapList
+                       #cat("MapList:",MapList,"\n")
                         
                        for (inx in MapList) { 
                           # Step through list of row index and check it out
+                          xxMapL <- NTable[inx,"MapL"]
+                          #cat("MapL:",xxMapL," len:",nchar(xxMapL),"\n")
+                          
                           # label for error messages
                           NTN <- NTable[inx,"Name"]        # get name field for message.
-                          if (nchar(NTable[inx,"MapL"]) > 3) {
+                          
+                          if (nchar(xxMapL) > 3) {
                              # too long a label > 3 chars
                              xmsg <- 
-                                paste0("***3634 The MapL label for area ",NTN," should be 3 or less\n",
+                                paste0("***3634 The MapL label - ",xxMapL," -  for area ",NTN," should be 3 or less\n",
                                        "        characters to be usable.\n")
                                 ErrorFlag <- errCntMsg(xmsg)
+                          } else {
+                             # build table of just the MapL labels.
+                             MapLData <- TRUE   # have good MapL, X, and Y.
                           }
-                          # build table of just the MapL labels.
-                          MapLData <- TRUE   # have good MapL, X, and Y.
                        }
                        # it is all stored in the Name Table - validate later.
                     }
@@ -5704,7 +5809,7 @@ BuildBorderGroup <- function(
               }
             }
          }
-         NTable$MapL <- MapL   # restore MapL values to Name Table
+         #NTable$MapL <- MapL   # restore MapL values to Name Table  (Done above)
       }
       #
       #  End of MapL, MapX, and MapY processing
@@ -5712,6 +5817,7 @@ BuildBorderGroup <- function(
       #
       #####
     
+      #cat("Status of MapLData:",MapLData,"\n")
       ##### 363x  (5-7)
       #
       #  Part 6.3.2 - MapLabel - and break it up into three fields 
@@ -5927,6 +6033,9 @@ BuildBorderGroup <- function(
                      "        Please fix problem(s) and retry.\n"))
       }
 
+      #cat("NTable after MapLabel check\n")
+      #print(NTable)   
+      
       #########
       #######
       #####
@@ -5936,7 +6045,7 @@ BuildBorderGroup <- function(
       #
       
       if (bitwAnd(debug,64) != 0) cat("ShapeFile Current Proj4 CRS:",
-            as.character(SFproj4$input)," ",as.character(SFproj4$wkt),"\n")    #     String
+            as.character(SfCrs$input)," ",as.character(SfCrs$wkt),"\n")    #     String
            
       #####  
       #
@@ -6017,14 +6126,14 @@ BuildBorderGroup <- function(
             if (is.na(stringr::str_locate(WorkSf01Proj4,"\\+units=m |\\+units=m$"))[[1]]) {  
                # +units not set to meters.
                cat("***3711 The projection provided in the Shape File does not have\n",
-                   "        +units=m, modify and setup for re-projection to change to meters.\n")
+                   "        +units=m, will modify and setup for re-projection to change to meters.\n")
                CurProj     <- WorkSf01Proj4    # get copy of projection string
                
                # find the +units=??? and replace with +units=m.
                matchstr    <- "\\+units=[[:alpha:]]+"     # RegExp string to find +units=???.
                ModProj4    <- stringr::str_replace(CurProj,matchstr,"\\+units=m ")   # find start and end and do replacement
             
-               cat("New Projection for ShapeFile - later:",ModProj4,"\n")
+               cat("New Projection for ShapeFile to be applied later:",ModProj4,"\n")
                #  ModProj4 contains copy of the upgraded projection from the shape file.               
                DoModProj4 <- TRUE   
                
@@ -6062,7 +6171,7 @@ BuildBorderGroup <- function(
       #    They would be overriden by the users proj4 request.
       #
                
-      WorkSf02     <- WorkSf01        # advance the SPDF for the next phase of this process.
+      WorkSf02     <- WorkSf01        # advance the sf for the next phase of this process.
       WorkSf02_a   <- WorkSf01
       WorkSf02Data <- sf::st_drop_geometry(WorkSf02) # save for later if need to restore.
       
@@ -6374,6 +6483,7 @@ BuildBorderGroup <- function(
       #
       WorkSf03_b <- WorkSf03   #  (RAW - first image)
       #cat("printing map raw - WorkSf03\n")
+      #plot(WorkSf03)
       
       vDebug <- debug 
       ##  if debug bits 256, 512, or 1024 are set - plot map for inspection.
@@ -6455,11 +6565,12 @@ BuildBorderGroup <- function(
         
       if (bitwAnd(debug,64) != 0) 
       {
-         cat("Spatial Polygon data section:\n")
+         cat("sf structure data section:\n")
          print(sf::st_drop_geometry(WorkSf03))
       }
       #  rmapshaper call for ms_simplify   (affine - simplification)
-      #suppressWarnings(
+      suppressWarnings(
+          suppressMessages(
           WorkSf04 <- rmapshaper::ms_simplify( WorkSf03,
                              keep        = MS_Keep,         # def = 1.25 %  or 0.0125 units.
                              method      = "vis",           # NULL=Visvalingam Simplification (default)
@@ -6476,8 +6587,7 @@ BuildBorderGroup <- function(
                           # Therefore, these two parameters are commented out
                           #   force_FC    = TRUE,   # default - passed to apply_mapshaper_commands
                           #   sys         = FALSE)  # default - passed to apply_mapshaper_commands
-           #)
-      #)
+          )    )
       #SizeSf04  <- utils::object.size(WorkSf04)
       #cat("sf size after ms_simplify:",SizeSf04," (04)\n")
       
@@ -6504,7 +6614,7 @@ BuildBorderGroup <- function(
          grDevices::pdf(OutPutP,width=10, height=7)
          Sys.setFileTime(OutPutP,Sys.time())
          
-         plot(WorkSf04[5],main='',lwd=0.2,asp=1,key.pos=NULL)
+         plot(WorkSfc04,main='',lwd=0.2,asp=1,key.pos=NULL)
          graphics::title("Shape File after rmapshaper simplification.")
          x          <- grDevices::dev.off()
       }
@@ -6527,10 +6637,11 @@ BuildBorderGroup <- function(
       WorkSf05        <- aggregate(WorkSfxx,by=list(MList),FUN=aggFun )
                          # the coordinates modified sf::st_shift survive the aggregations.
                          
+      #cat("Aggregation of Polygons completed.\n")
       #cat("projecton of WorkSf05 after aggregation:\n")
       #print(sf::st_crs(WorkSf05))
       
-      #print(WorkSf05,n=20)
+      WorkSf05       <- sf::st_make_valid(WorkSf05)
       
       #cat("***3778 Map area aggregation completed.\n")
       #
@@ -6568,7 +6679,6 @@ BuildBorderGroup <- function(
       #
       #  Shape file now in WorkSf06
       WorkSf06   <- WorkSf05
-      WorkSf06_a <- WorkSf06
       #
       #####
       #cat("Set Abbr and Key into WorkSf06.\n")
@@ -6581,12 +6691,12 @@ BuildBorderGroup <- function(
       #
       if (bitwAnd(debug,8) !=0) {
          WorkSfc06 <- sf::st_geometry(WorkSf06)
-         OutPutP   <- paste0(BGPathName,"BBG-Shape_file_after_multipolygon_union.pdf")
+         OutPutP   <- paste0(BGPathName,"BBG-Shape_file_after_multipolygon_agg.pdf")
          grDevices::pdf(OutPutP,width=10, height=7)
          Sys.setFileTime(OutPutP,Sys.time())
          
          plot(WorkSfc06,main='',lwd=0.2,asp=1,key.pos=NULL)
-         graphics::title("ShapeFile after multipolygon union to get the areas organized")
+         graphics::title("ShapeFile after multipolygon agg ")
          x         <- grDevices::dev.off()
       }   
       if (bitwAnd(debug,64) !=0) {
@@ -6604,7 +6714,7 @@ BuildBorderGroup <- function(
       #  Create an AEA projection to use for area estimation on map areas
       #
       EstAEAProj <- NULL
-      #cat("Code 6601 - ShpProjLL: ", ShpProjLL,"\n")
+      #cat("Code 6700 - ShpProjLL: ", ShpProjLL,"\n")
       
       if (ShpProjLL) {
            EstAEAProj <- AEAProjection(WorkSf06)
@@ -6660,14 +6770,15 @@ BuildBorderGroup <- function(
       #
       #cat("***3801 Identifying neighbors for each area.\n")
       
-      WorkSf06_c    <- WorkSf06
-      
       #cat("spdep::poly2nb.\n")  
       suppressWarnings(
-          Sf06.nb <- spdep::poly2nb(st_geometry(WorkSf06,queen=TRUE))
+         suppressMessages(
+          Sf06.nb <- spdep::poly2nb(sf::st_geometry(WorkSf06,queen=TRUE))
+         )
       )
       #
       #
+      #cat("Completed spdep::poly2nb\n")
       
       RNList        <- row.names(WorkSf06)              # Get list to help backfile in the nb list.
       NBList        <- sapply(Sf06.nb, function(x) RNList[x])
@@ -6798,8 +6909,7 @@ BuildBorderGroup <- function(
       #       Resulting sf will be in the WorkSf07.
        
       WorkSf07    <- WorkSf06
-      WorkSf07_a  <- WorkSf06
-      
+     
       options(warn=1)
       
       # cat("Setting Xoffset and Yoffset to 0 if value NA.\n")
@@ -6875,6 +6985,8 @@ BuildBorderGroup <- function(
          
          names(Worksfc) <- KeyList    # add names to each row.
          
+         #cat("KeyList:",KeyList,"\n")
+         
          for (xKey in KeyList) {      #  See which areas need modification in order of geometry?
          
             ##  geometry order -> go to NTable and get flags.
@@ -6884,16 +6996,17 @@ BuildBorderGroup <- function(
             # Only need to work on rows with "DoAdj" flag set in Name Table.
             if (NTable[xKey,"DoAdj"]) {      # of NTable row says DoAdj, we have work to do on this area.
                
-               #cat("***3811 Area:",xKey," will be adjusted using the ",modList," values.\n")
+               cat("***3811 Area:",xKey," will be adjusted using the ",modList," values.\n")
 
                # pick up Xoffset, Yoffset, Scale and pass to the function to process sf row.
                # translate degrees to radian
                
-               xAdjParms <- (NTable[xKey,modList])
+               xAdjParms <- (NTable[xKey,modList])   # get modification values
+               
                if (is.null(xAdjParms$Rotate) || is.na(xAdjParms$Rotate)) { # no rotate
                   xAdjParms$Rotate = 0
                   NTable[xKey,"Rotate"] = 0
-                  xAdjparms$RotateR = 0
+                  xAdjParms$RotateR = 0
                } else {
                   xAdjParms$RotateR <- xAdjParms$Rotate * pi / 180  # get radian angle
                }
@@ -6901,15 +7014,15 @@ BuildBorderGroup <- function(
                   xAdjParms$Scale = 1
                   NTable[xKey,"Scale"] = 1
                }
-               cat("***3812 Area: ",xKey," Xoffset:",xAdjParms$Xoffset," Yoffset:",xAdjParms$Yoffset,"\n",
-                   "        Scale:",xAdjParms$Scale, " Rotate :",xAdjParms$Rotate, " in radians:",xAdjParms$RotateR,"\n")
+               #cat("***3812 Area: ",xKey," Xoffset:",xAdjParms$Xoffset," Yoffset:",xAdjParms$Yoffset,"\n",
+               #    "        Scale:",xAdjParms$Scale, " Rotate :",xAdjParms$Rotate, " in radians:",xAdjParms$RotateR,"\n")
                   
                  # get sub-SF for area.
                  # pull off each areas sf structure by key.
                
-               areaSFC    <- Worksfc[xKey]   # get sfc for the area.   
+               areaSFC    <- Worksfc[xKey]   # get sfc for the area to adjust.   
                
-               #cat("get centroid of area.\n")
+               #cat("get centroid of area. code 7011 \n")
                suppressWarnings(
                   areaCtr    <- sf::st_centroid(areaSFC)  # old coordinates  of sfc
                ) 
@@ -6930,7 +7043,8 @@ BuildBorderGroup <- function(
                #     shifting:  uses a 2x1 matrix (vector)
                #     recentering: uses a 2x1 matrix line shifting.
                #
-
+               
+               #cat("Do adjustment for ",xKey,"\n")
                areaSFC2         <- (areaSFC - areaCtr) * rot(xAdjParms$RotateR) * xAdjParms$Scale + c(xAdjParms$Xoffset,xAdjParms$Yoffset) + areaCtr
  	       # The above formula strips the crs from the spatial definition.
  	       # Add the crs back in the area sfc.
@@ -6938,8 +7052,9 @@ BuildBorderGroup <- function(
  	       #if (LLShift) areaSFC2 <- sf::st_shift_longitude(areaSFC2)   # don't need to check on st_crs.
 
 	       Worksfc[xKey]    <- areaSFC2  # re-insert the area into the sf
- 	       
-               # Working at the sfc level mays it easy to manipulate, plot,
+               cat("***3813 Re-inserting area polygons for ",xKey,"\n")
+   	    
+   	       # Working at the sfc level mays it easy to manipulate, plot,
                # and replace entry in the SF or SFC.
                # In some cases, the st_shift_longitude shift and st_crs 
                # projection are lost and must be reapplied.  
@@ -6948,7 +7063,6 @@ BuildBorderGroup <- function(
                # You can manipulate the list form of the areaSFG for the modifications.  
     
                # Get list of Neighbors to be Evaluate for overlay
-               #cat("***3813 Re-inserting area polygons for ",xKey,"\n")
                NBList          <- NTable[xKey,"NB"][[1]]  # neighbor list for this area (xKey).
                
                #
@@ -6965,14 +7079,14 @@ BuildBorderGroup <- function(
                
                # overlayed by below...
                
-               cat("***3814 plot of original area before modifications in blue :\n") # xKey and Violet
+               #cat("***3814 plot of original area before modifications in blue :\n") # xKey and Violet
                # plot of area before modification
-               plot(areaSFC,border="blue",xlim=xLim,ylim=yLim)   # basic plot
+               #plot(areaSFC,border="blue",xlim=xLim,ylim=yLim)   # basic plot
 	    	                
-               cat("***3815 plot of main area after modifications in green :\n") # Modified xKey and Green    
+               #cat("***3815 plot of main area after modifications in green :\n") # Modified xKey and Green    
 	       # plot of area after modification 
-	       par(new=TRUE)
-	       plot(areaSFC2,border="green",xlim=xLim,ylim=yLim,add=TRUE)
+	       #par(new=TRUE)
+	       #plot(areaSFC2,border="green",xlim=xLim,ylim=yLim,add=TRUE)
 	    
                #
                # the area can be modified but not have neighbors.
@@ -6987,27 +7101,40 @@ BuildBorderGroup <- function(
                   for (iNB in NBList) {   # process for each neighbor of this modified area.
                   
                      #  get neighbor area
-                     cat("***3818 Original neighbor boundaries in magenta for neighbor : ",iNB,"\n")
-                     wsfSFC    <- Worksfc[iNB]    #  sfc (each neighbor)
-                     par(new=TRUE)
-                     plot(wsfSFC,border="magenta",xlim=xLim,ylim=yLim,add=TRUE)  # neighbor over print
+                     #cat("***3818 Original neighbor boundaries in magenta for neighbor : ",iNB,"\n")
+                     wsfSFC    <- Worksfc[iNB]    #  get sfc (each neighbor)
+                     
+                     #par(new=TRUE)
+                     #plot(wsfSFC,border="magenta",xlim=xLim,ylim=yLim,add=TRUE)  # neighbor over print
                     
                      #cat("difference: ",xKey," and ", iNB,"\n")
+                     
                      suppressMessages(
                        wsfTrimmedSFC      <- sf::st_difference(wsfSFC, areaSFC2)
                      )
                      if (LLShift) wsfTrimmedSFC <- sf::st_shift_longitude(wsfTrimmedSFC) # long values modified - reapply st_shift_longitute
                      
-                     cat("***3819 Trimmed neighbor boundaries in seagreen for ",iNB,"\n")
+                     #cat("***3819 Trimmed neighbor boundaries in seagreen for ",iNB,"\n")
                      #  Now have the new boundaries for the neighbor  - sfc
-                     par(new=TRUE)
-                     plot(wsfTrimmedSFC,border="seagreen",xlim=xLim,ylim=yLim,add=TRUE)
+                     #par(new=TRUE)
+                     #plot(wsfTrimmedSFC,border="seagreen",xlim=xLim,ylim=yLim,add=TRUE)
                      
-                     Worksfc[iNB] <- wsfTrimmedSFC   # save the change.
+                     Worksfc[iNB] <- wsfTrimmedSFC   # save the change back into map.
                     
                      #print(Worksfc[iNB])
                   } # next neighbor
                }
+               if (bitwAnd(debug,8) != 0) {            
+	          WorkSfc04  <- sf::st_geometry(Worksfc)
+	          OutPutP    <- paste0(BGPathName, "BBG-AT start of NT Mod loop-",xKey,".pdf")
+	          grDevices::pdf(OutPutP,width=10, height=7)
+	          Sys.setFileTime(OutPutP,Sys.time())
+	          
+	          plot(WorkSfc04,main='',lwd=0.2,asp=1,key.pos=NULL)
+	          graphics::title("Shape File at head of NT Mod loop.")
+	          x          <- grDevices::dev.off()
+	       }
+
             }  # End of process of modifying values for one area.     
          }  # Loop through areas to see which need adjustments
          
@@ -7017,7 +7144,8 @@ BuildBorderGroup <- function(
          x <- 1
          #cat("***3810 Info:No modifications are required to map.\n")
       }
-      
+      #cat("end of name table modifications\n")
+      #plot(st_geometry(WorkSf07))      
       # Results in WorkSf07 with modifications and East-West Crossing issue 
       # corrected (sf::st_shift_longitude).
       # Areas are modified and neighbors clipped to have the space is needed.
@@ -7045,7 +7173,7 @@ BuildBorderGroup <- function(
          SamplePrts_sf(PPsf,PPTitle,PPMfrow,vDebug,NTable$Key, MapAvgH)
       }
       #
-      #cat("***3822 Name Table modificiations to Shape file are complete.\n")
+      cat("***3822 Name Table modificiations to Shape file are complete.\n")
       
       #####
       #######
@@ -7414,8 +7542,7 @@ BuildBorderGroup <- function(
       }
       #
       #####
-      
-              
+                   
       #####  390x
       #
       #  Section 9.0 - Get set up for building the VisBorder files
@@ -7543,8 +7670,8 @@ BuildBorderGroup <- function(
       #  with /
       
       CkptPath <- paste0(BGDir,"CheckPoint")
-      cat("***3910 The checkpoint files will be store in the Checkpoint directory :\n",
-          "      ",CkptPath,"\n")
+      #cat("***3910 The checkpoint files will be store in the Checkpoint directory :\n",
+      #    "      ",CkptPath,"\n")
       if (!dir.exists(CkptPath)) {
          # create if it does not exist.
          # build checkpoint folder if first time (rebuild if needed.)
@@ -7588,7 +7715,9 @@ BuildBorderGroup <- function(
       # Save name table as RDA file.
       save(areaNamesAbbrsIDs, file=NTPCkpt, compress="xz")  
       # Save name table as CSV file.
-      file.remove ( file=NTPCkptcsv )
+      if (file.exists(NTPCkptcsv)) {
+         file.remove ( file=NTPCkptcsv )
+      }
       utils::write.csv(areaNamesAbbrsIDs, file=NTPCkptcsv, row.names=FALSE)        
  
       #
@@ -7634,13 +7763,15 @@ BuildBorderGroup <- function(
       areaParms$CP_ShpDSN     <- SFPCkpt   # save location of shape file information.
       areaParms$CP_ShpLayer   <- SFCkpt
       
-      cat("***3913 Checkpoint - ShapeFile collection is :",SFCkpt,"\n",
-          "        set of ESRI Shapefiles and an RDA image :",SFCkptRDA,"\n")
+      cat("***3913 Checkpoint - The shape file spatial data is written to:",SFCkpt,"\n",
+          "        as a set of ESRI Shapefiles.  The RDA image spatial data is in:",SFCkptRDA,"\n")
       save(WorkSfMaster, file=SFPCkptRDA, compress="xz")
       
       #print(head(WorkSfMaster,n=20))
-      wFiles <- dir(SFPCkpt,pattern=paste0(SFCkpt,'.*'))  # get list of existing file we will
-      file.remove(paste0(SFPCkpt,'/',wFiles))             # overwrite files - erase old copies.
+      wFiles  <- dir(SFPCkpt,pattern=paste0(SFCkpt,'.*'))  # get list of existing file we will
+      RMFiles <- paste0(SFPCkpt,'/',wFiles)
+      file.remove(RMFiles)                                # overwrite files - erase old copies.
+     
       #
       # Now I know how I read the shapefile in and the driver that was used.
       # I can now write it back the same way using the SReadDriver and the ReadFlag information.
@@ -7675,12 +7806,12 @@ BuildBorderGroup <- function(
       # After doing the check point, we continue to build 
       # the border group dataset.
       #
-      cat("***3917 BuildBorderGroup has completed the write of the checkpoint\n",
+      cat("***3917 BuildBorderGroup has completed writing of the checkpoint\n",
           "        files to disk for possible editing and restart.\n",
           "        They are located in the following directory : \n")
       cat("        ",CkptPath,"\n")
-      cat("***3918 The check point Shape File for the border group is saved to:\n",
-          "        ",SFCkpt,"\n")
+      #cat("***3918 The check point Shape File for the border group is saved to:\n",
+      #    "        ",SFCkpt,"\n")
       cat("***3919 After editing, the resulting files must be saved back to\n",
           "        the same directory and filename.\n")
       
@@ -7850,21 +7981,22 @@ BuildBorderGroup <- function(
       
       # Reloading of the check point files is done.
    }  
-   
-   
+      
    suppressMessages(      # Turn it off so we can process the shapefile.
       sf_use_s2(FALSE)
    )	
-
-  
+ 
    #####  3A0x
    #
    # Since Shapefile could have been modified, make sure 
    # shape file is OK.
    #
-   WorkSfMst   <- sf::st_make_valid(WorkSfMst)
+   WorkSfMst     <- sf::st_make_valid(WorkSfMst)
    
-   WorkSfNames <- names(WorkSfMst)   # get names of variables
+   WorkSfMst     <- st_cast(WorkSfMst,"MULTIPOLYGON")   # Make sure all geometry elements are multipolygons
+   WorkSfMstData <- sf::st_drop_geometry(WorkSfMst)
+   WorkSfNames   <- names(WorkSfMst)   # get names of variables
+
    #
    #  Make sure the added variables are still there.
    #     X__Link should be gone..
@@ -7986,6 +8118,9 @@ BuildBorderGroup <- function(
       SamplePrts_sf(PPsf,PPTitle,PPMfrow,vDebug,NTable$Key,MapAvgH)    # gotcha
    }
    
+   Wkbbx    <- sf::st_bbox(WorkSfMst)
+   wDist    <- abs(Wkbbx[1]-Wkbbx[3])/7500
+
    SfMstrows <- row.names(WorkSfMst)  # the list of rows in the WorkSf08 sf
    #  No more unions on the area layer
    
@@ -8075,9 +8210,52 @@ BuildBorderGroup <- function(
    #
    #cat("Layer 3 - outline of all.\n")
    WorkL3          <- WorkSfMst
-   WorkL3          <- sf::st_as_sf(sf::st_union(WorkL3))  # all of the areas.
+
+   WorkL3agg       <- aggregate(WorkSfMst,by=list(rep("L3",length(SfMstrows))),FUN=aggFun)
+   #  Aggregate reverted the spatial objects back to polygons.  Have to re cast it again.
+   #plot(sf::st_geometry(WorkL3agg))
+   
+   ##WorkL3aggb      <- sf::st_boundary(WorkL3agg)
+   ##   In some cases st_boundary creates a linestring geometry.  This can't be
+   ##   converted back to Multipolygon in one step.  Needs MULTIPOLYGON to 
+   ##   ensure the conversion to VisBorders works.
+   ##object.size(WorkL3aggb)
+   
+   #cat("Layer 3 - outline of all.\n")
+   
+   WorkL3          <- sf::st_cast(WorkL3agg,"MULTIPOLYGON")   # Make sure all geometry elements are multipolygons
+   #            This is required for the BuildVisBorders to work right.
    WorkL3$agg      <- BorderGroupName
    WorkL3$agg_name <- BorderGroupName
+  
+   #
+   #  Steps to find concave hull  - not used.
+   #  a) st_union (not useful, skip)
+   #  b) get bbox for sizing
+   #  c) find distance for st_buffer  =  width of map / 7500 (meters)  = US is 4882 km = 4,882,000
+   #     st_buffer increases the size of the file enormously..  find another method of 
+   #     building a concave hull boundary for entire map.  
+   #    I suppect, the modificates create a small river like gap between RI and MA on the right 
+   #    and also a gap on the top border between MA and RI and CT.   st_boundary can't 
+   #    catch it since it looks like a river.
+   #
+   #  -- Did not use st_buffer since it inflated the size of the objects by 2x and did not really help.
+   #
+   #  Alternate Steps:
+   #  1) get a clean and valid copy of the boundaries.
+   #  2) aggregate all boundaries to one key.
+   #  3) Use st_boundary function to clean up edges.
+   #  4) Set the results to ALL MULTIPOLYGON elements.
+   #  5) Set the aggregate names in the data section.
+   #
+   #suppressMessages(    # removed.
+   #   suppressWarnings(
+   #      WorkL3          <- sf::st_as_sf(sf::st_union(WorkL3))  # all of the areas.
+   #   )
+   #)
+   #WorkL3   <- sf::st_buffer(WorkL3,wDist)
+
+   #plot(sf::st_geometry(WorkL3))
   
    if (bitwAnd(debug,8) != 0) {
       WorkL3sfc <- sf::st_geometry(WorkL3)
@@ -8275,7 +8453,7 @@ BuildBorderGroup <- function(
       PngH         <- 4 + .4
       xAsp         <- areaParms$Map.Aspect
       PngW         <- PngH / xAsp   #  Y / (Y/X)  <-  Y * X/Y
-      #cat("xAsp:",xAsp,"  PngW:",PngW,"  PngH:",PngH,"\n")
+      cat("xAsp:",xAsp,"  PngW:",PngW,"  PngH:",PngH,"\n")
       
       FTitle       <- gsub(" ","_",PPTitle)
       
@@ -8288,7 +8466,7 @@ BuildBorderGroup <- function(
       
       Sys.setFileTime(OutTestSm,Sys.time())
          
-      #cat("par('din')",par('din'),"  par('fin'):",par('fin'),"  par('pin'):",par('pin'),"\n")
+      cat("par('din')",par('din'),"  par('fin'):",par('fin'),"  par('pin'):",par('pin'),"\n")
            
       #par(mfrow=c(1,1))
       par(omi=c(0,0,0,0))

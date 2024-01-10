@@ -148,7 +148,7 @@
          was meant to point to a different location, correct 
          the parameter and retry.
        }  
-     }
+      }
      }
      \item{320x}{\bold{NameTable Files}\cr
       \describe{
@@ -191,7 +191,7 @@
          columns required to construct the name table. (see name table section.)
        }
       }
-     } #320x
+     } 
      \item{321x}{\bold{Name Table Link}\cr
       \describe{
        \item{3212}{\bold{The NameTableLink call parameter is an 'NA', empty 
@@ -207,7 +207,7 @@
         sure it is a valid column in the initial name table.
        }
       } 
-     } # 321x
+     } 
      \item{322x}{\bold{Shape File and Directory}\cr
       \describe{
        \item{3220}{\bold{Shape File parameter has not been provided or is NA.}\cr
@@ -260,7 +260,7 @@
         ShapeFile name.  Correct and retry.
        }
       }
-     } # 322x
+     } 
      \item{323x}{\bold{ShapeLinkName parameter}
       \describe{   
        \item{3230}{\bold{The ShapeLinkName call parameter is missing. The default 
@@ -288,7 +288,7 @@
         Review the <ShapeLinkName> character string and correct.
        }
       }
-     } #323x
+     } 
      \item{324x}{\bold{Map Headers and parameters}
       \describe{
        \item{3240}{\bold{The MapHdr parameter does not contain character strings 
@@ -303,7 +303,7 @@
        }
        \item{3244}{\bold{The MapHdr parameter has zero or more than 2 elements. 
         Only the first 2 will be used.}\cr
-        The MapHdr call parameter contains more that 2 elements. 
+        The MapHdr call parameter contains more that 2 elements. \cr
         For example: c('hdr1','hdr2','hdr3') Only the first 2 elements will be used.
        }
        \item{3246}{\bold{It is suggested the max length of the MapHdr strings 
@@ -313,7 +313,7 @@
         the character strings.
        }
       }
-     } #324x
+     } 
      \item{325x}{\bold{Map Minimum and Maximum Height}
       \describe{
        \item{3251}{\bold{The MapMinH parameter does not contain numeric value. 
@@ -341,7 +341,7 @@
         The MapMaxH value must higher than the MapMinH value.  The values are swapped.
        }
       }
-     } #325x 
+     }  
      \item{326x}{\bold{ID Header and Parameters}
       \describe{
        \item{3261}{\bold{The IDHdr parameter does not contain character strings 
@@ -366,7 +366,7 @@
         the IDHdr string be limited to less than 12 characters each.
        }
       }  
-     }  # 326x
+     } 
      \item{327x}{\bold{Reduction Percentage Parameter}
       \describe{
        \item{3272}{\bold{The ReducePC parameter must be a numeric value. The default 
@@ -392,7 +392,7 @@
         It is out of range.  The default value of 1.25 \% will be used.
        }
       }
-     }  # 326x
+     }  
      \item{328x}{\bold{LabelCex Call Parameter}
       \describe{
        \item{3282}{\bold{The LabelCex parameter must be a numeric value. The default 
@@ -416,7 +416,7 @@
         and the default value of 0.25 will be used.
        }
       }
-     } # 328x
+     } 
      \item{330x}{\bold{proj4 Parameter}
       \describe{
        \item{3301}{\bold{No projection provided in the shapefile or the proj4 
@@ -465,7 +465,7 @@
         to m to force the final projection to be in meters.
        }
       }
-     } # 330x 
+     } 
      \item{331x & 332x}{\bold{Shape File Processing and Call Parameter}
       \describe{
        \item{3310}{\bold{The Shape file SPDF structure was passed to the function 
@@ -536,7 +536,7 @@
         in variable X__Link for later use.
        }
       }
-     }  # 331x-2x
+     }  
      \item{350x to 355x}{\bold{Name Table General Issues}
       \describe{
        \item{3510}{\bold{The Name Table was read from: <NameTableType> 
@@ -546,7 +546,7 @@
         is <NameTableType>.
        }
        \item{3511}{\bold{The Name Table Path provided to read the Name Table 
-         does not exist. Value=<NameTablePath>.
+         does not exist. Value = <NameTablePath>.
           }
         The Name Table Directory and Filename to read the Name Table does 
         not exist. Please check the Name Table file's location and try again.  
@@ -597,7 +597,7 @@
         is retained.
        }
       }
-     }  # 350x-5x 
+     }  
      \item{356x to 359x}{\bold{Name Table Name, Abbr, ID, Alias and Alt_Abr data errors}\cr
       \describe{
        \item{3562}{\bold{The <inx> column contains duplicate entries. Correct and retry.}\cr
@@ -678,7 +678,7 @@
         value and is disabled.
        }
       }
-     } #356x-359x
+     } 
      \item{362x}{\bold{Name Table Modification Parameters}
       \describe{
        \item{3622}{\bold{The Name Table in the <inxRN> area row and in the <inx> column
@@ -692,7 +692,7 @@
         out of range.  The acceptable range is from <low> to <high>.   Correct and rerun.
        }
       }
-     }  # 362x
+     } 
      \item{363x and 364x}{\bold{Map Labels and Coordinates}
       \describe{
        \item{3630}{\bold{The MAPL column in the name table is not character data. Labeling 
@@ -715,7 +715,7 @@
         A map label for an area is present, but the MapY coordinate is missing or invalid.
         The label will not be drawn. Correct the MapY and possibly the MapX values.       
        } 
-       \item{3634}{\bold{The MapL label for area <area name> should be 3 or less characters 
+       \item{3634}{\bold{The MapL label - <label> - for area <area name> should be 3 or less characters 
         to be usable.}\cr
         It is recommended the map label string be shortened to 3 character or less to reduce 
         the space required to draw the label.
@@ -752,7 +752,7 @@
         this error will appear.  Inspect the coordinates and adjust as needed.
        } 
       }     
-     }  # 363x-364x
+     }  
      \item{371x}{\bold{Shape File Projection}
       \describe{
        \item{3711}{\bold{The projection provided in the Shape File does not have +units=m,
@@ -767,7 +767,7 @@
         meters.  No modifications are required and no transformation will be needed.
         }
        } 
-      } #371x 
+      } 
      \item{372x}{\bold{Boundary data clean up}\cr
       \describe{
        \item{3720}{\bold{Cleaning up polygons in spatial structure.}\cr
@@ -780,7 +780,7 @@
         are not used.
         }
        }
-      } # 372x
+      } 
      \item{375x}{\bold{Matching Shape File to Name Table}
       \describe{
        \item{3750}{\bold{Comparing shape file to name table links}\cr
@@ -796,7 +796,7 @@
         be dropped from the final border group map.
        }
       }
-     } # 375x
+     } 
      \item{376x}{\bold{Linking Name Table to Shape File}
       \describe{
        \item{3760}{\bold{Comparing the link values to tie the name table to the shape file.}\cr
@@ -818,7 +818,7 @@
         same boundary, the boundary may not be drawn.
        }
       }
-     } # 376x
+     } 
      \item{377x}{\bold{Shape File Simplification}\cr
       \describe{
        \item{3770}{\bold{Simplifying the shape file boundary data with rmapshaper.}\cr
@@ -845,7 +845,7 @@
         number of areas in the name table.
        }
       }
-     } # 377x
+     }  
      \item{379x}{\bold{Area Size Inspection and Name Table Modifications}\cr
       \describe{
        \item{3793}{\bold{The following areas may be too small (<0.03\%): <ListOfAreas>}\cr
@@ -863,7 +863,7 @@
         in the maps.  No modifications were done.
        }
       }
-     }  # 379x
+     }  
     \item{38xx}{\bold{Name Table Modifications}\cr
      \describe{
       \item{3801}{\bold{Identifying neighbors for each area.}\cr
@@ -909,7 +909,7 @@
        All of the name table specified area modification has been completed.
       }
      } 
-    }  # 381x - 382x  
+    }  
     \item{384x}{\bold{Area Coverage Analysis}
      \describe{
       \item{3843}{\bold{These area coverage estimates were done after the name table 
@@ -931,7 +931,7 @@
        area.
       }
      }
-    } # 384x
+    } 
     \item{386x}{\bold{Final processing and transformation}\cr
      \describe{
       \item{3860}{\bold{Transforming projection of Shape file and label points.}\cr
@@ -971,7 +971,7 @@
        specification.  The proj4 parameter will be ignored.
       }
      }
-    }  # 386x
+    }  
     \item{387x}{\bold{Generating Test Plot}
      \describe{
       \item{3872}{\bold{The length of name table and the number of areas in the shape file are different.}\cr
@@ -980,7 +980,7 @@
        more areas then the name table.  Correct and re-run.
       }
      }
-    }  # 387x
+    }  
     \item{391x}{\bold{checkPointRestart Writes}\cr
      \describe{
       \item{3910}{\bold{The checkpoint files will be store in the Checkpoint directory : <CkptPath>}\cr
@@ -991,8 +991,8 @@
        The check point Name Table data.frame is save as a data.frame (.rda) in the <NPCkpt> file 
        and as a .csv file in the <NTCkptcsv> file.
       }
-      \item{3913}{\bold{Checkpoint - Shape File collection is: <SFCkpt>  set of ESRI 
-       Shapefiles and an RDA image: <SFCkptRDA>}\cr
+      \item{3913}{\bold{Checkpoint - The shape file spatial data is written to: <SFCkpt>.
+        as a set of ESRI Shapefiles.  The RDA image spatial data is in: <SFCkptRDA>}\cr
        The check point image of the shape file is saved in ERSI Shapefile format in the 
        <SFCkpt> shape files and as a SpatialPolygonsDataFrame in the <SFCkptRDA> RDA file.
       }
@@ -1000,9 +1000,9 @@
        The control areaParms dataset has been checkpointed in the <APPCkpt> directory
        as the <APCkpt> filename.
       }
-      \item{3917}{\bold{BuildBorderGroup has completed the write of the check point files to disk
-       for possible editing and restart.  They are located in the following directory: 
-       <Check Point Directory>}\cr
+      \item{3917}{\bold{BuildBorderGroup has completed writing of the checkpoint files to disk 
+        for possible editing and restart. They are located in the following directory : 
+        <Check Point Directory>}\cr
        The border group dataset has been successfully written to directory included in this 
        message and is ready for use, reuse, or editing.
       }
@@ -1062,7 +1062,7 @@
        do a \option{checkPointReStart} = TRUE to build the micromapST boundary files.
       }
      }
-    } # 392x
+    } 
     \item{3Axx}{\bold{Creating micromapST boundaries files}\cr
      \describe{
       \item{3A02}{\bold{The shape file variables have been editted. The 'X__Key' variables are 
@@ -1137,14 +1137,15 @@
       }
       \item{3999}{\bold{Errors have been found and noted above.  Execution stopped. 
        Please fix problem(s) and retry.}\cr
-
-       *** More detail to be added ***
+       Inspect the previous messages and errors to identify the cause of problems that stopped 
+       the execution of the function.  Fix the problem and rerun.
       }
      }   
-    }   
+    }
+    
    }  
   }
-  \item{\bold{Report messages}}{
+  \item{\bold{REPORT MESSAGES}}{
    \describe{
     \item{\bold{PUBLICATION INFORMATION FOR NAME TABLE IN BORDER GROUP}}{
      The border group has been created.  To make sure the user can use the same location ids that were

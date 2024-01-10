@@ -1,6 +1,6 @@
 #
 #  micromapST - 
-#  Updated: November 8, 2023 by Jim Pearson
+#  Updated: January 9th, 2024 by Jim Pearson
 #
 #  discussion points:  not all border groups have abbreviations or IDs.  Names yes, but need to 
 #       handle the value inputed by the user and link data to boundaries. May be needed
@@ -117,7 +117,7 @@
 #
 #  2013-05-09 - switch the TS Array to be 1=x, 2=y, 3=low-y, 4=high-y.
 #
-#  2013-05-10 - add support for rownames on the time series arrays.
+#  2013-05-10 - add support for rowNames on the time series arrays.
 #        - added validation of state ids in boxplots and time series.
 #        - added new time series dataset to package.
 #        - added panelInBound to generating x and y axis labels.
@@ -723,18 +723,44 @@
 #           attr(,"xIsDate") of the array.  For example:
 #           attr(<TS array>,"xIsDate") <- "%y-%b-%d"  #   based on the date/time arguments
 #           documented in the strptime R function.
+#  2023-1113 - During the deployment to CRAN of Version 3.0.1, it was discovered that R versions 
+#           earlier than 4.3 require the as.Date function have an origin paramter when converting 
+#           numeric dates to character dates.  It is assumed the origin of "1970-1-1" will be the 
+#           proper origin for all packages and operating systems.
+#            - In the map ploting functions of micromapST ("mapcum", "maptail", and "mapmedian",
+#           when the median group/row represents only one area, and no map is craw.  Instead, 
+#           the median area is colored BLACK in the group/row above and below the median group/row.
+#           This was done to let the graph reader know where the median area is located and 
+#           which graphic element in the group/row is the area,  During testing, it was 
+#           discovered, the software would overlay the median area's color (instead of black)
+#           with the highlight color (yellow) or one of the two median colors (high or low.) 
+#  2023-1128 - Since CRAN requires all packages successfully operate on the current version of R and 
+#           an older version of R, when R makes a change to any function, the package must be able 
+#           to use the old and new version of the function.  In this version, the as.Date function 
+#           was used to convert dates from numeric to character and back again.  In the current 
+#           R the basic function of as.Date is all that is needed.  However, in an older release
+#           of R, an origin parameter is required or an error will be announced.  To overcome this
+#           difference, the origin="1970-01-01" parameter has been added to the as.Date function 
+#           call.
+#  2024-0103 - updated copyrights in documentation.
+#	    - updated documentation in package for the BuildBorderGroup "debug" call parameter 
+#           and how the bits work.
+#           _ Attempted to check all call parameters verifications to see if all conditions were 
+#           caught.  Any found were fixed.
+#           - added st_make_valid after reading the shape file and adding the projection.
+#           Africa was working and now bombs.
 #
 #
 #  Used packages: RColorBrewer, stringr, R.rsp, labeling, 
 #
-#  Used internal packages: utils, graphics, R.utils, 
+#  Used internal packages: utils, graphics, R.utils, sf, sp, spdep, grDevices,
 #
 #      
 ########
 
 ########
 #
-# Copyrighted 2013, 2014, 2015, 2016, 2021, 2022, 2023 - 
+# Copyrighted 2013, 2014, 2015, 2016, 2021, 2022, 2023, 2024 - 
 #           by: Dan Carr, GMU and Linda Pickle and Jim Pearson of StatNet Consulting, LLC.
 #
 ########
@@ -794,6 +820,7 @@
 #
 #  The areaParms object provides defaults for several run parameters that tune micromapST
 #  execution.  The list of variables are:
+#
 #             bordGrp      = a character vector - name of the border group.  Must be the same
 #                            as the dataset filename minus the ".rda" extension.
 #             Map.Hdr1 = a character vector - title header for the Map glyphs.
@@ -992,7 +1019,6 @@ groupPanelOutline = function (panelGroup, j )
      panelOutline()                  # outline it.
   }
 }   
-
 
 ####
 #
@@ -1492,7 +1518,7 @@ micromapSEER <- function(statsDFrame,panelDesc,...) {
 #
 #   Get micromapST Version
 #
-micromapST.Version <- function() { return ("micromapST V3.0.1 built 2023-11-12 04:09 am ") }
+micromapST.Version <- function() { return ("micromapST V3.0.2 built 2024-01-09 09:28pm ") }
 
 #
 ####
@@ -1509,25 +1535,28 @@ micromapST.Version <- function() { return ("micromapST V3.0.1 built 2023-11-12 0
 micromapST = function(
     statsDFrame,
     panelDesc,
-    rowNamesCol = NULL,                      # Name of name link column.
-    rowNames    = NULL,                      # default = "ab"   ### modify to SEER IDs
-    sortVar     = NULL,                      # default = sort on plotNames values
-    ascend      = TRUE,                      # default = ascending sorting order 
-    title       = c("",""),                  # default = empty
-    plotNames   = NULL,                      # default = "ab"  ### modify to SEER Abv and Names
-    axisScale   = NULL,                      # axis Scale Method, default = "e" -> extended
-    staggerLab  = NULL,                      # stagger Axis Labels, default = FALSE
-    bordGrp     = NULL,                      # border and names group to use with micromapST, Def = "USStatesBG"
-    bordDir     = NULL,                      # data directory containing the bordGrp .RDa file to use.  
-                                             #    If null or NA, a DATA statement is used to load the 
-                                             #    bordGrp from the included package datasets.
-    dataRegionsOnly = NULL,                  # when regions are defined, permit package to map only regions containing data. Default=FALSE,
-    regionsB    = NULL,                      # when regional boundaries are present, map regional overlays. Default = FALSE. 
-    grpPattern  = NULL,                      # Override areas per panel/group pattern
-    maxAreasPerGrp = NULL,                   # Maximum number of areas per group/row - default - 5
-    ignoreNoMatches  = FALSE,                # How to handle statsDFrames that don't match.
-    colors      = NULL,                      # Override colors structure
-    details     = NULL )                     # Override details parameters.
+    rowNamesCol = NULL,                # Name of name link column.
+    rowNames    = NULL,                # default = "ab"   ### modify to SEER IDs
+    sortVar     = NULL,                # default = sort on plotNames values
+    ascend      = TRUE,                # default = ascending sorting order 
+    title       = c("",""),            # default = empty
+    plotNames   = NULL,                # default = "ab"  ### modify to SEER Abv and Names
+    axisScale   = NULL,                # axis Scale Method, default = "e" -> extended
+    staggerLab  = NULL,                # stagger Axis Labels, default = FALSE
+    bordGrp     = NULL,                # border and names group to use with micromapST, 
+                                       #    Def = "USStatesBG"
+    bordDir     = NULL,                # data directory containing the bordGrp .RDa file to use.  
+                                       #    If null or NA, a DATA statement is used to load the 
+                                       #    bordGrp from the included package datasets.
+    dataRegionsOnly = NULL,            # when regions are defined, permit package to map 
+                                       #    only regions containing data. Default=FALSE,
+    regionsB    = NULL,                # when regional boundaries are present, map regional 
+                                       #    overlays. Default = FALSE. 
+    grpPattern  = NULL,                # Override areas per panel/group pattern
+    maxAreasPerGrp = NULL,             # Maximum number of areas per group/row - default - 5
+    ignoreNoMatches  = FALSE,          # How to handle statsDFrames that don't match.
+    colors      = NULL,                # Override colors structure
+    details     = NULL )               # Override details parameters.
     
 {
 
@@ -1542,14 +1571,17 @@ micromapST = function(
 #  Updated and Extended by   Jim Pearson, Jan, 2014
 #  Updated and Extended by:  Jim Pearson, March, 2014
 #  Updated and Extended by:  Jim Pearson, October-November, 2014
-#       Updated impacted every function and feature of the package to generalize the panel layouts.
+#                     Updated impacted every function and feature of the package 
+#                     to generalize the panel layouts.
 #  Updated and Extended by:  Jim Pearson, December 2014 and January 2015
-#  Updated and Extended by:  Jim Pearson, March 2015, generalized the package for other geospatial areas.
-#                                           and refined the scaling and sizing of the rows and columns.
+#  Updated and Extended by:  Jim Pearson, March 2015, generalized the package 
+#                     for other geospatial areas and refined the scaling and 
+#                     sizing of the rows and columns.
 #  Updated and Extended by:  Jim Pearson, September, 2015 and February, 2016
 #  Updated and Extended by:  Jim Pearson, November, 2016
 #  Updated and Extended by:  Jim Pearson, November, 2021
-#  Updated and Extended by:  Jim Pearson, April, 2022 to December, 2022 to September, 2023
+#  Updated and Extended by:  Jim Pearson, April, 2022 to December, 2022 to 
+#                     September, 2023, and Sept 2023 to Jan 2024
 #
 #  Packaged by: Jim Pearson
 #
@@ -1560,16 +1592,16 @@ micromapST = function(
 #                  panelFunctions.r
 #
 #  Included bordGrp DataSets:
-#                  USStatesBG    - equivalent to original micromapST setup
-#                  USSeerBG      - new setup for borders and behavior for US Seer Areas.
-#                  KansasBG      - new setup for borders and behavior for Kansas County Areas.
-#                  NewYorkBG     - new setup for borders and behavior for New York County Areas.
-#                  MarylandBG    - new setup for borders and behavior for Maryland County Areas.
-#                  ChinaBG       - new setup for borders and behavior for China.
-#                  UKIrelandBG   - new setup for borders and behavior for UK-Ireland area
-#                  UtahBG        - new setup for borders and behavior for Utah County Areas
-#                  SeoulSKoreaBG - net setup for borders and behavior for the districts in the city of Seoul South Korea.
-#                  AfricaBG      - net setup for borders and behavior for the countries of Africa.
+#         USStatesBG    - equivalent to original micromapST setup
+#         USSeerBG      - new setup for borders and behavior for US Seer Areas.
+#         KansasBG      - new setup for borders and behavior for Kansas County Areas.
+#         NewYorkBG     - new setup for borders and behavior for New York County Areas.
+#         MarylandBG    - new setup for borders and behavior for Maryland County Areas.
+#         ChinaBG       - new setup for borders and behavior for China.
+#         UKIrelandBG   - new setup for borders and behavior for UK-Ireland area
+#         UtahBG        - new setup for borders and behavior for Utah County Areas
+#         SeoulSKoreaBG - net setup for borders and behavior for the districts in the city of Seoul South Korea.
+#         AfricaBG      - net setup for borders and behavior for the countries of Africa.
 #
 #   Each contain the following DataFrames, Lists and Vectors:
 #      Run Parameters:                             areaParms     
@@ -1600,22 +1632,22 @@ micromapST = function(
 #   Defaults List for call simulation
 #     statsDFrame <- data
 #     panelDesc   <- panel description data.frame  or panel description list of lists.
-#     rowNames    <- "ab"                     # global
-#     sortVar     <- NULL                     # global 
-#     ascend      <- TRUE                     # global
-#     Title       <- c("titles")              # global
-#     plotNames   <- "full"                   # global and glyph
-#     axisScale   <- "e"                      # new extended method - global and glyph
-#     staggerLab  <- FALSE                    # global and glyph
-#     colors      <- NULL                     # global 
-#     details     <- NULL                     # global and glyph
-#     bordGrp     <- "USStatesBG"             # global
-#     bordDir     <- NULL                     # global
-#     ignoreNoMatches <- FALSE                # global
-#     grpPattern  <- NULL                     # global - default = calculated row / panel pattern
-#     maxAreasPerGrp <- NULL                  # global
-#     regionsB    <- NULL                     # global - default = FALSE
-#     dataRegionsOnly <- NULL                 # global - default = FALSE
+#     rowNames    <- "ab"            # global
+#     sortVar     <- NULL            # global 
+#     ascend      <- TRUE            # global
+#     Title       <- c("titles")     # global
+#     plotNames   <- "full"          # global and glyph
+#     axisScale   <- "e"             # new extended method - global and glyph
+#     staggerLab  <- FALSE           # global and glyph
+#     colors      <- NULL            # global 
+#     details     <- NULL            # global and glyph
+#     bordGrp     <- "USStatesBG"    # global
+#     bordDir     <- NULL            # global
+#     ignoreNoMatches <- FALSE       # global
+#     grpPattern  <- NULL            # global - default = calculated row / panel pattern
+#     maxAreasPerGrp <- NULL         # global
+#     regionsB    <- NULL            # global - default = FALSE
+#     dataRegionsOnly <- NULL        # global - default = FALSE
 #
 #     colors and details are used to override/modify the basic default structure for the colors
 #     and the operational details information.
@@ -1635,9 +1667,9 @@ micromapST = function(
 #             data is provided in the panelDesc data.frame.
 #
 #             The statsDFrame must have the area's abbr, name or ID code (like fips code) as 
-#             the rownames of the data.frame.  As an alternate a column can contain the 
+#             the rowNames of the data.frame.  As an alternate a column can contain the 
 #             area's identifier and the "rowNamesCol" parameter can be used to point to 
-#             the column.  Once the column is verified, it is assigned to the rownames 
+#             the column.  Once the column is verified, it is assigned to the rowNames 
 #             of the statsDFrame.
 #     
 #             The data.frame must be at least 2 columns for some of the functions
@@ -1649,7 +1681,7 @@ micromapST = function(
 #               When the structure is ordered xxx[ord,] and then assigned to the working 
 #               variable "dat", the dimensions are preserved. 
 #               If the data.frame has only one column, the ordering and assigned, 
-#               strips the rownames and leaves the dim(dat) = NULL.
+#               strips the rowNames and leaves the dim(dat) = NULL.
 #
 #             The numerical data in the statsDFrame data frame may be in a numerical vector 
 #             or a character vector.  If the data is found to be a factor, it is converted to 
@@ -1854,7 +1886,7 @@ micromapST = function(
 #      For time series graphics, the object must be an array(51,"x",4), 
 #         where the 1st index is the areas (1 to n), the second index is the number 
 #         of time periods ("x") with a minimum of 2 and maximum of 30, and 
-#         the third index is the type of variable. The rownames of array must
+#         the third index is the type of variable. The rowNames of array must
 #         be the associate area id (a 2 character abbreviation if states).  This 
 #         is required so the time series array can be properly associated 
 #         with the data in the statsDFrame when it's sorted.
@@ -2148,7 +2180,8 @@ on.exit(options(WrkOptions))
 # Set up global variables values  and functions
 #
 #
-#   create warning and stop counters - must be in .GlobalEnv so the panelXXXX functions can use them.
+#   create warning and stop counters - must be in .GlobalEnv so the 
+#       panelXXXX functions can use them.
 #
 var  <- "warnCnt"
 wstr <- paste0("assign(var,NewCounter(),envir=.GlobalEnv)")
@@ -2171,7 +2204,8 @@ errCntMsg  <- function(xmsg) {
 }
 
 #
-#   this should get the global variables set up so they can be referenced within all functions.
+#  This should get the global variables set up so they can be referenced 
+#      within all functions.
 #
 #  Cross column variables
 #
@@ -2214,15 +2248,19 @@ eval(parse(text=wstr))
 #
 #     Can't do this in a function because the environment and frames will change.
 #
-frml         <- formals()                   # get list of call parameters - the formals - for the function and default values. (as defined).
-frmlNames    <- names(formals())            # get the name of the parameters  (as we validate the parameter, we will back file the defaults.
+frml         <- formals()                 # get list of call parameters - the formals
+                                          #   - for the function and default values.(as defined).
+frmlNames    <- names(formals())          # get the name of the parameters  (as we validate the 
+                                          #   parameter, we will back file the defaults.
 
-callVar      <- as.list(match.call())[-1]   # get the names and values used on the current call.
-callVarNames <- names(callVar)              # get the names of the used call parameters
+callVar      <- as.list(match.call())[-1] # get the names and values used on the current call.
+callVarNames <- names(callVar)            # get the names of the used call parameters
 
-# merge the formals parameter list with the parameter list used at the time of the micromapST call with user set values.
+# merge the formals parameter list with the parameter list used at the time of the micromapST 
+#    call with user set values.
 
-callVL       <- frml                        # Seed the call variable list with the formals and default values 
+callVL       <- frml                      # Seed the call variable list with the formals 
+                                          #   and default values 
 callVL[callVarNames] <- callVar[callVarNames]  # copy the values used in the call .
 
 # save call parameter list and values to .GlobalEnv
@@ -2240,15 +2278,14 @@ var  <- "pDName"
 wstr <- paste0("assign(var,callVL$panelDesc,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
-cat("statsDFrame = ",as.character(sDFName),"\n")
-cat("panelDesc   = ",as.character(pDName),"\n")
-
 #
-#  callVarList is now a names list with the names of the parameter variables the the list content the 
-#    values at the time of the call.  Any variables show up with a typeof "symbol" and class "name".
+#  callVarList is now a names list with the names of the parameter variables 
+#    the the list content the values at the time of the call.  Any variables 
+#    show up with a typeof "symbol" and class "name".
 #    The value of the variable is not captured.
 #
-#  Later must copy this information up to the .GlobalEnv so it can be referenced by everyone.
+#  Later must copy this information up to the .GlobalEnv so it can be 
+#    referenced by everyone.
 #
 
 #print(callVL)
@@ -2263,11 +2300,13 @@ cat("panelDesc   = ",as.character(pDName),"\n")
 #  Verify Run Parameter:
 #
 #  Order of importants:
-#    a) bordDir and bordGrp - needed to get the border group loaded and its particular parameters defaults
+#    a) bordDir and bordGrp - needed to get the border group loaded and 
+#         its particular parameters defaults
 #    b) Validate statsDFrame (but not contents)
 #    c) Validate panelDesc   (but not contents, yet)
 #
-#  bordDir and bordGrp  - 1st parameter to check - sets up the information for all of the other parameters.
+#  bordDir and bordGrp  - 1st parameter to check - sets up the information 
+#     for all of the other parameters.
 #
 #  Package contained border groups:
 #
@@ -2284,9 +2323,12 @@ PkgBGs <- c("USStatesBG"
            ,"SeoulSKoreaBG"
           )
 
-UserBordGrpLoad <- FALSE             # FALSE, load from package with data(),  TRUE load from directory with load()
+UserBordGrpLoad <- FALSE             # FALSE, load from package with data(),  
+                                     # TRUE load from directory with load()
 
 #  Package Variables
+
+#______________________(3)__Border Group Information
 
 #####  015x
 #
@@ -2295,137 +2337,96 @@ UserBordGrpLoad <- FALSE             # FALSE, load from package with data(),  TR
 #   The bordDir is used to direct the border group load to a user directory or during testing 
 #    of a new or modified border group.
 #
+#   Check for border Group in package, then extend to bordDir
+#
+def_bordGrp         <-  "USStatesBG"
+BordGrpName         <-  def_bordGrp 
+bgFile              <-  NA
+NoBordGrp           <-  FALSE
+
+# no valid bordDir directory -> the bordGrp must be a .rda in this package. 
+# If no bordGrp parameter, set default to USStatesBG.
+
+if ( missing(bordGrp) || is.null(bordGrp)) {
+      # only an error if part of bordDir
+    bordGrp     <- def_bordGrp   # set to flag.
+    NoBordGrp   <- TRUE
+} else {
+   if ( !is.character(bordGrp) ) {
+      ErrorFnd <- errCntMsg(paste0("***0153 BGBN The bordGrp value not a character string.\n",
+                                "        The default of 'USStatesBG' will be used.\n"))
+      bordGrp  <- def_bordGrp
+   } else {   
+      if (length(bordGrp) == 0 ) {
+         bordGrp <- def_bordGrp
+      } else {
+         if (length(bordGrp) > 1 ) { bordGrp < stringr::str_trim(bordGrp[[1]][1])}
+         # now bordGrp is one items (length = 1), not zero or 2 or greater.
+         #if ( any(is.na(bordGrp)) || bordGrp == "" ) {
+         if (is.na(bordGrp) || bordGrp == "" ) {
+            bordGrp <- def_bordGrp
+         }
+      }   
+   }
+}
+BordGrpName <- bordGrp
+
+xm <- match(BordGrpName, PkgBGs)
+if (any(is.na(xm))) {  # no (all) match on the list.
+    UserBordGrpLoad <- TRUE
+}
+
+# now we know if we have a bordGrp and if it is a private BG and needs a Dir.
+
+#
+#  bordDir   - if directory then private border group.  (Required for external border group.)
+#
+#   The bordDir is used to direct the border group load to a user directory or during testing 
+#    of a new or modified border group.
+#   The bordDir can even be supplied with a package border group if it's overriding it.
+#
+NoBordDir <- FALSE
 
 if ( missing(bordDir) || is.null(bordDir) ) {
-   bordDir  <- NULL   # make sure
+   bordDir     <- NULL   # make sure
+   NoBordDir   <- TRUE
+   if (UserBordGrpLoad) {
+      StopFnd <- stopCntMsg(paste0("***0150 BGBD The Border Group directory is missing or NULL.\n",
+                                  "        It must be provided to use a Border Group not contained in the package.\n"))
+   }
 } else {
-   if (length(bordDir)>1) { bordDir <- bordDir[[1]][1] }
+   if ( !is.character(bordDir) ) {
+      StopFnd <- stopCntMsg(paste0("***0151 BGBD The Border Group directory value is not character, is NA, or empty.\n",
+                                   "        To use a private Border Group, a valid directory must be provided.\n"))
+   } else {   
+      if (length(bordDir)>1) { bordDir <- bordDir[[1]][1] }   # get single value if needed.
 
-   if ( is.na(bordDir) || bordDir == "" ) {
-      bordDir <- NULL
-   } else {
-      if (!methods::is(bordDir,"character")) {
-         # bordDir path is not a character string.
-         StopFnd <- stopCntMsg(paste0("***0150 BGBD The directory specified in the bordDir call parameter \n",
-                                      "        is not a valid character string.\n"))
+      if ( is.na(bordDir) || bordDir == "" ) {
+         bordDir <- NULL
+         StopFnd <- stopCntMsg(paste0("***0151 BGBD The Border Group directory value is not character, is NA, or empty.\n",
+                                   "        To use a private Border Group, a valid directory must be provided.\n"))
       } else {
-         bordDir <- stringr::str_trim(bordDir)                   # trim spaces.
+         bordDir <- stringr::str_trim(bordDir)
          # validate the directory exists and is referencable.
-    
+
          if (!dir.exists(bordDir))  {
             # bordDir path does not exist.
-            StopFnd <- stopCntMsg(paste0("***0151 BGBD The directory specified in the bordDir call parameter does not exist.\n",
+            StopFnd <- stopCntMsg(paste0("***0152 BGBD The directory specified in the bordDir parameter does not exist.\n",
                                          "        Value=",bordDir,"\n"))
          } else {
             UserBordGrpLoad = TRUE    # load() from directory don't data()
             xc <- stringr::str_sub(bordDir,-1,-1)  # get last character
-
+   
             if (xc != "/" && xc != "\\") {
                bordDir <- paste0(bordDir,"/")   # add slash   if not present.  (must check for \ and / slashes.)
-            }
-         }
-      } 
-   }
-}
+            } # /
+         } # does exist.
+      } # end of NA and empty
+   } # end of character
+} # end missing/null
 
 callVL$bordDir <- bordDir
 
-bordGrp             <-  stringr::str_trim(bordGrp[[1]][1])  # get first value only and clean it up.
-BordGrpName         <-  bordGrp 
-bgFile              <-  NA
-
-def_bordGrp         <-  "DeFaUlT"
-# no valid bordDir directory -> the bordGrp must be a .rda in this package. 
-# If no bordGrp parameter, set default to USStatesBG.
-
-if ( missing(bordGrp) || (is.null(bordGrp) )) {
-   # if NULL - set to default.
-   bordGrp          <- def_bordGrp           # indicates which structure .rda file in package to load.
-   
-} else {
-   if(length(bordGrp) == 0) {
-      bordGrp <- def_bordGrp
-   } else {
-      if (length(bordGrp) > 1) { bordGrp <- bordGrp[[1]][1] }
-      if ( is.na(bordGrp) || bordGrp == "" ) {
-         bordGrp     <- def_bordGrp
-      } else {
-         if (!methods::is(bordGrp,"character")) {
-            StopFnd <- stopCntMsg(paste0("***0152 BGBN The value provided as the bordGrp name is not character. Fix and rerun.\n"))
-      
-         } else {
-            #  bordGrp should be valid.
-            BordGrpName <- bordGrp
-         }
-      }
-   }
-}
-
-#  border group Dir
-if (!UserBordGrpLoad) {
-   if (bordGrp == def_bordGrp)  bordGrp <- "USStatesBG"
-
-   # this point we have something in bordGrp
-   BordGrpName    <- stringr::str_trim(bordGrp)
-   #cat("bordGrp:",bordGrp,"  len:",length(bordGrp),"\n")
-   #cat("BordGrpName:",BordGrpName," len:",length(BordGrpName),"\n")
-
-   #   Look up the bordGrp name.
-   bGM <- match(BordGrpName,PkgBGs)    # must be one of the packaged bordGrps
-   #cat("bGM:",bGM,"\n")
-   if (is.na(bGM)) { 
-      # no match to the bordGrps supported within the package.
-      # Use variable to make message dynamic as more bordGrps are added.
-      ymsg      <- paste0(shQuote(PkgBGs),collapse=", ")
-      stopCntMsg(paste0("***0153 BGBN The bordDir call parameter was not provided, the bordGrp\n",
-                        "        must be one contain in the package:\n", ymsg, "\n"))
-      # alternative is to check for file in working directory and them varity it's structure.
-      rm(ymsg)
-   }
-   rm(bGM)
-   
-   # DATA bordGrp
-   
-} else {
-   # User specific bordDir and bordGrp.  
-   #     BUG = what if user put the path in the bordGrp name?
-   #cat("bordGrp:",bordGrp,"  len:",length(bordGrp),"\n")
-   #cat("BordGrpName:",BordGrpName," len:",length(BordGrpName),"\n")
-
-   if (bordGrp == def_bordGrp) {
-      #  bordDir provided, but no bordGrp - ouch! error
-      stopCntMsg(paste0("***0154 BGBN The bordGrp call parameter has not been specified.\n",
-                        "        It is required when the bordDir is provided.\n"))
-   } else {
-   
-      # if not check to see if the .rda file exists.
-      fnSplit    <- NULL       #  fake a split - use a better solution (file_ext)
-      fnSplit[1] <- file_path_sans_ext(bordGrp)   # get path and filename without extent.
-      fnSplit[2] <- file_ext(bordGrp)             # get extent 
-      
-      BordGrpName <- fnSplit[1]                   # basic name and path.
-      if (is.na(fnSplit[2]) || fnSplit[2]=="") {  # check extension.
-         # if no extension - then add .rda
-         bordGrp     <- paste0(bordGrp,".rda")
-      } else {
-         # if extension is present - must be .rda or .RData
-         fnSplit[2]   <- stringr::str_to_upper(fnSplit[2])
-         if (fnSplit[2] != "RDA" && fnSplit[2] != "RDATA") {
-            # error - extension must be .rda or .RData.
-            stopCntMsg(paste0("***0155 BGBN The bordGrp filename must have an '.rda' or '.RData' file extension.\n"))
-         }
-      }
-   } 
-   # test to see if directory and file exist, before trying to load.
-   
-   bgFile             <-  paste0(bordDir,bordGrp)
-
-   if (!file.exists(bgFile)) {
-      stopCntMsg(paste0("***0156 BGBN The bordGrp file in the bordDir directory does not exist.\n"))
-   }
-}
-
-# got this far, variables to load/data the border group appear to be good.
 
 callVL$bordGrp     <- bordGrp
 callVL$bgFile      <- bgFile
@@ -2469,29 +2470,67 @@ areaVisBorders    <- NULL
 L2VisBorders      <- NULL
 RegVisBorders     <- NULL
 L3VisBorders      <- NULL
+#
+#  Load border group (package or user's)
+#
+bgFile              <-  NA
 
-if (!UserBordGrpLoad) {
-  # System border group
-  #print (paste0("reading border group ",BordGrpName, " via a data statement."))
-  
-  utils::data(list=BordGrpName,envir=environment())    # Group Border tables and parameters distributed with package.
+if (UserBordGrpLoad) {
 
+   # User specific bordDir and bordGrp.  
+   #     BUG = what if user put the path in the bordGrp name?
+
+   #cat("bordGrp:",bordGrp,"  len:",length(bordGrp),"\n")
+   #cat("BordGrpName:",BordGrpName," len:",length(BordGrpName),"\n")
+
+   # if not check to see if the .rda file exists.
+   fnSplit    <- NULL       #  fake a split - use a better solution (file_ext)
+   fnSplit[1] <- file_path_sans_ext(bordGrp)   # get path and filename without extent.
+   fnSplit[2] <- file_ext(bordGrp)             # get extent 
+      
+   BordGrpName <- fnSplit[1]                   # basic name and path.
+   if (is.na(fnSplit[2]) || fnSplit[2]=="") {  # check extension.
+      # if no extension - then add .rda
+      bordGrp     <- paste0(bordGrp,".rda")
+   } else {
+      # if extension is present - must be .rda or .RData
+      fnSplit[2]   <- stringr::str_to_upper(fnSplit[2])
+      if (fnSplit[2] != "RDA" && fnSplit[2] != "RDATA") {
+         # error - extension must be .rda or .RData.
+         stopCntMsg(paste0("***0155 BGBN The bordGrp filename must have an '.rda' or '.RData' file extension.\n"))
+      }
+   } 
+   # test to see if directory and file exist, before trying to load.
+   
+   bgFile             <-  paste0(bordDir,bordGrp)
+
+   if (!file.exists(bgFile)) {
+      StopFlag <- stopCntMsg(paste0("***0156 BGBN The bordGrp file in the bordDir directory does not exist.\n"))
+   }
+   # user border group   
+   #print (paste0("reading border group ",BordGrpName, " via LOAD since bordDir = ",bordDir))
+
+   # need to put a try around this incase there is a problem with the user data file.
+
+   res <- try(load(bgFile),silent=TRUE)                    # only error should be a lock or error in reading file.
+   if (inherits(res,"try-error",which=FALSE)) {
+      # TRUE - error occurred during user border group file loading.
+      xmsg     <- paste0("***01M0 BGBD System error encountered when loading the border group. See error message:\n")
+      ymsg     <- paste0("        >>",res[1])  # get message from error
+      warning(xmsg, call.=FALSE)
+      StopFnd <- stopCntMsg(ymsg)
+      # stopped.  
+      rm(ymsg)
+   }
 } else {
-  # user border group   
-  #print (paste0("reading border group ",BordGrpName, " via LOAD since bordDir = ",bordDir))
 
-  # need to put a try around this incase there is a problem with the user data file.
+   # got this far, variables to load/data the border group appear to be good.
 
-  res <- try(load(bgFile),silent=TRUE)                    # only error should be a lock or error in reading file.
-  if (inherits(res,"try-error",which=FALSE)) {
-     # TRUE - error occurred during user border group file loading.
-     xmsg     <- paste0("***01M0 BGBD System error encountered when loading the border group. See error message:\n")
-     ymsg     <- paste0("        >>",res[1])  # get message from error
-     warning(xmsg, call.=FALSE)
-     StopFnd <- stopCntMsg(ymsg)
-     # stopped.  
-     rm(ymsg)
-  }
+   # System border group
+   #print (paste0("reading border group ",BordGrpName, " via a data statement."))
+  
+   utils::data(list=BordGrpName,envir=environment())    # Group Border tables and parameters distributed with package.
+
 }
 
 #
@@ -5126,19 +5165,29 @@ rlAreaID = function(j){
 #  VisCol should contain the mstColors for each polygon to allow a single "polygon" print.
 #
 #
-#  General Map Notes:
+#  All of these reference the VisBorder points in the boundary data.frame.
 #
-#  NotUsed    = NT T/F list of sub-areas not referenced in the data.
+#  NotUsed    = NT T/F list of points of areas not referenced in the data.
 #
-#  back       = NT T/F list of not active sub-areas 
+#  back       = NT T/F list of points of not active areas 
 #
-#  high       = NT T/F list of secondary sub-areas (not active or background or Not Used.)  (Color = pale Yellow)
+#  high       = NT T/F list of of points of secondary areas (not active or background or Not Used.)  (Color = pale Yellow)
 #                  for map       -> not used
 #                  for mapcum    -> accumulative list, colored pale yellow (8)
 #                  for mapmedian -> areas below or above median value (two colors and cross in median group.)(9,10)
 #                  for maptail   -> accumulative list to median then subtractive list to end. (8)
-#  highU      = NT T/F list of above median sub-areas (not active or Not used.) (color = pale red)
-#  highL      = NT T/F list of below median sub-areas (not active or Not used.) (color = pale blue)
+#  highU      = NT T/F list of above median areas (not active or Not used.) (color = pale red)
+#  highL      = NT T/F list of below median areas (not active or Not used.) (color = pale blue)
+#
+#  medi       = NT T/F list of points in median area boundary
+#
+#  fore       = NT T/F list of points in foreground boundary 
+#
+#  VisNU      = T/F for NotUsed polygons in boundary
+#  VisHigh    = T/F for highlighted polygons  (VisHighU and VIsHighL)  
+#  VisFore    = T/F for foreground polygons
+#  VisMedi    = T/F for median area polygons
+#
 #
 #  gnams      = NT T/F list of active colored to match links.
 #
@@ -5176,19 +5225,12 @@ rlAreaID = function(j){
 rlAreaMap = function(j) {
 
   # Works using area abbreviations
-  # bnd.ord gives abbreviations in the
-  #           the boundary are stored.
   # areaDatKey give the abbreviations in the order plotted 
   #  
   # Areas are colors if associated with active rows
   #
   #   j = column number,   i = row number
   
-  #  bnd.ord is a list of Keys (one per polygon) in the border file.  
-  #    Each polygon ends with NA,NA as X,Y.
-  bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
-  #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
-  #cat("unique bnd:",unique(bnd.ord),"\n")
   #cat("Map-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   #cat("Map-Overlays exist area:",exists("areaVisBorders")," L2:",exists("L2VisBorders")," Reg:",exists("RegVisBorders")," L3:",exists("L3VisBorders"),"\n")
   #cat("Map-Overlays exist 'rl' area:",exists("rlAreaVisBorders")," L2:",exists("rlL2VisBorders")," Reg:",exists("rlRegVisBorders")," L3:",exists("rlL3VisBorders"),"\n")
@@ -5266,40 +5308,77 @@ rlAreaMap = function(j) {
   #
   #
   # Put the initial colors for all areas into a vector.
-  #print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
   # per VisBorder polygon (point/vector)
-  VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of polygons in VisBorders (indexes)
+  # Should be able to do ONCE at the start???
+   
+  # Work done prior to main loop.
+
+  #  Two special vectors:
+  #    NotUsed, Fore, Medi, High -  equal to the number of points in the areaVisBorders
+  #         T if point is part of the polygon belonging to this groupping.  F is not.
+  #    VisNU, VisFore, VisMedi, VisHigh - equal to the number of polygons in areaVisBorders
+  #         T if polygon part of the group, F is not.
+  #    NotUsedFlag, ForeFlag, MediFlag, HighFlag - indicate as one variable if any points are in this group
+  #    
+  #    Initially, all VisCol entries are set to the "background" color.  When used other color overlays the background.
+  #    VisCol = the color code for this polygon.
+  #    VisCol2 = true color of the polygon.
+  #
   
-  #    NA entries in VisBorders (TRUE)    # one entry per point in polygons.
-  #cat("VisNodes:\n")
-  #print(VisNodes)
+  #
+  #   Panel Setup already calculated the following variables
+  #
+  #   numGrps     - number of group/rows
+  #   medGrp      - the number of the median group/rows     (if number of groups is odd, otherwize = 0)
+  #   medGrpSize  - number of rows in the median group/row  (if no median group, value = 0)
+  #   medRow      - the number of the median row            (if number of rows is odd, othersize = 0)
+  #   medRowBlw   - the number of the row just below the median
+  #   medRowAbv   - the number of the row just above the median
+  #
+  #   dat has the numerics and the order of the rows.
+  #   
+  #
+  #cat("numGrps:",numGrps," medGrp:",medGrp," medGrpSize:",medGrpSize,"\n")
+  #cat("map - list of areas in maps - sorted - areaDatKey:",areaDatKey,"\n")
+
   
-  # per polygon (end point) (decode VisBorders by polygon)  # pull key and hole info for each polygon.
-  VisKeys        <- rlAreaVisBorders$Key[VisNodes]       # key at end points of a polygons
-  VisHoles       <- rlAreaVisBorders$hole[VisNodes]      # hole indicator at end points of all polygons
-     # one entry per end of polygon. Multi-polygons per area.
   
-  #cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
-  #print(VisKeys)
   
-  #cat("Basic list of VisHoles (zero or more per polygon):\n")
-  #print(VisHoles)
   
-  # per Visborder all point/vector
-  # NotUsedKeys created above after reviewing the data.
-  NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys)) # list of not used polygons - no data.
-  NotUsedFlag    <- any(NotUsed)  # flag to indicate not used exists 
   
-  #cat("NotUsedKeys:\n")    # global.
-  #print(NotUsedKeys)
-  #cat("NotUsed:\n")
-  #print(NotUsed)
- 
-  # per polygon (end point).  # not used area Key lost.
-  VisNU          <- !is.na(match(VisKeys,NotUsedKeys))   # T/F list of not used polygons.
-  
-  #cat("VisNU:\n")
-  #print(VisNU)
+  ##print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
+  #VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of polygons in VisBorders (indexes)
+  #
+  ##    NA entries in VisBorders (TRUE)    # one entry per point in polygons.
+  ##cat("VisNodes:\n")
+  ##print(VisNodes)
+  #
+  ## per polygon (end point) (decode VisBorders by polygon)  # pull key and hole info for each polygon.
+  #VisKeys        <- rlAreaVisBorders$Key[VisNodes]       # key at end points of a polygons
+  #VisHoles       <- rlAreaVisBorders$hole[VisNodes]      # hole indicator at end points of all polygons
+  #   # one entry per end of polygon. Multi-polygons per area.
+  #
+  ##cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
+  ##print(VisKeys)
+  #
+  ##cat("Basic list of VisHoles (zero or more per polygon):\n")
+  ##print(VisHoles)
+  #
+  ## per Visborder all point/vector
+  ## NotUsedKeys created above after reviewing the data.
+  #NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys)) # list of not used polygons - no data.
+  #NotUsedFlag    <- any(NotUsed)  # flag to indicate not used exists 
+  #
+  ##cat("NotUsedKeys:\n")    # global.
+  ##print(NotUsedKeys)
+  ##cat("NotUsed:\n")
+  ##print(NotUsed)
+  #
+  ## per polygon (end point).  # not used area Key lost.
+  #VisNU          <- !is.na(match(VisKeys,NotUsedKeys))   # T/F list of not used polygons.
+  #
+  ##cat("VisNU:\n")
+  ##print(VisNU)
   
   #
   #   Panel Setup already calculated the following variables
@@ -5318,9 +5397,13 @@ rlAreaMap = function(j) {
   #cat("map - list of areas in maps - sorted - areaDatKey:",areaDatKey,"\n")
 
   # Drawing Loop   # down the page - each group/row
+
   for (i in 1:numGrps) {
      #cat("In Loop - panel:",j," ",i,"\n")
     
+     VisCol        <- rep(11,lenVisKeys)
+     VisCol[VisNU] <- 12    # not used color in all polygons.
+  
      if ( i == medGrp & medGrpSize == 1 ){                   # line break in maps.   Group n/2 - middle group of n (odd)
     
         # Setup Panel for single row median group
@@ -5355,7 +5438,8 @@ rlAreaMap = function(j) {
      #cat("area index - gsubs:",gsubs,"   The area index.\n")    
     
      blkAreaCol <- 0
-    
+     mediKey    <- ""
+     
      if (medGrp > 0 & medGrpSize == 1) {   
     
         # If this setup has a median group with only 1 row with an odd number of groups > 1
@@ -5368,11 +5452,13 @@ rlAreaMap = function(j) {
         if (i == (medGrp-1)) {
            gsubs      <- c(gsubs,medRow)  # slot med-1 - add med-row to this group
            blkAreaCol <- length(gsubs)    # indicate median/black area flag saves the "color" number the will be seen in the final.
+           mediKey     <- areaDatKey[medRow]  
         }
         # if current row is one below the median, add medRow to this group for coloring.
         if (i == (medGrp+1)) {
            gsubs      <- c(gsubs,medRow)  # slot med+1 - add med-row to this group
            blkAreaCol <- length(gsubs)    # indicate median/black area and the length of the gsubs vector
+           mediKey     <- areaDatKey[medRow]  
         }
        
         # blkAreaCol uses length(gsubs) as key - 2,3,4,5,6 used the index to match up later.
@@ -5403,12 +5489,19 @@ rlAreaMap = function(j) {
      #           
      #  Run: sequence
      #       VisCol length = number of polygons (NA)
+     #
      #       Set all VisCol to background color to 11
+     #
      #       Set VisCol to unused colors based on NotUsedKeys matches to 12.
+     #
      #       Separate highlight area borders (2) (None for "map")
      #
      #       Separate foreground area borders (current set)
+     #
+     #       Color Black areas if required for median area.
+     #
      #       Get list of Keys in this Group/Row.
+     #
      #       Set all colors in VisCol (based on NA and Keys match) position in Keys is color index.
      #
      #       draw fill colors for all (VisCol)
@@ -5419,19 +5512,30 @@ rlAreaMap = function(j) {
      #
      #  Get set up T/F vector for each type of group of sub-areas to plot
      
-     #cat("length(NotUsedKeys):",length(NotUsedKeys)," with keys:",paste0(NotUsedKeys,collapse=", "),"\n")
        
      #####
      #
      #  Colors for map
      #    Get every copy assigned to its area
      #  Setup:
-     VisCol            <- rep(11,length(VisKeys))       # reduced size - color per polygon - not ref
+     
+     
+     #VisCol            <- rep(11,length(VisKeys))       # reduced size - color per polygon - not ref
      #cat("Loop: ",i,"  VisCol:\n")
      #print(VisCol)
     
+     #  1) All to start -> 11     background  - all
+     
+     #  2) UnusedKey  "12"   white
+     
+     #  3) HighlightKey      Yellow or pink/blue (not used - map)
+     
+     #  4) ForeKey           5-6 colors
+     
+     #  5) MediKey            black 7
+     
      #
-     #     Forground
+     #    4- Forground
      #
                                                         # everyone get color # 11 (no data) (check)
      #  isolate foreground (active) areas. (Colors)
@@ -5469,15 +5573,37 @@ rlAreaMap = function(j) {
         cat("VisFore:",VisFore,"\n") 
      }
       
-     if (blkAreaCol>0) {
-        xm <- match(blkAreaCol,VisCol)
-        #cat("BlackAreaCol:",blkAreaCol," assigned to ",xm,"\n")
-        VisCol[VisCol == blkAreaCol] <- 7   # set to black # if VisCol ==  BlkAreaCol set previously - reset to "black" index (7)
+     #  5- black  MEDIAN single area.
+     
+     # Median Black coloring
+     
+     if (blkAreaCol > 0) {
+        # have single area at median group/row  mediKey is the key for the single median area.
+        
+        medi         <- !is.na(match(rlAreaVisBorders$Key,mediKey)) # vis boundary points for median area key
+            # medi is the full VisBorder list with T/F; T-median area, F-No
+        mediFlag     <- any(medi)
+        
+        #  Identify the Col element for the median single area
+        VisMediCol   <- match(VisKeys,mediKey)    # find Vis elements for the median area  NA or 1
+        #  Set VisMedi T/F as to whether to set color or not.
+        VisMedi      <- !is.na(VisMediCol)   # VisBlk is T/F if polygon part of median area.
+        #  Set median area color to 7 (black)
+        VisCol[VisMedi] <- 7                 # assign black
+     } else {
+        # if no single median area, set VisMedi to all FALSE
+        VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
+        medi         <- rep(0,length(rlAreaVisBorders$Key))  # equal number of points.
+        mediFlag     <- FALSE
      }
+     #cat("length VisMedi:",length(VisMedi),"\n")
     
+     #
+     #  3 - highlight 
+     
      # highlight area keys...    
     
-     # Previously active for a Group/Row, no just highlighted.
+     # Previously active for a Group/Row,rcmdr no just highlighted.
      # not really used - can we delete or set to empty?   Trying to standardize code??
      highKeys          <- NA                             # clear high light vector - always none for "map"
      
@@ -5489,16 +5615,23 @@ rlAreaMap = function(j) {
      VisHigh           <- !is.na(match(VisKeys,highKeys))   # should be none for "map"
      VisCol[VisHigh]   <- 8                                 # set to color 8
      
-     # background colors - not anything else.
+
+     # 1- Unused Keys areas.
      
-     # what is left - the background areas.   (list if any points not matching other categories.)
+     #VisCol[VisNU}     <- 12  #  Above
      
-     back              <- !(fore | high | NotUsed)        # background points is anything not active and not used.   T/F list
+     # 2 - Non-Active background (good, but not referenced yet)
+     
+     back              <- !(fore | high | medi | NotUsed)   # what left is non-active waiting
      backFlag          <- any(back)
-     backKeys          <- unique(rlAreaVisBorders$Key[back])
-   
-     VisBack           <- !is.na(match(VisKeys,backKeys))
-     VisCol[VisBack]   <- 12                              # background color (grey)
+      if (backFlag) {
+         backKeys         <- unique(rlAreaVisBorders$Key[back])
+         VisBack          <- !is.na(match(VisKeys,backKeys))
+         VisCol[VisBack]  <- 11  
+      } else {
+         VisBack          <- rep(FALSE,lenVisKeys)
+         backKeys         <- NA
+      }
     
      #cat("Final VisCol string.\n")
      #print(data.frame(n=VisKeys,c=VisCol))
@@ -5517,6 +5650,7 @@ rlAreaMap = function(j) {
      #}
   
      #print(VisFore)
+     #print(VisMedi)
      #print(VisHigh)
      #print(VisBack)
     
@@ -5611,6 +5745,19 @@ rlAreaMap = function(j) {
         #cat(paste0(wVisH,collapse=", ",sep=" "),"\n")
       }
 
+     # 
+     #    Median single area areas
+     #
+     if (mediFlag) {
+        wVisBorders   <- NULL
+        wVisBorders   <- rlAreaVisBorders[medi,]      # pull out with T/F
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
+        #cat("Drawing Active areas borders.\n")
+        #wVisM <- unique(wVisBorders$Key)
+        #cat("Median area:\n")
+        #cat(paste0(wVisM,collapse=", ",sep=" "),"\n")
+      }
      # 
      #    Foreground (active) areas
      #
@@ -5722,18 +5869,15 @@ rlAreaMap = function(j) {
 
 rlAreaMapCum = function(j) {
 
+  #cat("mapcum\n")
+  
   # Works using area abbreviations
-  # bnd.ord gives abbreviations in the order the boundary are stored.
   # areaDatKey give the abbreviations in the order plotted 
   #
   # Areas are colored if active in row.
   # Areas are colored cream is they were active in previous groups/rows.
   #
   
-  #  bnd.ord is a list of Keys (one per polygon) in the border file.
-  bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
-  #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
-  #cat("unique bnd:",unique(bnd.ord),"\n")
   #cat("MapCum-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
   # the x,y limits must be based on the biggest area plotted, if the data level 
@@ -5778,13 +5922,6 @@ rlAreaMapCum = function(j) {
 
   lastLab2Space  <<- - ( xpin[1] - ( graphics::strwidth(banner["mapcum","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
   
-  VisNodes       <- is.na(rlAreaVisBorders$x)
-  VisKeys        <- rlAreaVisBorders$Key[VisNodes]
-  VisHoles       <- rlAreaVisBorders$hole[VisNodes]  
-  NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys))
-  NotUsedFlag    <- any(NotUsed)
-  VisNU          <- !is.na(match(VisKeys,NotUsedKeys))
-
   #
   #
   #####
@@ -5796,10 +5933,18 @@ rlAreaMapCum = function(j) {
   # Drawing Loop
   #cat("mapcum - areaDatKey:",areaDatKey,"\n")
 
+  # loop through all of the group/rows
   
   for (i in 1:numGrps) {
 
+     VisCol <- rep(11,lenVisKeys)
+     VisCol[VisNU] <- 12    # not used color in all polygons.
+  
+     #cat("VisNU:\n")
+     #print(VisNU)
+
      if (i == medGrp & medGrpSize == 1) {
+
         panelSelect(panels,i,j)
         x       <- panelScale()
         panelFill (col=Panel.Fill.col)
@@ -5809,31 +5954,133 @@ rlAreaMapCum = function(j) {
         next
      }
      
+
+
+
      panelSelect(panels,i,j)
      x <- panelScale(rxpoly2,rypoly2)
 
      gsubs      <- ib[i]:ie[i]
      blkAreaCol <- 0
- 
+     mediKey    <- ""
+      
      ke = length(gsubs)    # get number of rows.  ??? extra
      
      ##  if a single row is not the median then the middle group is the median.
      
-     if ( medGrp > 0 & medGrpSize == 1) {
-     
-         if (i == (medGrp-1)) {
+     if ( medGrp > 0 & medGrpSize == 1) {   # single row with no map at median
+         # set area getting painted black as we hit the group/row. Save the area index.
+         # if single area in the median, find area in map above and below and Blacken.
+         
+         if (i == (medGrp-1)) {   # one above median
             gsubs      <- c(gsubs,medRow)
             blkAreaCol <- length(gsubs)
+            mediKey     <- areaDatKey[medRow]
          }
-         if (i == (medGrp+1)) {
+         if (i == (medGrp+1)) {   # one below median
             gsubs      <- c(gsubs,medRow)
             blkAreaCol <- length(gsubs)
+            mediKey     <- areaDatKey[medRow]
          }
      }
+     #   blkAreaCol is <> 0 if single area is on the median.
 
      gnams = areaDatKey[gsubs]    # translate from sequence number to sorted order of areas (abbrev)
                        # list of areas in this row (group) panel.
+                       # get keys for the areas in the group/row including the median area.
+                 # blkAreaCol value (if > 0) is the index into gsubs and gnams for the median area.
+                 # mediKey is the area key
 
+   
+     
+     
+     
+     
+     # Get foreground - 5 colors.
+     
+     foreKeys        <- gnams
+     fore            <- !is.na(match(rlAreaVisBorders$Key,foreKeys))            # find fore sub-areas and assign color based on order in gnams
+   
+   
+     foreFlag        <- any(fore)
+ 
+ 
+     VisForeCol      <- match(VisKeys,foreKeys)
+     VisFore         <- !is.na(VisForeCol)
+        
+   
+   
+     
+     
+     VisCol[VisFore] <- VisForeCol[VisFore]
+     # Set the foreground colors in the full list.
+     
+
+
+     # Median black color is needed
+     
+     if (blkAreaCol > 0) {
+        # have single area at median group/row  mediKey is the key for the single median area.
+        
+        medi         <- !is.na(match(rlAreaVisBorders$Key,mediKey)) # vis boundary points for median area key
+            # medi is the full VisBorder list with T/F; T-median area, F-No
+        mediFlag     <- any(medi)
+        
+        #  Identify the Col element for the median single area
+        VisMediCol   <- match(VisKeys,mediKey)    # find Vis elements for the median area  NA or 1
+        #  Set VisMedi T/F as to whether to set color or not.
+        VisMedi      <- !is.na(VisMediCol)   # VisBlk is T/F if polygon part of median area.
+        #  Set median area color to 7 (black)
+        VisCol[VisMedi] <- 7                 # assign black
+     } else {
+        # if no single median area, set VisMedi to all FALSE
+        medi         <- rep(0,length(rlAreaVisBorders$Key))
+        mediFlag     <- FALSE
+        VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
+     }
+     #cat("length VisMedi:",length(VisMedi),"\n")
+
+     # Set all of the highlight colors. 
+     highKeys        <- areaDatKey[1:ib[i]-1]   # vector of names used areas include this panel.
+
+
+
+     high            <- !is.na(match(rlAreaVisBorders$Key,highKeys))
+     highFlag        <- any(high)
+   
+     VisHighCol      <- match(VisKeys, highKeys)
+     VisHigh         <- !is.na(match(VisKeys,highKeys))  # keys to be highlighted.
+     #VisCol[VisHigh] <- 8    # set color.
+
+
+     HighDo          <- VisHigh & !(VisFore | VisMedi ) 
+     VisCol[HighDo]  <- 8    # set color to highlight.
+    
+     # 2 - Non-Active background (good, but not referenced yet)
+          
+     #if (blkAreaCol>0) {
+     #   # if black area is coming up, set it's color.
+     #   VisCol[VisCol == blkAreaCol] <- 7   # set to black
+     #   # do black after highlight, so black will over point highlight.
+     #}
+
+     # what is left - the background sub-areas.
+     back              <- !(fore | high | medi | NotUsed)   # what left is non-active waiting
+     backFlag          <- any(back)
+      if (backFlag) {
+         backKeys         <- unique(rlAreaVisBorders$Key[back])
+         VisBack          <- !is.na(match(VisKeys,backKeys))
+         VisCol[VisBack]  <- 11  
+      } else {
+         VisBack          <- rep(FALSE,lenVisKeys)
+         backKeys         <- NA
+      }
+   
+     VisCol2 <- mstColors[VisCol]   # translate to real colors
+    
+     VisCol2[VisHoles] <- Map.Bg.col
+ 
+ 
      ####
      #  Map background - Layer 2 borders   
      #
@@ -5847,53 +6094,13 @@ rlAreaMapCum = function(j) {
      }
      #
      ####
-     
+ 
+ 
      ####
      #
-     #  map boundaries for regions.
-     #
-     
-     if (Map.RegBorders && regionsB) {       # regions boundary overlay
-        graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
-                density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)
-     }
-     #
-     ####
-   
-     VisCol          <- rep(11,length(VisKeys))     # reduced size
-        
-     foreKeys        <- gnams
-     fore            <- !is.na(match(rlAreaVisBorders$Key,foreKeys))            # find fore sub-areas and assign color based on order in gnams
-     foreFlag        <- any(fore)
-     
-     VisForeCol      <- match(VisKeys,foreKeys)
-     VisFore         <- !is.na(VisForeCol)
-        
-     VisCol[VisFore] <- VisForeCol[VisFore]
-        
-     if (blkAreaCol>0) {
-       VisCol[VisCol == blkAreaCol] <- 7   # set to black
-     }
-  
-     highKeys        <- areaDatKey[1:ib[i]-1]   # vector of names used areas include this panel.
-     high            <- !is.na(match(rlAreaVisBorders$Key,highKeys))
-     highFlag        <- any(high)
-   
-     VisHigh         <- !is.na(match(VisKeys,highKeys))
-     VisCol[VisHigh] <- 8
-    
-     # what is left - the background sub-areas.
-     back            <- !(fore | high | NotUsed)                  # background is anything not active and not used.   T/F list
-     backFlag        <- any(back)
-     backKeys        <- unique(rlAreaVisBorders$Key[back])
-   
-     VisBack         <- !is.na(match(VisKeys,backKeys))
-     VisCol[VisBack] <- 12  
-        
-     VisCol2 <- mstColors[VisCol]   # translate to real colors
-    
-     VisCol2[VisHoles] <- Map.Bg.col
-          
+     #  Draw colors of areas (shading)
+ 
+
      graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
                  density=-1, col=VisCol2, border=FALSE)
      
@@ -5916,6 +6123,13 @@ rlAreaMapCum = function(j) {
      if (highFlag) {
         wVisBorders   <- NULL
         wVisBorders   <- rlAreaVisBorders[high,]
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
+     }
+     #    Median (active) areas
+     if (mediFlag) {
+        wVisBorders   <- NULL
+        wVisBorders   <- rlAreaVisBorders[medi,]
         graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
      }
@@ -6022,8 +6236,8 @@ rlAreaMapCum = function(j) {
 rlAreaMapMedian = function(j){
 
    # Works using area abbreviations
-   # bnd.ord gives abbreviations in the
-   #           the boundary are stored.
+
+
    # areaDatKey give the abbreviations in the order plotted
    # This MapMedian cream colors all areas above and below the median area.
    #   Areas < median are colored very light red in upper half of groups,
@@ -6032,10 +6246,6 @@ rlAreaMapMedian = function(j){
    #   shading are done as a cross over.
    #
 
-   #  bnd.ord is a list of Keys (one per polygon) in the border file.
-   bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
-   #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
-   #cat("unique bnd:",unique(bnd.ord),"\n")
    #cat("MapMedian-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
    # the x,y limits must be based on the biggest area plotted, if the data level 
@@ -6072,13 +6282,6 @@ rlAreaMapMedian = function(j){
 
    #
    
-   VisNodes       <- is.na(rlAreaVisBorders$x)
-   VisKeys        <- rlAreaVisBorders$Key[VisNodes]
-   VisHoles       <- rlAreaVisBorders$hole[VisNodes]  
-   NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys))
-   NotUsedFlag    <- any(NotUsed)
-   VisNU          <- !is.na(match(VisKeys,NotUsedKeys))
-
    highUKeys      <- areaDatKey[1:medRowAbv]
    highU          <- !is.na(match(rlAreaVisBorders$Key,highUKeys))
    highUFlag      <- any(highU)
@@ -6089,12 +6292,20 @@ rlAreaMapMedian = function(j){
    highLFlag      <- any(highL)
    VisHighL       <- !is.na(match(VisKeys,highLKeys))
     
+ 
+ 
+   
    # Drawing Loop
-
 
    # if this is the median group, the both get shaped.
 
-   for (i in 1:numGrps) {
+   for (i in 1:numGrps) {   # process for each group/row
+
+
+      VisCol        <- rep(11,lenVisKeys)             # background fill
+      VisCol[VisNU] <- 12  # not used areas           # not used fill
+  
+      #cat("lengths: VisCol:",length(VisCol)," VisNU:",length(VisNU),"\n")
 
       # Median Group/Row with 1 row
       if (i == medGrp & medGrpSize == 1) {
@@ -6118,6 +6329,7 @@ rlAreaMapMedian = function(j){
       gsubs      <- ib[i]:ie[i]
     
       blkAreaCol <- 0
+      mediKey    <- ""
 
       # Median Group/Row Panel
       if (medGrp > 0 & medGrpSize == 1) {
@@ -6127,11 +6339,13 @@ rlAreaMapMedian = function(j){
          if (i == medGrp-1) {
             gsubs <- c(gsubs,medRow)   # add median row to list
             blkAreaCol <- length(gsubs)
+            mediKey    <- areaDatKey[medRow]
             # accent in above panel
          }
          if (i == medGrp+1) {
             gsubs <- c(gsubs,medRow)   # add median row to list
             blkAreaCol <- length(gsubs)
+            mediKey    <- areaDatKey[medRow]
             # accent in below panel
          }
       }
@@ -6148,22 +6362,13 @@ rlAreaMapMedian = function(j){
       #          if we don't reference them, then boundaries may not be completely drawn.
       #
      
-      ####
-      #  Map background - Layer 2 borders   (regional areas  (US -> states))
-      #
-      if (Map.L2Borders) {    # area area overlay
-          # map fill areas
-        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
-                density=-1, col=Map.L2.Fill.col, border=FALSE)
-          # map borders
-        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
-                density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)   # white
-      }
-      #
-      ####
       
-      VisCol      <- rep(11,length(VisKeys))
+      #VisCol      <- rep(11,length(VisKeys))
    
+      # prefilled with background and not used colors.
+      
+      # upper and lower highlights before foreground colors and single median
+         
       highUbdr    <- FALSE
       highLbdr    <- FALSE
    
@@ -6184,6 +6389,7 @@ rlAreaMapMedian = function(j){
          VisCol[VisHighU] <- 9
          VisCol[VisHighL] <- 10
       }
+      #cat("length: highUbdr:",length(highUbdr)," highLbdr:",length(highLbdr)," high:",length(high),"\n")
 
       foreKeys         <- gnams
       fore             <- !is.na(match(rlAreaVisBorders$Key,foreKeys))            # find fore sub-areas and assign color based on order in gnams
@@ -6193,27 +6399,76 @@ rlAreaMapMedian = function(j){
       VisFore          <- !is.na(VisForeCol)
          
       VisCol[VisFore]  <- VisForeCol[VisFore]
-         
-      if (blkAreaCol>0) {
-        VisCol[VisCol == blkAreaCol] <- 7   # set to black
-      }
+
+
+        
+      if (blkAreaCol > 0) {
+         # have single area at median group/row  mediKey is the key for the single median area.
+        
+         medi         <- !is.na(match(rlAreaVisBorders$Key,mediKey)) # vis boundary points for median area key
+            # medi is the full VisBorder list with T/F; T-median area, F-No
+         mediFlag     <- any(medi)
+        
+         #  Identify the Col element for the median single area
+         VisMediCol   <- match(VisKeys,mediKey)    # find Vis elements for the median area  NA or 1
+         VisMedi         <- !is.na(VisMediCol)  # VisMedi is T/F if polygon part of median area.
+         VisCol[VisMedi] <- 7          # assign 7 - black
     
-      # what is left - the background sub-areas.
-      back             <- !(fore | high | NotUsed)                  # background is anything not active and not used.   T/F list
-      backFlag         <- any(back)
+      } else {
+         # if no single median area, set VisMedi to all FALSE
+         medi         <- rep(0,length(rlAreaVisBorders$Keys))       # single median keys
+         mediFlag     <- FALSE
+     
+         VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
+      }
+      #cat("length VisMedi:",length(VisMedi),"\n")
+      #cat("length medi:",length(medi),"\n")
+    
+      # 2 - Non-Active background (good, but not referenced yet)
+     
+      back              <- !(fore | high | medi | NotUsed)   # what left is non-active waiting
+      #cat("length back:", length(back),"\n")
+     
+      backFlag          <- any(back)
       if (backFlag) {
          backKeys         <- unique(rlAreaVisBorders$Key[back])
          VisBack          <- !is.na(match(VisKeys,backKeys))
-         VisCol[VisBack]  <- 12  
+         VisCol[VisBack]  <- 11  
+      } else {
+         backKeys         <- NA
+         VisBack          <- rep(FALSE,lenVisKeys)
       }
+      # should be equal to what is left colored 11, but this is a double check 
+      # and generates the back vector of T/F for all polygons.
       
       VisCol2           <- mstColors[VisCol]   # translate to real colors
      
       VisCol2[VisHoles] <- Map.Bg.col
            
-      graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
+      ####
+      #
+      #  Map background - Layer 2 borders   (regional areas  (US -> states))
+      #
+      if (Map.L2Borders) {    # area area overlay
+          # map fill areas
+        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+                density=-1, col=Map.L2.Fill.col, border=FALSE)
+          # map borders
+        graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+                density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)   # white
+      }
+      #
+      ####
+
+      #####
+      #
+      #     Map areas Coloring
+      #
+           graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
                   density=-1, col=VisCol2, border=FALSE)
 
+      #
+      
       #  setup each group of areas and draw polygons.
       #    Not Referenced sub-areas  
       if (NotUsedFlag) {
@@ -6221,25 +6476,28 @@ rlAreaMapMedian = function(j){
          graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)  # white
       }
+      #
       #    Background (not-active) areas
+      #
+      #  In VisBorder but does not have data .  (11)
       if (backFlag) {
+
          wVisBorders   <- rlAreaVisBorders[back,]
          graphics::polygon(wVisBorders$x,wVisBorders$y,
                  density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)  # white
       }
-
-      #    Highlighted areas (2)
-      if (highUbdr) {
-         wVisBorders   <- rlAreaVisBorders[highU,]
-         graphics::polygon(wVisBorders$x,wVisBorders$y,
-                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)  # black
-      }
-      if (highLbdr) {
-         wVisBorders   <- rlAreaVisBorders[highL,]
-         graphics::polygon(wVisBorders$x,wVisBorders$y,
-                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)  # black
-      }
-   
+     #    Highlighted areas (2) (8-9-10)
+     xhigh <- ( highUbdr | highLbdr )
+     if (any(xhigh)) {
+        wVisBorders   <- rlAreaVisBorders[xhigh,]
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)  # black
+     }
+     if (mediFlag) {
+        wVisBorders   <- rlAreaVisBorders[medi,]
+        graphics::polygon(wVisBorders$x,wVisBorders$y,
+                density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)  # white
+     }
       #    Foreground (active) areas
       if (foreFlag) {
          wVisBorders   <- rlAreaVisBorders[fore,]
@@ -6343,8 +6601,6 @@ rlAreaMapMedian = function(j){
 rlAreaMapTail = function(j){
  
    # Works using area abbreviations
-   # bnd.ord gives abbreviations in the
-   #           the boundary are stored.
    # areaDatKey give the abbreviations in the order plotted
    # MapTail shows current areas in a group as colored and
    # a tail of areas (in cream color) from the outside inward.  
@@ -6352,10 +6608,6 @@ rlAreaMapTail = function(j){
  
    #browser()
  
-   #  bnd.ord is a list of Keys (one per polygon) in the border file.
-   bnd.ord = rlAreaVisBorders$Key[is.na(rlAreaVisBorders$x)] # Area abbrev based on "NA" in point List.
-   #cat("bnd.ord:",bnd.ord,"\n")  # key order of polygons in VisBorder.
-   #cat("unique bnd:",unique(bnd.ord),"\n")
    #cat("MapTail-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
    # the x,y limits must be based on the biggest area plotted, if the data level 
@@ -6406,17 +6658,15 @@ rlAreaMapTail = function(j){
    } else { 
       medGrpPt <- (numGrps/2) # + one lower
    }
+
    
-   VisNodes       <- is.na(rlAreaVisBorders$x)
-   VisKeys        <- rlAreaVisBorders$Key[VisNodes]
-   VisHoles       <- rlAreaVisBorders$hole[VisNodes]  
-   NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys))
-   NotUsedFlag    <- any(NotUsed)
-   VisNU          <- !is.na(match(VisKeys,NotUsedKeys))
- 
    # Drawing Loop
  
+ 
    for (i in 1:numGrps) {
+ 
+      VisCol        <- rep(11,lenVisKeys)
+      VisCol[VisNU] <- 12
  
       if(i == medGrp & medGrpSize == 1 ) {
          panelSelect(panels,i,j)
@@ -6436,15 +6686,18 @@ rlAreaMapTail = function(j){
       ke         <- length(gsubs)  # why?
       
       blkAreaCol <- 0
+      mediKey    <- ""
       
       if (medGrp > 0 & medGrpSize == 1) {
          if (i == (medGrp-1)) {
             gsubs      <- c(gsubs,medRow)
             blkAreaCol <- length(gsubs)
+            mediKey    <- areaDatKey[medRow]
          }
          if (i == (medGrp+1)) {
             gsubs      <- c(gsubs,medRow)
             blkAreaCol <- length(gsubs)
+            mediKey    <- areaDatKey[medRow]
          } 
       }
       
@@ -6452,21 +6705,17 @@ rlAreaMapTail = function(j){
       gnams = areaDatKey[gsubs]
  
       ####
+      #  colors and order
+      #  highKeys - low or high - area has been referenced previously 
+      #      from the top or is to be reference in following maps below.
+      #  foreKeys - colors for the current areas being referenced in this group/row.
+      #  blkAreaCol - "black" used to fill the median area above the median and below
+      #      the median.
+      #  backKeys - background color - matches the back color of the map and general space.
+      #  
       #
-      #  Map background - Layer 2 borders   (regional areas  (US -> states))
-      #
-      if (Map.L2Borders) {    # area area overlay
-         # map fill areas 
-         graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
-               density=-1, col=Map.L2.Fill.col, border=FALSE)
-         # map borders
-         graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
-               density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)  # white
-      }
-      #
-      ####
-     
-      VisCol          <- rep(11,length(VisKeys))
+      #  The order of coloring is important.
+      #  For the mapmedian, colors are: highlight (high or low); fore; black; back
      
       highKeys        <- NA
       highFlag        <- FALSE
@@ -6491,28 +6740,66 @@ rlAreaMapTail = function(j){
          
       VisCol[VisFore]  <- VisForeCol[VisFore]
          
-      if (blkAreaCol>0) {
-         VisCol[VisCol == blkAreaCol] <- 7   # set to black
+      if (blkAreaCol > 0) {
+         # have single area at median group/row  mediKey is the key for the single median area.
+         
+         medi         <- !is.na(match(rlAreaVisBorders$Key,mediKey)) # vis boundary points for median area key
+             # medi is the full VisBorder list with T/F; T-median area, F-No
+         mediFlag     <- any(medi)
+         
+         #  Identify the Col element for the median single area
+         VisMediCol   <- match(VisKeys,mediKey)    # find Vis elements for the median area  NA or 1
+         #  Set VisMedi T/F as to whether to set color or not.
+         VisMedi      <- !is.na(VisMediCol)   # VisBlk is T/F if polygon part of median area.
+         #  Set median area color to 7 (black)
+         VisCol[VisMedi] <- 7                 # assign black
+       } else {
+         # if no single median area, set VisMedi to all FALSE
+         medi         <- rep(0,length(rlAreaVisBorders$Key))
+         mediFlag     <- FALSE
+         VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
       }
+      #cat("length VisMedi:",length(VisMedi),"\n")
       
-      # what is left - the background sub-areas.
-      back             <- !(fore | high | NotUsed)                  # background is anything not active and not used.   T/F list
-      backFlag         <- any(back)
-      if (backFlag) {
-         backKeys         <- unique(rlAreaVisBorders$Key[back])
-         VisBack          <- !is.na(match(VisKeys,backKeys))
-         VisCol[VisBack]  <- 12  
-      }
+      
+     # what is left - the background sub-areas.
+     back             <- !(fore | medi | high | NotUsed)                  # background is anything not active and not used.   T/F list
+     #cat("length back:",length(back),"\n")
+     backFlag         <- any(back)
+     if (backFlag) {
+        backKeys         <- unique(rlAreaVisBorders$Key[back])
+        VisBack          <- !is.na(match(VisKeys,backKeys))
+        VisCol[VisBack]  <- 11  
+     } else {
+        backKeys         <- NA
+        VisBack          <- rep(FALSE,lenVisKeys)
+     }
       
       VisCol2           <- mstColors[VisCol]   # translate to real colors
       
       VisCol2[VisHoles] <- Map.Bg.col
            
+      ####
+      #
+      #  Map background - Layer 2 borders   (regional areas  (US -> states))
+      #
+      if (Map.L2Borders) {    # area area overlay
+         # map fill areas 
+         graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+               density=-1, col=Map.L2.Fill.col, border=FALSE)
+         # map borders
+         graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
+               density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)  # white
+      }
+      #
+
+      # Map area colors.
       # draw the combined fill colors in VisBorder file order.
-      
+      #     
       graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,                    # plot all polygons
                   density=-1, col = VisCol2, border = FALSE)            # fill in all areas. (1 to 6, 7, hole)
      
+      ####
       #  setup each group of sub-areas and draw polygons.
       #    Not Referenced sub-areas  
      
@@ -6532,6 +6819,11 @@ rlAreaMapTail = function(j){
          wVisBorders   <- rlAreaVisBorders[high,]
          graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)   # black
+      }
+      if (mediFlag) {
+         wVisBorders   <- rlAreaVisBorders[medi,]
+         graphics::polygon(wVisBorders$x,wVisBorders$y,
+                 density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)  # white
       }
       #    Foreground (active) sub-areas
       if (foreFlag) {
@@ -9687,7 +9979,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         }
      } else {
         if (methods::is(FDate,"character")) {
-           if (str_trim(FDate) == "") {
+           if (stringr::str_trim(FDate) == "") {
               WantDate   <- FALSE
               DateFormat <- NULL
            } else {
@@ -9772,7 +10064,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 
                 # convert to character or Date
                 if (WantDate) {
-                   atD          <- as.Date(atRx)
+                   atD          <- as.Date(atRx,origin="1970-1-1")
                    atLab        <- format(atD,format=DateFormat)
                 } else {
                    atLab        <- as.character(atRx)
@@ -9792,7 +10084,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 rx            <- res$rx
  
  		if (WantDate) {
-                   atD          <- as.Date(atRx)
+                   atD          <- as.Date(atRx,origin="1970-1-1")
                    atLab        <- format(atD,format=DateFormat)
  		} else {
                    #  get Scaler1 results on max.
@@ -9845,7 +10137,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 rx           <- res$rx
                 
                 if (WantDate) {
-                   atD          <- as.Date(atRx)
+                   atD          <- as.Date(atRx,origin="1970-1-1")
                    atLab        <- format(atD,format=DateFormat)
                 } else {
                    # numerical format for the scaled version of the value
@@ -9867,7 +10159,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 		#cat("m4-Label:",atRx," ",rx,"  WantDate:",WantDate,"\n")
 		# convert to character or Date
                 if (WantDate) {
-                   atD          <- as.Date(atRx)
+                   atD          <- as.Date(atRx,origin="1970-1-1")
                    atLab        <- format(atD,format=DateFormat)
                 } else {
                    atLab        <- as.character(atRx)
@@ -9887,7 +10179,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
                 # convert to character or Date
                 if (WantDate) {
-                   atD          <- as.Date(atRx)
+                   atD          <- as.Date(atRx,origin="1970-1-1")
                    atLab        <- format(atD,format=DateFormat)
                 } else {
                    atLab        <- as.character(atRx)
@@ -11715,15 +12007,20 @@ rowNames     <- rowNames[[1]][1]
 
 if ( missing(rowNames) || is.null(rowNames) )  {
    # no rowNames provided up front.  Set to default
+   #x<-errCntMsg("***0193 The rowNames parameter is NULL, NA or Missing. The default of 'ab' will be used.\n")
    rowNames             <- def_rowNames
 }
 
 if ( is.na(rowNames) ) {
    rowNames <- def_rowNames   # value is NA for set it to the default.
+   x<-errCntMsg("***0193 The rowNames parameter is NULL, NA or Missing. The default of 'ab' will be used.\n")
 }
 
 #cat("Code: 11724 - Validate rowNames : ", rowNames,"\n")
-
+if (!is.character(rowNames)) {
+   StopFnd <- stopCntMsg("***0197 The rowNames parameter is not a character string.\n")
+   rowNames <- def_rowNames
+}
 xm <- match(rowNames,c("ab","abbr","full","seer","alias","id","FIPS","alt_ab"))
 if (is.na(xm)) { # invalid rowNames value
    StopFnd <- stopCntMsg(paste0("***0190 CARG-RN Invalid rowNames call parameter value of ",
@@ -12548,7 +12845,6 @@ eval(parse(text=wstr))
    #
    
    # process sortVar
-   #sortVar <- sortVar[[1]][1]   # get first element.  (no, use more than one column.)
    
    if ( missing(sortVar) || is.null(sortVar) || any(is.na(sortVar)) ) {
      
@@ -12795,6 +13091,7 @@ eval(parse(text=wstr))
 #   Default Call = NULL,  Default value = FALSE 
 #
    def_staggerLab <- FALSE
+   staggered  <<- FALSE    # start with a lower value. (lower line of staggered set.)
    
    #print("Validating staggered:")
    if ( missing(staggerLab) || is.null(staggerLab) ) {
@@ -12802,18 +13099,15 @@ eval(parse(text=wstr))
    } else {
       staggerLab <- staggerLab[[1]][1]
 
-      staggered  <<- FALSE    # start with a lower value. (lower line of staggered set.)
-
-      if (any(is.na(staggerLab)) ) {
-      
+      if (is.na(staggerLab)) {
+         staggerLab <- def_staggerLab
+      } else {   
+         # not NA
          if (!methods::is(staggerLab,"logical")) {
             staggerLab <- FALSE
             errCntMsg("***01E0 CARG-SL The staggerLab argument is not a logical value. Setting staggerLab to FALSE.\n")
          }
-      } else {
-         # parameter not present or set to NULL/NA
-         staggerLab    <- FALSE    # default = FALSE - don't stagger axis labels.
-      }
+      } 
    
       #cat("staggerLab:",staggerLab,"\n")
    
@@ -13788,6 +14082,39 @@ if (is.na(match('lab4',PDUsed))) {
                         # FALSE = first label on line 1,   TRUE = first label on line 2.
                         # This value is set when staggered labels are proceed based on if the last value
                         # in the atRx1 is greater thatn atRx2 = TRUE then value is TRUE.
+
+
+#####
+#
+#   Setup for area VisCol processing:  foreground, median, highlights, not used, background
+#
+#print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
+# per VisBorder polygon (point/vector)
+  
+VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of each polygons in VisBorders (indexes)
+  
+# per polygon (end point) (decode VisBorders by polygon)  # pull key and hole info for each polygon.
+VisKeys        <- rlAreaVisBorders$Key[VisNodes]       # key at end points of each polygon
+VisHoles       <- rlAreaVisBorders$hole[VisNodes]      # hole indicator at end points of all polygons
+lenVisKeys     <- length(VisKeys)
+ 
+# one entry per end of polygon. Multi-polygons per area.
+  
+#cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
+#print(VisKeys)
+  
+#cat("Basic list of VisHoles (zero or more per polygon):\n")
+#print(VisHoles)
+  
+# per Visborder all point/vector
+  
+  # NotUsedKeys created above after reviewing the data.
+  NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys)) # list of not used polygons - no data.
+  NotUsedFlag    <- any(NotUsed)  # flag to indicate not used exists 
+  
+  # per polygon (end point).  # not used area Key lost.
+  VisNUCol       <- match(VisKeys,NotUsedKeys)       # NotUsedKeys gathered above based on data.  NA no match 1=NotUsed polygon.           
+  VisNU          <- !is.na(VisNUCol)                 # T or F, T=not used, F=used.
 
 
 #####

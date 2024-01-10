@@ -356,37 +356,37 @@ data the micromapST package can utilize.
 
 Dataset contained in the package to support the examples provides are:
  \describe{
-    \item{statePop2010}{To be added 
+    \item{statePop2010}{U. S. State population data for 2010.
       }
-    \item{TSdata}{To be added
+    \item{TSdata}{To be Added
       }
-    \item{Educ8thData}{To be added
+    \item{Educ8thData}{To be Added
       }
-    \item{stateData}{Internal Operation
+    \item{stateData}{To be Added
       }
     \item{wflung00and95}{White Female Lung (wflung) data from 1995 and 2000
       }
-    \item{wflung00cnty}{To be Added
+    \item{wflung00cnty}{Wflung US data for 2000 by county.
       }
-    \item{wflung00and95US}{To be Added
+    \item{wflung00and95US}{Wflung US data for 2000 and 1995.
       }
     \item{wflung5070}{Wflung  data for 50s to 70s 
       }
     \item{wflung5070US}{ Wflung  data for 50s to 70s US rates
       }
-    \item{KanPopInc}{Internal Operation
+    \item{KanPopInc}{Kansas state population by county.
       }
-    \item{mdPopData}{Internal Operation
+    \item{mdPopData}{Maryland state population by county. 
       }
-    \item{nyPopData}{Internal Operation
+    \item{nyPopData}{New York state population by county.
       }
-    \item{UtahPopData}{Internal Operation
+    \item{UtahPopData}{Utah state population by county.
       }
-    \item{AfricaPopData}{Internal Operation
+    \item{AfricaPopData}{Africa population by country.
       }
-    \item{SeoulPopData}{Internal Operation
+    \item{SeoulPopData}{Seoul City population by district.
       }
-    \item{cnPopData}{Internal Operation
+    \item{cnPopData}{China population by province and adminstrative district.
       }
   }
 
@@ -626,7 +626,7 @@ attr(NewArray,"xIsDate") <- TRUE
 
 panelDesc03a   <- data.frame(                    
     type=c("maptail","id","tsconf","dot"),      
-    lab1=c("","","Time Series (MMM-YY)","Female"),    
+    lab1=c("","","Time Series (YYYY-MM)","Female"),    
       # recommend adding to the column title a note about the date format used.
     lab2=c("","","Annual Rate per 100,000","Most Recent Rate (2010)"),  
     lab3=c("","","Years","Deaths per 100,000"), 
@@ -635,7 +635,7 @@ panelDesc03a   <- data.frame(
     panelData =c(NA,NA,"NewArray",NA)
     )
     
-ExTitle <- c("Ex03a-US Time Series with Confidence bands with time (mmm-yy)",
+ExTitle <- c("Ex03a-US Time Series with Confidence bands with time (yyyy-mm)",
                "Annual Female Lung Cancer Mortality Rates, 1996-2010")
 
 grDevices::pdf(file=paste0(TDir,"Ex03a-US Time-Series-with-Conf wDates.pdf"),

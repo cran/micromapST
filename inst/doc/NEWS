@@ -1,5 +1,5 @@
-micromapST - Version 3.0.1 - 
-Updated: 11-08-2023
+micromapST - Version 3.0.2 - 
+Updated: 01-09-2024
 
 Enhancements:
 1) Added the capability to display date labels for the x-axis
@@ -14,6 +14,69 @@ Enhancements:
 2) micromapST code as been corrected to remove the conflict between 
    when the time series date feature is used and the axisScale feature
    specifies the "s" or "sn" options for the linked micromap graphic.
+3) The color logic in the mapping code has been re-written to 
+   handle a problem when a single area is the only area at the
+   median of the map.  The design is to not draw a map, but to 
+   only mark the median position and color the area in the 
+   upper and lower group/rows black to mark the area.  The original
+   code also painted highlights over the areas.  The highlights
+   were used in the mapcum, mapmedian and maptail versions of the 
+   map, they would over paint the median area.  This has been resolved.
+4) Several parmeters were not check or not check properly to limit 
+   the allowed input information to the functions.  This has been
+   fixed on the plotNames, NameTableFile, NameTableDir, NameTableLink,
+   ShapeFile, ShapeFileDir, ShapeLinkName and the BordGroupName.  
+   The other parameters will be reviewed and adjusted if needed.
+Fixes:
+a) Due to past R releases still supported on CRAN, it is necessary
+   to add the once required "origin=" parameter to all as.Date()
+   uses in R 4.2 and forward to not cause a error message.
+   The origin has been set to "1970-01-01".
+b) BuildBorderGroup attempts to provide as much information
+   to the user as possible, since they are constructing a border
+   group that will hopefully be used over and over and possibily
+   distributed to other users.  In this version, the messages 
+   outputted by the function are starting to be reviewed and the less
+   meaningful and helpful message removed to make it easier to use
+   BuildBorderGroup.
+c) Test plots of modified area have been removed.
+d) In several validations of call parameters, invalid data is being allowed 
+   through.  This is being caused by situations like: Lists are Vectors,
+   But Lists of Lists are not. If str_trim processes any variable, it becomes
+   a vector of character type, even if it is a List, Matrix, Array, etc.
+   More work is needed to make this a bulletproof validation. The program
+   tries to enforce single value variables with xxx[[1]][1] which works.
+   However, if a matrix, data.frame, array, etc. are passed to the 
+   function, the first value is isolated and processed regardless of 
+   the original class of variable.  So a matrix with the first element
+   having a value of 10, will be seen as a variable with a single element of 10.
+e) In handling read character data via read.csv and other functions, if the 
+   data is "xxx" in the file data, then R reads the "s as well as the characters
+   into the variable.  When displayed with print or cat, it's not always
+   clear whether the " or ' are part of the string or used to indicate 
+   this is a character string.  So, a "AK" may have a length of 2 or 4.
+   To address this situation, the noquote function was tried, but it 
+   converts the class of the variable to "noquote" and hides the "character"
+   class and typeof.  In this version, use of the str_remove_all function
+   is being used to try and intelligently remove the " and ' characters from 
+   the character strings to be able to provide valid character count 
+   for the parameter validation.
+f) A few warning message related to Long/Lat projects and the sf function
+   are still being produced.  To reduce the confusion to the user, these
+   sf functions have been identified and encased with suppressWarnings and 
+   suppressMessages functions.
+
+
+micromapST  Version 3.0.1 - 
+Updated:  11-06-2023
+
+Fixes:
+a) Adjustments in the sf function calls to reduce the number of overhead messages
+   and warnings due to the rgdal, rgeos, and maptools package
+   retirements on Oct 16, 2023.
+b) When using Long Lat shift mode in sf, several sf function would drop out of the
+   return answers not shifted.  These functions were identify and the 
+   LLShift mode was re-applied to the answer to allow proper processing.
    
 
 micromapST  Version 3.0.0 -

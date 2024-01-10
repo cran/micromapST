@@ -720,7 +720,11 @@
 
              Select the correct border group or use another rowNames value.
            }
-
+          \item{0193}{\bold{The rowNames parameter is NULL, NA or Missing. 
+             The default of 'ab' will be used.}\cr
+             rowNames must be provided to define the type of location id to use.
+             The default is "ab".  The other options are "full", "alias", and "alt_ab".
+           }  
           \item{0195}{\bold{ALIAS Alias Names(s) in the data no not match the 
             name table for the area. The unmatched data rows are: <listRowNames>}
 
@@ -742,6 +746,10 @@
              data row will be used.  The <listRowNames> section 
              of the message contains a list of the duplicate rows.  Correct row names 
              to eliminate any duplicates and re-run.
+           }
+           \item{0197}{\bold{The rowNames parameter is not a character string.}\cr
+             The rowNames parameter must be provided and must be a character vector.  If 
+             it is not, the function is terminated.
            }
          }
        }
