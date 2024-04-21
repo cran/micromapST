@@ -1,6 +1,6 @@
 #
 #  micromapST - 
-#  Updated: January 9th, 2024 by Jim Pearson
+#  Updated: January 20th, 2024 by Jim Pearson
 #
 #  discussion points:  not all border groups have abbreviations or IDs.  Names yes, but need to 
 #       handle the value inputed by the user and link data to boundaries. May be needed
@@ -749,6 +749,9 @@
 #           caught.  Any found were fixed.
 #           - added st_make_valid after reading the shape file and adding the projection.
 #           Africa was working and now bombs.
+#  2024-0416 - corrected column width calculation for the "id" glyph. The column width calculation did 
+#           not include the symbol width.   The code was adjusted to mimic the events and scaling in the 
+#           ID glyph drawing code.  
 #
 #
 #  Used packages: RColorBrewer, stringr, R.rsp, labeling, 
@@ -1407,17 +1410,20 @@ Scaler2 <- function(var,lower=FALSE) {
 
 #####
 #
-#  plotPoint - takes a give x,y any type of point (0:18, 19:25, > 32 or character)
-#    and correctly plots it at x,y.   Other parameters are required incase of outlines.
+#  plotPoint - takes a give x,y, any type of point (0:18, 19:25, > 32 or character)
+#    and correctly plots it at x,y.  Other parameters are required incase of outlines.
 #
 #
  plotPoint <- function(ppX, ppY, ppPch,  ppColor, ppSize, ppLwd, 
                        ppOutline, ppOutline.col, ppOutline.lwd) {                     
             #
-            # Call parameters:  pchValue, x, y, pch.size, outline.lwd, outline.col, mstColor, 
+            # Call parameters:  pchValue, x, y, pch.size, outline.lwd, outline.col, mstColor
+            #
+            #  x, y are the coordinates to plot the point.  They are in the coordinates system
+            #       set in the par("usr") values.
             #
             
-            pchValue   <- ppPch
+            pchValue   <- ppPch     # get symbol to plot.
             
             suppressWarnings(chrValue   <- as.numeric(pchValue))
             
@@ -1448,48 +1454,38 @@ Scaler2 <- function(var,lower=FALSE) {
                if (chrValue > 31) {
                   #cat("chrValue > 31 - normal points\n")
                   
-                  # normal symbols (numeric) (no border)
+                  # normal symbols (numeric) (no border)  32 up to 255?
                   # > 31 characters
-                  graphics::points(ppX,ppY,pch=chrValue,
-                             cex=ppSize,
-                             col=ppColor 
-                        )
+                  graphics::points( ppX, ppY, pch=chrValue, cex=ppSize, col=ppColor )
+                  
                } else {
-                  # <= 31
+                  # <= 31   lower then 31 to 0
                   if (chrValue > 25) {
-                     # 26:31 -> not used character use default
+                     # 26:31 -> not used character, use the default of 21
                      chrValue  <- 21
                      #cat("char 26:31 not used -> use default 21\n")
                   }
-                  if (chrValue > 18) {
+                  if (chrValue > 18) {   # 19 to 25
                     
                      #  19:25 value characters.
+                     
                      #  Dot.Conf.Outline set by user or by BW/Greya/Grays color scheme
                      if (ppOutline) {
                         #  19:25 with outline around symbol
                         #cat("19:25 -> filled with borders symbols - outline ON \n")
-                        graphics::points(ppX, ppY, pch=chrValue, 
-                                 cex=ppSize, 
-                                 lwd=ppOutline.lwd, 
-                                 col=ppOutline.col, 
-                                 bg=ppColor                              )         
+                        graphics::points(ppX, ppY, pch=chrValue, cex=ppSize, 
+                                 lwd=ppOutline.lwd, col=ppOutline.col, bg=ppColor )         
                      } else {
                         #  19:25 with no outline (border) 
                         #cat("19:25 -> filled with borders symbols - outline OFF \n")
-                        graphics::points(ppX, ppY, pch=chrValue, 
-                                 cex=ppSize,
-                                 col=NA,
-                                 bg=ppColor
-                              )
+                        graphics::points(ppX, ppY, pch=chrValue, cex=ppSize, col=NA, bg=ppColor )
+                        
                      }
                   } else {
                      # 0:18 symbols - line drawings
                      #cat("0:18 symbols - standard print.\n")
-                     graphics::points(ppX, ppY, pch=chrValue,
-                              cex = ppSize,
-                              lwd = ppLwd,
-                              col = ppColor
-                           )
+                     graphics::points(ppX, ppY, pch=chrValue, cex = ppSize, lwd = ppLwd, col = ppColor  )
+                     
                   }
                }
             }
@@ -1518,7 +1514,7 @@ micromapSEER <- function(statsDFrame,panelDesc,...) {
 #
 #   Get micromapST Version
 #
-micromapST.Version <- function() { return ("micromapST V3.0.2 built 2024-01-09 09:28pm ") }
+micromapST.Version <- function() { return ("micromapST V3.0.3 built 2024-04-20 19:30 pm") }
 
 #
 ####
@@ -2611,10 +2607,11 @@ if (!exists("areaNamesAbbrsIDs")) {
    #    Presentation strings
    ID.Abbr        <- areaNT$Abbr             #    (All CAPS, no punct, single blanks)
    # for ID.Name force proper capitalization on the name
-   ID.Name        <- as.vector(sapply(areaNT$Name,function(x) simpleCap(x))) # proper cap.  Not matched on but should look neat.
-    
+   #ID.Name        <- areaNT$Name
+   ID.Name         <- as.vector(sapply(areaNT$Name,function(x) simpleCap(x))) # proper cap.  Not matched on but should look neat.
+       
    NTColList <- c("Name","Abbr","ID","Alt_Abbr","Alias","Key","NotUsed")
-   #cat("Code: 2578 - Adjusted Name Table variable:\n")
+   #cat("Code: 2613 - Adjusted Name Table variable:\n")
    #print(areaNT[,NTColList])
    #cat("Original:\n")
    #print(rlAreaNamesAbbrsIDs[,NTColList])
@@ -2624,7 +2621,7 @@ NTNames <- names(areaNT)
 #print (NTNames)
 #print (names(areaNT))
 #print (areaNT)
-#cat("Code: 2588 \n")
+#cat("Code: 2623 \n")
 #
 #####
 
@@ -2888,7 +2885,7 @@ if (ErrFnd) {
 
 rm(MissInBG,ErrFnd)
 
-#cat("Code: 2852 - Map.L2Borders:",Map.L2Borders,"  Map.RegBorders:",Map.RegBorders,"  aP_Regions:",aP_Regions,"\n")
+#cat("Code: 2887 - Map.L2Borders:",Map.L2Borders,"  Map.RegBorders:",Map.RegBorders,"  aP_Regions:",aP_Regions,"\n")
 
 # Clean up and move data into old structures
 
@@ -2914,7 +2911,6 @@ if (UserBordGrpLoad) {
    #   run md5sum over the BG file and compare values with this file.
    #   if it matches, then BG file does not have to validated and waste time and CPU.
    #
-
 }
 #
 #####
@@ -2962,7 +2958,7 @@ if (UserBordGrpLoad) {
     if (any(is.na(Id.Hdr2))) Id.Hdr2 <- ""
     
     
-    #cat("AT 2927 - bordGrp:",bordGrp,"\n",
+    #cat("AT 2960 - bordGrp:",bordGrp,"\n",
     #    "             Map Var-Hdr1:",Map.Hdr1,"  Hdr2:",Map.Hdr2,
     #    "  MinH:",Map.MinH,"  MaxH:",Map.MaxH,"  Aspect:",Map.Aspect,"\n",
     #    "             Id Var-Hdr1:",Id.Hdr1,"  Hdr2:",Id.Hdr2,"\n")        
@@ -2984,7 +2980,7 @@ if (UserBordGrpLoad) {
        # turn off the DC, HI, AK old logic.
     }
    
-    #cat("AT 2949 end of addition dup checks.\n")
+    #cat("AT 2982 end of addition dup checks.\n")
     
 ####
 #
@@ -3005,7 +3001,7 @@ if (UserBordGrpLoad) {
 #
 # fix up areaParms to unique names   (old to new)
     
-    #cat("AT 2970 - read areaParms data.\n")
+    #cat("AT 3003 - read areaParms data.\n")
     
     # check for old field names.  If present - copy to new names.
     #  If Regions is present, the other parameters should not be.
@@ -3043,7 +3039,7 @@ if (UserBordGrpLoad) {
 ####
 
 if (is.null(areaParms$Ver))  areaParms$Ver <- c("0")  # set areaParms version to 0
-#cat("AT 3008 - areaParms$Ver and details\n")
+#cat("AT 3041 - areaParms$Ver and details\n")
 ####
 #
 #   The following variables may be included in details, but are not configured here
@@ -3076,7 +3072,7 @@ if (!is.na(x)) {
 # create a list of valid variables.
 #
 ##########
-#cat("AT 3041 Name Table\n")
+#cat("AT 3074 - Name Table\n")
      
 ##########
 #
@@ -3148,7 +3144,7 @@ if (!is.na(x)) {
 
 #  Gather MapL variables
 
-    # cat("Code: 3113 \n")
+    # cat("Code: 3146 \n")
     # Working vectors for PRINT out.
     
     areaNTMapLabels <- FALSE
@@ -3174,7 +3170,7 @@ xps  <- par("ps")
 xpin <- par("pin")
 xdin <- par("din")
 
-#cat("check point 3139 on par - ps:",xps," pin:",xpin," din:",xdin,"\n")
+#cat("check point 3172 on par - ps:",xps," pin:",xpin," din:",xdin,"\n")
 
 #print("Border Group Read and Setup")
 
@@ -3370,6 +3366,9 @@ rlAreaArrow = function(j){
       # May need to check to see if the scaling already handles this. So let it go for now.
       # 
       # One approach is to adjust the values based on the number to graph.  Use table.
+      #
+      # Each panel is x by y with 0,0 being in the lower left corner.
+      # The x and y values are plotted against the par("usr") parameters for the space.
       #
       laby   <- ke:1                 # labels n:1 depending on number of rows in group (US case 1:1 and 1:5).
       
@@ -4961,6 +4960,7 @@ rlAreaDotSe = function(j){
 # type = 'id' =======================================================
 #
 # rlAreaID
+#     The column sizes have already been calculated by the panelLayout section of code.
 #
 
 rlAreaID = function(j){
@@ -4980,42 +4980,33 @@ rlAreaID = function(j){
    x <- panelScale(rx,ry)
   
    #
-   #  ID text set based on Text.cex.. for 12 point text  in a 3/4 to over 1" height boxes.
+   #  Changed from referencing Text.cex to Id.Text.cex for consistancy.
+   #
+   #  ID text set based on Id.Text.cex.. for 12 point text  in a 3/4 to over 1" height boxes.
    #
    
    xusr  <- par("usr")  # base decision on first panel - they should all be the same.
    xpin  <- par("pin")
    
-   IDcex.mod <- Id.Cex.mod     # get multiplier based on 12 pt.   0.75
-   pchSize   <- Id.Text.cex * IDcex.mod * Id.Dot.cexm   #   0.75 * 0.75 * 1.5
-   #cat("ID: pchsize:",pchSize,"\n")
- 
-   if (xpin[2] < 0.75) {
-      # panel height is getting smaller.  reduce text and symbol size.  < 0.75 inches
-      Old_IDcex.mod <- IDcex.mod
-      #IDcex.mod <- (1 - (( 1 - xpin[2]/0.75 ) ^ 2 ))          # get ratio.  (1-Height/0.75) sq
-      IDcex.mod  <- IDcex.mod * (xpin[2]/0.75)
-      #cat(" xpin[2]<0.75 - IDcex.mod:",Old_IDcex.mod," change to ",IDcex.mod,"\n")
-   }
    
    ### request to lower title into axis label space.
   
    xLab1 <- banner["id","H2"]   # get related banners for "id" glyph
    xLab2 <- banner["id","H3"]
    
-   #cat(" ps:",par("ps"),"  cex:",par("cex"),"  Text.cex:",Text.cex,"\n")
+   #cat(" ps:",par("ps"),"  cex:",par("cex"),"  Id.Text.cex:",Id.Text.cex,"\n")
    if (xLab2 == "") {
       xLab2 <- xLab1
       xLab1 <- ""
    }
   
-   # print column titles
+   # print column Titles/Headers.
    if (xLab1 != "") {
       graphics::mtext(xLab1,side=3,line=Id.Title.1.pos,cex=Text.cex)    # 0.75
    }
-   graphics::mtext(xLab2,side=3,line=Id.Title.2.pos,cex=Text.cex)       # 0.75
+   graphics::mtext(xLab2,side=3,line=Id.Title.2.pos,cex=Text.cex)       # 0.75  # should at least be a Lab2.
    
-   #cat("lab size:",Text.cex,"\n")
+   #cat("label text cex size:",Text.cex,"\n")
    
    widthPanel    <- xpin[1]   # inches width of "id" glyph.
 
@@ -5029,8 +5020,7 @@ rlAreaID = function(j){
    lastLab2Space <<- ( widthPanel + colSepGap - widthxLab2 ) / 2  # pos - space (have), neg - overhang (need).
    
    #cat("ID - widthPanel:",widthPanel,"  width xLab2:",widthxLab2,"  lastLab2Space:",lastLab2Space," staggered:",staggered,"\n")
-   
-   
+      
    # ______Bottom Label/Title - Lab3 ______
 
    lastLab3Space <<- ( widthPanel + colSepGap ) / 2     
@@ -5046,26 +5036,74 @@ rlAreaID = function(j){
       lastLab3Space <<- ( widthPanel + colSepGap - widthxLab3  ) / 2
    }
 
-   #_____________________Square Sizing  and Symbol Placement
+   #_____________________Square Sizing and Symbol Placement  (do it again for placement positions.)
 
    #  square width
+   
+   #
+   # Id.Start    # inches from left margins
+   # Id.Dot.width  = 0.1   estimate width (in) of the symbol (can vary)
+   # Id.Dot.cexm   = 1.75  multiplier for Symbol to make the good size in relation to text.
+   # Id.Text.cex   = 0.75  multiplier for the text content.  
+   # Id.Cex.mod    = 0.75  multiplier for entire line (symbol and text).
+   #
+   #  ratio of usr and inch is usually and should be 1:1.
+   #
+   # So, 
+   #     Space Width  = strwidth(" ") * Id.Text.cex
+   #     Symbol Width = Id.Dot.width * Id.Dot.cexm
+   #     Text Width   = (" " + <text> + " ") * Id.Text.cex
+   #     Line Width   = Id.Space + SymbolSize + Id.Space + <text width> + Id.Space
+   #     Final size   = Line init size * Id.Cex.mod
+   #     starting point for Symbol xStartSym = (Id.Space * Id.Text.cex * Id.Cex.mod) + 0.5 Symbol width.
+   #     starting point for text   xStartTxt = xStartSym + (Id.Space * Id.Text.cex * Id.Cex.mod) 
+   #
+   
+   Idcex.mod <- Id.Cex.mod                    # get multiplier based on 12 pt. =>  0.75
+      
+   if (xpin[2] < 0.75) {    ### panel height...
+      # panel height is getting smaller.  reduce text and symbol size.  < 0.75 inches
+      Old_Idcex.mod <- Idcex.mod   # save original value.
+      
+      # ratio of height / 0.75 to reduce the line height.  example: 0.65/0.75 = 0.8666667
+      Idcex.mod     <- Idcex.mod * (xpin[2]/0.75)    # xpin[2]/0.75 ratio.
+      
+      #cat(" xpin[2]<0.75 - Idcex.mod:",Old_Idcex.mod," change to ",Idcex.mod,"\n")
+      # this parameter change effects height and width of the lines.  
+      # must fit height.
+   }
+   #wCex      <- Id.Text.cex * Idcex.mod 
+   #pchSize   <- Id.Dot.cexm * Idcex.mod     #    1.5 *  0.75  => 1.125   cex value
+   #cat("ID: pchsize:",pchSize,"\n")
  
-   # xstart =  Id.Start    # inches from left margins
-
-   #### idstart = 0.137    # inches from base line  (not relative)  (appears to be replaced below..)
-
-   TextH2  <- max(graphics::strheight(areaDatIDNames,units="inch",cex=(Id.Text.cex * IDcex.mod) )) / 2  # maximum length value /2
+   pchCex    <- Id.Dot.cexm * Idcex.mod     # complete.
+   txtCex    <- Id.Text.cex * Idcex.mod     # complete.
+   #cat("pchCex:",pchCex,"  txtCex:",txtCex,"\n")
+   
+   #TextH2  <- max(graphics::strheight(areaDatIDNames,units="inch",cex=wCex )) / 2  # maximum length value (Half) /2
+   TextH2  <- max(graphics::strheight(areaDatIDNames,units="inch",cex=txtCex )) / 2  # maximum length value (Half) /2
    #cat("max ID label height:",TextH2,"\n")
+   
    par(pch = Id.Dot.pch)   # set up the character.
   
-   #cat("ID Text Size:",(Id.Text.cex * IDcex.mod),"  Id.Text.cex:",Id.Text.cex,"  IDcex.mod:",IDcex.mod,"  Id.Cex.mod:",Id.Cex.mod,"\n")
+   #cat("ID Text Size (combined):",wCex,"  Id.Text.cex:",Id.Text.cex,"  Idcex.mod:",Idcex.mod,"  Id.Cex.mod:",Id.Cex.mod,"\n")
+  
+   #______________________Common Variables_________
+   Id.Space     <- strwidth(" ",units="inch",cex=txtCex)
+   Id.Dot.size  <- Id.Dot.width * pchCex
+   Id.Dot.sizes <- Id.Dot.size + Id.Space
+   Id.HalfSym   <- Id.Dot.sizes/2
+   #cat("Id.Dot.size:",Id.Dot.size,"  Id.Dot.sizes:",Id.Dot.sizes,"  Id.HalfSym:",Id.HalfSym,"  Id.Space:",Id.Space,"\n")
    
    #______________________main loop________________
 
    # Cycle thought the GROUPS (numGrps)
+   # Variables that do not change.
+   
    for (i in 1:numGrps){
 
       npad  <- ifelse((i == medGrp & medGrpSize == 1),0.57,pad)  # single row = 0.57, or pad list for multiple rows.
+                      # vertical spacing gap
        
       gsubs <- ib[i]:ie[i]           # first element of group to last element of group.
       ke    <- length(gsubs)         # number of elements. (rows per group)
@@ -5085,6 +5123,7 @@ rlAreaID = function(j){
 
       gnams         <- areaDatIDNames[gsubs]
       
+      # Recalculate in case panels are different sizes
       xusr          <- par("usr")
       xpin          <- par("pin")
       xUnitsPerInch <- diff(xusr[1:2]) / xpin[1]    # x units per inch  (width)
@@ -5092,13 +5131,15 @@ rlAreaID = function(j){
       
       #cat("xUPI:",xUnitsPerInch,"  usr:",xusr,"  xpin:",xpin,"  TextH2:",TextH2,"\n")
    
-      xHalfSym      <- ((Id.Dot.width * Id.Cex.mod) + Id.Space)/2  * xUnitsPerInch
-      xStartu       <- xHalfSym                       # ID offset in units.   (a little more than 1/2 width of symbole
-      xSymWu        <- xHalfSym - 0.15*Id.Space       # ID symbol now in units.
+      #  xHalfSym is lead space, Symbol width divided by 2 converted to "units"  The value should be in the middle of the symbol.
+       
+      xStartu       <- Id.HalfSym * xUnitsPerInch                  # ID offset in units.   x position to plot the symbol(point)
+      xSymWu        <- (Id.HalfSym - ( Id.Space ) ) * xUnitsPerInch  # distance from ctr to start of text.
+      #                Other half of symbol, space then minus 0.2 of space.
       
-      #cat("xStartu:",xStartu,"  xHalfSym:",xHalfSym,"\n")
+      #cat("xHalfSym:",Id.HalfSym,"  xStartu:",xStartu,"  xSymWu:",xSymWu," U/I:",xUnitsPerInch,"  units\n")
       
-      ###
+      ###  Much plot in "user" units.
       
       xPosu         <- rep(xStartu,ke)   # start unit position
       xPos2u        <- xPosu + xSymWu    # position for symbol.
@@ -5107,19 +5148,22 @@ rlAreaID = function(j){
       yPos2u        <- laby - TextH2 * 0.3 * yUnitsPerInch        # offset down by half the height  
    
        
-      #cat("xPosu:",xPosu,"  xPos2u:",xPos2u,"\n")
-      #cat("yPosu:",yPosu,"  yPos2u:",yPos2u,"\n")
+      #cat("xPosu:",xPosu,"  xPos2u:",xPos2u,"   units\n")
+      #cat("yPosu:",yPosu,"  yPos2u:",yPos2u,"   units\n")
+      #cat("gnams:",gnams,"\n")
+      #cat("width.gnams:",strwidth(gnams,units="inches",cex=txtCex),"  inches\n")
       
-      #cat("Id.Text.cex:",Id.Text.cex,"  IDcex.mod:",IDcex.mod,"  prod:",(Id.Text.cex * IDcex.mod),"\n")
-      
+      #   txtCex may have been modified to reduce the size.
+      #cat("Id.Text.cex:",Id.Text.cex,"  Idcex.mod:",Idcex.mod,"  prod:",(Id.Text.cex * Idcex.mod),"\n")
+     
       #    draw text string.
-      graphics::text(xPos2u, yPos2u, gnams,  cex=(Id.Text.cex * IDcex.mod ), xpd=T, pos=4)
+      graphics::text(xPos2u, yPos2u, gnams,  cex=txtCex, xpd=T, pos=4)    # place name
       
           
       #  Note: the xPosu and yPosu coordinates is the center of the point not the starting edge of a character.
       #    plot symbol
       plotPoint(xPosu, yPosu,
-                Id.Dot.pch, mstColors[pen], Id.Dot.cexm, "black",
+                Id.Dot.pch, mstColors[pen], pchCex, "black",
                 TRUE, "black", Id.Dot.lwd
                )
      
@@ -5954,9 +5998,6 @@ rlAreaMapCum = function(j) {
         next
      }
      
-
-
-
      panelSelect(panels,i,j)
      x <- panelScale(rxpoly2,rypoly2)
 
@@ -5991,32 +6032,19 @@ rlAreaMapCum = function(j) {
                  # blkAreaCol value (if > 0) is the index into gsubs and gnams for the median area.
                  # mediKey is the area key
 
-   
-     
-     
-     
-     
      # Get foreground - 5 colors.
      
      foreKeys        <- gnams
      fore            <- !is.na(match(rlAreaVisBorders$Key,foreKeys))            # find fore sub-areas and assign color based on order in gnams
    
-   
      foreFlag        <- any(fore)
- 
  
      VisForeCol      <- match(VisKeys,foreKeys)
      VisFore         <- !is.na(VisForeCol)
-        
-   
-   
-     
      
      VisCol[VisFore] <- VisForeCol[VisFore]
      # Set the foreground colors in the full list.
      
-
-
      # Median black color is needed
      
      if (blkAreaCol > 0) {
@@ -6042,8 +6070,6 @@ rlAreaMapCum = function(j) {
 
      # Set all of the highlight colors. 
      highKeys        <- areaDatKey[1:ib[i]-1]   # vector of names used areas include this panel.
-
-
 
      high            <- !is.na(match(rlAreaVisBorders$Key,highKeys))
      highFlag        <- any(high)
@@ -6080,7 +6106,6 @@ rlAreaMapCum = function(j) {
     
      VisCol2[VisHoles] <- Map.Bg.col
  
- 
      ####
      #  Map background - Layer 2 borders   
      #
@@ -6100,7 +6125,6 @@ rlAreaMapCum = function(j) {
      #
      #  Draw colors of areas (shading)
  
-
      graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,
                  density=-1, col=VisCol2, border=FALSE)
      
@@ -6291,9 +6315,6 @@ rlAreaMapMedian = function(j){
    highL          <- !is.na(match(rlAreaVisBorders$Key,highLKeys))
    highLFlag      <- any(highL)
    VisHighL       <- !is.na(match(VisKeys,highLKeys))
-    
- 
- 
    
    # Drawing Loop
 
@@ -6361,8 +6382,7 @@ rlAreaMapMedian = function(j){
       #    note: non-data sub-area will not any row in the data, but will have a row in the rlAreaNamesAbbrsIDs.
       #          if we don't reference them, then boundaries may not be completely drawn.
       #
-     
-      
+       
       #VisCol      <- rep(11,length(VisKeys))
    
       # prefilled with background and not used colors.
@@ -6400,8 +6420,6 @@ rlAreaMapMedian = function(j){
          
       VisCol[VisFore]  <- VisForeCol[VisFore]
 
-
-        
       if (blkAreaCol > 0) {
          # have single area at median group/row  mediKey is the key for the single median area.
         
@@ -6658,10 +6676,8 @@ rlAreaMapTail = function(j){
    } else { 
       medGrpPt <- (numGrps/2) # + one lower
    }
-
    
    # Drawing Loop
- 
  
    for (i in 1:numGrps) {
  
@@ -6968,7 +6984,6 @@ rlAreaRank = function(j){
 }
 
 
-
 #####
 #
 # type = 'ScatDot'   =====================================================
@@ -7006,13 +7021,11 @@ rlAreaScatDot = function(j){
    
    if (xr$Err) { ErrFnd <- TRUE } else { xdat2 <- xr$Dat }
    
-   
    if (ErrFnd) return ()
    
    good1       <- !is.na(xdat1)      # test to see if both values are present.
    good2       <- !is.na(xdat2)
    goodrow     <- !is.na(xdat1 + xdat2)   # used by code to skip bad entries.
-   
      
    # x and y data loaded into workSCD data.frame
    workSCD           <- data.frame(x=xdat1,y=xdat2)      # get x and y data from the statsDFrame.
@@ -7753,7 +7766,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    # convert x axis data to numeric.  Can't process other formats.
    rx          <- range(workDArr[,,1],na.rm=TRUE)       # x range from all values in vector (works for date or numeric
    # cat("ts-rx:",rx,"\n")
-   # the x axis does not get inlarged.
+   # the x axis does not get enlarged.
    
    # y scaling                  
    if (conf) {
@@ -7894,7 +7907,6 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
       #       at=atRy, labels=as.character(atRy)) # Y axis labels
       #graphics::mtext(lab4[j],side=2,line=Title.Line.5.pos,cex=TS.Axis.cex)  # Y axis title
       #
-       
         
       graphics::axis(side=2, tick=F, cex.axis=YAxis_cex, mgp=mgpLeft, line= -YAxis_adj*0.3,
              at=atRy, 
@@ -7921,8 +7933,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
       #  Change Sept 1, 2015
       #
       #####
-      
-      
+       
       # handle confidence bands
       if (conf) {
       
@@ -7986,7 +7997,6 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
          }  # end of k loop rows.
       
       }  # end of confidence test.       
-     
       
       #  draw lines
       
@@ -8211,7 +8221,6 @@ BuildSegColors <- function(NumSegs) {
 
    # result => baseColRgb [color (1:7), segmentNum (1:n)]
    return(baseColRgb)
-   
  }  
 
 #
@@ -8477,7 +8486,7 @@ CheckParmColx <- function(colNames, parmCode, wSDFNames, len_wSDFNames)
      return(res)
    }        
 
-#
+#						
 ###
 
 ###
@@ -11607,7 +11616,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    par(fin = par("din"))   # safety value to get moving.
    graphics::plot.new()
    
-   #cat("Code: 11117 - par values- din:",par("din")," fin:",par("fin")," \n   pin:",par("pin")," plt:",par("plt")," usr:",par("usr"),"\n")
+   #cat("Code: 11613 - par values- din:",par("din")," fin:",par("fin")," \n   pin:",par("pin")," plt:",par("plt")," usr:",par("usr"),"\n")
    
    #
    # ________________Load Colors and Details defaults_______________________________
@@ -11863,6 +11872,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
 #------- Start Getting widths of labels and titles to help setup column widths
 #
+#cat("setting up banner DF\n")
 
     #
     #   This will have to be re-written to handle user provided labels and titles for the glyph columns.
@@ -11881,34 +11891,39 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     #   Map titles with symbols
     #
     
-    sw = Map.Lab.Box.Width + 0.05 + 0.04 # square width and spaces on each side. (inches)
+    sw    <- Map.Lab.Box.Width + 0.05 + 0.04 # square width and spaces on each side. (inches)
+    
+    #     used by MapCum, MapMedian and ID.
     #cat("Size of Box Symbols (guess) sw:",sw,"\n")
+    
+    #cat("Headers=> 1 * ",Text.cex," = ",1 * Text.cex,"\n")
+    #cat("ID     => 0.8 * ", Id.Text.cex * 0.8 , " = ", 0.8 * Id.Text.cex," and Id.Text.cex * Id.Cex.mod = ",Id.Text.cex*Id.Cex.mod,"\n") 
    
     # empty banner data.frame
     banner <- data.frame(H1=character(),H2=character(),H3=character(),M1=character(),stringsAsFactors=FALSE)
    
     #   add "Highlighed" titles for default.
-    banner <- rbind(banner,t(c("","Highlighted",Map.Hdr2,medianBanner)))
+    banner <- rbind(banner,t(c("","Highlighted",Map.Hdr2,medianBanner)))    # map
    
     #   add headers for cumulative
-    banner <- rbind(banner,t(c("Cumulative Maps",
+    banner <- rbind(banner,t(c("Cumulative Maps",                           # mapcum
                             paste0(Map.Hdr2,' Above Featured Rows'), 
                             paste0(Map.Hdr2,' Below Featured Rows'),
                             medianBanner) ) )
    
     #   add headers for median
-    banner <- rbind(banner,t(c("Median Based Contours", 
+    banner <- rbind(banner,t(c("Median Based Contours",                     # mapmedian
                             paste0(Map.Hdr2,' Above the Median'),
                             paste0(Map.Hdr2,' Below the Median'),
                             medianBanner) ) )
    
     #   add headers for two ended (tail) 
-    banner <- rbind(banner,t(c("",
+    banner <- rbind(banner,t(c("",                                          # maptail
                              "Two Ended Cumulative Maps",
                              paste0(Map.Hdr2," Highlighted"),
                              medianBanner) ) )
                              
-    banner <- rbind(banner,t(c("",Id.Hdr1,Id.Hdr2,"") ) )
+    banner <- rbind(banner,t(c("",Id.Hdr1,Id.Hdr2,"") ) )                   # id
     
     
     bcn <- c("H1","H2","H3","M1")    # h1, h2, h3, median   # row in header and median
@@ -11926,22 +11941,26 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     #print(banner)
     
     #   .adj -> which lines in each header have symbols?  (boxes)
-    banner.adj <- data.frame(H1=c(0,0,0,0,0),H2=c(0,sw,sw,0,0),H3=c(0,sw,sw,0,0),M1=c(0,0,0,0,0))
+    #           .adj is the space required to support the "boxes" in the headers.
+    #           .adj is also used in the ID entries to lead the line/label
+    #
+    banner.adj            <- data.frame(H1=c(0,0,0,0,0),H2=c(0,sw,sw,0,0),H3=c(0,sw,sw,0,0),M1=c(0,0,0,0,0))
     row.names(banner.adj) <- brn
     
-    banner.m <- c(1,1,1,0.8)           # text size multiplier for  H1, H2, H3, Med1
-    banner.tc <- Text.cex * banner.m     # text.cex = 0.75
+    banner.m     <- c(1,1,1,0.8)               # text size multiplier for  H1, H2, H3, Med1  (base 1 or 0.8)
+    banner.tc    <- Text.cex * banner.m        # Text.cex = 0.75
+    # banner.tc[4] <- Id.Text.cex * banner.m[4]  # handle ID column  Id.Text.cex * 0.8  => 0.6  (same as titles)
     
     #cat("CEX for headers and median - banner.tc:",banner.tc,"\n")
     
     banner.w <- banner
     
-    #  replace strings with width values for current font and Text.cex values.
+    #  replace strings with width values for current font and Text.cex and Id.Text.cex values.
     
     for (iH in c(1:4)) {
        for (iT in c(1:5))  {
           banner.w[iT,iH] <- graphics::strwidth(banner[iT,iH],units="inches",cex=banner.tc[iH])
-                                       #   cex = 0.75 or 0.6
+                                       #   cex = 0.75 (titles/headers) or 0.6 (ID titles/headers)
        }
     }
     
@@ -11962,29 +11981,80 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    
     #  Make subroutine to be able to do again later.
     #                                   Id.Text.cex = 0.75            Id.Cex.mod = 0.75   = (.56)
-
-    ID.Abbr.width       <- max(graphics::strwidth(ID.Abbr,units="inches",cex=(Id.Text.cex * Id.Cex.mod))) 
-    ID.Name.width       <- max(graphics::strwidth(ID.Name,units="inches",cex=(Id.Text.cex * Id.Cex.mod))) 
-        # widths of contents of ID labels.
-        
-    #cat("ID.Abbr.width:",ID.Abbr.width,"\n ")
+    
+    # 
+    
+    # ID value width
+    
+    #  ID.Name is proper cased upper and lower. no punctuation.  This could be part of the 
+    #  problem - mixed case.  
+    #  The width consist of the following elements:
+    #  <space> <symbol> <space> <text> <space>
+    #  
+    #  The symbol needs a unique cex to be able to enlarge it's size.
+    #
+    #  The overall string, spaces and symbol need an overall cex modification
+    #  incase the line's total size must be changed because of space limitations.
+    #
+    #  Id.Dot.width = estimated width of the symbol - can't get a measurement 
+    #      of a symbol with strwidth - their may be other ways, but for now, it
+    #      is a fixed value = .1 inches with CEX=1
+    #  Id.Dot.cexm = modifier for the symbol. To get the symbol large enough 
+    #      to be visible, this CEX = 1.5  (150%)
+    #
+    #  Id.Space    = estimate of the width of a space.  Widths of character may change if in the
+    #      future the font family or style is ever changed.  Spaces can also be added to the 
+    #      label string.  However, the spaces around the symbol area need to be counted
+    #      and calculated.  Therefore, Id.Space = 0.03125 inches.
+    #
+    #  ID.Name or ID.Abbr = list of the label text for each line.  (ID.Name is properly cap.)
+    #  If this is problem, then pull back areaNT$Name.
+    #
+    
+    Id.HdrDot   <-   Id.Dot.width * Id.Dot.cexm * Id.Cex.mod
+    Id.HdrSect  <-   Id.Space + Id.HdrDot + Id.Space
+    
+    Id.TxtSect.A  <- max(strwidth(ID.Abbr,units="inch",cex=(Id.Text.cex*Id.Cex.mod))) + Id.Space * 1.5
+    Id.TxtSect.N  <- max(strwidth(ID.Name,units="inch",cex=(Id.Text.cex*Id.Cex.mod))) + Id.Space * 1.5
+    
+    Id.Aw         <- Id.HdrSect + Id.TxtSect.A
+    Id.Nw         <- Id.HdrSect + Id.TxtSect.N
+    
+    #cat("Id.HdrDot:",Id.HdrDot,"  Id.HdrSect:",Id.HdrSect,"  Id.TxtSect.A:",Id.TxtSect.A," .N:",Id.TxtSect.N,"  Id.Aw:",Id.Aw,"  Id.Nw:",Id.Nw,"\n")
+    
+    #IDTC   <- Id.Text.cex * Id.Cex.mod
+    #cat("IDTC:",IDTC,"\n")
+    #  #   entry text + "sw" for the space for the leading spaces and symbol.
+    #ID.Abbr.width       <- max(graphics::strwidth(ID.Abbr,units="inches",cex=(IDTC)))   # all uppercase
+    #ID.Name.width       <- max(graphics::strwidth(ID.Name,units="inches",cex=(IDTC)))   # mixed case
+    #    # widths of contents of ID labels.
+    #    
+    #cat("ID.Abbr.width:",ID.Abbr.width,"\n")   # in cex modified inches
     #cat("ID.Name.width:",ID.Name.width,"\n")
-
+    #
     #   adjust the widths for ID labels by the space for the symbol and surrounding spaces.
-    Id.OverH <- Id.Dot.width*(Id.Dot.cexm * Id.Cex.mod) + Id.Space*2.5  # two spaces left and right of symbol.
-                        #  box is 1.15 cex.   (1.5 * 0.75)
-       
+    #Id.OverH <- Id.Dot.width * ( Id.Dot.cexm * Id.Cex.mod ) + Id.Space * 2.5  # two spaces left and right of symbol.
+    #                    #  box is 1.15 cex.   (.1 * 1.5 * 0.75 + 0.03125 * 2.5) =  0.190625   in cex mod inches.
+    #   
     #cat("ID overhead - Id.Start, space, Id.Dot.width, space , <letters>, space (letter to edge):",Id.OverH,"\n")
     #cat("banner.max ID:",banner.max["id","width"],"   IDName:",Id.OverH+ID.Name.width,"  IDAbbr:",Id.OverH+ID.Abbr.width,"\n")
    
+    
     #  width of ID glyph with border Group names/abbreviations
     
-    #  Now find max width from headers and id box&label.   Determine later which one will be used.
-    Id.width    <- c(1.5,1)         # initialize
-    Id.width[1] <- max((Id.OverH + ID.Name.width ),banner.max["id","width"])   # plus padding. FULLNAMES
-    Id.width[2] <- max((Id.OverH + ID.Abbr.width ),banner.max["id","width"])   #    ABBREVIATIONS
+    #  Now find max width from headers and id box&label.   Determine later which one will be used. (in inches)
+    Id.width    <- c(1.5,1)         # initialize Name & Abbr
+    #Id.width[1] <- max((Id.OverH + ID.Name.width ),banner.max["id","width"])   # plus padding. FULLNAMES
+    #Id.width[2] <- max((Id.OverH + ID.Abbr.width ),banner.max["id","width"])   #    ABBREVIATIONS
+    Id.width[1] <- max(Id.Nw, banner.max["id","width"])   # plus padding. FULLNAMES (proper Cap)
+    Id.width[2] <- max(Id.Aw, banner.max["id","width"])   #    ABBREVIATIONS
+    
+    # based on the headers and label text lengths.
+    # Id.width include string length + ID Overhead (Id.Start offset, Space, Symbol width, space, <letters>, space..
+    #   and it is modified by the Id.Text.cex and Id.Cex.mod..
 
-    #cat("Id.width:",Id.width,"\n")
+    #cat("Id.width:",Id.width,"  cex = ",Id.Text.cex*Id.Cex.mod," code:12056 \n\n")
+ 
     #
     #  Build title lists for maps and get width for point size.
     #
@@ -12172,7 +12242,7 @@ eval(parse(text=wstr))
 #cat("IndexDFtoNT:\n")
 #print(IndexDFtoNT)
 
-#cat("Code: 11877 - Initial IndexDFtoNT:",IndexDFtoNT,"\n")
+#cat("Code: 12245 - Initial IndexDFtoNT:",IndexDFtoNT,"\n")
 #cat("Reverse Check:",areaNT$Key[IndexDFtoNT],"\n")
 
    
@@ -12680,7 +12750,6 @@ eval(parse(text=wstr))
 
    #print("Validate plotNames.")
    def_plotNames <- "ab"
-   
 
    #  Set the defaults if not present or NA
    
@@ -12708,9 +12777,9 @@ eval(parse(text=wstr))
    if (plotNames == "abbr") plotNames="ab"   # accept "abbr" but convert to "ab".
 
    # Default - abbreviations
-   areaUAbbr   <- areaNT$Abbr[IndexDFtoNT]
-   areaUFull   <- areaNT$Name[IndexDFtoNT]
-   
+   areaUAbbr   <- areaNT$Abbr[IndexDFtoNT]     # label values  (all uppercase)
+   areaUFull   <- ID.Name[IndexDFtoNT]     #               (all upper AND LOWER)
+     
    areaIDNames <- areaUAbbr
    IdW         <- Id.width[2]  # temp initialization  (abbreviation)
    
@@ -12719,7 +12788,7 @@ eval(parse(text=wstr))
    
           "ab"  = {IdW <- Id.width[2]; areaUAbbr},    # set IdW to value and return vector of names or "abbr"
           
-          "full"= {IdW <- Id.width[1]; areaUFull},
+          "full"= {IdW <- Id.width[1]; areaUFull},    # full name
 
           {  # no match
 
@@ -12728,17 +12797,24 @@ eval(parse(text=wstr))
              errCntMsg(paste0("***01B0 CARG-PN Invalid plotNames argument value.  The value must be 'ab' or 'full'. The default of 'ab' will be used.\n"))
           }
         )
-        
-   # IdW is now the longest string to be used.
+   
+   # IdW is now the longest string (characters) to be used based on plotnames.
    # areaIDNames are in statsDFrame order containing the ab or full name associated 
    #   with the row in statsDFrame - used by ID glyph.
    
+   #cat("IdW:",IdW," already modified - etc. code:12763 \n")
+   #cat("areaIDNames:",areaIDNames,"\n")
+   
    statsDFrame$IDNames <- as.character(areaIDNames)   # set IDNames for sorting and ID into statsDFrame
+   
+   #  the comparison with headers and text should have already been done !!!!
   
    # IdColWidth is based on number of strwidth and does not include the symbol or spacing.
-   IdColWidth <- max(banner.max["id","width"],IdW)               # maximum of banners or label.
-   #cat("ID column width to use - IdColWidth:",IdColWidth,"\n")
+   #print(banner.max)
    
+   IdColWidth <- max(banner.max["id","width"],IdW)        # maximum of banners or label.
+   #cat("ID column width to use - IdColWidth:",IdColWidth," inch. & IdW:",IdW," inch.\n")
+    
    #  now complete the default sort.
    
    #  statsDFrame$IDNames is in the order of the user data.  Not the Names/Abbr Table.
@@ -12923,7 +12999,7 @@ eval(parse(text=wstr))
    ###  are assigns needed in our mode?    Data area for all calls below...   dat$RN ..
 
    assign("dat",statsDFrame[sortedOrd,])  # data fields    "dat" has sorted version of statsDFrame
-   #cat("dim(dat):",dim(dat),"\n")
+   #cat("data dim(dat):",dim(dat),"\n")
    
    # 
    #  From now on, the "dat" structure is the primary data.frame containing the user's data.
@@ -13489,9 +13565,6 @@ if (is.na(match('lab4',PDUsed))) {
 #_____________panelDesc$panelData_______________
 #
 
-
-
-
 #  if present is the typeof correct ?   - check within the glyph - it may be different.
 
    if (is.na(match('panelData',PDUsed))) { 
@@ -13503,9 +13576,7 @@ if (is.na(match('lab4',PDUsed))) {
  
    rm(wPanelData)
    
-   
-   
-   
+     
    #_________________-
    #
    #cat("Check on header row counts - top:",numTopHeaderRows,"  bot:",numBotHeaderRows,"\n")
@@ -13539,8 +13610,8 @@ if (is.na(match('lab4',PDUsed))) {
             "mapcum"=   c(max(banner.max["mapcum","width"],Map.Min.width),0,0,Map.MinH, Map.MaxH),
             "maptail"=  c(max(banner.max["maptail","width"],Map.Min.width),0,0,Map.MinH, Map.MaxH),
             "mapmedian"=c(max(banner.max["mapmed","width"],Map.Min.width),0,0,Map.MinH, Map.MaxH),
-            "id"=       c(IdColWidth,0,0,0,0),
-            "dot"=      c(0,0,0,0,0),
+            "id"=       c(IdColWidth,0,0,0,0),   # IdColWidth - complete
+            "dot"=      c(0,0,0,0,0), 
             "dotse"=    c(0,0,0,0,0),
             "dotconf"=  c(0,0,0,0,0),
             "dotsignif"=c(0,0,0,0,0),
@@ -13565,7 +13636,7 @@ if (is.na(match('lab4',PDUsed))) {
    
    colnames(cparm) <- c("cSize","lSep","rSep","rMinH","rMaxH")
 
-   #cat("Column Sizing Table completed.\n") # dump table.
+   #cat("Column Sizing Table completed. code:13639 \n") # dump table.
    #print(cparm)
    #cat("\n")
    
@@ -13590,8 +13661,6 @@ if (is.na(match('lab4',PDUsed))) {
    
    #cat("xPlotWidth:", xPlotWidth,"\n")
    
-   # done IdW = Id.width[1]                 # bigger value for full names  [2] is for abbreviations - default
-
 #
 #_____________panelDesc$colSize____________________
 #
@@ -13710,7 +13779,7 @@ if (is.na(match('lab4',PDUsed))) {
      
      #cat("5-wColS:",wColS," numColS:",numColS,"\n")
      
-     # Fix colSize columsn to Mean - "" columns in colFlex range.
+     # Fix colSize columns to Mean - "" columns in colFlex range.
          
      #  Get sum of valid colSize entries.   
      wColFG           <- colFlex & colGood
@@ -13871,7 +13940,7 @@ if (is.na(match('lab4',PDUsed))) {
    
    #
    savedColWidths <- colWidths    # save a copy of the column size parameters.
-   savedColSep    <- colSep        # save a copy
+   savedColSep    <- colSep       # save a copy
 
    legfactor <- 1
 
@@ -13970,14 +14039,14 @@ if (is.na(match('lab4',PDUsed))) {
    assign("panels",panelLayout(
                         vnrow       = numGrps,               # num of Row/Groups   1 or more.   
                         vncol       = numCol,                # num of columns
-                        topMargin   = topMar,                # 0.95
+                        topMargin   = topMar,                # 0.95 (? 1.1)
                         bottomMargin= botMar,                # 0.5
                         leftMargin  = 0,                      
                         rightMargin = 0,
                         rowSep      = rowSep,                # vector
                         rowSize     = rowSize,               # vector
                         colSize     = colWidths,             # calculated column widths (inches)
-                        colSep      = colSep,                # vector
+                        colSep      = colSep,                # vector  c(0,0.075,0.075,0)
                         rSizeMx     = rowMaxH,
                         rSizeMn     = rowMinH,
                         rSizeMaj    = rowSizeMaj,            # 7 rows per group/row

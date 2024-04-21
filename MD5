@@ -1,10 +1,10 @@
-08289c47a102e7c5c3d5364654a0066d *DESCRIPTION
+750aa945dc26f746f0c1661dccdb7d6d *DESCRIPTION
 48db3c5db476d3b1b17665e1a71b4d55 *NAMESPACE
-29152f702b197e41dddd46c59c9ecc14 *R/BuildBorderGroup.r
+07baf070167be155a61908e3a3711696 *R/BuildBorderGroup.r
 649e36fd9c6a45b0115306c182ad037d *R/globals.r
-4147ef1802ec4b0f3d7b61df3cc3bcd4 *R/micromapDefSets.r
-7c4da5d2df238a0bef33669b3b231d21 *R/micromapST.r
-03187a66f51c95b7e0c69f005934f098 *R/panelFunctions.r
+853500d12f0ef2ba04c9f3f606add82b *R/micromapDefSets.r
+4ac9a762de40c067069e7a6350f0afe1 *R/micromapST.r
+98e905b6945c96fa90b88ca5fcb851c4 *R/panelFunctions.r
 042260f15618835a7ed522d529ece4f0 *build/vignette.rds
 4b598e68ef866508561f13b8a13f24a0 *data/AfricaBG.rda
 07cc5318d7e44234ac47aaf2c7f97c43 *data/AfricaPopData.rda
@@ -39,7 +39,7 @@ eb5d3ae828df71d0ebce5b0058e695cd *data/wmlung5070US.rda
 15f2ddf11d3c8e78599e54d5fa18dec7 *inst/CITATION
 ddebc109ea1a00ed66f0fe77c13626ef *inst/doc/JSSmicromapSTv63i03.pdf
 eca78e3a99c4793b61fe08429a4ea6df *inst/doc/JSSmicromapSTv63i03.pdf.asis
-05eab1e2f82a4beb6ad7e50d0c48e8dc *inst/doc/NEWS
+d1c56d8d39e4800a7b9b823bbdb2de02 *inst/doc/NEWS
 854a8d47ab0dc77646fc928113b38f74 *inst/extdata/KY_ADD_NameTable.xlsx
 e34602ecb1c7a160824caeafdc84dc16 *inst/extdata/KY_ADD_Population-2020.xlsx
 8782e2100f9a059b961058e5f7bd1de9 *inst/extdata/KY_County.dbf
@@ -79,8 +79,8 @@ f0b85eee9f7ac2642dab377b3a1cde10 *man/micromapGDefaults.Rd
 0063ff04c8fa55b49ae35750e66e83e4 *man/micromapGSetDefaults.Rd
 12a11b045b6ce6e8d3630fc26afd3db9 *man/micromapGSetPanelDef.Rd
 008cb08527f2ecb876aa7ed9692a8e74 *man/micromapSEER.Rd
-3ea34a811b8156a43b5e167b26330cc3 *man/micromapST-package.Rd
-fcce4cf48e17c100f364dc414fa7e95e *man/micromapST.Rd
+f00b81f6796c396ec82450c226b365b2 *man/micromapST-package.Rd
+1d1ac0e40b675e9a0039af32d5bd07a0 *man/micromapST.Rd
 d59d3edc9f000bc584ca79800e8dac8a *man/nyPopData.Rd
 2631c24a15344d1b149d0904a319a0c3 *man/panelDesc.Rd
 87540315215e82df0e26bd234c4f6341 *man/statePop2010.Rd

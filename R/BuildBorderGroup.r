@@ -400,7 +400,7 @@
 #               Bit  7 =  64 - Display internal variable on processing
 #               Bit  8 = 128 - 0 = set output file type for the 512 option to PDF (default)
 #                              1 = set output file type for the 512 option to PNG
-#               Bit  9 = 254 - Generate a multiple plot graphic of the map in small format 
+#               Bit  9 = 256 - Generate a multiple plot graphic of the map in small format 
 #                              with each plot having only 5 areas shaped.  Number of images = Areas/5 + 1
 #               Bit 10 = 512 - Generate a 4" x 4" plot of the area at key states in the processing:
 #                               RAW, After rmapshaping, After Name Table modifications, and 
@@ -7505,7 +7505,7 @@ BuildBorderGroup <- function(
       #
       #   Final sf Test Plot of Map before convertion, full color. 
       #
-      if (bitwAnd(debug,512+8) != 0) {
+      if (bitwAnd(debug,8) != 0) {    #  Change dropped 512 
          # Do final test map  
          #cat("Generating scaled example of map.\n",
          #    "        - last check of sf structure before conversion.\n")
@@ -8106,15 +8106,12 @@ BuildBorderGroup <- function(
    
    vDebug  <- debug
    
-   #if (bitwAnd(debug,1024) != 0)  vDebug <- bitwOr(vDebug,512)   # have to OR it incase it is already set.
-   #   Not the final map.
-   
-   if (bitwAnd(vDebug,256+512) != 0) {
+   if (bitwAnd(vDebug,256) != 0) {              # change - dropped 512 and 1024
       # caller wants sample maps
        
       PPsf         <- WorkSfMst
       PPTitle      <- "Before conversion to VisBorder"
-      PPMfrow      <- c(3,3)
+      PPMfrow      <- c(4,4)
       SamplePrts_sf(PPsf,PPTitle,PPMfrow,vDebug,NTable$Key,MapAvgH)    # gotcha
    }
    
@@ -8437,7 +8434,7 @@ BuildBorderGroup <- function(
       
    #####  3A5x
    #
-   #   Record final areaVisBorder in file.
+   #   Plot final areaVisBorder in file.
    #
    #   Use Name Table for Color codes.
    #
@@ -8453,7 +8450,7 @@ BuildBorderGroup <- function(
       PngH         <- 4 + .4
       xAsp         <- areaParms$Map.Aspect
       PngW         <- PngH / xAsp   #  Y / (Y/X)  <-  Y * X/Y
-      cat("xAsp:",xAsp,"  PngW:",PngW,"  PngH:",PngH,"\n")
+      #cat("xAsp:",xAsp,"  PngW:",PngW,"  PngH:",PngH,"\n")
       
       FTitle       <- gsub(" ","_",PPTitle)
       
@@ -8466,7 +8463,7 @@ BuildBorderGroup <- function(
       
       Sys.setFileTime(OutTestSm,Sys.time())
          
-      cat("par('din')",par('din'),"  par('fin'):",par('fin'),"  par('pin'):",par('pin'),"\n")
+      #cat("par('din')",par('din'),"  par('fin'):",par('fin'),"  par('pin'):",par('pin'),"\n")
            
       #par(mfrow=c(1,1))
       par(omi=c(0,0,0,0))

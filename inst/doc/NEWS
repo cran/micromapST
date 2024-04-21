@@ -1,3 +1,18 @@
+micromapST - Version 3.0.3 -
+Updated: 2024-04-20
+
+Fixes:
+1) The package was not calculating the width of the "ID" glyph 
+   column correctly based on the number of characters in each 
+   abbreviation or name label.  The result was the next column 
+   to the right would overlay the end of the labels (about 3-4 
+   characters.)  The code was reviewed and corrected to properly 
+   calculate the space required for the labels for any border 
+   group dynamically.  When the panels are layout, the ID glyph
+   panel was not wide enough.  Formula corrected.
+
+
+
 micromapST - Version 3.0.2 - 
 Updated: 01-09-2024
 

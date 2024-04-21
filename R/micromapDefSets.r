@@ -629,7 +629,7 @@ details = list(
     Panel.Outline.col          = colorsRef["black"],     # panel outline color                                     # 56
 
 # Title and Text - cex for character size
-    Text.cex                   = 0.75,          ## JP decreased text size.  Used almost everywhere.                # 57
+    Text.cex                   = 0.75,               ## JP decreased text size.  Used almost everywhere.                # 57
 
 # refVals parameters
 
@@ -771,7 +771,7 @@ details = list(
     Id.Text.cex                = 0.75,                   ## JP decreased ID text size.                             # 143
 
     Id.Dot.pch                 = 22,                     # ID Symbol - pch values (19:25) solid and filled symbols, default = filled square  # 144
-    Id.Dot.cexm                = 1.5,                    # multiplier to the Id.Text.cex value for the symbol. Max should be about 3         # 145
+    Id.Dot.cexm                = 2,                      # multiplier to the Id.Text.cex value for the symbol. Max should be about 3         # 145
     Id.Dot.lwd                 = 0.8,                    # line width applied to solid symbols                     # 146
     Id.Dot.width               = 0.1,                    # inches.   (Size of Dot/Square or Symbol)                # 147
 

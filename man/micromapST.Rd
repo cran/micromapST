@@ -179,10 +179,12 @@ All border groups are distrbuted with the package as .rda datasets.
     }
   \item{plotNames}{defines the type of state names to be displayed when an \var{id} glyph column 
     requested.  The options are: \option{ab} or \option{full}.  
-    \option{ab} will display the sub-area abbreviations as defined in the border groups name information.
-    \option{full} will display the full sub-area name as defined in the border group name information.
-    (For the U.S. Stata name information, the full name for District of Columbia is shown 
-    as Dist. of Col.. because of space limitations). \cr
+    \option{ab} will display the area abbreviations in uppercase as defined in the border 
+    groups name information. \cr 
+    \option{full} will display the full area name as properly capitalized
+    strings as defined in the border group name information. \cr
+    (For the U.S. Stata name information, 
+    the full name for District of Columbia is shown as Dist. of Col.. because of space limitations). \cr
     The default is \option{ab}.
     }
   \item{axisScale}{defines the type of axis labels to be used and if scaling is applied.  
@@ -619,6 +621,7 @@ for (inx in seq(1,length(TSAreas)))  { # loop once per area
 # setting the attribute "xIsDate" on array to TRUE, signals micromapST 
 # the user wants to see the x-axis values as dates.
 
+\dontrun{
 attr(NewArray,"xIsDate") <- TRUE
 
 # TSdata and NewArray structures are arrays of size c(51,15,4), 
@@ -646,6 +649,7 @@ micromapST(temprates,panelDesc03a,sortVar="P15",ascend=FALSE,
            title=ExTitle)  
 
 x <- grDevices::dev.off()
+}
 #
 ### End Example 03a
 

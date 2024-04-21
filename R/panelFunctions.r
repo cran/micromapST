@@ -9,6 +9,7 @@
 #
 # Release Version 220417 build - V1.1.2 - replace emails and minor fix.
 # Release Version 220829 build - V2.0 and V2.0.1 (micromapST) - correct layout to handle 1 group/row.
+# Release Version 240416 build - V2.1 - correct "ID" column width calculation.
 #
 
 panelFill <- function(col="#D0D0D0",border=NA,...)
@@ -198,7 +199,7 @@ function(vnrow = 1,
      cat("  vncol     :",vncol,"  colSize :",colSize,"  colSep  :",colSep,"\n")
      cat("  rSizeMn   :",rSizeMn,"  rSizeMx :",rSizeMx,"  rSizeMaj:",rSizeMaj,"\n")
      cat("  rMapCol   :",rMapCol,"\n")
-     cat("  lpad      :",lpad,"\n")
+     cat("  lpad      :",lpad,"\n")    # not defined.
      cat("  rDebug    :",rDebug,"\n\n")
      cat(" borders    :",borders,"\n")
      cat("leftMargin  :",leftMargin,"\n")
@@ -365,7 +366,7 @@ function(vnrow = 1,
 		      rowSep[vnrow + 1] + bottomMargin + borders[4])  # bottom	
 	}
 	
-	#cat("lpad:",lpad,"\n")
+	#cat("lpad-369:",lpad,"\n")
 	
 	#  lpad[1] = borders[1] + leftmargin + colSep[1] = left edge
 	#  lpad[2] = borders[2] + rightmargin + (farright colSep) = right edge
@@ -386,6 +387,7 @@ function(vnrow = 1,
 	rowCumSep <- cumsum(rowSep)    # inches.
 	colCumSep <- cumsum(colSep)    # columns - inches -convert individual spaces to cumulative sums.           
 	
+	#cat("colCumSep:",colCumSep,"\n")
 	
 	wPlotXAvail <- round(plotX - colCumSep[vncol + 1], digits=3)    # subtract total separate gaps. inches  
 	                                               # (space available for columns in inches)
@@ -394,7 +396,7 @@ function(vnrow = 1,
 	         # Plot.Avail is the space available minus borders, margins, separators in inches.
 	
 	if (bitwAnd(rDebug,256) != 0 ) {
-	   cat("Code: 396 pf \n")
+	   cat("Code: 399 pf \n")
 	   cat("rowCumSep:",rowCumSep,"\n")
 	   cat("colCumSep:",colCumSep,"\n")
 	   cat("Width -wPlotXAvail:",wPlotXAvail," inches\n")
@@ -449,7 +451,7 @@ function(vnrow = 1,
 	# space on each side of the plot area.
 	#
 	
-	#cat(" Current Calculations-446: rInPerUnit:",rInPerUnit,"in.   curGRowInch:",curGRowInch,"in. for g/r  \n",
+	#cat(" Current Calculations-454: rInPerUnit:",rInPerUnit,"in.   curGRowInch:",curGRowInch,"in. for g/r  \n",
 	#    " Min Height In. rSizeMn:",rSizeMn,"   Max Height In. rSizeMx:",rSizeMx,"  Sum of Row Sizes in. sumRowSize:",sumRowSize,"\n",
 	#    " rowSize vector in. :",paste0(rowSize,collapse=", "),"\n")
 	
@@ -548,13 +550,13 @@ function(vnrow = 1,
 	if (comRatio < 0.999) {
 	   # reduce scaling.   To keep symetric -use the smallest. Can't be > 1.
 	   #rowSizeTotMaxUnits =  relySum
-	   #cat("reduction enforced - map columns - REALLY, comRatio:",comRatio,"\n")
+	   cat("reduction enforced - map columns - REALLY, comRatio:",comRatio,"\n")
 	
 	   colSize   <- colSize  * xRatio   #  adjust column width (but doesn's work right - to small)
-	   #cat("reduced colSize:",paste0(colSize,collapse=", "),"\n")
+	   cat("reduced colSize:",paste0(colSize,collapse=", "),"\n")
 	   
 	   rowSizeIn <- rowSizeIn * yRatio
-	   #cat("reduced rowSizeIn:", paste0(rowSizeIn,collapse=", "),"\n")
+	   cat("reduced rowSizeIn:", paste0(rowSizeIn,collapse=", "),"\n")
 	   
 	   #stop()  # don't want this logic to be working yet.
 	}
@@ -627,7 +629,7 @@ function(vnrow = 1,
 	   }
 	}
 	
-	#cat("Initial build of fig:\n")
+	#cat("Initial build of fig:\n"," row x col\n", " each row is Srt X, End X, Srt Y, End Y for panel row.col\n\n")
 	#print(fig)
 	
 	#
@@ -663,11 +665,16 @@ function(vnrow = 1,
 	labfig   <- t(t(labfig)/fig.scale)  # change to device 0 to 1 NDC
 	#cat("labfig:",labfig,"\n")
 
+        #cat("colCumSep-668:",colCumSep,"\n")
+        #cat("xinc:",xinc,"\n")
+        #cat("length(xinc):",length(xinc),"\n")
+        #cat("leftMargin:",leftMargin,"  rightMargin:",rightMargin,"\n")
+
 	# coltabs are in inches and start inside the left border
 	#     elements= left, points (CumSep+XInc+leftmar)(nCol), leftMar+CumSep + xinc + rightMarf
 	coltabs  <- cbind(c(0, colCumSep + xinc + leftMargin), 
-	                    leftMargin + c(0,colCumSep) + c(xinc, xinc[length(xinc)]
-	                    + rightMargin )
+	                    leftMargin + c(0,colCumSep) + c(xinc, xinc[length(xinc)] + rightMargin
+	                 )
 	                 )	
 	            # 0, LM+XInc+CumSep, LM+
 	#cat("coltabs:",coltabs,"\n")
