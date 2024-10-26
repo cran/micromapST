@@ -14,7 +14,7 @@ counties in the state of Maryland}
  The user's data is then linked to the boundary data via the county's name, 
  abbreviated or ID based on the table below.
 }
-
+\usage{data(MarylandBG)}
 \details{
 The \var{MarylandBG} border group dataset contains the following data.frames: 
  \describe{

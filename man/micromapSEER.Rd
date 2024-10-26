@@ -7,7 +7,9 @@ can be used to create linked micromaps for the 20 U. S. Seer Registries.
 }
 \usage{micromapSEER(statsDFrame,panelDesc,...)}
 \details{
-More details to follow.
+A release of micromapST was custom modified for the NCI Seer projects. Later the cusstom changes 
+were integrated into the standard micromapST and the micromapSEER only version was discontinued. 
+This micromapSEER shell call allows existing code to continue to work without modification.
 }
 \arguments{
   \item{statsDFrame}{- data frame of the data required for creating the graphical glyphics with one 

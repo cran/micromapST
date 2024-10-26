@@ -13,6 +13,7 @@
  abbreviations, IDs and boundaries files for 50 U. S. states and the District of Columbia
  for the processing of user data and the creation of the requested linked micromap.
 }
+\usage{data(USStatesBG)}
 \details{
 The \var{USStatesBG} border group contains in the following data.frames: 
  \describe{

@@ -22,7 +22,7 @@
   testing \var{micromapST} and enhancing it's ability to handle a large number of sub-areas and
   generate usable linked micromaps.
 }
-
+\usage{data(UKIrelandBG)}
 \details{
 The \var{UKIrelandBG} border group dataset contains the following data.frames: 
   \describe{

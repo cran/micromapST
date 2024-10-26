@@ -16,7 +16,7 @@ in the state of Kansas}
  The user's data is then linked to the boundary data via the county's name, 
  abbreviated name or ID based on the table below.
 }
-
+\usage{data(KansasBG)}
 \details{
 The border group contains the following data.frames:: 
   \describe{

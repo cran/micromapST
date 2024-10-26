@@ -14,7 +14,7 @@ in the Korean city of Seoul.}
   The user's data is then linked to the boundary data via the district's name, 
   abbreviated or ID based on the table below.
 }
-
+\usage{data(SeoulSKoreaBG)}
 \details{
 The \var{SeoulSKoreaBG} border group contains the following data.frames:: 
  \describe{

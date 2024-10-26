@@ -16,7 +16,8 @@ micromaps for the 52 countries in Africa}
  loaded in \var{micromapST}. The user's data is then linked to the
  boundary data via the country's name, abbreviation, alternate
  abbreviation, or ID based on the table below.
- }
+}
+\usage{data(AfricaBG)} 
 \details{
 The \var{AfricaBG} border group dataset contains the following
 data.frames:

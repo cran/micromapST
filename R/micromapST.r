@@ -3841,7 +3841,7 @@ rlAreaBoxplot  <- function(j, boxnam){
    med     <- stats[3,]             # a single value for each area (median data value)
   
    nam     <- boxlist$names         # area name list of boxplots
-   nam     <- ClnStr(nam)             # upper case, no punct, single blanks.
+   nam     <- ClnStr(nam)           # upper case, no punct, single blanks.
   
    # conf  <- boxlist$conf          # matrix of extremes - not used.  Don't check for.
      
@@ -7638,7 +7638,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    #    If TRUE, do the confidence band using y-low, y-med, and y-high values (columns 2, 3, 4)
    #    If FALSE, only plot the Y value (column 2)
    #
-   #cat("TS - areaDatKey:",areaDatKey,"\n")
+   cat("TS - areaDatKey:",areaDatKey,"\n")
 
    ErrFnd               <- FALSE
    TSMsgLabel           <- "TS"
@@ -7713,9 +7713,9 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    # structure of dataArr
    #     DataList is a 3 dim array :
    #          a * b * c, where: 
-   #          a is the area index number (1 to "n") (sub-area)
+   #          a is the area index number (1 to "n") (area)
    #          b is the time period index (2 to "n" range) (Limited only by R and memory)
-   #          c is the type of value (1=x, 2=low, 3=mid, 4=high) or (1=x, 2=y)
+   #          c is the type of value (1=x, 2=y, 3=low y, 4=high y) or (1=x, 2=y)
    #
       
    #  Adjust dataArr to handle possible "Date" variables  (NEW 2023-10-22)
@@ -7749,14 +7749,18 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    attr(DataList,"xIsDate") <- TS_Attr
    #cat("TS_Attr:",TS_Attr,"  axisMethod:",axisMethod,"\n")
    
+   
+   
    # The array has been restored to it's original structure (numerical array)
-   areaDatKey <- row.names(DataList) # TEMP
-   workDArr   <- DataList            # transfer the data to workDArr.
-   wDArrNames <- rownames(workDArr)  # get rownames
-   dimDArr    <- dim(workDArr)
+   #areaDatKey <- row.names(DataList) # TEMP
+   areaTSKey   <- row.names(DataList) #
+   workDArr    <- DataList[areaDatKey,,]            # transfer the data to workDArr and reorder.
+   wDArrNames  <- rownames(workDArr)  # get rownames
+   dimDArr     <- dim(workDArr)
+   
  
    #   
-   # cat("TS Scaling- 7454 \n")
+   # cat("TS Scaling- 7759 \n")
    #_______________Scaling of TS Axis____________
    
    # x scaling
@@ -7806,6 +7810,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    #   
    #   at present no re-ordering of the time series like the other plots.
    #   JP-if other column is sorted, time series will follow that order via the indexes.
+   #   JP-trying to varify??
    #
 
    ####
@@ -7849,12 +7854,12 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
 
       # Cycle through the Row/Groups in the micromap column
       
-      gsubs    <- ib[i]:ie[i]               # get beginning to end index row number in group  
-      ke       <- length(gsubs)                # get number of rows in group  (5/6 or 1)  
+      gsubs    <- ib[i]:ie[i]               # get beginning to end index row number in group  (areas)
+      ke       <- length(gsubs)             # get number of rows in group  (5/6 or 1)  
 
       pen      <- if(i == medGrp & medGrpSize == 1) 7 else 1:ke        # if middle group (7), then pen=7 (Black), otherwise pen = c(1...5) or c(1...6)   
       
-      kcol     <- c(mstColors[c(1:ke,7)])                # get major colors
+      kcol     <- c(mstColors[c(1:ke,7)])   # get major colors
 
       addBlack <- 0      
             
@@ -7871,7 +7876,8 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
          }
       } 
      
-      gnams <- areaDatKey[gsubs]            # get list of area ids for data group of data.
+      gnams <- areaDatKey[gsubs]            # get list of area ids for data group of data. (row.names of original data order.)
+                                            # translate to area Keys.  (gnams are the keys in the new order.)
 
       # adjust if middle group      
     
@@ -7943,10 +7949,10 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
                
             kp = pen[k]          # color number
         
-            wDArr <- workDArr[gnams[k],,]
+            wDArr <- workDArr[gnams[k],,]    # get data for area.
                
             wX   <- wDArr[,1]    # get X values for line and polygon plots
-            wLine = wDArr[,2]    #  Get Y values for mid line 
+            wLine = wDArr[,2]    # Get Y values for mid line 
                    
             #  build polygon of confidence band to fill (y-low to y-high) and draw first.
                   

@@ -1,7 +1,7 @@
 Package: micromapST
 Type: Package
-Version: 3.0.3
-Date: 2024-04-20
+Version: 3.0.4
+Date: 2024-10-26
 Title: Linked Micromap Plots for U. S. and Other Geographic Areas
 Authors@R: c(person("Jim","Pearson",email="jbpearson353@gmail.com",role=c("aut","cre","cph")),
             person("Dan","Carr",email="dcarr@gmu.edu", role=c("aut","cph")),
@@ -55,7 +55,7 @@ LazyLoad: no
 BuildResaveData: best
 ByteCompile: yes
 NeedsCompilation: no
-Packaged: 2024-04-20 23:54:05 UTC; jpear
+Packaged: 2024-10-26 23:05:12 UTC; jpear
 Repository: CRAN
-Date/Publication: 2024-04-21 02:22:45 UTC
+Date/Publication: 2024-10-26 23:30:02 UTC
 RoxygenNote: 7.2.3

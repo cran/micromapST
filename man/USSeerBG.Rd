@@ -16,7 +16,7 @@
   The 20 U. S. Seer registries are the accepted registries as of January 2010 
   funded by NCI. 
 }
-
+\usage{data(USSeerBG)}
 \details{
 The \var{USSeerBG} border group dataset contains the following data.frames: 
   \describe{

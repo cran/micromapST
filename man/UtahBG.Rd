@@ -15,7 +15,7 @@ counties in the state of Utah}
   The user's data is then linked to the boundary data via the county's name, 
   abbreviation, alternate abbreviation, or ID based on the table below.
 }
-
+\usage{data(UtahBG)}
 \details{
 The \var{UtahBG} border group dataset contains the following data.frames: 
  \describe{

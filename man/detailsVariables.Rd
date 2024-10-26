@@ -8,6 +8,7 @@
    information needed to translate the existing (as of 9/17/2015) details structure into a
    new details structure segmented by each type of glyphic.
    }
+   
 \usage{data(detailsVariables)}
 
 \format{
@@ -52,8 +53,6 @@
    length 3 and each value is within the range in \var{v1} to
    \var{v2}.
 
-   More to be added later. *****
-    
    The micromapST package is being updated to use a new variable
    structure. The new structure will allow options/parameters to be
    specified on glyphic and column basis.  This allows each column

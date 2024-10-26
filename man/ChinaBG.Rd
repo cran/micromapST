@@ -15,7 +15,7 @@ and municipalities in the country of Republic of China}
   The user's data is then linked to the boundary data via the county's name, 
   abbreviated name or ID based on the table below.
 }
-
+\usage{data(ChinaBG)}
 \details{
 The \var{ChinaBG} border group dataset contains the following data.frames: 
  \describe{

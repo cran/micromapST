@@ -13,7 +13,7 @@
   The user's data is then linked to the boundary data via the county's name, 
   abbreviated or ID based on the table below.
 }
-
+\usage{data(NewYorkBG)}
 \details{
 The \var{NewYorkBG} border group dataset contains the following data.frames: 
  \describe{
