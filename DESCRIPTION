@@ -1,7 +1,7 @@
 Package: micromapST
 Type: Package
-Version: 3.0.4
-Date: 2024-10-26
+Version: 3.1.0
+Date: 2025-02-13
 Title: Linked Micromap Plots for U. S. and Other Geographic Areas
 Authors@R: c(person("Jim","Pearson",email="jbpearson353@gmail.com",role=c("aut","cre","cph")),
             person("Dan","Carr",email="dcarr@gmu.edu", role=c("aut","cph")),
@@ -47,15 +47,16 @@ Description: Provides the users with the ability to quickly create
      and Carr (2015), micromapST: Exploring and Communicating
      Geospatial Patterns in US State Data., Journal of Statistical
      Software, 63(3), 1-25., <https://www.jstatsoft.org/v63/i03/>.
-     Copyrighted 2013, 2014, 2015, 2016, 2022, 2023, and 2024 by Carr, Pearson
+     Copyrighted 2013, 2014, 2015, 2016, 2022, 2023, 2024, and 2025 by Carr, Pearson
      and Pickle.
 License: GPL (>= 2)
 LazyData: no
 LazyLoad: no
 BuildResaveData: best
 ByteCompile: yes
+Config/build/clean-inst-doc: FALSE
 NeedsCompilation: no
-Packaged: 2024-10-26 23:05:12 UTC; jpear
+Packaged: 2025-02-13 21:23:38 UTC; jpear
 Repository: CRAN
-Date/Publication: 2024-10-26 23:30:02 UTC
+Date/Publication: 2025-02-13 22:20:02 UTC
 RoxygenNote: 7.2.3

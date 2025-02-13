@@ -1,15 +1,15 @@
 #
-# Release Version 130602 build - V1.0 (micromapST)
-# Release Version 141107 build - V1.1 (micromapSEER)
-# Release Version 150127 build - V1.1 (micromapST (super version))
+# Version 130602 build - V1.0 (micromapST)
+# Version 141107 build - V1.1 (micromapSEER)
+# Version 150127 build - V1.1 (micromapST (super version))
 #
 #     Adjustments for dynamic panel setup.
 #     Updated logic to enforce min and max panel sizes.
 #     Allow legal paper sideways.
 #
-# Release Version 220417 build - V1.1.2 - replace emails and minor fix.
-# Release Version 220829 build - V2.0 and V2.0.1 (micromapST) - correct layout to handle 1 group/row.
-# Release Version 240416 build - V2.1 - correct "ID" column width calculation.
+# Version 220417 build - V1.1.2 - replace emails and minor fix.
+# Version 220829 build - V2.0 and V2.0.1 (micromapST) - correct layout to handle 1 group/row.
+# Version 240416 build - V2.1 - correct "ID" column width calculation.
 #
 
 panelFill <- function(col="#D0D0D0",border=NA,...)

@@ -1,7 +1,7 @@
 ######
 #####
 #
-#  date: January 9, 2024
+#  date: November 19, 2024
 #
 #  packages used by BuildBorderGroup function
 #
@@ -38,7 +38,7 @@
 #            2022-1001 to 2022-1205 (migrate to sf functions from retired functions).
 #            2023-02xx to 2023-0724 (continue to update to sf, verify code, and test for 
 #                release.)
-#   In support of release 3.0.0.
+#   In support of version 3.0.0.
 #            2023-0724 to 2024-0103 continued updates to support book and correct problems.
 #
 #   This function takes a shapefile and name table (CSV or Excel format)
@@ -448,7 +448,7 @@
 #               limitations of is.null() and is.na() checks that produce
 #               difference sizes of results.  This is now caught 
 #               by CRAN pre-scans.
-#  2022-09-27 - Released Version 2.0.1 to CRAN.
+#  2022-09-27 - Released as Version 2.0.1 to CRAN.
 #  2022-10-03 - Based on discussion the effectiveness of the rmapshaper 
 #               on the map at different ReducePC values and to make sure 
 #               there are no coding issues, metrics have been added 
@@ -814,7 +814,7 @@
 #            sf, sfc, and sfg structure formats.  This change is required to remain
 #            on CRAN for distribution.
 #
-#  Version:  3.0.0 Tested release of 2.9.0
+#  Version:  3.0.0 Tested release of V2.9.0
 #
 #  Version:  3.0.1 Correction of some call parameter checks. 
 #
@@ -829,7 +829,7 @@
 #                  Attempt to fix bad geometries that leave slivers in 
 #                  geometry - no successful.  Must be careful when making manual adjustments.
 #                  Added the origin= option to the as.Date function call to support
-#                  old R releases.
+#                  old R versions.
 #                  Removed test output plots when modifying an area.  USstBG had 4 extra 
 #                  plots.
 #                  Updated documentation to only include one description of the border

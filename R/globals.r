@@ -81,22 +81,26 @@ utils::globalVariables(c(
                 "YAxis.width",        
           
             # Arrow
+                "rlAreaArrow", 
                 "Arrow.Head.length",  "Arrow.lwd",            "Arrow.cex",
                 "Arrow.Shadow.col",   "Arrow.Shadow.lwd",   
                 "Arrow.Dot.pch",      "Arrow.Dot.pch.size",   "Arrow.Dot.pch.lwd",       
                 "Arrow.Dot.Outline",  "Arrow.Dot.Outline.col","Arrow.Dot.Outline.lwd",
            
             # Bar
+                "rlAreaBar", 
                 "Bar.barht",          
                 "Bar.Outline.col",    "Bar.Outline.lwd",   "Bar.Outline.lty",
            
             # Boxplot
+                "rlAreaBoxplot", 
                 "BoxP.thin",          "BoxP.thick",         "BoxP.Use.Black",
                 "BoxP.Median.Line",   "BoxP.Median.col",
                 "BoxP.Median.Dot.col","BoxP.Median.Dot.pch","BoxP.Median.Dot.cex","BoxP.Median.Dot.lwd",
                 "BoxP.Outline.col",   "BoxP.Outlier.BW.col","BoxP.Outlier.lwd",   "BoxP.Outlier.cex",   
            
             # Center Stacked Bars
+                "rlAreaCtrSeg", 
                 "CBar.varht",         "CBar.two.ended",
                 "CBar.Zero.Line.col", "CBar.Zero.Line.lwd", "CBar.Zero.Line.lty",
            
@@ -105,14 +109,14 @@ utils::globalVariables(c(
                 "CSNBar.Outline.col", "CSNBar.Outline.lwd", "CSNBar.Outline.lty",
                 "CSNBar.First.barht", "CSNBar.Last.barht",
            
-            # Dot, Dotsignif, Dotconf, Dotse
+            # Dot, and general      
+                "rlAreaDot",              "rlAreaDotConf", 
+                 
                 "Dot.pch",            "Dot.pch.size",       "Dot.pch.lwd",       
                 "Dot.Outline",        "Dot.Outline.col",    "Dot.Outline.lwd",
                 
-                "Dot.Conf.pch",       "Dot.Conf.pch.size",  "Dot.Conf.pch.lwd",
-                "Dot.Conf.lwd",
-                "Dot.Conf.Outline",   "Dot.Conf.Outline.lwd","Dot.Conf.Outline.col",
-                
+           # DotSe     
+                "rlAreaDotSe",   
                 "Dot.SE",             
                 "Dot.SE.pch",         "Dot.SE.pch.size",     "Dot.SE.pch.lwd",             
                 "Dot.SE.lwd",      
@@ -127,11 +131,13 @@ utils::globalVariables(c(
                 "Dot.Signif.pvalue",
                 "Dot.Signif.range",
            
-            # Dotconf, Dotse
-                "Dot.conf.pch",       "Dot.conf.pch.size",
-                "Dot.conf",           "Dot.conf.lwd",       "Dot.conf.size",
-           
+            # Dotconf,
+                "Dot.Conf.pch",       "Dot.Conf.pch.size",  "Dot.Conf.pch.lwd",
+                "Dot.Conf.lwd",
+                "Dot.Conf.Outline",   "Dot.Conf.Outline.lwd","Dot.Conf.Outline.col",
+            
             # Id
+                "rlAreaID",
                 "Id.Hdr1",            "Id.Hdr2",            
                 "Id.Title.1.pos",     "Id.Title.2.pos",
                 "Id.Start",           "Id.Space",           "Id.Cex.mod",
@@ -158,6 +164,7 @@ utils::globalVariables(c(
                 "Map.Area.Spec.cex",  "Map.Hdr1",          "Map.Hdr2",
 
             # rank
+                "rlAreaRank",
                 "Rank.width",
            
             # Support - refVal, refText
@@ -165,6 +172,7 @@ utils::globalVariables(c(
                 "Ref.Text.col",       "Ref.Text.BW.col",    "Ref.Text.cex",
 
             # ScatDot
+                "rlScatterDot", 
                 "SCD.Bg.pch",         "SCD.Bg.pch.size",    "SCD.Bg.pch.fill",
                 "SCD.Bg.pch.col",     "SCD.Bg.pch.lwd",
                 "SCD.Fg.pch",         "SCD.Fg.pch.size",
@@ -173,9 +181,13 @@ utils::globalVariables(c(
                 "SCD.Median.pch.col", "SCD.Median.pch.lwd", 
                 "SCD.Axis.cex",
                 "SCD.xsc",            "SCD.ysc",            "SCD.hGrid",
-                "SCD.DiagLine",       "SCD.DiagLine.col",   "SCD.DiagLine.lwd",   "SCD.DiagLine.lty",
+                "SCD.line",
+                "SCD.Nline.col",      "SCD.Nline.lwd",      "SCD.Nline.lty",      "SCD.Nline.f",
+                "SCD.Dline.col",      "SCD.Dline.lwd",      "SCD.Dline.lty",      "SCD.Dline.f",
+                "SCD.Lline.col",      "SCD.Lline.lwd",      "SCD.Lline.lty",      "SCD.Lline.f",
 
-            # Normalized and Segmented stacked bar                
+            # Normalized and Segmented stacked bar     
+                "rlAreaStackedSegment",
                 "SNBar.varht",        "SNBar.two.ended",                
                 "SNBar.Middle.Dot",   
                 "SNBar.MDot.pch",     "SNBar.MDot.pch.fill","SNBar.MDot.pch.lwd", "SNBar.MDot.pch.size",
@@ -192,7 +204,8 @@ utils::globalVariables(c(
                 "GetMColors",         "mchr",               "masc",               "NewCounter",
                 "PlotVis",            "Plotsf",             "is.between.r",       "is.between",
                 "errCntMsg",          "stopCntMsg",         "TS_Date",            
-                "ClnStr",             "ClnStr2"
+                "ClnStr",             "ClnStr2",
+                "ErrCntMsg"
                 
            
                 ), add=TRUE)
@@ -577,7 +590,6 @@ PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
 }
 #
 #####
-
 
 
 #####

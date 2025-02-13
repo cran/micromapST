@@ -12,10 +12,9 @@ and used by the "panel functions" to manage the panels during the setup and glyp
 creation.
 }
 
-\usage{micromapGSetPanelDef(nRows,rSizeMaj,rSizeMin,rSepGap,MaxRows,UGrpPattern)}  
-
+\usage{micromapGSetPanelDef(nRows,rSizeMaj,rSizeMin,rSepGap,MaxRows,UGrpPattern)}           
 \arguments{
-   \item{nRows}{for the number of data rows to include in the map.)}
+   \item{nRows}{for the number of data rows to include in the map.}
    \item{rSizeMaj}{the maximum size of a row group in inches.  A row group represents
      a number of data rows as one horizontal set of graphs.}
    \item{rSizeMin}{the minimum size of a row group in inches.}
@@ -26,7 +25,8 @@ creation.
      equal the number of rows in the data that match the mapping data and must have the 
      rows grouped so that the top and bottom groups have the most rows.  The pattern can then 
      slowly dimenish to 2 rows as the group approach the middle (median) row group.}
-}
+  
+ }
 \details{
  Minor modifications can be made to the presentation structure through the details= call parameter, 
  but this is not recommended.  See the micromapGDefault description for more information on these

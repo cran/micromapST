@@ -83,6 +83,7 @@
      \item{-CS}{Column Size parameter}
      \item{-DF}{Statistics Data Frame parameter or content}
      \item{-PD}{Panel Description data frame parameter or content}
+     \item{-PDparm}{Panel Description data frame - parm row list}
      \item{-SORT}{Sort parameters}
     }
    }
@@ -97,6 +98,7 @@
      to the columns within the panel description data frame 
      rather than the glyph itself.}
    \item{PANEL}{Panel Description dataframe general issues}
+   \item{PDPARM}{Panel Description dataframe parm list row issues}
    \item{DMP & INB}{Internal issues}
    \item{<glyph name>}{Messages related to a specific glyph graphic.  
      The <glyph name> would be one 
@@ -1489,6 +1491,27 @@
           }
          }
          
+         The following warnings are issued during the processing of the Scatter Dot glyphs using
+         the \var{<statsDFrame>} data from the x and y coordinates of the points for each 
+         geographic area.  These points are also used to determine the slope of the "DIAGONAL" line 
+         and the "LOESS" line included in the graphic.  
+       
+        \describe{
+          \item{02N1}{\bold{The following parameter names were presented in the 'panel=list()' for column cc 
+           for SCATDOT : <List of Invalid Names>.  Ignoring bad entries. Suggest correcting.} \cr 
+           
+             Only "line", "line.col", "line.lty", "line.lwd" and "f" labels are permitted in the parm list entry 
+             for a Scatter Dot glyph.  Any other label will be ignored and processing will continue.  Please remove
+             or correct invalid names.   The format for specifying these options is list(line="LOWESS", line.col="red", f=.5).
+           }
+          \item{02N2}{\bold{The SCATDOT line style specified <Line Style> is not "NOLINE", "DIAGONAL", or "LOWESS".
+           The default value of <Default Line Style> will be used. }
+           
+             The line style specified in the parm=list() list for this scatdot glyph is not "NOLINE", "DIAGONAL", or "LOWESS".
+             One of there values must be specified.  The default of "DIAGONAL" will be used.
+           }      
+         }
+         
          The following warnings are issued during the processing of the sub-area identifiers 
          in the \var{<statsDFrame>} data frame and the border group name table.
          
@@ -1603,100 +1626,138 @@
        }
      }
    }
-
-  \item{04xx}{\bold{panel layout calculations:}
+  \item{03xx}{\bold{border group elements:}
   
     \describe{
-      \item{042x}{\bold{column sizing calculations:}
+    
+     \item{0310}{\bold{Missing the areaVisBorders dataset in the border group specified.}
+       In the border group specified, there is not area boundary data information provided.  Cannot
+       draw the area boundaries. Check the contents of the border group, rebuild or repair.
+      }
+     \item{0311}{\bold{Missing the L2VisBorders dataset in the border group specified.} 
+       In the border group specifeid, there is no level 2 boundary data information provided. Cannot
+       draw the level 2 boundaries.  Check the contents of the border group, rebuild or repair.
+      }
+     \item{0312}{\bold{Missing the RegVisBorders dataset in the border group specified.}
+      In the border group specified, there is no regional boundary data information provided. Cannot
+      draw any regional boundaries.  Check the contents of the border group, rebuild or repair.
+      }
+     \item{0313}{\bold{Missing the L3VisBorders dataset in the border group specified.}
+      In the border group specified, there is no outer boundary data information provided. Cannot
+      draw the outer boundaries.  Check the contents of the border group, rebuild or repair.
+      }
       
-        \describe{
-          \item{0420}{\bold{PANEL Calculated column widths is less than minimum <colSizeMin> 
-            inches - too many columns specified.}
-
-              ***  More Information to be provided later. ***
-           }
-          \item{0421}{\bold{PANEL Column width is to small to be useful, Package stopped.}
-
-              ***  More Information to be provided later. ***
-           }
-         }
-       }
-      \item{043x}{\bold{row sizing calculations:}
-      
-        \describe{
-          \item{0430}{\bold{PANEL panelLayout - The calculated width of <calculated-width> 
-             is too large for the available space of <space-width>.}
-
-              ***  More Information to be provided later. ***
-           }
-          \item{0431}{\bold{PANEL panelLayout - The calculated GrpRow Height is too small 
-             to be used.}
-
-              ***  More Information to be provided later. ***
-           }
-          \item{0432}{\bold{PANEL panelLayout - The calculated GrpRow Height is <GrpRowHeight> inches.  
+    }
+   }
+   
+   \item{04xx}{\bold{panel layout calculations:}
+   
+     \describe{
+       \item{042x}{\bold{column sizing calculations:}
+       
+         \describe{
+           \item{0420}{\bold{PANEL Calculated column widths is less than minimum <colSizeMin> 
+             inches - too many columns specified.}
+   
+               ***  More Information to be provided later. ***
+            }
+           \item{0421}{\bold{PANEL Column width is to small to be useful, Package stopped.}
+   
+               ***  More Information to be provided later. ***
+            }
+          }
+        }
+       \item{043x}{\bold{row sizing calculations:}
+       
+         \describe{
+           \item{0430}{\bold{PANEL panelLayout - The calculated width of <calculated-width> 
+              is too large for the available space of <space-width>.}
+   
+               ***  More Information to be provided later. ***
+            }
+           \item{0431}{\bold{PANEL panelLayout - The calculated GrpRow Height is too small 
+              to be used.}
+   
+               ***  More Information to be provided later. ***
+            }
+           \item{0432}{\bold{PANEL panelLayout - The calculated GrpRow Height is <GrpRowHeight> inches.  
              The minimum size limit is: <minimum row height>.}
-
-              ***  More Information to be provided later. ***
-           }
+   
+               ***  More Information to be provided later. ***
+            }
          }
-       }
-      \item{045x}{\bold{panel functions:}
-      
-        \describe{
-          \item{0450}{\bold{PANEL panelLengthen - invalid vector length. < 2}
-
-              ***  More Information to be provided later. ***
-           }
-          \item{0451}{\bold{PANEL panelSelect - Dimension error. Program error - index 'i' 
+        }
+       \item{045x}{\bold{panel functions:}
+       
+         \describe{
+           \item{0450}{\bold{PANEL panelLengthen - invalid vector length. < 2}
+   
+               ***  More Information to be provided later. ***
+            }
+           \item{0451}{\bold{PANEL panelSelect - Dimension error. Program error - index 'i' 
              or 'j' is out of bounds.}
-
-              ***  More Information to be provided later. ***
-           }
-          \item{0452}{\bold{PANEL panelSelect - Bad label region name.  Must be left, right, 
+   
+               ***  More Information to be provided later. ***
+            }
+           \item{0452}{\bold{PANEL panelSelect - Bad label region name.  Must be left, right, 
              top or bottom.}
-
-              ***  More Information to be provided later. ***
-           }
-         }
+   
+               ***  More Information to be provided later. ***
+            }
+          }
        }
-      \item{049x}{\bold{Internal Package Messages:}
-      
-        \describe{
-          \item{0490}{\bold{DMP Error in axisMethod selection in Dot and DotSignif code.}
-
-              ***  More Information to be provided later. ***
-           }
-          \item{0491}{\bold{INB is.between.r The r range value is not a vector with length of 2. 
+       \item{049x}{\bold{Internal Package Messages:}
+       
+         \describe{
+           \item{0490}{\bold{DMP Error in axisMethod selection in Dot and DotSignif code.}
+   
+               ***  More Information to be provided later. ***
+            }
+           \item{0491}{\bold{INB is.between.r The r range value is not a vector with length of 2. 
             FALSE returned.}
-
-             Function is.between.r --- Need description **checked**
-              ***  More Information to be provided later. ***
+   
+              Function is.between.r --- Need description **checked**
+               ***  More Information to be provided later. ***
+            }
+         }
+        }
+      }
+    }
+   
+   \item{05xx}{\bold{Informational:}
+    
+      \describe{
+        \item{050x}{\bold{Panel Messages:}
+        
+          \describe{
+            \item{0501}{\bold{PANEL Number of parameters overlaid = <numOverlaid.}
+   
+                ***  More Information to be provided later. ***
+            }
            }
          }
        }
      }
-   }
-
-  \item{05xx}{\bold{Informational:}
-  
-    \describe{
-      \item{050x}{\bold{Panel Messages:}
-      
-        \describe{
-          \item{0501}{\bold{PANEL Number of parameters overlaid = <numOverlaid.}
-
-              ***  More Information to be provided later. ***
-           }
-         }
-       }
-     }
-   }
- } 
-}
+  } 
+}  
 \author{
-Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
-}
+  Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
+}  
 \keyword{messages}
 \keyword{datasets}
+   
 
+   
+   
+   
+   
+   
+   
+   
+
+   
+   
+   
+   
+   
+   

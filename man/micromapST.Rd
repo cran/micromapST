@@ -47,9 +47,9 @@ glyphics columns as one of the following glyph types:
    \item dots,
    \item dots with confidence intervals,
    \item dots with standard error,
-   \item dot with a significance marker,
+   \item dots with a significance marker,
    \item time series line plots with or without confidence bands,
-   \item scatter plots, and
+   \item scatter plots and optionally diaganol line or lowesse line, and
    \item horizontal stacked (segmented, centered, and normalized) bars.
  }
 
@@ -102,13 +102,16 @@ All border groups are distrbuted with the package as .rda datasets.
   \item{rowNames}{defines the type of value used as the row.names in the \var{stateFrame}. 
     The options are:  
     \itemize{
+      \item \option{auto} - micromapST will scan the data in the \var{rowNamesCol} against
+       the border group's name table ("Abbr", "Name", "ID", and "Alt-Abbr" columns) and 
+       select the name column containing the most matched.  If the \option{auto} does not 
+       properly select the expected location id column, specify the desired column in the 
+       \var{rowNames} call parameter.;
       \item \option{ab} - an abbreviation for the sub-area: 2 character state ID, 
-       postal code abbreviation, ISO abbreviation, or a generally accepted 
-       abbreviation for the sub-area;
-      \item \option{id} - sub-area ID, numerical integer identifiers.  
-       In the U.S. border groups, the state and county FIPs codes are used. 
-       An alias for \option{id} is \option{FIPS}.;
-      \item \option{full} - the full sub-area names;
+       postal code abbreviation, ISO abbreviation, or a generally accepted abbreviation for the sub-area.;
+      \item \option{id} - sub-area ID, numerical integer identifiers,
+       In the U.S. border groups, the state and county FIPs codes are used. An alias for \option{id} is \option{FIPS}.;
+      \item \option{full} - the full sub-area names.;
       \item \option{alias} - partial match aliases.  Used only with the Seer Registry
        sub-area registry names as outputted by the SeerStat programs; or
       \item \option{alt_ab} - an alternate sub-area abbreviation.  
@@ -272,7 +275,7 @@ All border groups are distrbuted with the package as .rda datasets.
         or have meaning depend on the type of map requested. 
         The usage is as follows:
         \preformatted{
-        "map"      - not used.
+        "map"      - not used for this type of micromap.
         "mapcum"   - highlight areas previously referenced
                      above.
         "maptail"  - highlight areas previously referenced 
@@ -557,6 +560,7 @@ panelDesc03   <- data.frame(
     col1=c(NA,NA,NA,15),        
     panelData =c(NA,NA,"TSdata",NA)
     )
+
 ExTitle <- c("Ex03-US Time Series with Confidence bands",
                "Annual Female Lung Cancer Mortality Rates, 1996-2010")
 
@@ -678,7 +682,9 @@ panelDesc04 <- data.frame(
     col1=c(NA,NA,1,1),                 
     col2=c(NA,NA,NA,15)		
     )
-    
+wparm <- list(NA,NA,NA,list(line="LOWESS",f=.77,line.col="blue",line.lwd=1,line.lty="solid"))
+panelDesc04$parm <- wparm
+
 ExTitle <- c("Ex04-US Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
                "Female Lung Cancer Mortality Rates")
 

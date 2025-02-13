@@ -1,3 +1,51 @@
+Changes made in micromapST - Version 3.1.0 Updated: February 13, 2025
+
+Enhancements: 
+ 
+1) The SCATDOT glyph features a diagonal line in the graphic.  The type of line as been       
+        upgraded to include two other options: "NOLINE" and a "LOWESS" line based on the data.     
+        The "DIAGONAL" line is still available and is the default style.  Rather then expand the 
+        call parameters or the general default parameter vector ("details"), a new row was added
+        to the panelDesc data.frame, the "parm" row. Since each column in the "parm" row can contain
+        multiple subparms, the parm row is a list of lists instead of a simple vector. Check the 
+        documentation on the parm format and the options that can be conveyed to the glyph. Different 
+        subparms can be specified for each glyph row. The subparms supported for ScatDot glyphs are:
+    
+          line=	line style of "NOLINE", "DIAGONAL", or "LOWESS"
+   
+       There are no other subparms are used with the "NOLINE".
+   
+       For the "DIAGONAL" and "LOWESS" subparms:
+ 
+       line.col=    line color (any value from the colors() function)
+ 
+       line.lwd=    line width (default=1 based on the font size. Can have a value from .1 to 10)
+   
+       line.lty=    line type (default="solid", other types are "twodash", "longdash", "dottted",
+                "dashed", and any other valid R line type (see R documentation.)
+       The "LOWESS" line has one additional subparm:  
+   
+          f=        The f parameter for the shape of the LOWESS modeling.  The default is 0.75.
+                    But can be values from .01 to 99.  The lower the value, the more the line follows
+                    the data points. Higher values the smoother the line is.
+                  
+               Check the documents for more details on this enhancement.
+      
+2) The SCATDOT "LOWESS" line feature can have a weight specified for each x,y data point.  
+      The col3 panelDesc row is used to specify the data column in the statsDFrame to use for the 
+      weights.
+
+3) Any future enhancements related to glyph specific parameters will be converted to use the 
+    parm= row in the panelDesc data.frame with pre-defined default values in the details vector.  
+    It will be recommended to implement changes to the default values through the parm= row instead
+    of modifying the details vector.  This will allow each glyph column to have unique parameter 
+    specifications.
+  
+4) The package includes a dataset for the "LOWESS" line style in the SCATDOT glyphic, LOWESSData.
+  
+
+
+
 micromapST - Version 3.0.4 - 
 Updated: 2024-10-26
 

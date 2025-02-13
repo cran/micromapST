@@ -14,14 +14,16 @@ importFrom("graphics",    "arrows",     "axis",        "legend",      "lines",
 importFrom("grDevices",    "rgb",        "col2rgb",    "adjustcolor", "xy.coords",  
     "dev.new",             "dev.off",    "pdf",        "png",         "colors",      
     "gray", "grey")
-importFrom("stats",        "qnorm",      "aggregate")
-importFrom("RColorBrewer", "brewer.pal")
+importFrom("stats",        "qnorm",      "aggregate",  "lowess",       "predict")
 importFrom("stringr",      "str_trim",   "str_split",  "str_sub",     "str_replace", 
     "str_replace_all",     "str_pad",    "str_locate", "str_squish",  "str_to_upper",   
     "str_to_lower",        "str_remove", "str_remove_all")
 importFrom("labeling",     "wilkinson",  "extended")
+importFrom("RColorBrewer", "brewer.pal")
+
 importFrom("readxl",       "read_xls",   "read_xlsx")
 importFrom("writexl", "write_xlsx")
+
 importFrom("sf",      "st_geometry",     "st_shift_longitude", "st_is_longlat", 
     "st_transform",   "st_drop_geometry","st_as_sf",           "st_as_sfc",
     "st_union",       "st_difference",   "st_intersects",      "st_intersection",          

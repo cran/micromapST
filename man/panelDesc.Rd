@@ -464,6 +464,18 @@
       bottom of each column to identify the reference value.
       }
       
+    \item{\var{parm=}}{list of lists containing named items to be passed to a glyph.  It was originally
+      added to pass control parameters to the \var{scatdot} glyph to request a "LOWESS" line and to provide
+      the line graphic parameters (type, width, and color). It use will be expanded as needed to 
+      pass other parameters to other glyphs.  Since it is a list and not a vector, it must be added to the 
+      panelDesc data.frame in a different manner:   
+      \code{
+      	panelDesc <- data.frame(type=c("map","id","dot","scatdot"),  ... )
+      	wparm     <- list(NA,NA,NA,list(line="LOWESS",line.col="blue"))
+      	panelDesc$parm <- wparm
+      }
+     }
+      
     \item{\var{panelData=}}{List of object names containing the boxplot data list and/or an array of time series 
       data for each area.  If boxplot and time series data are not used in a column, 
       then associated object names should be \code{NA}.

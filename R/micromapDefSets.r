@@ -19,7 +19,7 @@ micromapGSetPanelDef <- function(nRows,rSizeMaj,rSizeMin,rSepGap,MaxRows,UGrpPat
    
    # build panels from panelLayout and pieces of rlAreaDefaults$Details
    
-   # nrow = 11 -> 5,5,5,5,5,1,5,5,5,5,5 states = 11 groups
+   # nrow = 11 -> 5,5,5,5,5,1,5,5,5,5,5  for the 51 states/districts = 11 groups
    # individual panels (rows(11) and columns)
    
    # changes to generalize number of rows.
@@ -330,6 +330,7 @@ micromapGSetDefaults = function()
 #  .78, .78, .78,  # light gray       "#C7C7C7" or "gray78"   # changed from .80
 #  .50, .50, .50,  # middle gray      "#7F7F7F" or "gray50"
 #  .30, .30, .30,  # dark gray        "#4D4D4D" or "gray30"  
+#  .20, .20, .20,  # m-dark gray      "#333333" 0r "gray20"
 #  .00, .00, .00,  # black            "#000000" or "black"    # borders
 # 
 #  .93,1.00, .93,  # light green
@@ -342,7 +343,7 @@ micromapGSetDefaults = function()
 #
 #colorsRef = grDevices::rgb(colorsRefRgb[,1],colorsRefRgb[,2],colorsRefRgb[,3])
 #names(colorsRef) = c("white","lightest gray","lighter gray","light gray",
-#                     "mid gray","dark gray", "black",
+#                     "mid gray","dark gray", "mdark gray", "black",
 #                     "light green","mid green",
 #                     "light yellow","bright yellow",
 #                     "light green blue","mid green blue")           
@@ -591,8 +592,8 @@ details = list(
 # margin lines (in mex units) for axis title, axis labels, and axis line.  
     mgpTop                     = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0.1,0)# 35  (not used)(margin spacing for title and axis = (title=2 lines, tick 0.1 lines, and 0 lines)
     mgpBottom                  = c(3.2,    0.1,  0),     # label & gridline (tick) placement (changed from 2,0,0)  # 36  (not used)
-    padjBottom                 = -0.35,                  # gridline (tick  placement)                               # 37  (not used) Was -0.7 adjusted 11/14
-    mgpLeft                    = c(0.75,   0.1,  0),     # left axis labels (when present)                                       # 38  (used TS and SCD)
+    padjBottom                 = -0.35,                  # gridline (tick  placement)                              # 37  (not used) Was -0.7 adjusted 11/14
+    mgpLeft                    = c(0.75,   0.1,  0),     # left axis labels (when present)                         # 38  (used TS and SCD)
 
     ###  End of sizing of areas...
     
@@ -625,11 +626,11 @@ details = list(
     staggered                  = FALSE,                  # intra column flags - staggered state of previous column # 54
     
 # panels
-    Panel.Fill.col             = colorsRef["lighter gray"],            # panel fill color                                        # 55
+    Panel.Fill.col             = colorsRef["lighter gray"],            # panel fill color                          # 55
     Panel.Outline.col          = colorsRef["black"],     # panel outline color                                     # 56
 
 # Title and Text - cex for character size
-    Text.cex                   = 0.75,               ## JP decreased text size.  Used almost everywhere.                # 57
+    Text.cex                   = 0.75,               ## JP decreased text size.  Used almost everywhere.           # 57
 
 # refVals parameters
 
@@ -803,7 +804,7 @@ details = list(
     Map.Median.text            = "Median for Sorted Panel", # text for the median single row box.                  # 170
 
     Map.Panel.col              = "white",                # NA map panel fill color                                 # 171
-    Map.Unu.col                = colorsRef["lightest gray"],  # NA map unused sub-area fill color                  # 172
+    Map.Unu.col                = colorsRef["lightest gray"],  # NA map unused sub-area fill color                  # 172=
 
 # Rank area parameters
     Rank.width                 = 0.25,                   # rank width of column   (x axis - about inches - working units) # 173
@@ -814,11 +815,11 @@ details = list(
 
     SCD.Bg.pch                 =  21,                    # Background symbol pch                                   # 176
     SCD.Bg.pch.fill            =  'transparent',         # Background symbol fill (bg) color (19:25)               # 177
-    SCD.Bg.pch.col             =  "black",               # Background symbol border color                          # 178
+    SCD.Bg.pch.col             =  colorsRef["black"],    # Background symbol border color                          # 178
     SCD.Bg.pch.lwd             =  0.6,                   # Background symbol border line weight                    # 179
     SCD.Bg.pch.size            =  0.75,                  # Background symbol size                                  # 180
     SCD.Fg.pch                 =  21,                    # Foreground symbol pch                                   # 181
-    SCD.Fg.pch.col             =  "black",               # Foreground symbol border color                          # 182
+    SCD.Fg.pch.col             =  colorsRef["black"],    # Foreground symbol border color                          # 182
     SCD.Fg.pch.lwd             =  0.6,                   # Foreground symbol border line weight                    # 183
     SCD.Fg.pch.size            =  1,                     # Foreground symbol size                                  # 184
     SCD.Median.pch             =  21,                    # median symbol PCH value (21 = filled circle)            # 185
@@ -826,34 +827,48 @@ details = list(
     SCD.Median.pch.col         =  "black",               # median symbol border color                              # 187
     SCD.Median.pch.lwd         =  0.6,                   # median symbol border line weight                        # 188
     SCD.Median.pch.size        =  1,                     # median symbol border size (cex)                         # 189
-    SCD.hGrid                  = FALSE,                  # draw horizontal grid.                                   # 190
+    SCD.hGrid                  = FALSE,                  # draw horizontal grid (def=NO).                          # 190
  
-    SCD.DiagLine               = TRUE,                   # TRUE, draw a diagonal line in scatter plot at x=y       # 191
-    SCD.DiagLine.col           = colorsRef["white"],     # color of diagonal line                                  # 192
-    SCD.DiagLine.lwd           = 1.25,                   # width of diagonal line                                  # 193
-    SCD.DiagLine.lty           = "solid",                # type of diagnoal line (see "R" line function)           # 194
-
-    SCD.xsc                    = 1.08,                   # NA fudge for margins to try and not clip circles.(not used)# 195
-    SCD.ysc                    = 1.12,                   # NA fudge for margins to try and not clip circles.(not used)# 196
+    
+    #  ScatDot reference line in plot:  "NO", "DIAG", "LOWESS"
+    SCD.line                   = "DIAGONAL",             # Type of line:  NONE (or NA), "DIAG", or "LOWESS"         # 191 new 10/2024
+    #  No Line defaults
+    SCD.Nline.col               = colorsRef["white"],    # junk value - not used                                   # 192 new 10/2024
+    SCD.Nline.lwd               = 1,                     # junk value - not used                                   # 193 new 10/2024
+    SCD.Nline.lty               = "solid",               # junk value - not used                                   # 194 new 10/2024
+    SCD.Nline.f                 = 2/3,                   # junk value - not used				   # 195 new 11/2024
+   #  DIAG line defaults
+    SCD.Dline.col               = colorsRef["white"],    # color of diagonal line                                  # 196 new 10/2024
+    SCD.Dline.lwd               = 1.25,                  # width of diagonal line                                  # 197 new 10/2024
+    SCD.Dline.lty               = "solid",               # type of diagnoal line (see "R" line function)           # 198 new 10/2024
+    SCD.Dline.f                 = 2/3,                   # junk value - not used				   # 199 new 11/2024
+    #  LOWESS line defaults    # ew 10/2024
+    SCD.Lline.col               = "grey20",              # color of LOWESS line                                    # 200 new 10/2024
+    SCD.Lline.lwd               = .75,                   # width of LOWESS line                                    # 201 new 10/2024
+    SCD.Lline.lty               = "solid",               # type of LOWESS line (see "R" line function)             # 202 new 10/2024
+    SCD.Lline.f                 = 2/3,                   # jf parameter for lowess functon call                    # 203 new 11/2024
+   
+    SCD.xsc                    = 1.08,                   # NA fudge for margins to try and not clip circles.(not used)# 204
+    SCD.ysc                    = 1.12,                   # NA fudge for margins to try and not clip circles.(not used)# 205
 
 # segmented bar parameters - segbar and normbar only
-    SNBar.MDot.pch             = 21,                     #  middle point symbol                                    # 197
-    SNBar.MDot.pch.border.col  = 'black',                # middle point symbol.border.col with using filled symbols# 198
-    SNBar.MDot.pch.border.lwd  = 0.6,                    # middle point symbol border lwd                          # 199
-    SNBar.MDot.pch.fill        = colorsRef["white"],     # middle point symbol fill/color                          # 200
-    SNBar.MDot.pch.size        = 0.6,                    # middle point symbol size                                # 201
-    SNBar.Middle.Dot           = FALSE,                  #  draw dot in middle point of segmented bars (default - no mid-poing dot) # 202
+    SNBar.MDot.pch             = 21,                     #  middle point symbol                                    # 206
+    SNBar.MDot.pch.border.col  = colorsRef["black"],     # middle point symbol.border.col with using filled symbols# 207
+    SNBar.MDot.pch.border.lwd  = 0.6,                    # middle point symbol border lwd                          # 208
+    SNBar.MDot.pch.fill        = colorsRef["white"],     # middle point symbol fill/color                          # 209
+    SNBar.MDot.pch.size        = 0.6,                    # middle point symbol size                                # 210
+    SNBar.Middle.Dot           = FALSE,                  #  draw dot in middle point of segmented bars (default - no mid-poing dot) # 211
 
-    SNBar.two.ended            = FALSE,                  #  (not implemented)                                      # 203
-    SNBar.varht                = FALSE,                  #  (default fixed height)                                 # 204
+    SNBar.two.ended            = FALSE,                  #  (not implemented)                                      # 212
+    SNBar.varht                = FALSE,                  #  (default fixed height)                                 # 213
 
 # ts and tsconf parameters
-    TS.Axis.cex                = 0.75 * 0.7,                                                                       # 205
-    TS.hGrid                   = FALSE,                                                                            # 206
-    TS.lwd                     = 1.1,                    # TS Line weight                                          # 207
+    TS.Axis.cex                = 0.75 * 0.7,                                                                       # 214
+    TS.hGrid                   = FALSE,                                                                            # 215
+    TS.lwd                     = 1.1,                    # TS Line weight                                          # 216
 
 # debug parameter
-    MST.Debug                  = 0                       # debug switch - for use by developers only. (default=0)  # 208
+    MST.Debug                  = 0                       # debug switch - for use by developers only. (default=0)  # 217
 
   )
 
