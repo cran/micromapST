@@ -24,7 +24,8 @@
         colSize=c(NA,NA,5,5),
         refVals=c(NA,NA,NA,wflungUS[,1]),
         refTexts=c(NA,NA,NA,"US Rate"),
-        panelData=c("","","","")
+        panelData=c("","","",""),
+        parm=list(NA,NA,NA,list=(a=9))
      }
   The panelDesc data.frame (which does not have to be named "panelDesc", any name will do) 
   provides the means of defining how many columns to create, the type of glyph per column, 
@@ -171,8 +172,8 @@
   boxplot   \tab Horizontal\tab NA            \tab NA            \tab NA   \tab Name of  \cr
             \tab box plot  \tab               \tab               \tab      \tab output   \cr
             \tab           \tab               \tab               \tab      \tab list from \cr
-            \tab           \tab               \tab               \tab      \tab call to          \cr
-            \tab           \tab               \tab               \tab      \tab boxplot(...plot=F)         \cr
+            \tab           \tab               \tab               \tab      \tab call to   \cr
+            \tab           \tab               \tab               \tab      \tab boxplot(...plot=F) \cr
             \tab           \tab               \tab               \tab      \tab          \cr
   dot       \tab Dot       \tab Values for    \tab NA            \tab NA   \tab NA       \cr
             \tab           \tab dots          \tab               \tab      \tab          \cr
@@ -195,7 +196,7 @@
   dotsignf  \tab Dot       \tab Values for    \tab P value       \tab NA   \tab NA       \cr
             \tab overprinted \tab dots        \tab associated    \tab      \tab          \cr
             \tab if not    \tab               \tab with dot      \tab      \tab          \cr
-            \tab significant \tab               \tab               \tab      \tab          \cr
+            \tab significant \tab              \tab               \tab      \tab          \cr
             \tab           \tab               \tab               \tab      \tab          \cr
             \tab           \tab               \tab               \tab      \tab          \cr
   scatdot   \tab Scater plot \tab Values on   \tab Values on     \tab NA   \tab NA       \cr
@@ -203,20 +204,20 @@
             \tab           \tab (x) axis      \tab (y) axis      \tab      \tab          \cr
             \tab           \tab               \tab               \tab      \tab          \cr
             \tab           \tab               \tab               \tab      \tab          \cr
-  ts        \tab Time Series\tab NA           \tab NA            \tab NA   \tab Name of array       \cr
-            \tab (line) plot\tab              \tab               \tab      \tab with dimensions         \cr
-            \tab           \tab               \tab               \tab      \tab of c(51,t,2),         \cr
-            \tab           \tab               \tab               \tab      \tab where t = #         \cr
-            \tab           \tab               \tab               \tab      \tab of time points         \cr
+  ts        \tab Time Series\tab NA           \tab NA            \tab NA   \tab Name of array   \cr
+            \tab (line) plot\tab              \tab               \tab      \tab with dimensions \cr
+            \tab           \tab               \tab               \tab      \tab of c(51,t,2),   \cr
+            \tab           \tab               \tab               \tab      \tab where t = #     \cr
+            \tab           \tab               \tab               \tab      \tab of time points   \cr
             \tab           \tab               \tab               \tab      \tab (max 15), x values \cr
             \tab           \tab               \tab               \tab      \tab in [,,1], y values \cr
             \tab           \tab               \tab               \tab      \tab in [,,2]   \cr
             \tab           \tab               \tab               \tab      \tab            \cr
-  tsconf    \tab Time Series\tab NA           \tab NA            \tab NA   \tab Name of array       \cr
-            \tab (line) plot\tab              \tab               \tab      \tab with dimensions         \cr
-            \tab with confidence\tab          \tab               \tab      \tab of c(51,t,4), as ts         \cr
+  tsconf    \tab Time Series\tab NA           \tab NA            \tab NA   \tab Name of array     \cr
+            \tab (line) plot\tab              \tab               \tab      \tab with dimensions   \cr
+            \tab with confidence\tab          \tab               \tab      \tab of c(51,t,4), as ts  \cr
             \tab limits    \tab               \tab               \tab      \tab lower limit is \cr
-            \tab           \tab               \tab               \tab      \tab [,,3] amd the         \cr
+            \tab           \tab               \tab               \tab      \tab [,,3] amd the  \cr
             \tab           \tab               \tab               \tab      \tab upper limit is \cr
             \tab           \tab               \tab               \tab      \tab [,,4]     \cr
             \tab           \tab               \tab               \tab      \tab            \cr
@@ -361,19 +362,18 @@
          data.frame that contain the contiguous bar segment values. (See "segbar" type above for 
          more information.)
         }
-        
-        \item{scatdot}{ - a set of 51 points with an \var{x} and \var{y} value per area. All points 
+       \item{scatdot}{ - a set of 51 points with an \var{x} and \var{y} value per area. All points 
          are plotted in each panel with the key areas in the panel highlighted. 
          \var{col1} indicates \var{statsDFrame} column containing the \var{x} values and 
          \var{col2} indicates the column containing the \var{y} values.
         }
       }
-     Example: \code{type=c("id","map","rank", "boxplot")}  
-     To specify a \var{micromapSEER} with three columns, left to right,
-     containing the area label, a map and a boxplot.
-    }
+    Example: \code{type=c("id","map","rank", "boxplot")}  
+    To specify a \var{micromapSEER} with three columns, left to right,
+    containing the area label, a map and a boxplot.
+   }
     
-    \item{\var{col1=}, \var{col2=}, \var{col3=}}{Vectors of index numbers 
+    \item{\bold{\var{col1=}, \var{col2=}, \var{col3=}}}{Vectors of index numbers 
      or names of columns in \var{statsDFrame} data.frame to be used as data for graphics. 
      The uses of these three vectors are defined below:
      \describe{
@@ -464,12 +464,13 @@
       bottom of each column to identify the reference value.
       }
       
-    \item{\var{parm=}}{list of lists containing named items to be passed to a glyph.  It was originally
-      added to pass control parameters to the \var{scatdot} glyph to request a "LOWESS" line and to provide
-      the line graphic parameters (type, width, and color). It use will be expanded as needed to 
-      pass other parameters to other glyphs.  Since it is a list and not a vector, it must be added to the 
-      panelDesc data.frame in a different manner:   
-      \code{
+    \item{\var{parm=}}{list of lists containing named items to be passed to a glyph.  
+    It was originally added to pass control parameters to the \var{scatdot} glyph 
+    to request a "LOWESS" line and to provide the line graphic parameters (type, width, and color). 
+    It use will be expanded as needed to pass other parameters to other glyphs.  
+    Since it is a list and not a vector, it must be added to the panelDesc data.frame 
+    in a different manner:   
+      \preformatted{
       	panelDesc <- data.frame(type=c("map","id","dot","scatdot"),  ... )
       	wparm     <- list(NA,NA,NA,list(line="LOWESS",line.col="blue"))
       	panelDesc$parm <- wparm
@@ -492,11 +493,10 @@
       The first dimension \code{[\var{st},,]} represent one entry for each area (1 to 51).  
       The second dimension \code{[,\var{t},]} indexes up to 30+ data points for the area.  
       The third dimension \code{[,,\var{v}]} are the data point values at each data point.  
-      \code{[,,var{1}]} is 
-      the \var{x} value and \code{[,,\var{2}]} is the median \var{y} value for the data point.  
-      The rownames associated with the first dimension must be the area location ids used
-      in the statsDFrame table to link the elements of this structure the presentation 
-      order of the areas.
+      \code{[,,var{1}]} is the \var{x} value and \code{[,,\var{2}]} is the median \var{y} 
+      value for the data point. The rownames associated with the first dimension must be 
+      the area location ids used in the statsDFrame table to link the elements of this 
+      structure the presentation order of the areas.
       
       For the time series with confidence intervals glyph (tsconf), the array is extended to include:  
       \code{[,,\var{3}]} and \code{[,,\var{4}]} for the \var{lower y} and \var{upper y} values.
@@ -511,10 +511,10 @@
       to convert to and from characters and date variable.  In the past, before this feature, users 
       had to do work-a-rounds by using year numbers or year and faction numbers.  Once you have inserted
       the date X values into the array [,,1], modify the class of the array to add the "Date" class.
-      micrpmapST will inspect the array and find the "Date" class, flag it for internal operations and remove it.
-      The date format of "%Y-%m" (YYYY-MM) will be setup as the default format.  If the time series contains <= 90 days,
-      the date format will be changed to "%b-%d" (MMM-DD) to provide a more useful label.==-
-      The date feature is only available on the Time Series Glyphs.
+      micrpmapST will inspect the array and find the "Date" class, flag it for internal operations 
+      and remove it.  The date format of "%Y-%m" (YYYY-MM) will be setup as the default format.  
+      If the time series contains <= 90 days, the date format will be changed to "%b-%d" (MMM-DD) 
+      to provide a more useful label.  The date feature is only available on the Time Series Glyphs.
       
       If axisScale is set to "s" or "sn", they will be ignored for any TS glyph using the date feature.
       }

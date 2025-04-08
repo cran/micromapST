@@ -1,3 +1,74 @@
+Changes made in micromapST - Version 3.1.1 Updated: March 29, 2025
+
+Fixed:
+
+1) The TS and TSConf glyphics will not handle numeric ID location identifiers.
+
+2) expanded the documentation on the TS/TSConf and ScatDot glyphs.
+
+3) Add graphic examples of each glyph to their related chapter in the documentation.
+
+4) Corrected the refTexts bottom header to make sure it is centered on the column, and has flexibility 
+to fit the width of the column.   If a 1/4" line and texts is to wide, then the text will be truncated to 
+permit a valid fit under the glyph column.  The standard line length is 1/2" with text to fill the 
+remaining space under the column.  This is typically only 5-8 characters depending on the width of the column.
+
+5) The package release process now requires this "NEWS" file to be located in the package directory at the same 
+level as the "DESCRIPTION" and "NAMESPACE" files.  
+
+6) The following code functions were found to not be used in micromapST:  FindShortest, 
+
+7) The rowNames accepted values has been expanded to "ab", "abbr", "full", "name", "id", "FIPS", "alias", 
+"seer", "alt_ab", and "auto".
+
+8) Updated the "***02xB" warning message to incorporate the row names with missing values instead of having a 
+separate warning message.  "***02xC" is now been removed.
+
+9) Replaced the " gCol:" string in several messages with " Col:" to clean up the text of the messages.
+
+10) In the code when a variable is assigned to an environment, it was found the "names" on the variable 
+were erased.  Code in several location was corrected to add the names to be variables after the assignment.
+
+11) Added an informational message to the rowNames "auto" logic to announce which type of loc ID was 
+used to match the user's data data.frame (statsDFrame) to the name table.
+
+12) The mexican country boundary had a extra line across the image.  This was found to be caused by over
+simplification of at 1.25 %.   When used with ReducePC set to 50 %, the images were find.  It was also found
+that shapefiles that were not well constructed and had silvers and holes in the internal areas when processed to 
+form a simple outline of the boundary for Level 3 plotting (the outline of the area) would maintain internal 
+line representing the mismatched borders between areas or states and lakes or any interior hole present.
+After a lot of testing of concave_hull functions, st_boundary and other ways of creating an outline, the 
+code was adjusted to use the following sequence of function when creating the L3 layer outline:
+	st_make_valid
+	aggregate
+	st_make_valid
+	force the sf typing to Multipolygons structure
+	st_make_valid
+	st_buffer  using value of 0.000001 units
+	st_make_valid
+	
+	Then convert the L3 sf image to VisBorder format.
+
+The aggregate command does the st_combine and st_union functions.
+
+13) In the plotNames logic, if the supplied call parameter value is invalid, the code assume the parameter to be
+"ab", but does not correctly assign the values to each data row for the construction of the label on each 
+"ID" glyph.  Problem corrected by providing the correct list of labels.
+
+14) While testing with the Alaska State region, it was found the Buildbordergroup function did not handle
+several of the situations where the user may provide the "name", "abbr", or "ID" in the starting name table
+in a manner that ensure a match with a user's data when micromapST is used.  Complications come 
+from upper and lower case, punctuation, control characters, and several math operation symbols.   It was elected
+to edit out of the characters strings used any character that was not a number, alpha character (upper or lower case),
+spaces, and the special characters of "-" and "_" that are frequently used in contracted names.
+The logic was to filter the "name", "abbr", and "ID" columns when building the name table for 
+the border group and to filter the rowNamesCol or row.names() data in a similar manner.   This should 
+clean up the problems with match users data to name table rows to find the area geometry.
+If you use the name table data to back file data with the "name", "abbr", or "ID" location 
+IDs, you must remember to filter the source (data) information to match the name table 
+(upper case, numbers, "-", "_", or a blank).
+
+
 Changes made in micromapST - Version 3.1.0 Updated: February 13, 2025
 
 Enhancements: 

@@ -1,6 +1,6 @@
 \name{glyph-arrow}
 \alias{glyph-arrow}
-\alias{ARROW}
+\alias{arrow}
 \title{The arrow glyph creates a graphic of a two data points, from a beginning point to an end point.}
 \description{
 The \var{arrow} glyph creates a simple arrow with pointing heads from a beginning point (col1 value) to 
@@ -31,6 +31,18 @@ The \var{panelDesc} variables col1 or col2 provide the name/number of the data c
   \var{panelDesc} variable rows not used are the col3, panelData, and parm variable rows. If these
   rows are present the value for the \var{arrow} glyph should be set to NA.
   
+  The following is an example of a section of a boxplot glyph column in a linked micromap:
+  
+  \if{html}{\figure{ExamArrow.png}{options: width=150}}
+  \if{latex}{\figure{ExamArrow.png}{options: width=150px}}
+  
+  If both the start and end points of an arrow are the same, a "dot" is draw.   If the begin and end points of 
+  an arrow are very close to each other, the arrow may not be much more than an arrow head.  See example below.
+  
+  \if{html}{\figure{ExamArrowSmall.png}{options: width=150}}
+  \if{latex}{\figure{ExamArrowSmall.png}{options: width=150px}}
+  
+
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.
   

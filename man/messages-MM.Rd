@@ -500,99 +500,8 @@
              Execution is stopped..
            }
           }
-         }
-        \item{01Mx}{\bold{Boundary datasets:}
-         \describe{   
-          \item{01M0}{\bold{BGBG System error encountered when loading the border group. 
-             See error message:}\cr
-             The package attempted to load the user/private border group.  
-             The R system load() function failed and returned an error message.  
-             The error message is logged following this message using the same 
-             message indicator.  Inspect the file and resolve the R system load() error
-             mesage and re-run.  Execution was stopped.
-             
-             The second like of error message details the loading error issued by R.
-           }
-          \item{01M1}{\bold{The areaNamesAbbrsIDs (Name Table) is missing from 
-            the border group.}\cr
-            The border group must contain the name table (areaNamesAbbrsIDs) 
-            to be useful.  Determine why the name table is missing and retry.
-           }
-          \item{01M2}{\bold{The areaVisBorders boundary data set is missing 
-            from the border group.}\cr
-            The border group must contain the boundary data for all of the areas 
-            in the name table. In this case, the areaVisBorders data.frame containing 
-            the area boundary point is missing. Determine why the table is 
-            missing and retry.
-           }
-          \item{01M3}{\bold{The areaVisBorders boundary data set has a NULL value 
-            from the border group.}\cr
-            The border group must contain the boundary data for all of the areas 
-            in the name table.  In this case, the areaVisBorders data.frame containing 
-            the area boundary point has a NULL value.
-            Determine why the areaVisBorders data set is NULL, repair and retry.
-           }
-         \item{01M4}{\bold{The L3VisBorders boundary dataset is missing from the Border Group. }\cr
-            The Level 3 (map outline) boundary table is an optional boundary points 
-            data.frame and is missing from the border group.  The package will disable 
-            drawing the L3 borders.
-           }
-          \item{01M5}{\bold{The L2Borders is set to be drawn, but no L2 border data is present. 
-             L2 Feature disabled.}\cr
-            The L2VisBorders boundary point data.frame is missing from the border 
-            group when the L2Feature is enabled.  The L2Feature will be disabled.  
-            If you require the L2 boundaries 
-            determine why the data.frame is missing and retry.
-           }
-          \item{01M6}{\bold{The RegBorders is set to be drawn, border data is not present. 
-             Reg Feature disabled.}\cr
-            The RegVisBorders boundary point data.frame is missing from the border 
-            group when the RegFeature is enabled.  The RegFeature will be disabled. 
-            dataRegionsOnly options is also disabled.  If you require the Reg boundaries 
-            determine why the data.frame is missing and retry.
-           }
-          \item{01M7}{\bold{The L3VisBorders is NULL. Ploting the L3 outline is disabled.}\cr
-            The L3 boundary data found in the border group is empty.  The drawing of the L3 
-            outline boundary has been disabled.  This may be a normal situation and only 
-            needs attention if the L3 boundary data was expected to be in the border group.  
-            Correct the problem and recreate the border group.
-           } 
-          \item{01M8}{\bold{BGBN After loading <BorderGroupName> border group, the 
-            following optional objects are missing: <list of data.frames>}\cr
-            After loading the border group specified in the function call 
-            (<BorderGroupName>), the following optional objects (data.frames)
-            were missing in the border group:  <list of data.frames>.  
-            These are optional and any use of them has been disabled.
-            If you need one of these boundary data.sets, contact the border 
-            group builder and determine why these data.frames were excluded.  
-            The optional boundary data.frames are:  L3VisBorders, L2VisBorders, 
-            and RegVisBorders.
-           }
-          \item{01M9}{\bold{BGBN After loading <BorderGroupName> border group, the following 
-            critical objects are missing: <list of data.frames>}\cr
-            After loading the border group specified in the function call 
-            (<BorderGroupName>), the following critical objects (data.frames)
-            were missing in the border group:  <list of data.frames>.  
-            These boundary data.frames are required for the micromapST package
-            to run.  The execution of the package has been stopped. 
-            Contact the border group builder and determine why these data.frames 
-            were excluded.  The optional boundary data.frames are:  areaVisBorders, 
-            areaNamesAbbrsIDs, and areaParms.
-           }
-          \item{01MA}{\bold{L2Border was requested, but the Name Table does not have 
-            a L2_ID column.  Disable drawing of L2.}\cr
-            The border group indicates a Level 2 boundary should be drawn where 
-            appropriate.  However, the name table does not have the L2_ID column 
-            to like the Level 2 boundaries to the basic areas.  Correct the border 
-            group's name table, rebuild the border group and try again.
-           }
-          \item{01MB}{\bold{Regional boundaries have been requested, but the 
-            Name Table has no regID column. The feature is disabled.}\cr
-           The border group indicates the Regional boundary and the regional mapping 
-           feature has been requested, but the Name Table has no regID column.  
-           This feature is disabled.         
-          }
-         }
+          
+        Also see the 01Mx message section for more information on Border Group messages.
         }
       
       \item{017x}{\bold{\option{rowNamesCol} call argument (CARG-RNC):}/cr      
@@ -1042,6 +951,99 @@
            }
          }
        }
+     \item{01Mx}{\bold{Boundary datasets:}
+      \describe{   
+       \item{01M0}{\bold{BGBG System error encountered when loading the border group. 
+          See error message:}\cr
+          The package attempted to load the user/private border group.  
+          The R system load() function failed and returned an error message.  
+          The error message is logged following this message using the same 
+          message indicator.  Inspect the file and resolve the R system load() error
+          mesage and re-run.  Execution was stopped.
+          
+          The second like of error message details the loading error issued by R.
+        }
+       \item{01M1}{\bold{The areaNamesAbbrsIDs (Name Table) is missing from 
+         the border group.}\cr
+         The border group must contain the name table (areaNamesAbbrsIDs) 
+         to be useful.  Determine why the name table is missing and retry.
+        }
+       \item{01M2}{\bold{The areaVisBorders boundary data set is missing 
+         from the border group.}\cr
+         The border group must contain the boundary data for all of the areas 
+         in the name table. In this case, the areaVisBorders data.frame containing 
+         the area boundary point is missing. Determine why the table is 
+         missing and retry.
+        }
+       \item{01M3}{\bold{The areaVisBorders boundary data set has a NULL value 
+         from the border group.}\cr
+         The border group must contain the boundary data for all of the areas 
+         in the name table.  In this case, the areaVisBorders data.frame containing 
+         the area boundary point has a NULL value.
+         Determine why the areaVisBorders data set is NULL, repair and retry.
+        }
+       \item{01M4}{\bold{The L3VisBorders boundary dataset is missing from the Border Group. }\cr
+         The Level 3 (map outline) boundary table is an optional boundary points 
+         data.frame and is missing from the border group.  The package will disable 
+         drawing the L3 borders.
+        }
+       \item{01M5}{\bold{The L2Borders is set to be drawn, but no L2 border data is present. 
+          L2 Feature disabled.}\cr
+         The L2VisBorders boundary point data.frame is missing from the border 
+         group when the L2Feature is enabled.  The L2Feature will be disabled.  
+         If you require the L2 boundaries 
+         determine why the data.frame is missing and retry.
+        }
+       \item{01M6}{\bold{The RegBorders is set to be drawn, border data is not present. 
+          Reg Feature disabled.}\cr
+         The RegVisBorders boundary point data.frame is missing from the border 
+         group when the RegFeature is enabled.  The RegFeature will be disabled. 
+         dataRegionsOnly options is also disabled.  If you require the Reg boundaries 
+         determine why the data.frame is missing and retry.
+        }
+       \item{01M7}{\bold{The L3VisBorders is NULL. Ploting the L3 outline is disabled.}\cr
+         The L3 boundary data found in the border group is empty.  The drawing of the L3 
+         outline boundary has been disabled.  This may be a normal situation and only 
+         needs attention if the L3 boundary data was expected to be in the border group.  
+         Correct the problem and recreate the border group.
+        } 
+       \item{01M8}{\bold{BGBN After loading <BorderGroupName> border group, the 
+         following optional objects are missing: <list of data.frames>}\cr
+         After loading the border group specified in the function call 
+         (<BorderGroupName>), the following optional objects (data.frames)
+         were missing in the border group:  <list of data.frames>.  
+         These are optional and any use of them has been disabled.
+         If you need one of these boundary data.sets, contact the border 
+         group builder and determine why these data.frames were excluded.  
+         The optional boundary data.frames are:  L3VisBorders, L2VisBorders, 
+         and RegVisBorders.
+        }
+       \item{01M9}{\bold{BGBN After loading <BorderGroupName> border group, the following 
+         critical objects are missing: <list of data.frames>}\cr
+         After loading the border group specified in the function call 
+         (<BorderGroupName>), the following critical objects (data.frames)
+         were missing in the border group:  <list of data.frames>.  
+         These boundary data.frames are required for the micromapST package
+         to run.  The execution of the package has been stopped. 
+         Contact the border group builder and determine why these data.frames 
+         were excluded.  The optional boundary data.frames are:  areaVisBorders, 
+         areaNamesAbbrsIDs, and areaParms.
+        }
+       \item{01MA}{\bold{L2Border was requested, but the Name Table does not have 
+         a L2_ID column.  Disable drawing of L2.}\cr
+         The border group indicates a Level 2 boundary should be drawn where 
+         appropriate.  However, the name table does not have the L2_ID column 
+         to like the Level 2 boundaries to the basic areas.  Correct the border 
+         group's name table, rebuild the border group and try again.
+        }
+       \item{01MB}{\bold{Regional boundaries have been requested, but the 
+         Name Table has no regID column. The feature is disabled.}\cr
+        The border group indicates the Regional boundary and the regional mapping 
+        feature has been requested, but the Name Table has no regID column.  
+        This feature is disabled.         
+       }
+      }
+     }
 
       \item{01Nx}{\bold{\option{details} call argument (DETS):}
          
@@ -1267,7 +1269,7 @@
              One or more entries did not convert correctly resulting in missing values.  
              Inspect the data in the \var{<stColName>} column of the \var{<statsDFrame>} data frame and correct. 
             }
-           \item{02y9}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
+          \item{02y9}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
              data frame is not a character or numeric vector. \var{<usage>}}
 
              The \var{<stColName>} data column in the \var{<statsDFrame>} is not a character or numeric column.  The glyph requires
@@ -1278,36 +1280,28 @@
           \item{02yA}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
              data frame does not contain any numerical data. No rows will be drawn. \var{<usage>}}
 
-            The \var{<statsDFrame>} data frame column \var{<stColName>} does not contain ANY 
-            numerical data to permit drawing of the requested glyph.  Inspect the data column and re-run.
-           }
-          \item{02yB}{\bold{<glyph> cc The \var{<pdVarName>} data column in \var{<statsDFrame>} data frame contains 
-             all missing values (NA) and cannot be graphed. \var{<usage>}}
-
+             The \var{<statsDFrame>} data frame column \var{<stColName>} does not contain ANY 
+             numerical data to permit drawing of the requested glyph.  Inspect the data column and re-run.
+            }
+          \item{02yB}{\bold{<glyph> Col: <cc> The \var{<pdVarName>} data column in \var{<statsDFrame>} data frame 
+             contains one or more missing values and will not be graphed. <usage>.  The following <pdUsage> rows
+             will not be drawn:}
+             
+    
              In the <glyph> for column \var{cc}, the data column in the user provided \var{statsDFrame} pointed to by the 
              \var{<PDVarName>} \var{panelDesc} variable contains a \var{NA} value.  The glyph for that data row will not be drawn.
              If this is an error, correct the data in the \var{statsDFrame} data.frame and re-run.
-             ***check***
-           }
-          \item{02yC}{\bold{<glyph> cc The row numbers with missing data are: <list of row names>}\cr
-             The <list of row names> indicates which rows in the \var{statsDFrame}
-             data.frame provided by the user is missing data values, are NA, or "".
-             Inspect the supplied data and correct.
-
-             In the <glyph> for column \var{cc}, the data column in the user provided 
-             \var{statsDFrame} pointed to by the \var{<PDVarName>} \var{panelDesc} variable 
-             contains a \var{NA} value.  The glyph for that data row will not be drawn.
-             If this is an error, correct the data in the \var{statsDFrame} data.frame and re-run.
-             ***check***
-           }
-         \item{02yD}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
+             The line following this message contains a list of the lines in the \var{statsDFrame} that contained
+             the missing (NA) values.
+            }
+          \item{02yD}{\bold{<glyph> cc The \var{<stColName>} data column in \var{<statsDFrame>} 
              data frame does not contain any data. Data vector has length of zero. \var{<usage>}}
 
-            The \var{<statsDFrame>} data frame column \var{<stColName>} has a length of zero. 
-            If the \var{<statsDFrame>} is properly constructed with at least one sub-area, 
-            then this should not happen.  If this error occurs, check the \var{<statsDFrame>} 
-            to make sure it has not been corrupted and has rows for each sub-area being 
-            graphed and mapped. 
+             The \var{<statsDFrame>} data frame column \var{<stColName>} has a length of zero. 
+             If the \var{<statsDFrame>} is properly constructed with at least one sub-area, 
+             then this should not happen.  If this error occurs, check the \var{<statsDFrame>} 
+             to make sure it has not been corrupted and has rows for each sub-area being 
+             graphed and mapped. 
            }
         }            
 
@@ -1326,22 +1320,7 @@
             }
           }
          
-         The following warnings are specific to the dot significance glyph:
-        \describe{
-           \item{022P}{\bold{<glyph> cc One or more P_Value data entries in \var{<stColName>} are missing.}
-
-             The data in the \var{<statsDFrame>} pointed to for use by the dotsignif glyph (\var{col2}) 
-             for the significance P Value is not in the range of 0 to 1 probability.  Review the data 
-             and correct the values to a range of 0 to 1. This is only used by the DOTSIGNIF glyph.
-           }
-          \item{022Q}{\bold{<glyph> cc One or more P_Value data entries in \var{<stColName>} are out of the range.}
-
-             The data in the \var{<statsDFrame>} pointed to for use by the dotsignif glyph (\var{col2}) 
-             for the significance P Value is not in the range of 0 to 1 probability.  Review the data 
-             and correct the values to a range of 0 to 1. This is only used by the DOTSIGNIF glyph.
-           }
-         }
-         
+        
          The following special case that do not reference a particular panelDesc column 
          variable. These are generated by the stacked bar glyphs with regard to the \var{<statsDFrame>}
          data and the panelDesc col1 and col2 specifications.:
@@ -1383,7 +1362,26 @@
              
            }
          }
+ 
+        The following warnings are specific to the dot significance glyph:
+        \describe{
+           \item{022P}{\bold{<glyph> cc One or more P_Value data entries in \var{<stColName>} are missing.}
 
+             The data in the \var{<statsDFrame>} pointed to for use by the dotsignif glyph (\var{col2}) 
+             for the significance P Value is not in the range of 0 to 1 probability.  Review the data 
+             and correct the values to a range of 0 to 1. This is only used by the DOTSIGNIF glyph.
+           }
+          \item{022Q}{\bold{<glyph> cc One or more P_Value data entries in \var{<stColName>} are out of the range.}
+
+             The data in the \var{<statsDFrame>} pointed to for use by the dotsignif glyph (\var{col2}) 
+             for the significance P Value is not in the range of 0 to 1 probability.  Review the data 
+             and correct the values to a range of 0 to 1. This is only used by the DOTSIGNIF glyph.
+           }
+         }
+
+
+       The following warnings are issued during the processing of the sub-area identifiers 
+       in the \var{<statsDFrame>} data frame and the border group name table.
          
         \bold{BoxPlot specific processing messages (boxplot data list):}
          
@@ -1512,8 +1510,6 @@
            }      
          }
          
-         The following warnings are issued during the processing of the sub-area identifiers 
-         in the \var{<statsDFrame>} data frame and the border group name table.
          
         \describe{
            \item{02P3}{\bold{<glyph> cc There are no links in the \var{<PDDataName>} data 

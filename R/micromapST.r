@@ -1,6 +1,6 @@
 #
 #  micromapST - 
-#  Updated: February 13, 2025 by Jim Pearson
+#  Updated: April 5th, 2025 by Jim Pearson
 #
 #  discussion points:  not all border groups have abbreviations or IDs.  Names yes, but need to 
 #       handle the value inputed by the user and link data to boundaries. May be needed
@@ -13,7 +13,7 @@
 #
 #  2009-06-07 - Added VerStr as a parameter to be able to determine
 #        which output files are from this version.
-#        - Updated book Micromap-Dot-Arrow-Box plot to use new 
+#        - Updated book Micromap-Dot-Arrow-Boxplot to use new 
 #        data files:
 #           WFAgeAdjLungMort2000-4CountyAgeAdj2000.csv
 #           WFLungMort19951999AgeAdj2000State.csv
@@ -170,8 +170,8 @@
 #        - moved up titles printing to let INTERRUPTED pdf build have titles.
 #
 #  2013-05-28 - fix parameter checking for boxplot list. 
-#        - Added names check for box plot,
-#        - Added "list" type check for box plot.
+#        - Added names check for boxplot,
+#        - Added "list" type check for boxplot.
 #        - Reorganized test to not cause a secondary error.
 #        - Added Id.Text.adj parameter to details and rlAreaID to adjust text alignment.
 #
@@ -580,7 +580,7 @@
 #           CRAN requirements.
 #         - Modified code to not directly use assigns for 
 #           variables in the .GlobalEnv space.
-#         - Modified all data() function calls to load
+#         - Modified all utils::data() function calls to load
 #           the data into the current environment.
 #
 #     Version 1.1.1  -------------------
@@ -641,7 +641,7 @@
 #           and user provided data in a data.frame.  All names, abbrs, and IDs will be 
 #           edited in the name tables and user data.frames to remove any and all punctuation
 #           marks.   This will be done in the micromapST and BuildBorderGroup functions.
-#           data <- gsub("[[:punct:]]", " ", data)  and data <- str_squish(data)
+#           data <- gsub("[[:punct:]]", " ", data)  and data <- stringr::str_squish(data)
 #           The list names of the boxplot and ts data are also processed to ensure a match 
 #           to the area links.  The tables use the "rowNames" value to correct match 
 #           the name table.
@@ -780,6 +780,23 @@
 #  2024-1219 - continued testing of all call parameters values to make sure the validity
 #           checking is accurate for all each.
 #  2025-0213 - Could not get RHUB working to test package, updated dates in documentation and released.
+#     Version 3.1.0 was released
+#  2025-0304 - The TS and TSCONF glyphics do not work properly when a numeric ID like a FIDS code is 
+#           used for the area identifier.
+#  2025-0328 - Improved the simplification for the boundary data to handle less refined polygon
+#           structure.  Mexico was very poorly written and it was used to help guide the 
+#           coding changes to help produce better border group output when it near impossible
+#           to use standard sf calls to create a outline of the border group area.
+#  2025-0405 - Corrected the Clean String Name logic to provide an exported function
+#           ClnStrName_MST() plus capitalization that is used to clean the 
+#           user data location IDs and 
+#           the Name Table "Name" and "Abbr" columns in micromapST and BuildBorderGroup 
+#           function.  Trying to make sure the loc IDs provided when a border group is built
+#           and the string in the user data.frame of statistics have the best chance of 
+#           matching.  Currently only alpha-numeric character, spaces, and the "-" and "_" 
+#           characters are permitted. All else is converted to a " " and doublicate " "s and 
+#           leading and trailing " " removed. 
+#
 #                      - 
 #
 #  Best way to build panelDesc and add parm enties is to use the normal technique of 
@@ -805,7 +822,7 @@
 ########
 #
 # Copyrighted 2013, 2014, 2015, 2016, 2021, 2022, 2023, 2024, 2025 - 
-#           by: Dan Carr, GMU and Linda Pickle and Jim Pearson of StatNet Consulting, LLC.
+#           by: Linda Pickle and Jim Pearson of StatNet Consulting, LLC. and Dan Carr, GMU
 #
 ########
 
@@ -1004,6 +1021,8 @@
 
 #  gC[j]$panelData - data structure name for column in panelData.
 
+#  gC[j]$parm      - parameters unique to current glyph.
+
 #  gC[j]$...     - glyph specific parameters and variables (panelDesc expanded.)
 
 #
@@ -1063,36 +1082,6 @@ groupPanelOutline = function (panelGroup, j )
      panelOutline()                  # outline it.
   }
 }   
-
-####
-#
-#  Find shortest format for Axis labels 
-#
-#  Test the following formats on the Axis Labels and determine
-#   the narrowest format.
-#  The formats checked are:
-#       fixed format (up to 1 decimal place)
-#       general format (including scientific notation)
-#       fixed with KMB modification
-#       fixed with "in thousands" type label
-#
-
-FindShorest <- function(x, w) {
-     #   x is a vector of numbers
-     #   w is the width of the target column (inches)
-     #
-     n <- as.integer(w / 4)  # number of labels required
-     xr <- range(x)          # get range of the values
-     
-     if (!odd(n))  n = n + 1
-     xW <- labeling::wilkinson(xr[1],xr[2], n, mrange=c(n/2,n))
-     xE <- labeling::extended( xr[1],xr[2], n, w = c(0.25, 0.2, 0.5, 0.05))
-     #                                   simp, cover, densi, legible
-     
-     #  Function is incomplete...
-     
-}
-
 #
 ####
 
@@ -1172,25 +1161,25 @@ is.Color2 <- function(x) {
 
 ####
 #
-# Testing function - print out key par() plot parameters
+# Testing function - print out graphics::key par() plot parameters
 #
 
 printPar <- function() {  
-  cFin   <- par("fin")   # get parameters for current panel.
+  cFin   <- graphics::par("fin")   # get parameters for current panel.
   cat("cFin:",cFin," (w,h)\n")
-  cFig   <- par("fig")   # get parameters for current panel.
+  cFig   <- graphics::par("fig")   # get parameters for current panel.
   cat("cFig:",cFig," (x,x,y,y)\n")
-  cPin   <- par("pin")
+  cPin   <- graphics::par("pin")
   cat("cPin:",cPin," (w,h)\n")
-  cPlt   <- par("plt")
+  cPlt   <- graphics::par("plt")
   cat("cPlt:",cPlt," (x,x,y,y)\n")
-  cMai   <- par("mai")
+  cMai   <- graphics::par("mai")
   cat("cMai:",cMai," (b,l,t,r)\n")
-  cMar   <- par("mar")
+  cMar   <- graphics::par("mar")
   cat("cMar:",cMar," (b,l,t,r)\n")
-  cUsr   <- par("usr")
+  cUsr   <- graphics::par("usr")
   cat("cUsr:",cUsr," (x,x,y,y)\n")
-  cPs    <- par("ps")
+  cPs    <- graphics::par("ps")
   cat("cPs :",cPs," pt.\n")
 }  
 
@@ -1328,7 +1317,7 @@ Scaler1 <- function(var) {
       }
    }
    # vc <- c(divisor, <axis sub-title string>)
-   #cat("returning vc:",vc,"\n")
+   # cat("returning vc:",vc,"\n")
    
    return(vc)     # return divisor [1] and subtitle string [2] 
    
@@ -1367,7 +1356,7 @@ Scaler2 <- function(var,lower=FALSE) {
    
    if (var1 != 0) {   # number zero, quick exit
       varLog <- as.integer(log10(var1))
-      #cat("varLog:",varLog,"\n")
+      # cat("varLog:",varLog,"\n")
     
       if (varLog != 0) {
          if (varLog > 0) {
@@ -1434,7 +1423,7 @@ Scaler2 <- function(var,lower=FALSE) {
          }
       }
    }
-   #cat("minus:",minusFlag,"  vc:",vc,"\n")
+   # cat("minus:",minusFlag,"  vc:",vc,"\n")
    
    cvx <- paste0(minusFlag, stringr::str_trim(formatC(var2,format="fg",width=5,digits=4,drop0trailing=TRUE)),vc[2])
    
@@ -1461,7 +1450,7 @@ Scaler2 <- function(var,lower=FALSE) {
             # Call parameters:  pchValue, x, y, pch.size, outline.lwd, outline.col, mstColor
             #
             #  x, y are the coordinates to plot the point.  They are in the coordinates system
-            #       set in the par("usr") values.
+            #       set in the graphics::par("usr") values.
             #
             
             pchValue   <- ppPch     # get symbol to plot.
@@ -1478,22 +1467,22 @@ Scaler2 <- function(var,lower=FALSE) {
                             cex=ppSize,
                             col=ppColor
                         )
-                  #cat("points of character:",pchValue)
+                  # cat("points of character:",pchValue)
                  
                } else {
                   # set to default since we can't decode it.  Set to numeric value.
                   chrValue <- 21
-                  #cat("not a character-typeof:",typeof(pchValue),"  setting chrValue to 21.","\n")
+                  # cat("not a character-typeof:",typeof(pchValue),"  setting chrValue to 21.","\n")
                }
             } 
             if (!is.na(chrValue)) {
-               #cat("numeric - typeof:",typeof(pchValue), " ", typeof(chrValue)," ",typeof(chrValue)," ",pchValue," ",chrValue,"\n")
+               # cat("numeric - typeof:",typeof(pchValue), " ", typeof(chrValue)," ",typeof(chrValue)," ",pchValue," ",chrValue,"\n")
                
                # have a numeric value (still), got conversion - 0:255 range.
                # if it's NA, it's character and has been plotted.
                
                if (chrValue > 31) {
-                  #cat("chrValue > 31 - normal points\n")
+                  # cat("chrValue > 31 - normal points\n")
                   
                   # normal symbols (numeric) (no border)  32 up to 255?
                   # > 31 characters
@@ -1504,7 +1493,7 @@ Scaler2 <- function(var,lower=FALSE) {
                   if (chrValue > 25) {
                      # 26:31 -> not used character, use the default of 21
                      chrValue  <- 21
-                     #cat("char 26:31 not used -> use default 21\n")
+                     # cat("char 26:31 not used -> use default 21\n")
                   }
                   if (chrValue > 18) {   # 19 to 25
                     
@@ -1513,18 +1502,18 @@ Scaler2 <- function(var,lower=FALSE) {
                      #  Dot.Conf.Outline set by user or by BW/Greya/Grays color scheme
                      if (ppOutline) {
                         #  19:25 with outline around symbol
-                        #cat("19:25 -> filled with borders symbols - outline ON \n")
+                        # cat("19:25 -> filled with borders symbols - outline ON \n")
                         graphics::points(ppX, ppY, pch=chrValue, cex=ppSize, 
                                  lwd=ppOutline.lwd, col=ppOutline.col, bg=ppColor )         
                      } else {
                         #  19:25 with no outline (border) 
-                        #cat("19:25 -> filled with borders symbols - outline OFF \n")
+                        # cat("19:25 -> filled with borders symbols - outline OFF \n")
                         graphics::points(ppX, ppY, pch=chrValue, cex=ppSize, col=NA, bg=ppColor )
                         
                      }
                   } else {
                      # 0:18 symbols - line drawings
-                     #cat("0:18 symbols - standard print.\n")
+                     # cat("0:18 symbols - standard print.\n")
                      graphics::points(ppX, ppY, pch=chrValue, cex = ppSize, lwd = ppLwd, col = ppColor  )
                      
                   }
@@ -1550,12 +1539,11 @@ micromapSEER <- function(statsDFrame,panelDesc,...) {
 
 #
 ####
-
 ####
 #
 #   Get micromapST Version
 #
-micromapST.Version <- function() { return ("micromapST V3.1.0 built 2025-02-13 04:12 pm") }
+micromapST.Version <- function() { return ("micromapST V3.1.1 built 2025-04-07 07:15 pm") }
 
 #
 ####
@@ -1573,11 +1561,11 @@ micromapST = function(
     statsDFrame,
     panelDesc,
     rowNamesCol = NULL,                # Name of name link column.
-    rowNames    = NULL,                # default = "ab"   ### modify to SEER IDs
+    rowNames    = NULL,                # default = "ab"      ### modify to SEER IDs
     sortVar     = NULL,                # default = sort on plotNames values
     ascend      = TRUE,                # default = ascending sorting order 
     title       = c("",""),            # default = empty
-    plotNames   = NULL,                # default = "ab"  ### modify to SEER Abv and Names
+    plotNames   = NULL,                # default = "ab"      ### modify to SEER Abbr and Names
     axisScale   = NULL,                # axis Scale Method, default = "e" -> extended
     staggerLab  = NULL,                # stagger Axis Labels, default = FALSE
     bordGrp     = NULL,                # border and names group to use with micromapST, 
@@ -1619,6 +1607,8 @@ micromapST = function(
 #  Updated and Extended by:  Jim Pearson, November, 2021
 #  Updated and Extended by:  Jim Pearson, April, 2022 to December, 2022 to 
 #                     September, 2023, and Sept 2023 to Jan 2024
+#  Updated and Extended by:  Jim Pearson, Dec, 2024 and Jan, 2025
+#  Updated and Extended by:  JIm Pearson, Feb, 2025 and March, 2025
 #
 #  Packaged by: Jim Pearson
 #
@@ -1642,17 +1632,17 @@ micromapST = function(
 #
 #   Each contain the following DataFrames, Lists and Vectors:
 #      Run Parameters:                             areaParms     
-#      Data Level Names, Abbrs. IDs, and Labels:   areaNamesAbbrIDs       (Old stateNamesFips)
-#      Data Level Boundaries:                      areaVisBorders         (Old stateVisBorders)
-#      L3 (national) Level Boundaries              L3VisBorders           (Old stateNationVisBorders)
+#      Data Level Names, Abbrs, IDs, 
+#                 Alt_ab, Alias and Labels:        areaNamesAbbrIDs  
+#      Data Level Boundaries:                      areaVisBorders        
+#      L3 (national) Level Boundaries              L3VisBorders           
 #
-#      L2 (state) Level Boundaries  (Optional)     L2VisBorders           (Old stateNationVisBorders)
-#      Reg Level Boundaries (Optional-Regions)     RegVisBorders          (<NA>)
+#      L2 (state) Level Boundaries  (Optional)     L2VisBorders          
+#      Reg Level Boundaries (Optional-Regions)     RegVisBorders        
 #
 #   Each level draws there boundaries a little wider then the previous level.
 #   The area level starts with the width at 
 #   Currently the L2 Boundaries are only used with the "USSeerBG" border group at this time.
-#
 #
 #   If L2 Boundaries are not included in the bordGrp, the L3 Boundaries are copied into 
 #   the L2 boundaries as a place holder.
@@ -1662,7 +1652,6 @@ micromapST = function(
 #####
 
 #####
-#
 #
 #  Call Parameters:
 #
@@ -2045,12 +2034,14 @@ micromapST = function(
 #           and the row.names in the data.frame.
 #
 # rowNames: Type of area id used as row.names in statsDFrame data.frame. 
-#           Acceptable values are: "ab", "alt_ab", "full", "id", and "auto". Two additional options
+#           Acceptable values are: "ab", "alt_ab", "full", "name", "abbr", "id", and "auto". 
+#           Two additional options
 #           have been added to accomodate the SEER data requirements:  "seer" or "alias".
+#           The "seer" options is equivalent to "abbr" where seer area abbrs are in column.
 #           This rowNames option requests the packet to do partial matches of an alias for 
 #           area against the "registry" column/list outputted by SeerStat. If the partial
 #           match succeeds, the associated area abbreviation is used.
-#           By default the row.names of the statsDFrame are used.  Based on 
+#           The default is to use the row.names of the statsDFrame.  Based on 
 #           this option, the value is treated as an abbreviation, full area name,
 #           or the numeric ID of the area..
 #           The default is "auto" for automatic determination.
@@ -2071,7 +2062,7 @@ micromapST = function(
 # plotNames: When the ID glyphs is selected, this options informs the 
 #           package which form of labels to use.  The options are "full" area name
 #           or the abbreviated area name. The default is the "ab" for abbreviated name. 
-#           Acceptable values are: "ab", "full"
+#           Acceptable values are: "ab", "full", "name", "abbr"
 #           The values of the "ab" and "full" labels are provided in the areaNamesAbbrsIDs
 #           data.frame associated with the border structures provided to the package.
 #
@@ -2249,7 +2240,7 @@ utils::data(detailsVariables,envir=environment())    # get validation and transl
 mstColorNames         <- "black"
 mmSTEnvir             <- environment()
 xmsg                  <- utils::capture.output(mmSTEnvir)
-#cat("micromapST envir:",xmsg,"\n")
+# cat("micromapST envir:",xmsg,"\n")
 
 WrkOptions <- options()
 options(warn=1)
@@ -2317,7 +2308,7 @@ var  <- "Id.Dot.pch"
 wstr <- paste0("assign(var,22,envir=.GlobalEnv)")   # assign default of 22.
 eval(parse(text=wstr))
 
-#cat("envir=warnCnt:", find("warnCnt"),"\n") 
+# cat("envir=warnCnt:", find("warnCnt"),"\n") 
 
 #
 #####
@@ -2368,12 +2359,12 @@ eval(parse(text=wstr))
 #    referenced by everyone.
 #
 
-#print(callVL)
+# print(callVL)
 
 #
 #####
 
-#print("callVarList Saved in .GlobalEnv")
+# print("callVarList Saved in .GlobalEnv")
 
 #####
 #
@@ -2403,7 +2394,7 @@ PkgBGs <- c("USStatesBG"
            ,"SeoulSKoreaBG"
           )
 
-UserBordGrpLoad <- FALSE             # FALSE, load from package with data(),  
+UserBordGrpLoad <- FALSE             # FALSE, load from package with utils::data(),  
                                      # TRUE load from directory with load()
 
 #  Package Variables
@@ -2494,7 +2485,7 @@ if ( missing(bordDir) || is.null(bordDir) ) {
             StopFnd <- stopCntMsg(paste0("***0152 BGBD The directory specified in the bordDir parameter does not exist.\n",
                                          "        Value=",bordDir,"\n"))
          } else {
-            UserBordGrpLoad = TRUE    # load() from directory don't data()
+            UserBordGrpLoad = TRUE    # load() from directory don't utils::data()
             xc <- stringr::str_sub(bordDir,-1,-1)  # get last character
    
             if (xc != "/" && xc != "\\") {
@@ -2516,9 +2507,9 @@ var     <- "callVarList"
 wstr    <- paste0("assign(var,callVL,envir=.GlobalEnv)")
 eval(parse(text=wstr))
 
-#cat("bordDir     = ",bordDir,"\n","bordGrp = ",bordGrp,"\n")
-#cat("BordGrpName = ",BordGrpName,"\n")
-#cat("bgFile      = ",bgFile,"\n")
+# cat("bordDir     = ",bordDir,"\n","bordGrp = ",bordGrp,"\n")
+# cat("BordGrpName = ",BordGrpName,"\n")
+# cat("bgFile      = ",bgFile,"\n")
 
 #
 ######  01Mx
@@ -2560,13 +2551,13 @@ if (UserBordGrpLoad) {
    # User specific bordDir and bordGrp.  
    #     BUG = what if user put the path in the bordGrp name?
 
-   #cat("bordGrp:",bordGrp,"  len:",length(bordGrp),"\n")
-   #cat("BordGrpName:",BordGrpName," len:",length(BordGrpName),"\n")
+   # cat("bordGrp:",bordGrp,"  len:",length(bordGrp),"\n")
+   # cat("BordGrpName:",BordGrpName," len:",length(BordGrpName),"\n")
 
    # if not check to see if the .rda file exists.
-   fnSplit    <- NULL       #  fake a split - use a better solution (file_ext)
-   fnSplit[1] <- file_path_sans_ext(bordGrp)   # get path and filename without extent.
-   fnSplit[2] <- file_ext(bordGrp)             # get extent 
+   fnSplit    <- NULL       #  fake a split - use a better solution (tools::file_ext)
+   fnSplit[1] <- tools::file_path_sans_ext(bordGrp)   # get path and filename without extent.
+   fnSplit[2] <- tools::file_ext(bordGrp)             # get extent 
       
    BordGrpName <- fnSplit[1]                   # basic name and path.
    if (is.na(fnSplit[2]) || fnSplit[2]=="") {  # check extension.
@@ -2588,7 +2579,7 @@ if (UserBordGrpLoad) {
       StopFlag <- stopCntMsg(paste0("***0156 BGBN The bordGrp file in the bordDir directory does not exist.\n"))
    }
    # user border group   
-   #print (paste0("reading border group ",BordGrpName, " via LOAD since bordDir = ",bordDir))
+   # print (paste0("reading border group ",BordGrpName, " via LOAD since bordDir = ",bordDir))
 
    # need to put a try around this incase there is a problem with the user data file.
 
@@ -2607,7 +2598,7 @@ if (UserBordGrpLoad) {
    # got this far, variables to load/data the border group appear to be good.
 
    # System border group
-   #print (paste0("reading border group ",BordGrpName, " via a data statement."))
+   # print (paste0("reading border group ",BordGrpName, " via a data statement."))
   
    utils::data(list=BordGrpName,envir=environment())    # Group Border tables and parameters distributed with package.
 
@@ -2630,6 +2621,8 @@ Map.L3Borders       <- FALSE
 #
 #  areaParms, areaNamesAbbrsIDs, areaVisBorders
 #
+
+# cat("Code: 2617 - Have border group loaded.\n")
 
 #  areaParms
 
@@ -2658,14 +2651,14 @@ if (!exists("areaNamesAbbrsIDs")) {
    #  All location IDs must be upper case, have punctation removed, leading and trailing
    #  blanks removed, and internal blanks reduced to a single blank.
    #
-   #cat("Code: 2660 Dim of rlAreaNamesAbbrsIDs:",dim(rlAreaNamesAbbrsIDs),"\n")
-   #cat("names of rlAreaNamesAbbrsIDs:",names(rlAreaNamesAbbrsIDs),"\n")
+   # cat("Code: 2642 Dim of rlAreaNamesAbbrsIDs:",dim(rlAreaNamesAbbrsIDs),"\n")
+   # cat("names of rlAreaNamesAbbrsIDs:",names(rlAreaNamesAbbrsIDs),"\n")
    row.names(rlAreaNamesAbbrsIDs) <- rlAreaNamesAbbrsIDs$Key   # ensure row.names match the keys
    rlAreaNamesAbbrsIDs$NotUsed    <- FALSE
   
-   #print(str(rlAreaNamesAbbrsIDs))
+   # print(str(rlAreaNamesAbbrsIDs))
   
-   NTNames         <- names(rlAreaNamesAbbrsIDs)  # get names of each NameTable Column.
+   NTNames         <- names(rlAreaNamesAbbrsIDs)  # get names (fields) of each NameTable Column.
 
    # start modifying code focus on areaNT data.frame instead of name table.  These variables
    # have been editted to the requirements for matching.
@@ -2675,38 +2668,42 @@ if (!exists("areaNamesAbbrsIDs")) {
    areaNT         <- rlAreaNamesAbbrsIDs       # get working copy of Name Table (areaNT)
     
    #    Matching strings  - use areaNT$xxx variables
-   areaNT$Abbr    <- ClnStr(areaNT$Abbr)       # Get list of abbrevations cleaned. (All CAPS, no punct, single blanks)
+   areaNT$Abbr    <- ClnStrName_MST(areaNT$Abbr)       # Get list of abbrevations cleaned. (All CAPS, no punct, single blanks)
     
-   areaNT$Name    <- ClnStr(areaNT$Name)       # get list of full area names in uppercase (All CAPS, no punct, single blanks)
+   areaNT$Name    <- stringr::str_to_upper(ClnStrName_MST(areaNT$Name))       # get list of full area names in uppercase (All CAPS, no punct, single blanks)
     
-   areaNT$Alt_Abbr<- ClnStr(areaNT$Alt_Abbr)   # get list of alternate abbreviations. (All CAPS, no punct, single blanks)
+   areaNT$Alt_Abbr<- ClnStrName_MST(areaNT$Alt_Abbr)   # get list of alternate abbreviations. (All CAPS, no punct, single blanks)
     
    # alias values are left un-editted in case they contain symbols needed for the wildcard match.
     
-   areaNT$ID      <- ClnStr(areaNT$ID)         # ID   (All CAPS, no punct, single blanks)
+   areaNT$ID      <- ClnStrName_MST(areaNT$ID)         # ID   (All CAPS, no punct, single blanks)
     
-   # Done = areaNT$Key <- ClnStr(areaNT$Key)  # get key as uppercase. (links into VisBorder files.)  Where was this done?
+   # Done = areaNT$Key <- ClnStr(areaNT$Key)  # get key as uppercase  ??. (links into VisBorder files.)  Where was this done?
+   
+   areaNT$RN      <- row.names(areaNT)
       
    # L2_ID and regID variable are processed below.
     
-   #    Presentation strings
+   #    Presentation (ID glyph) strings       # in name table order.    Cleaned.
    ID.Abbr        <- areaNT$Abbr             #    (All CAPS, no punct, single blanks)
    # for ID.Name force proper capitalization on the name
-   #ID.Name        <- areaNT$Name
-   ID.Name         <- as.vector(sapply(areaNT$Name,function(x) simpleCap(x))) # proper cap.  Not matched on but should look neat.
+   #ID.Name       <- areaNT$Name
+   ID.Name        <- as.vector(sapply(areaNT$Name,function(x) simpleCap(x))) # proper cap.  Not matched on but should look neat.
        
    NTColList <- c("Name","Abbr","ID","Alt_Abbr","Alias","Key","NotUsed")
-   #cat("Code: 2698 - Adjusted Name Table variable:\n")
-   #print(areaNT[,NTColList])
-   #cat("Original:\n")
-   #print(rlAreaNamesAbbrsIDs[,NTColList])
-}   
+   # cat("Code: 2686 - Adjusted Name Table variable:\n")
+   # print(areaNT[,NTColList])
+   # cat("Original:\n")
+   # print(rlAreaNamesAbbrsIDs[,NTColList])
+}  
+
+# cat("Code: 2692 Name Table loaded.\n")
 
 NTNames <- names(areaNT)
-#print (NTNames)
-#print (names(areaNT))
-#print (areaNT)
-#cat("Code: 2708 \n")
+# print (NTNames)
+# print (names(areaNT))
+# print (areaNT)
+# cat("Code: 2698 \n")
 #
 #####
 
@@ -2716,7 +2713,7 @@ if (!exists("areaVisBorders")) {
    ErrFnd           <- TRUE
    MissInBG         <- paste0(MissInBG,", areaVisBorders")
    NoAreaVisBorders <- TRUE  
-   #cat("***01M2 The areaVisBorders does not exist in memory!\n")
+   # cat("***01M2 The areaVisBorders does not exist in memory!\n")
    #StopFnd <- stopCntMsg(paste0("***01M2 The areaVisBorders boundary data set is missing from the border group.\n"))
 } else {
    if (is.null(areaVisBorders)) {
@@ -2725,18 +2722,18 @@ if (!exists("areaVisBorders")) {
    } else {
       # areaVisBorders exists in memory.
       DimAVB <- dim(areaVisBorders)
-      #cat("areaVisBorders - Original Dim:",DimAVB[1]," ",DimAVB[2],"\n")
+      # cat("areaVisBorders - Original Dim:",DimAVB[1]," ",DimAVB[2],"\n")
       
       rlAreaVisBorders      <- areaVisBorders                     # get border group's areaVisBorder
       #rlAreaVisBorders$Key  <- ClnStr(rlAreaVisBorders$Key)       # fix and clean keys.
       rlAreaVisBorders$hole <- as.logical(rlAreaVisBorders$hole)  # make adjustment for numeric vs logical.
       #
       #uAVBKeys    <- unique(areaVisBorders$Key)                  # debug output - list of unique keys in areaVisBorder
-      #cat("Unique areaVisBorders Keys: Code: 2734 \n")
-      #print(uAVBKeys)
+      # cat("Unique areaVisBorders Keys: Code: 2720 \n")
+      # print(uAVBKeys)
  
-      #cat("Dim of areaVisBorder:",dim(rlAreaVisBorders),"\n")
-      #print(head(rlAreaVisBorders,40))
+      # cat("Dim of areaVisBorder:",dim(rlAreaVisBorders),"\n")
+      # print(head(rlAreaVisBorders,40))
    }
 }
 
@@ -2777,15 +2774,15 @@ if (Map.L3Borders) {
       } else {
          # have L3 boundaries
          DimL3VB <- dim(L3VisBorders)
-         #cat("L3VisBorders - Original Dim:",DimL3VB[1]," ",DimL3VB[2],"\n")
+         # cat("L3VisBorders - Original Dim:",DimL3VB[1]," ",DimL3VB[2],"\n")
          
          rlL3VisBorders      <- L3VisBorders 
          # we have L3VisBorders - what do we do.
      
          rlL3VisBorders$Key  <- ClnStr(rlL3VisBorders$Key)
          rlL3VisBorders$hole <- as.logical(rlL3VisBorders$hole)  # make adjustment for numeric vs logical.
-         #cat("dim of rlL3VisBorders     :",dim(rlL3VisBorders),"\n")
-         #print(head(rlL3VisBorders,30))
+         # cat("dim of rlL3VisBorders     :",dim(rlL3VisBorders),"\n")
+         # print(head(rlL3VisBorders,30))
       }
    }
 }
@@ -2804,9 +2801,9 @@ if (!Map.L3Borders) {
    L3Feature         <- TRUE
 }
 
-#cat("Code: 2806 Length of Map.L3Borders=",length(Map.L3Borders),"  ",Map.L3Borders,"\n")
+# cat("Code: 2796 Length of Map.L3Borders=",length(Map.L3Borders),"  ",Map.L3Borders,"\n")
 
-#cat("Code: 2808 L2 boundaries\n")
+# cat("Code: 2798 L2 boundaries\n")
 
 # L2VisBorders    
 
@@ -2828,20 +2825,20 @@ if (Map.L2Borders) {
    if (!exists("L2VisBorders")) {
       # but no boundary data - turn it off.
       Map.L2Borders    <- FALSE      # Disable L2 drawing
-      #cat("L2Borders Mapping requested, but no borders.\n")
+      # cat("L2Borders Mapping requested, but no borders.\n")
       cat(paste0("***01M5 The L2Borders is set to be drawn, but no L2 border data is present. L2 Feature disabled."))
       #errCntMsg(xmsg)
    } else {
       #  L2VisBorders exist is some form and wanted.
       if (is.null(L2VisBorders)) {
          Map.L2Borders    <- FALSE
-         #cat("L2VisBorders is NULL\n")
+         # cat("L2VisBorders is NULL\n")
          #should not happen - just change map.l2border to false.
          
       } else {
          # have L2 boundary data.
          DimL2VB <- dim(L2VisBorders)
-         #cat("L2VisBorders - Original Dim:",DimL2VB[1]," ",DimL2VB[2],"\n")
+         # cat("L2VisBorders - Original Dim:",DimL2VB[1]," ",DimL2VB[2],"\n")
          
          rlL2VisBorders      <- L2VisBorders
       
@@ -2849,16 +2846,16 @@ if (Map.L2Borders) {
    
          if (is.null(areaNT$L2_ID)) {
             # name table does not have L2 information
-            Map.L2Borders    <- FALSE    # disable
+            Map.L2Borders       <- FALSE    # disable
             cat("***01MA L2Border was requested, but the Name Table does not have a L2_ID column.  Disable drawing of L2.\n")
          } else {
             # have column in Name Table and L2 borders.
-            Map.L2Borders    <- TRUE
+            Map.L2Borders       <- TRUE
             rlL2VisBorders$Key  <- ClnStr(rlL2VisBorders$Key)
             rlL2VisBorders$hole <- as.logical(rlL2VisBorders$hole)  # make adjustment for numeric vs logical.
-            areaNT$L2_ID     <- ClnStr(areaNT$L2_ID)      # L2_ID 
-            #cat("dim of rlL2VisBorders     :",dim(rlL2VisBorders),"\n")
-            #print(head(rlL2VisBorders,30))
+            areaNT$L2_ID        <- ClnStr(areaNT$L2_ID)      # L2_ID 
+            # cat("dim of rlL2VisBorders     :",dim(rlL2VisBorders),"\n")
+            # print(head(rlL2VisBorders,30))
          }
       }
    }
@@ -2879,7 +2876,7 @@ if (!Map.L2Borders) {    # if no borders, turn off other flags and the VisBorder
    L2Feature        <- TRUE
 }
 
-#cat("Code: 2881 - Reg Boundaries\n")
+# cat("Code: 2871 - Reg Boundaries\n")
 
 # Reg Boundaries
 
@@ -2907,7 +2904,7 @@ if (Map.RegBorders) {
       #  but don't exist.
       Map.RegBorders           <- FALSE    # disable
 
-      #cat("RegBorders-YES, but no borders.\n")
+      # cat("RegBorders-YES, but no borders.\n")
       cat(paste0("***01M6 The RegBorders is set to be drawn, border data is not present. Reg Feature disabled.\n"))
       #errCntMsg(xmsg)
    } else {
@@ -2915,11 +2912,11 @@ if (Map.RegBorders) {
       if (is.null(RegVisBorders)) {
          # another form of does not exist.
          Map.RegBorders       <- FALSE
-         #cat("RegVisBorders is NULL.\n") # should not happen, if Map.RegBorders is TRUE, there should be boundary data.
+         # cat("RegVisBorders is NULL.\n") # should not happen, if Map.RegBorders is TRUE, there should be boundary data.
          #    so just turn off the Map.RegBorders <- FALSE
       } else {  
          DimRegVB <- dim(RegVisBorders)
-         #cat("RegVisBorders - Original Dim:",DimRegVB[1]," ",DimRegVB[2],"\n")
+         # cat("RegVisBorders - Original Dim:",DimRegVB[1]," ",DimRegVB[2],"\n")
          
          rlRegVisBorders    <- RegVisBorders   # exists and not null
          # Have RegVisBorder boundary data
@@ -2934,8 +2931,8 @@ if (Map.RegBorders) {
             rlRegVisBorders$hole <- as.logical(rlRegVisBorders$hole)  # make adjustment for numeric vs logical.
  
             areaNT$regID         <- ClnStr(areaNT$regID)      # regID 
-            #cat("dim of rlRegVisBorders     :",dim(rlRegVisBorders),"\n")
-            #print(head(rlRegVisBorders,40))
+            # cat("dim of rlRegVisBorders     :",dim(rlRegVisBorders),"\n")
+            # print(head(rlRegVisBorders,40))
          }
       }
    }
@@ -2972,7 +2969,7 @@ if (ErrFnd) {
 
 rm(MissInBG,ErrFnd)
 
-#cat("Code: 2974 - Map.L2Borders:",Map.L2Borders,"  Map.RegBorders:",Map.RegBorders,"  aP_Regions:",aP_Regions,"\n")
+# cat("Code: 2960 - Map.L2Borders:",Map.L2Borders,"  Map.RegBorders:",Map.RegBorders,"  aP_Regions:",aP_Regions,"\n")
 
 # Clean up and move data into old structures
 
@@ -3045,13 +3042,15 @@ if (UserBordGrpLoad) {
     if (any(is.na(Id.Hdr2))) Id.Hdr2 <- ""
     
     
-    #cat("Code: 3047 - bordGrp:",bordGrp,"\n",
+    # cat("Code: 3033 - bordGrp:",bordGrp,"\n",
     #    "             Map Var-Hdr1:",Map.Hdr1,"  Hdr2:",Map.Hdr2,
     #    "  MinH:",Map.MinH,"  MaxH:",Map.MaxH,"  Aspect:",Map.Aspect,"\n",
     #    "             Id Var-Hdr1:",Id.Hdr1,"  Hdr2:",Id.Hdr2,"\n")        
 
 #   
 #####
+
+# cat("Code: 3041 - areaParms have been merged.\n")
 
 #####
 #
@@ -3067,7 +3066,7 @@ if (UserBordGrpLoad) {
        # turn off the DC, HI, AK old logic.
     }
    
-    #cat("Code: 3069 end of addition dup checks.\n")
+    # cat("Code: 3057 end of addition dup checks.\n")
     
 ####
 #
@@ -3076,10 +3075,10 @@ if (UserBordGrpLoad) {
     enableAlias   <- as.logical(areaParms$enableAlias[[1]][1])
     enableAlias   <- enableAlias[[1]][1]     # should only be TRUE when the Alias field is properly implemented.
     if (any(is.na(enableAlias))) enableAlias <- FALSE
-    #cat("Alias Enable is :",enableAlias,"\n")
+    # cat("Alias Enable is :",enableAlias,"\n")
 
-    #print("areaParms:")
-    #print(str(areaParms))
+    # print("areaParms:")
+    # print(str(areaParms))
 
 #
 #####
@@ -3088,7 +3087,7 @@ if (UserBordGrpLoad) {
 #
 # fix up areaParms to unique names   (old to new)
     
-    #cat("Code: 3090 - read areaParms data.\n")
+    # cat("Code: 3078 - read areaParms data.\n")
     
     # check for old field names.  If present - copy to new names.
     #  If Regions is present, the other parameters should not be.
@@ -3126,7 +3125,7 @@ if (UserBordGrpLoad) {
 ####
 
 if (is.null(areaParms$Ver))  areaParms$Ver <- c("0")  # set areaParms version to 0
-#cat("Code: 3128 - areaParms$Ver and details\n")
+# cat("Code: 3116 - areaParms$Ver and details\n")
 ####
 #
 #   The following variables may be included in details, but are not configured here
@@ -3159,7 +3158,7 @@ if (!is.na(x)) {
 # create a list of valid variables.
 #
 ##########
-#cat("Code: 3161 - Name Table\n")
+# cat("Code: 3153 - Name Table\n")
      
 ##########
 #
@@ -3231,7 +3230,7 @@ if (!is.na(x)) {
 
 #  Gather MapL variables
 
-    # cat("Code: 3233 \n")
+    # cat("Code: 3221 \n")
     # Working vectors for PRINT out.
     
     areaNTMapLabels <- FALSE
@@ -3245,7 +3244,7 @@ if (!is.na(x)) {
           areaNTMapLabels = TRUE
           x         <- sum(!yna)
           y         <- areaNT[!yna,c("MapL","MapX","MapY")]
-          #print(y)
+          # print(y)
           #  With MapL, X, and Y, no need to look for MapLabel.
        }
     }
@@ -3253,13 +3252,12 @@ if (!is.na(x)) {
 #
 ####
 
-xps  <- par("ps")
-xpin <- par("pin")
-xdin <- par("din")
+# xps  <- graphics::par("ps")
+# xpin <- graphics::par("pin")
+# xdin <- graphics::par("din")
+# cat("check point Code: 3247 on par - ps:",xps," pin:",xpin," din:",xdin,"\n")
 
-#cat("check point Code: 3259 on par - ps:",xps," pin:",xpin," din:",xdin,"\n")
-
-#print("Border Group Read and Setup")
+# print("Border Group Read and Setup")
 
 #  Script and code skips around the glyph subroutines.
 
@@ -3286,6 +3284,8 @@ xdin <- par("din")
 #  Finish check after the glyph function definitions.
 #
 #####################
+
+# cat("Code: 3280 - Loading Glyph graphics code.\n")
 
 #####################
 #
@@ -3316,7 +3316,7 @@ rlAreaArrow = function(j){
    #  Split into header and trailer.
    ###
    
-   #cat("Arrow-StartUp staggered:",staggered,"\n")
+   # cat("Arrow-StartUp staggered:",staggered,"\n")
   
   
    # j = current panel column number
@@ -3375,7 +3375,7 @@ rlAreaArrow = function(j){
    #  Need to add check that refVals are within range of X.  If not warning.  (add to all glyphs)
    #
    
-   #cat("arrow-x range:",rx,"\n")
+   # cat("arrow-x range:",rx,"\n")
    
    #rx         <- sc*diff(rx)*c(-.5,.5)+mean(rx)    # 
                                    #  x-scale extention (sc) = 1.08 *
@@ -3384,7 +3384,7 @@ rlAreaArrow = function(j){
    
    lPad    <- TRUE
    rPad    <- TRUE
-   #cat("arrow-x range adjusted:",rx,"\n")
+   # cat("arrow-x range adjusted:",rx,"\n")
    
    ry          <- c(0,1)                      # Y axis range = 0 to 1.. 
 
@@ -3406,9 +3406,9 @@ rlAreaArrow = function(j){
    rx        <- Res$rx
    ry        <- Res$ry
    
-   #cat("arrow-rx after DrawXAxisAndTitles:",rx,"\n")
+   # cat("Arrow-rx after DrawXAxisAndTitles:",rx,"\n")
   
-   #cat("Arrow-after DrawXAxisAndTitles-staggered:",staggered,"\n")
+   # cat("Arrow-after DrawXAxisAndTitles-staggered:",staggered,"\n")
    
    #
    #####
@@ -3449,14 +3449,14 @@ rlAreaArrow = function(j){
       # One approach is to adjust the values based on the number to graph.  Use table.
       #
       # Each panel is x by y with 0,0 being in the lower left corner.
-      # The x and y values are plotted against the par("usr") parameters for the space.
+      # The x and y values are plotted against the graphics::par("usr") parameters for the space.
       #
       laby   <- ke:1                 # labels n:1 depending on number of rows in group (US case 1:1 and 1:5).
       
       # select pen color or colors  7 or 1:n  
       pen    <- if(i == medGrp & medGrpSize == 1) 7 else 1:ke   # if index=medGrp (median group number, if present) then pen = 7, else 1:ke (length of line)
  
-      #cat("Arrow - panelSelect - Code: 3454 - i:",i,"  j:",j,"\n")
+      # cat("Arrow - panelSelect - Code: 3448 - i:",i,"  j:",j,"\n")
       
       panelSelect(panels,i,j)          # select current panel
  
@@ -3488,7 +3488,7 @@ rlAreaArrow = function(j){
       
       panelOutline(col=Panel.Outline.col)  # outline panel 
    
-      oldpar <- par(lend="butt")           # save old 
+      oldpar <- graphics::par(lend="butt")           # save old 
   
       # draw the area rows in this panel-row.
       
@@ -3498,7 +3498,7 @@ rlAreaArrow = function(j){
         
          if (goodrow[m]) {                 #  if good value for this area
         
-            #print(paste0(k,m,xdat1[m],xdat2[m],abs(xdat1[m]-xdat2[m])))
+            # print(paste0(k,m,xdat1[m],xdat2[m],abs(xdat1[m]-xdat2[m])))
             # Getting warning for NON-ZERO length arrows - must be rounding error to <> 0.
             #  So, taking liberties to say 0 is .002 and below.  Arrow works in inches??
          
@@ -3527,7 +3527,7 @@ rlAreaArrow = function(j){
       }   
       #  y is from 0 to 7, so the enter line for each arrow is 1,2,3,4,5,6, etc.
  
-      par(oldpar)
+      graphics::par(oldpar)
     
       ###
       # end of one Arrow glyph panel (row/group)
@@ -3567,7 +3567,7 @@ rlAreaBar = function(j){
    #  
    #  col1[j] points to the statsDFrame column holding the bar height from zero.
    #
-   #cat("Bar Startup staggered:",staggered,"\n")
+   # cat("Bar Startup staggered:",staggered,"\n")
    
    wstname     <- names(dat)   # names of columns in statsDFrame
    wstdim      <- dim(dat)
@@ -3604,7 +3604,7 @@ rlAreaBar = function(j){
    # get x axis range
   
    rx           <- range(xdat1,na.rm=T)         # get range of values (min-1, max-2)
-   #cat("bar-rx:",rx,"\n")
+   # cat("bar-rx:",rx,"\n")
    lPad   <- TRUE
    rPad   <- TRUE
    if (rx[2]<=0){                 
@@ -3623,7 +3623,7 @@ rlAreaBar = function(j){
           }
    # end of if / else if group
 
-   #cat("bar-rx adjusted:",rx,"\n")
+   # cat("bar-rx adjusted:",rx,"\n")
    
    # ____________label axis_______________
 
@@ -3633,7 +3633,7 @@ rlAreaBar = function(j){
    #
    #  No padding if Zero is left or right side.  Otherwise minor padding.
    #
-   #cat("Bar-Calling DrawXAxisAndTitle.\n")
+   # cat("Bar-Calling DrawXAxisAndTitle.\n")
 
    Res         <- DrawXAxisAndTitles(j, panels, rx, ry,reftxt, refval, leftPad=lPad, 
                   rightPad=rPad, FDate=FALSE, locAxisMethod=axisMethod)
@@ -3642,7 +3642,7 @@ rlAreaBar = function(j){
    rx          <- Res$rx
    ry          <- Res$ry
   
-   #cat("Bar-After DrawXAxisAndTitles staggered:",staggered,"\n")
+   # cat("Bar-After DrawXAxisAndTitles staggered:",staggered,"\n")
    
    #
    #####
@@ -3742,7 +3742,7 @@ rlAreaBar = function(j){
 #
 #  BoxPlots use panelData to pass the list of boxplot data to this glyph.
 #  Since the boxplots are passed as a list, it does not conflict with the 
-#  date enhancement used on the TS and TSConf array structure.
+#  date enhancement used on the ts and tsconf array structure.
 #
 
 rlAreaBoxplot  <- function(j, boxnam){
@@ -3800,7 +3800,7 @@ rlAreaBoxplot  <- function(j, boxnam){
                  
                  # check on the number of rows/etc.   - the $names list must be present after the last check.
           
-                 boxlist$names <- ClnStr(boxlist$names)   # force to upper case for match with areaNamesAbbrsIDs table (name table).
+                 boxlist$names <- stringr::str_to_upper(ClnStrName_MST(boxlist$names))   # force to upper case for match with areaNamesAbbrsIDs table (name table).
                  goodn         <- !is.na(boxlist$names)
                  nNams         <- length(boxlist$names)   # get number of names in structure
                  
@@ -3867,7 +3867,7 @@ rlAreaBoxplot  <- function(j, boxnam){
 
    #_______________Good Rows__________
    
-   #cat("Boxplot - goodn:",length(goodn),"  goods:",length(goods),"\n")
+   # cat("Boxplot - goodn:",length(goodn),"  goods:",length(goods),"\n")
      # if off, why is number of names and number of stats groups different?
      
    if (length(goodn) != length(goods)) {
@@ -3892,7 +3892,7 @@ rlAreaBoxplot  <- function(j, boxnam){
    thicky    <- BoxP.thick*py 
    medy      <- BoxP.Median.Line*c(-.5,.5)
    
-   #cat("point sets for -- thiny:",thiny,"  thicky:", thicky, "  medy:",medy,"\n")
+   # cat("point sets for -- thiny:",thiny,"  thicky:", thicky, "  medy:",medy,"\n")
      
    ry        <- c(0,1)                       # used in y scaling for grid lines
   
@@ -3922,7 +3922,7 @@ rlAreaBoxplot  <- function(j, boxnam){
    med     <- stats[3,]             # a single value for each area (median data value)
   
    nam     <- boxlist$names         # area name list of boxplots
-   nam     <- ClnStr(nam)           # upper case, no punct, single blanks.
+   nam     <- stringr::str_to_upper( ClnStrName_MST(nam))   # upper case, no punct, single blanks.
   
    # conf  <- boxlist$conf          # matrix of extremes - not used.  Don't check for.
      
@@ -3943,7 +3943,7 @@ rlAreaBoxplot  <- function(j, boxnam){
      
    zBPord  <- match(dat$RN, nam)  #  ord based on match between boxplot$names and original link names in statsDFrame (dat).  
                                   #    (Convert XX to index.  ord is the sequence of boxplot data to graph.
-                                  #  zBPord is in the statsDFrame order and points to the supporting boxplot row.
+        # zBPord is the boxplot list index that matches the dat$RN order  #  zBPord is in the statsDFrame order and points to the supporting boxplot row.
                                   #    if NA, it means the statsDFrame row does not have a boxplot to go with it.
    IndexDattoBP <- zBPord         #  should be one boxplot entry per user data.frame entry.
    
@@ -3986,11 +3986,11 @@ rlAreaBoxplot  <- function(j, boxnam){
       # if no outliers - range only on stats
       rx     <- range(stats,out,na.rm=TRUE)           # if outliers - range on stats and outliers
    }
-   #cat("boxplot-rx:",rx,"\n")
+   # cat("boxplot-rx:",rx,"\n")
      
    #rx      <- sc*diff(rx)*c(-.5,.5)+mean(rx)        # min to max range with expansion factors.
  
-   #cat("boxplot-rx after padding:",rx,"\n")
+   # cat("boxplot-rx after padding:",rx,"\n")
    
    # are these used.
    dx          <- diff(rx)/200                          # difference / 200 (??? use)
@@ -4012,7 +4012,7 @@ rlAreaBoxplot  <- function(j, boxnam){
    rx          <- Res$rx
    ry          <- Res$ry
   
-   #cat("BoxPlot-Result staggering:",staggering,"  staggered:",staggered,"\n")
+   # cat("BoxPlot-Result staggering:",staggering,"  staggered:",staggered,"\n")
     
    #####
    #
@@ -4022,7 +4022,7 @@ rlAreaBoxplot  <- function(j, boxnam){
 
    # _______________drawing loop___________________
 
-   oldpar = par(lend="butt")
+   oldpar = graphics::par(lend="butt")
    
    for (i in 1:numGrps){
    
@@ -4062,7 +4062,7 @@ rlAreaBoxplot  <- function(j, boxnam){
             
          if (goodAll[m]) {
          
-            #cat("Grp:",i,"  k;",k," m:",m,"\n")
+            # cat("Grp:",i,"  k;",k," m:",m,"\n")
             
             kp     <- pen[k]          # color number
             ht     <- laby[k]         # vector of the index into the panel (for a 5/6 row group ->  6,5,4,3,2,1 (top to bottom)
@@ -4101,7 +4101,7 @@ rlAreaBoxplot  <- function(j, boxnam){
          }
       }    # end k loop   
    }  # end i loop
-   par(oldpar)
+   graphics::par(oldpar)
    # ____________________________PanelOutline____________________
 
    groupPanelOutline(panelGroup,j)
@@ -4113,6 +4113,7 @@ rlAreaBoxplot  <- function(j, boxnam){
 #
 #####
 
+# cat("Code: 4105: Arrow, Bar, Boxplot glyphs loaded.\n")
 
 #####
 #
@@ -4207,11 +4208,11 @@ rlAreaCtrBar = function(j) {
       }
    }  # ind for loop
 
-   #print("end of verification in CTRBAR - length of good")
+   # print("end of verification in CTRBAR - length of good")
    
    good      <- !is.na(rowSums(workCB))  # good values (one per row)
    
-   #print(length(good))
+   # print(length(good))
 
    #
   
@@ -4306,10 +4307,10 @@ rlAreaCtrBar = function(j) {
    rPad        <- TRUE
    
    rx          <- range(CBPlotPts,na.rm=TRUE)
-   #cat("ctrbar-rx:",rx,"\n")
+   # cat("ctrbar-rx:",rx,"\n")
    
    #rx         <- sc*diff(rx)*c(-.5,.5)+mean(rx)
-   #cat("ctrbar-rx after padding:",rx,"\n")
+   # cat("ctrbar-rx after padding:",rx,"\n")
    
    ry          <- c(0,1)
  
@@ -4337,7 +4338,7 @@ rlAreaCtrBar = function(j) {
    rx          <- Res$rx
    ry          <- Res$ry
    
-   #cat("ctrbar-Result staggering:",staggering,"  staggered:",staggered,"\n")
+   # cat("ctrbar-Result staggering:",staggering,"  staggered:",staggered,"\n")
    #
    
    #
@@ -4347,7 +4348,7 @@ rlAreaCtrBar = function(j) {
  
    # ___________________drawing loop_____________________
 
-   oldpar     <- par(lend="butt")
+   oldpar     <- graphics::par(lend="butt")
    
    CtrPoint   <- 0                           # center point on centered stack segments
  
@@ -4426,7 +4427,7 @@ rlAreaCtrBar = function(j) {
  
    }  # end of i loop
   
-   par(oldpar)
+   graphics::par(oldpar)
    # ____________________________PanelOutline____________________
 
    groupPanelOutline(panelGroup,j)
@@ -4438,6 +4439,7 @@ rlAreaCtrBar = function(j) {
 #
 #####
 
+# cat("Code: 4431 - Center Stacked Bars Loaded.\n")
 
 #
 #  NA check, if any NA exist in the series from col1 to col2, then the stacked bar will not
@@ -4552,8 +4554,8 @@ rlAreaDot = function(j,dSignif=FALSE){           # 022x
    refval      <- lRefVals[j]     # get reference value for this column, changed 
    reftxt      <- lRefTexts[j]    # new - JP-2010/07/23
    
-   xps         <= par("ps")
-   #cat("dot-par(ps):",xps,"\n")
+   xps         <- graphics::par("ps")
+   # cat("dot-par(ps):",xps,"\n")
 
    #_____________y axis________________
    ry          <- c(0,1)
@@ -4563,13 +4565,13 @@ rlAreaDot = function(j,dSignif=FALSE){           # 022x
    rPad        <- TRUE
    
    rx          <- range(xdat1,na.rm=TRUE)
-   #cat("dot-rx:",rx,"  cxy:",par("cxy"),"\n")
+   # cat("dot-rx:",rx,"  cxy:",par("cxy"),"\n")
    
-   #cxyAdj     <- par("cxy")/2
+   #cxyAdj     <- graphics::par("cxy")/2
    #rx         <- sc*diff(rx)*c(-.5,.5)+mean(rx) # + c(-cxyAdj,cxyAdj)
                              # range = mean(rx)/2 * c(-1,1) * 1.08
                              
-   #cat("dot-rx after padding:",rx,"\n")
+   # cat("dot-rx after padding:",rx,"\n")
    
    # ____________labeling axis_______________
   
@@ -4587,8 +4589,8 @@ rlAreaDot = function(j,dSignif=FALSE){           # 022x
    rx          <- Res$rx
    ry          <- Res$ry
   
-   xps         <= par("ps")
-   #cat("dot-par(ps)2:",xps,"\n")
+   xps         <= graphics::par("ps")
+   # cat("dot-par(ps)2:",xps,"\n")
   
    #
    #  Basic validation and setup done for dot and dotsignif glyph
@@ -4678,7 +4680,7 @@ rlAreaDotConf <-  function(j){
    #   col2 indicates the column number for the lower confidence value in the statsDFrame.
    #   col3 indicates the column number for the upper confidence value in the statsDFrame.
    
-   #cat("\nDotConf:","\n")
+   # cat("\nDotConf:","\n")
    
    wstname     <- names(dat)   # names of columns in statsDFrame
    wstdim      <- dim(dat)
@@ -4734,7 +4736,7 @@ rlAreaDotConf <-  function(j){
   
    if (ErrFnd) return ()        # error warning found - return
  
-   #cat("dotconf: data OK - plot","\n")
+   # cat("dotconf: data OK - plot","\n")
  
    # setup column good arrays
  
@@ -4763,25 +4765,25 @@ rlAreaDotConf <-  function(j){
    rPad        <- TRUE
   
    rx          <- range(upper,lower,xmn,na.rm=TRUE)
-   #cat("dotConf-rx:",rx,"\n")
+   # cat("dotConf-rx:",rx,"\n")
    
    #
    #  NOT DONE in DrawXAxisAndTitle
    #
    #  dealing with a dot, so padding should be 1/2 width of dot in rx units.
-   #wP         <- par("pin")[1]  # width of panel
+   #wP         <- graphics::par("pin")[1]  # width of panel
    #wD         <- graphics::strwidth(" ",cex=Dot.Conf.pch.size)/2        # get 1/2 of character width 
    #rwD        <- (wD/wP) * diff(rx)  
         # dot width as percentage of panel width  "times"   number of x units to graph
    
    #rx         <- rx + c(-rwD,rwD)    # make room for dot and no more.
    
-   #cat("dotconf - dot adjust - widthPanel:",wP,"  widthSp:",wD,"   diff(rx):",
+   # cat("dotconf - dot adjust - widthPanel:",wP,"  widthSp:",wD,"   diff(rx):",
    #       diff(rx),"   rwD:",rwD,"\n")
    # The above is not done in DrawXAxis...
                          #  x may not be needed???
    #rx_old     <- sc*diff(rx)*c(-.5,.5)+mean(rx)
-   #cat("dotConf-rx after padding:",rx,"  old way:",rx_old,"\n")
+   # cat("dotConf-rx after padding:",rx,"  old way:",rx_old,"\n")
    
    # ____________labeling axes_______________
   
@@ -4791,7 +4793,7 @@ rlAreaDotConf <-  function(j){
    #
    #  padding on left and right for confidence and dot.
    #
-   #cat("DotConf-calling DrawXAxisAndTitles","\n")
+   # cat("DotConf-calling DrawXAxisAndTitles","\n")
    
    Res         <- DrawXAxisAndTitles(j, panels, rx, ry,reftxt, refval, leftPad=lPad, 
                   rightPad=rPad, FDate=FALSE, locAxisMethod=axisMethod)
@@ -4800,26 +4802,22 @@ rlAreaDotConf <-  function(j){
    rx          <- Res$rx
    ry          <- Res$ry
    
-   #cat("DotConf-back from DrawXAxisAndTitles","\n")
-  
-   #cat("dotconf-Result staggered:",staggered,"\n")
+   # cat("DotConf-back from DrawXAxisAndTitles","\n")
+   # cat("dotconf-Result staggered:",staggered,"\n")
   
    #
    #  Basic setup and validation done for dotconf glyph 
    #
    #####
    
-   #cat("Dot.Conf.pch:",Dot.Conf.pch,"  Dot.Conf.pch.size:",Dot.Conf.pch.size,
+   # cat("Dot.Conf.pch:",Dot.Conf.pch,"  Dot.Conf.pch.size:",Dot.Conf.pch.size,
    #    " Dot.Conf.Outline:",Dot.Conf.Outline,"\n")
    
    doDotOutline   <- Dot.Conf.Outline
    
-   #cat("doDotOutline:",doDotOutline,"\n")
-   
-   #cat("Dot.Conf.Outline.lwd:",Dot.Conf.Outline.lwd," .col:",Dot.Conf.Outline.col,"\n")
-   
-   
-   #cat("dotconf - drawing loop  col:",j,"\n")
+   # cat("doDotOutline:",doDotOutline,"\n")
+   # cat("Dot.Conf.Outline.lwd:",Dot.Conf.Outline.lwd," .col:",Dot.Conf.Outline.col,"\n")
+   # cat("dotconf - drawing loop  col:",j,"\n")
    
    #_____________drawing loop___________________
   
@@ -4854,11 +4852,11 @@ rlAreaDotConf <-  function(j){
                    col=mstColors[pen[k]], lwd=Dot.Conf.lwd)
             
             # plot dot.
-            #cat("m:",m,"  lower:",lower[m],"  upper[m]:",upper[m],
+            # cat("m:",m,"  lower:",lower[m],"  upper[m]:",upper[m],
             #    "  k:",k,"  laby[k]:",laby[k],"  pen[k]:",pen[k],"\n")
-            #cat("Dot.Conf.lwd:",Dot.Conf.lwd,"\n")
+            # cat("Dot.Conf.lwd:",Dot.Conf.lwd,"\n")
             #
-            #cat("xmn[m]:",xmn[m],"\n")
+            # cat("xmn[m]:",xmn[m],"\n")
             
             #
             # doDotOutline - mostly related to black and white printing.  
@@ -4897,7 +4895,7 @@ rlAreaDotConf <-  function(j){
 
    groupPanelOutline(panelGroup,j)
    
-   #cat("DotConf: END.\n")
+   # cat("DotConf: END.\n")
   
 }
 
@@ -4970,10 +4968,10 @@ rlAreaDotSe = function(j){
    rx          <- range(upper,lower,xdat1,na.rm=TRUE)  
               # use upper, lower and xdat1 to find "range" of x
               # x may not be needed at all. But best to leave.
-   #cat("dotSE-rx:",rx,"\n")
+   # cat("dotSE-rx:",rx,"\n")
    
    #rx         <- sc * diff(rx) * c(-.5,.5) + mean(rx)
-   #cat("dotSE-rx after padding:",rx,"\n")
+   # cat("dotSE-rx after padding:",rx,"\n")
    
    # ____________labeling axes_______________
 
@@ -4991,7 +4989,7 @@ rlAreaDotSe = function(j){
    rx          <- Res$rx
    ry          <- Res$ry
     
-   #cat("dotSE-Result staggering:",staggering,"  staggered:",staggered,"\n")
+   # cat("dotSE-Result staggering:",staggering,"  staggered:",staggered,"\n")
    
    #
    #  Setup and validation for dotse glyph completed.
@@ -5048,10 +5046,11 @@ rlAreaDotSe = function(j){
 
 }
 
-#
 #  End of dotse glyph
 #
 #####
+
+# cat("Code: 5042 - dot, dotconf, dotsignif, dotse - loaded.\n")
 
 #####
 #
@@ -5083,8 +5082,8 @@ rlAreaID = function(j){
    #  ID text set based on Id.Text.cex.. for 12 point text  in a 3/4 to over 1" height boxes.
    #
    
-   xusr  <- par("usr")  # base decision on first panel - they should all be the same.
-   xpin  <- par("pin")
+   xusr  <- graphics::par("usr")  # base decision on first panel - they should all be the same.
+   xpin  <- graphics::par("pin")
    
    
    ### request to lower title into axis label space.
@@ -5092,7 +5091,7 @@ rlAreaID = function(j){
    xLab1 <- banner["id","H2"]   # get related banners for "id" glyph
    xLab2 <- banner["id","H3"]
    
-   #cat(" ps:",par("ps"),"  cex:",par("cex"),"  Id.Text.cex:",Id.Text.cex,"\n")
+   # cat(" ps:",graphics::par("ps"),"  cex:",graphics::par("cex"),"  Id.Text.cex:",Id.Text.cex,"\n")
    if (xLab2 == "") {
       xLab2 <- xLab1
       xLab1 <- ""
@@ -5104,20 +5103,20 @@ rlAreaID = function(j){
    }
    graphics::mtext(xLab2,side=3,line=Id.Title.2.pos,cex=Text.cex)       # 0.75  # should at least be a Lab2.
    
-   #cat("label text cex size:",Text.cex,"\n")
+   # cat("label text cex size:",Text.cex,"\n")
    
    widthPanel    <- xpin[1]   # inches width of "id" glyph.
 
    widthxLab1    <- graphics::strwidth(xLab1,units="inch",cex=Text.cex)
    widthxLab2    <- graphics::strwidth(xLab2,units="inch",cex=Text.cex)  # get width of Lab2?
    widthMax      <- max(widthxLab1,widthxLab2)
-   #cat("widthMax of lab1,2 :",widthMax," at Text.cex:",Text.cex,"\n")
+   # cat("widthMax of lab1,2 :",widthMax," at Text.cex:",Text.cex,"\n")
    
    #  one label for ID column.  It's centered, so use 1/2 of the width. 
    #  Only check Lab2 because it is the header that would overlap the X Axis.
    lastLab2Space <<- ( widthPanel + colSepGap - widthxLab2 ) / 2  # pos - space (have), neg - overhang (need).
    
-   #cat("ID - widthPanel:",widthPanel,"  width xLab2:",widthxLab2,"  lastLab2Space:",lastLab2Space," staggered:",staggered,"\n")
+   # cat("ID - widthPanel:",widthPanel,"  width xLab2:",widthxLab2,"  lastLab2Space:",lastLab2Space," staggered:",staggered,"\n")
       
    # ______Bottom Label/Title - Lab3 ______
 
@@ -5148,7 +5147,7 @@ rlAreaID = function(j){
    #  ratio of usr and inch is usually and should be 1:1.
    #
    # So, 
-   #     Space Width  = strwidth(" ") * Id.Text.cex
+   #     Space Width  = graphics::strwidth(" ") * Id.Text.cex
    #     Symbol Width = Id.Dot.width * Id.Dot.cexm
    #     Text Width   = (" " + <text> + " ") * Id.Text.cex
    #     Line Width   = Id.Space + SymbolSize + Id.Space + <text width> + Id.Space
@@ -5166,32 +5165,32 @@ rlAreaID = function(j){
       # ratio of height / 0.75 to reduce the line height.  example: 0.65/0.75 = 0.8666667
       Idcex.mod     <- Idcex.mod * (xpin[2]/0.75)    # xpin[2]/0.75 ratio.
       
-      #cat(" xpin[2]<0.75 - Idcex.mod:",Old_Idcex.mod," change to ",Idcex.mod,"\n")
+      # cat(" xpin[2]<0.75 - Idcex.mod:",Old_Idcex.mod," change to ",Idcex.mod,"\n")
       # this parameter change effects height and width of the lines.  
       # must fit height.
    }
    #wCex      <- Id.Text.cex * Idcex.mod 
    #pchSize   <- Id.Dot.cexm * Idcex.mod     #    1.5 *  0.75  => 1.125   cex value
-   #cat("ID: pchsize:",pchSize,"\n")
+   # cat("ID: pchsize:",pchSize,"\n")
  
    pchCex    <- Id.Dot.cexm * Idcex.mod     # complete.
    txtCex    <- Id.Text.cex * Idcex.mod     # complete.
-   #cat("pchCex:",pchCex,"  txtCex:",txtCex,"\n")
+   # cat("pchCex:",pchCex,"  txtCex:",txtCex,"\n")
    
    #TextH2  <- max(graphics::strheight(areaDatIDNames,units="inch",cex=wCex )) / 2  # maximum length value (Half) /2
    TextH2  <- max(graphics::strheight(areaDatIDNames,units="inch",cex=txtCex )) / 2  # maximum length value (Half) /2
-   #cat("max ID label height:",TextH2,"\n")
+   # cat("max ID label height:",TextH2,"\n")
    
-   par(pch = Id.Dot.pch)   # set up the character.
+   graphics::par(pch = Id.Dot.pch)   # set up the character.
   
-   #cat("ID Text Size (combined):",wCex,"  Id.Text.cex:",Id.Text.cex,"  Idcex.mod:",Idcex.mod,"  Id.Cex.mod:",Id.Cex.mod,"\n")
+   # cat("ID Text Size (combined):",wCex,"  Id.Text.cex:",Id.Text.cex,"  Idcex.mod:",Idcex.mod,"  Id.Cex.mod:",Id.Cex.mod,"\n")
   
    #______________________Common Variables_________
-   Id.Space     <- strwidth(" ",units="inch",cex=txtCex)
+   Id.Space     <- graphics::strwidth(" ",units="inch",cex=txtCex)
    Id.Dot.size  <- Id.Dot.width * pchCex
    Id.Dot.sizes <- Id.Dot.size + Id.Space
    Id.HalfSym   <- Id.Dot.sizes/2
-   #cat("Id.Dot.size:",Id.Dot.size,"  Id.Dot.sizes:",Id.Dot.sizes,"  Id.HalfSym:",Id.HalfSym,"  Id.Space:",Id.Space,"\n")
+   # cat("Id.Dot.size:",Id.Dot.size,"  Id.Dot.sizes:",Id.Dot.sizes,"  Id.HalfSym:",Id.HalfSym,"  Id.Space:",Id.Space,"\n")
    
    #______________________main loop________________
 
@@ -5222,12 +5221,12 @@ rlAreaID = function(j){
       gnams         <- areaDatIDNames[gsubs]
       
       # Recalculate in case panels are different sizes
-      xusr          <- par("usr")
-      xpin          <- par("pin")
+      xusr          <- graphics::par("usr")
+      xpin          <- graphics::par("pin")
       xUnitsPerInch <- diff(xusr[1:2]) / xpin[1]    # x units per inch  (width)
       yUnitsPerInch <- diff(xusr[3:4]) / xpin[2]    # y units per inch  (height)
       
-      #cat("xUPI:",xUnitsPerInch,"  usr:",xusr,"  xpin:",xpin,"  TextH2:",TextH2,"\n")
+      # cat("xUPI:",xUnitsPerInch,"  usr:",xusr,"  xpin:",xpin,"  TextH2:",TextH2,"\n")
    
       #  xHalfSym is lead space, Symbol width divided by 2 converted to "units"  The value should be in the middle of the symbol.
        
@@ -5235,7 +5234,7 @@ rlAreaID = function(j){
       xSymWu        <- (Id.HalfSym - ( Id.Space ) ) * xUnitsPerInch  # distance from ctr to start of text.
       #                Other half of symbol, space then minus 0.2 of space.
       
-      #cat("xHalfSym:",Id.HalfSym,"  xStartu:",xStartu,"  xSymWu:",xSymWu," U/I:",xUnitsPerInch,"  units\n")
+      # cat("xHalfSym:",Id.HalfSym,"  xStartu:",xStartu,"  xSymWu:",xSymWu," U/I:",xUnitsPerInch,"  units\n")
       
       ###  Much plot in "user" units.
       
@@ -5246,13 +5245,13 @@ rlAreaID = function(j){
       yPos2u        <- laby - TextH2 * 0.3 * yUnitsPerInch        # offset down by half the height  
    
        
-      #cat("xPosu:",xPosu,"  xPos2u:",xPos2u,"   units\n")
-      #cat("yPosu:",yPosu,"  yPos2u:",yPos2u,"   units\n")
-      #cat("gnams:",gnams,"\n")
-      #cat("width.gnams:",strwidth(gnams,units="inches",cex=txtCex),"  inches\n")
+      # cat("xPosu:",xPosu,"  xPos2u:",xPos2u,"   units\n")
+      # cat("yPosu:",yPosu,"  yPos2u:",yPos2u,"   units\n")
+      # cat("gnams:",gnams,"\n")
+      # cat("width.gnams:",graphics::strwidth(gnams,units="inches",cex=txtCex),"  inches\n")
       
       #   txtCex may have been modified to reduce the size.
-      #cat("Id.Text.cex:",Id.Text.cex,"  Idcex.mod:",Idcex.mod,"  prod:",(Id.Text.cex * Idcex.mod),"\n")
+      # cat("Id.Text.cex:",Id.Text.cex,"  Idcex.mod:",Idcex.mod,"  prod:",(Id.Text.cex * Idcex.mod),"\n")
      
       #    draw text string.
       graphics::text(xPos2u, yPos2u, gnams,  cex=txtCex, xpd=T, pos=4)    # place name
@@ -5271,7 +5270,7 @@ rlAreaID = function(j){
    # No reference values for this type of column
    # as we exit loop, we are in the last panel..
   
-   xpin          <- par("pin")
+   xpin          <- graphics::par("pin")
    lastLab3Space <<- xpin[1]/2
   
    if (lab3[j] != "") {
@@ -5287,13 +5286,13 @@ rlAreaID = function(j){
 
 }
 
-#
 #  End of id glyph
 #
 #####
 
 ###### how to get right abbr or full ########
 
+# cat("Code: 5286 - id glyph loaded.\n")
 
 #####  MAP glyphs
 
@@ -5373,9 +5372,9 @@ rlAreaMap = function(j) {
   #
   #   j = column number,   i = row number
   
-  #cat("Map-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
-  #cat("Map-Overlays exist area:",exists("areaVisBorders")," L2:",exists("L2VisBorders")," Reg:",exists("RegVisBorders")," L3:",exists("L3VisBorders"),"\n")
-  #cat("Map-Overlays exist 'rl' area:",exists("rlAreaVisBorders")," L2:",exists("rlL2VisBorders")," Reg:",exists("rlRegVisBorders")," L3:",exists("rlL3VisBorders"),"\n")
+  # cat("Map-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+  # cat("Map-Overlays exist area:",exists("areaVisBorders")," L2:",exists("L2VisBorders")," Reg:",exists("RegVisBorders")," L3:",exists("L3VisBorders"),"\n")
+  # cat("Map-Overlays exist 'rl' area:",exists("rlAreaVisBorders")," L2:",exists("rlL2VisBorders")," Reg:",exists("rlRegVisBorders")," L3:",exists("rlL3VisBorders"),"\n")
   
   # the x,y limits must be based on the biggest area plotted, if the data level 
   #   does not cover the entire area, check the L2 and L3 borders.
@@ -5387,7 +5386,7 @@ rlAreaMap = function(j) {
 
   rxpoly2 <- rPoly$rxpoly2
   rypoly2 <- rPoly$rypoly2
-  #cat("Code: 5385 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+  # cat("Code: 5378 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
 
   # must be done before panel is scaled.
   
@@ -5398,11 +5397,11 @@ rlAreaMap = function(j) {
   
   panelSelect(panels,1,j)
   x      <- panelScale()
-  par(xpd=T)
-  xpin   <- par("pin")
+  graphics::par(xpd=T)
+  xpin   <- graphics::par("pin")
  
-  #cat("Select panel 1\n")
-  #printPar()
+  # cat("Select panel 1\n")
+  # printPar()
 
      
   # column titles  - centered no boxes.
@@ -5480,47 +5479,43 @@ rlAreaMap = function(j) {
   #   dat has the numerics and the order of the rows.
   #   
   #
-  #cat("numGrps:",numGrps," medGrp:",medGrp," medGrpSize:",medGrpSize,"\n")
-  #cat("map - list of areas in maps - sorted - areaDatKey:",areaDatKey,"\n")
+  # cat("numGrps:",numGrps," medGrp:",medGrp," medGrpSize:",medGrpSize,"\n")
+  # cat("map - list of areas in maps - sorted - areaDatKey:",areaDatKey,"\n")
 
-  
-  
-  
-  
-  
-  ##print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
+   
+  # print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
   #VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of polygons in VisBorders (indexes)
   #
   ##    NA entries in VisBorders (TRUE)    # one entry per point in polygons.
-  ##cat("VisNodes:\n")
-  ##print(VisNodes)
+  ## cat("VisNodes:\n")
+  ## print(VisNodes)
   #
   ## per polygon (end point) (decode VisBorders by polygon)  # pull key and hole info for each polygon.
   #VisKeys        <- rlAreaVisBorders$Key[VisNodes]       # key at end points of a polygons
   #VisHoles       <- rlAreaVisBorders$hole[VisNodes]      # hole indicator at end points of all polygons
   #   # one entry per end of polygon. Multi-polygons per area.
   #
-  ##cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
-  ##print(VisKeys)
+  ## cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
+  ## print(VisKeys)
   #
-  ##cat("Basic list of VisHoles (zero or more per polygon):\n")
-  ##print(VisHoles)
+  ## cat("Basic list of VisHoles (zero or more per polygon):\n")
+  ## print(VisHoles)
   #
   ## per Visborder all point/vector
   ## NotUsedKeys created above after reviewing the data.
   #NotUsed        <- !is.na(match(rlAreaVisBorders$Key,NotUsedKeys)) # list of not used polygons - no data.
   #NotUsedFlag    <- any(NotUsed)  # flag to indicate not used exists 
   #
-  ##cat("NotUsedKeys:\n")    # global.
-  ##print(NotUsedKeys)
-  ##cat("NotUsed:\n")
-  ##print(NotUsed)
+  ## cat("NotUsedKeys:\n")    # global.
+  ## print(NotUsedKeys)
+  ## cat("NotUsed:\n")
+  ## print(NotUsed)
   #
   ## per polygon (end point).  # not used area Key lost.
   #VisNU          <- !is.na(match(VisKeys,NotUsedKeys))   # T/F list of not used polygons.
   #
-  ##cat("VisNU:\n")
-  ##print(VisNU)
+  ## cat("VisNU:\n")
+  ## print(VisNU)
   
   #
   #   Panel Setup already calculated the following variables
@@ -5535,13 +5530,13 @@ rlAreaMap = function(j) {
   #   dat has the numerics and the order of the rows.
   #   
   #
-  #cat("numGrps:",numGrps," medGrp:",medGrp," medGrpSize:",medGrpSize,"\n")
-  #cat("map - list of areas in maps - sorted - areaDatKey:",areaDatKey,"\n")
+  # cat("numGrps:",numGrps," medGrp:",medGrp," medGrpSize:",medGrpSize,"\n")
+  # cat("map - list of areas in maps - sorted - areaDatKey:",areaDatKey,"\n")
 
   # Drawing Loop   # down the page - each group/row
 
   for (i in 1:numGrps) {
-     #cat("In Loop - panel:",j," ",i,"\n")
+     # cat("In Loop - panel:",j," ",i,"\n")
     
      VisCol        <- rep(11,lenVisKeys)
      VisCol[VisNU] <- 12    # not used color in all polygons.
@@ -5566,18 +5561,18 @@ rlAreaMap = function(j) {
      }
     
      # handle groups with 2 or more rows
-     #cat("map setup-> rxpoly2:",rxpoly2,"  rypoly2:",rypoly2,"\n")
+     # cat("map setup-> rxpoly2:",rxpoly2,"  rypoly2:",rypoly2,"\n")
      panelSelect(panels,i,j)             # Do map in - Panels by group...
      x  <- panelScale(rxpoly2,rypoly2)   # apply the required scaling   (x contains the rx and ry values.
-     #cat("rx & ry:\n")
-     #print(x)
-     #cat("par-> fin:",par("fin"),"  pin:",par("pin"), "\n      plt:",par("plt"),"\n      fig:",par("fig")," usr:",par("usr"),"\n")
+     # cat("rx & ry:\n")
+     # print(x)
+     # cat("par-> fin:",par("fin"),"  pin:",par("pin"), "\n      plt:",par("plt"),"\n      fig:",par("fig")," usr:",par("usr"),"\n")
      #xdis <- c(min(rlAreaVisBorders$x,na.rm=TRUE),max(rlAreaVisBorders$x,na.rm=TRUE))
      #ydis <- c(min(rlAreaVisBorders$y,na.rm=TRUE),max(rlAreaVisBorders$y,na.rm=TRUE))
     
     
      gsubs      <- ib[i]:ie[i]           # get the index range for this panel into "dat"
-     #cat("area index - gsubs:",gsubs,"   The area index.\n")    
+     # cat("area index - gsubs:",gsubs,"   The area index.\n")    
     
      blkAreaCol <- 0
      mediKey    <- ""
@@ -5607,13 +5602,13 @@ rlAreaMap = function(j) {
         # The number is the index to the area to color.
      }
     
-     #print(paste0("modified gsubs:",paste0(gsubs,collapse=" ")))
+     # print(paste0("modified gsubs:",paste0(gsubs,collapse=" ")))
      
      #    medRow - the median row, if number of rows is old.
      #         will always be in the medGrp group
    
      gnams    <- areaDatKey[gsubs]        # index to area keys (translation) (based on dat order) ????
-     #cat("gnams:",paste0(gnams,collapse=", "),"\n")
+     # cat("gnams:",paste0(gnams,collapse=", "),"\n")
  
      #
      #  Even though a hole in a sub-area may be later filled with a color or grey,
@@ -5663,8 +5658,8 @@ rlAreaMap = function(j) {
      
      
      #VisCol            <- rep(11,length(VisKeys))       # reduced size - color per polygon - not ref
-     #cat("Loop: ",i,"  VisCol:\n")
-     #print(VisCol)
+     # cat("Loop: ",i,"  VisCol:\n")
+     # print(VisCol)
     
      #  1) All to start -> 11     background  - all
      
@@ -5682,32 +5677,32 @@ rlAreaMap = function(j) {
                                                         # everyone get color # 11 (no data) (check)
      #  isolate foreground (active) areas. (Colors)
      foreKeys          <- gnams                         # get list of current keys (in order)
-     #cat("Loop ",i,"  foreKeys:",foreKeys,"\n")
+     # cat("Loop ",i,"  foreKeys:",foreKeys,"\n")
     
      fore     <- !is.na(match(rlAreaVisBorders$Key,foreKeys)) # find points in each fore areas and assign color based on order in gnams
      
      #  fore -- na entries are not foreground points.   Otherwize, it's the polygons color indx.
-     #cat("   fore - match foreKeys at vertex points level:\n")
-     #print(fore)
+     # cat("   fore - match foreKeys at vertex points level:\n")
+     # print(fore)
      
      foreFlag          <- any(fore)                      # set flags if any found
      
      # Get index for color (1-6) using match of all keys against foreKeys
      
      VisForeCol        <- match(VisKeys,foreKeys)        # get color index for each foreg polygon (1-6)  (foreKeys is 6 long in order)
-     #cat("VisForeCol - match foreground at end of polygon(NA) level: (color index, T/F) \n")
-     #print(VisForeCol)
+     # cat("VisForeCol - match foreground at end of polygon(NA) level: (color index, T/F) \n")
+     # print(VisForeCol)
     
      # get list of VisBorder point belonging to fore areas.
      VisFore           <- !is.na(VisForeCol)             # T/F for each polygon that a current foreground
-     #cat("VisFore - NOT NAs at the Col/NA.\n")          # T = color to draw (1-5/6)
-     #print(VisFore)
+     # cat("VisFore - NOT NAs at the Col/NA.\n")         # T = color to draw (1-5/6)
+     # print(VisFore)
    
      # replace background color with area color..
      VisCol[VisFore]   <- VisForeCol[VisFore]            # transfer color index for each foreground polygon.
      
-     #cat("VisCol at the polygon NA level from VisForeCol with background color.\n")
-     #print(VisCol)
+     # cat("VisCol at the polygon NA level from VisForeCol with background color.\n")
+     # print(VisCol)
      
      if (bitwAnd(MST.Debug,256) != 0) {
         cat("fore:",fore,"\n")
@@ -5738,7 +5733,7 @@ rlAreaMap = function(j) {
         medi         <- rep(0,length(rlAreaVisBorders$Key))  # equal number of points.
         mediFlag     <- FALSE
      }
-     #cat("length VisMedi:",length(VisMedi),"\n")
+     # cat("length VisMedi:",length(VisMedi),"\n")
     
      #
      #  3 - highlight 
@@ -5797,7 +5792,7 @@ rlAreaMap = function(j) {
         # map borders of areas
         graphics::polygon(rlL2VisBorders$x, rlL2VisBorders$y,
               density=0, col=Map.L2.Line.col, lwd=Map.L2.Line.lwd)  # white lines
-        #cat("Drawing L2 Borders\n")
+        # cat("Drawing L2 Borders\n")
      }
      #
      ####
@@ -5813,7 +5808,7 @@ rlAreaMap = function(j) {
      graphics::polygon(rlAreaVisBorders$x,rlAreaVisBorders$y,    # draw polygons with color specified (fills/bg)
                   density=-1, col=VisCol2, border=FALSE)
     
-     #cat("Drawing active area colors.\n")
+     # cat("Drawing active area colors.\n")
      
      #####
      #
@@ -5830,10 +5825,10 @@ rlAreaMap = function(j) {
         # map areas without data (not used)
         graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)   # white lines
-        #cat("Drawing not used areas borders.\n")
+        # cat("Drawing not used areas borders.\n")
         wVisUn <- unique(wVisBorders$Key)
-        #cat("Not Used areas:\n")
-        #cat(paste0(wVisUn,collapse=", ",sep=" "),"\n")
+        # cat("Not Used areas:\n")
+        # cat(paste0(wVisUn,collapse=", ",sep=" "),"\n")
      }
     
      #
@@ -5845,10 +5840,10 @@ rlAreaMap = function(j) {
         wVisBorders   <- rlAreaVisBorders[back,]   # pull out with T/F
         graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Bg.Line.col, lwd=Map.Bg.Line.lwd)    # white
-        #cat("Drawing not-active areas borders.\n")
+        # cat("Drawing not-active areas borders.\n")
         wVisBK <- unique(wVisBorders$Key)
-        #cat("back areas:\n")
-        #cat(paste0(wVisBK,collapse=", ",sep=" "),"\n")
+        # cat("back areas:\n")
+        # cat(paste0(wVisBK,collapse=", ",sep=" "),"\n")
      }
 
      #
@@ -5860,10 +5855,10 @@ rlAreaMap = function(j) {
         wVisBorders   <- rlAreaVisBorders[high,]     # pull out with T/F
         graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
-        #cat("Drawing highlighted areas borders.\n")
+        # cat("Drawing highlighted areas borders.\n")
         wVisH <- unique(wVisBorders$Key)
-        #cat("high areas:\n")
-        #cat(paste0(wVisH,collapse=", ",sep=" "),"\n")
+        # cat("high areas:\n")
+        # cat(paste0(wVisH,collapse=", ",sep=" "),"\n")
       }
 
      # 
@@ -5874,10 +5869,10 @@ rlAreaMap = function(j) {
         wVisBorders   <- rlAreaVisBorders[medi,]      # pull out with T/F
         graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
-        #cat("Drawing Active areas borders.\n")
-        #wVisM <- unique(wVisBorders$Key)
-        #cat("Median area:\n")
-        #cat(paste0(wVisM,collapse=", ",sep=" "),"\n")
+        # cat("Drawing Active areas borders.\n")
+        # wVisM <- unique(wVisBorders$Key)
+        # cat("Median area:\n")
+        # cat(paste0(wVisM,collapse=", ",sep=" "),"\n")
       }
      # 
      #    Foreground (active) areas
@@ -5887,10 +5882,10 @@ rlAreaMap = function(j) {
         wVisBorders   <- rlAreaVisBorders[fore,]      # pull out with T/F
         graphics::polygon(wVisBorders$x,wVisBorders$y,
                 density=0, col= Map.Fg.Line.col, lwd=Map.Fg.Line.lwd)    # black
-        #cat("Drawing Active areas borders.\n")
+        # cat("Drawing Active areas borders.\n")
         wVisF <- unique(wVisBorders$Key)
-        #cat("Fore areas:\n")
-        #cat(paste0(wVisF,collapse=", ",sep=" "),"\n")
+        # cat("Fore areas:\n")
+        # cat(paste0(wVisF,collapse=", ",sep=" "),"\n")
       }
          
      ####
@@ -5901,7 +5896,7 @@ rlAreaMap = function(j) {
      if (Map.RegBorders && regionsB) {       # regions boundaries overlay
         graphics::polygon(rlRegVisBorders$x, rlRegVisBorders$y,
                density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)     # black
-        #cat("Drawing Region Borders\n")
+        # cat("Drawing Region Borders\n")
      }
      #
      ####
@@ -5913,7 +5908,7 @@ rlAreaMap = function(j) {
      if (Map.L3Borders) {
         graphics::polygon(rlL3VisBorders$x, rlL3VisBorders$y,
             density=0, col=Map.L3.Line.col, lwd=Map.L3.Line.lwd)      # black - outside boundary
-        #cat("Drawing L3 Borders\n")
+        # cat("Drawing L3 Borders\n")
      }
      #
      #####
@@ -5921,7 +5916,7 @@ rlAreaMap = function(j) {
      #####
      #
      NTNames <- names(areaNT)
-     #cat("NTNames:",NTNames,"\n")
+     # cat("NTNames:",NTNames,"\n")
      #
      #  Map Labels
      #str(areaNT)
@@ -5929,7 +5924,7 @@ rlAreaMap = function(j) {
      #
   
      if (areaUSData) {                        ##### replace with feature based code.
-        if (i == 1) {   # first map      # added code to watch out for regional mapping.
+        if (i == 1) {   # first map         # added code to watch out for regional mapping.
            # if first map in column
            if(!areaNT["DC","NotUsed"]) {
               graphics::text(135,31,'DC',cex=Map.Area.Spec.cex, adj=.5, col=1)
@@ -5964,7 +5959,7 @@ rlAreaMap = function(j) {
    
   }  # i loop
   #   as we finish i loop, we end up in the last panel
-  xpin          <- par("pin")
+  xpin          <- graphics::par("pin")
   lastLab3Space <<- xpin[1]/2
 
   if (lab3[j] != "") {
@@ -5990,7 +5985,7 @@ rlAreaMap = function(j) {
 
 rlAreaMapCum = function(j) {
 
-  #cat("mapcum\n")
+  # cat("mapcum\n")
   
   # Works using area abbreviations
   # areaDatKey give the abbreviations in the order plotted 
@@ -5999,7 +5994,7 @@ rlAreaMapCum = function(j) {
   # Areas are colored cream is they were active in previous groups/rows.
   #
   
-  #cat("MapCum-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+  # cat("MapCum-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
   # the x,y limits must be based on the biggest area plotted, if the data level 
   #   does not cover the entire area, check the L2 and L3 borders.
@@ -6008,7 +6003,7 @@ rlAreaMapCum = function(j) {
 
   rxpoly2 <- rPoly$rxpoly2
   rypoly2 <- rPoly$rypoly2
-  #cat("Code: 6006 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+  # cat("Code: 5995 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
 
   # must be done before panel is scaled.
   
@@ -6019,12 +6014,12 @@ rlAreaMapCum = function(j) {
 
   panelSelect(panels,1,j)
   x <- panelScale()   #  default scale 0:1, 0:1  not very useful
-  par(xpd=T)
-  xpin      <- par("pin")
+  graphics::par(xpd=T)
+  xpin      <- graphics::par("pin")
   
   #    make adjustments to handle variable scaling of first panel - at this point its 0,1 by 0,1
-  #                      par("fin") has width and height in inches..  (2.4 x 3.6)
-  #                      par("pin") has plot width and height in inches  ( 1.4 x 1.111 )
+  #                      graphics::par("fin") has width and height in inches..  (2.4 x 3.6)
+  #                      graphics::par("pin") has plot width and height in inches  ( 1.4 x 1.111 )
   #                      So, at 0,1 by 0,1  the aspect is really 1.111/1.4 = 0.79 about.
   #
   
@@ -6052,7 +6047,7 @@ rlAreaMapCum = function(j) {
   #
     
   # Drawing Loop
-  #cat("mapcum - areaDatKey:",areaDatKey,"\n")
+  # cat("mapcum - areaDatKey:",areaDatKey,"\n")
 
   # loop through all of the group/rows
   
@@ -6061,8 +6056,8 @@ rlAreaMapCum = function(j) {
      VisCol <- rep(11,lenVisKeys)
      VisCol[VisNU] <- 12    # not used color in all polygons.
   
-     #cat("VisNU:\n")
-     #print(VisNU)
+     # cat("VisNU:\n")
+     # print(VisNU)
 
      if (i == medGrp & medGrpSize == 1) {
 
@@ -6143,7 +6138,7 @@ rlAreaMapCum = function(j) {
         mediFlag     <- FALSE
         VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
      }
-     #cat("length VisMedi:",length(VisMedi),"\n")
+     # cat("length VisMedi:",length(VisMedi),"\n")
 
      # Set all of the highlight colors. 
      highKeys        <- areaDatKey[1:ib[i]-1]   # vector of names used areas include this panel.
@@ -6268,7 +6263,7 @@ rlAreaMapCum = function(j) {
      #####
      #
      NTNames <- names(areaNT)
-     #cat("NTNames:",NTNames,"\n")
+     # cat("NTNames:",NTNames,"\n")
      #
      #  Map Labels
      #str(areaNT)
@@ -6311,7 +6306,7 @@ rlAreaMapCum = function(j) {
   # no reference values for this type of column. If present - ignor.
   #  as we leave i loop - we are in the last group panel
   
-  xpin          <- par("pin")
+  xpin          <- graphics::par("pin")
   lastLab3Space <<- xpin[1]/2
   
   if (lab3[j] != "") {
@@ -6347,7 +6342,7 @@ rlAreaMapMedian = function(j){
    #   shading are done as a cross over.
    #
 
-   #cat("MapMedian-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+   # cat("MapMedian-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
    # the x,y limits must be based on the biggest area plotted, if the data level 
    #   does not cover the entire area, check the L2 and L3 borders.
@@ -6356,14 +6351,14 @@ rlAreaMapMedian = function(j){
 
    rxpoly2 <- rPoly$rxpoly2
    rypoly2 <- rPoly$rypoly2
-   #cat("Code: 6354 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+   # cat("Code: 6343 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
    
    # ____________labeling and axes_______________
 
    panelSelect(panels,1,j)
    x <- panelScale()
-   par(xpd=T)
-   xpin        <- par("pin")
+   graphics::par(xpd=T)
+   xpin        <- graphics::par("pin")
    
    #
    #    draw box for title label   (convert inches into points for the panel.)
@@ -6379,7 +6374,7 @@ rlAreaMapMedian = function(j){
    
    lastLab2Space  <<- - ( xpin[1] - ( graphics::strwidth(banner["mapmed","H3"],units="inch",cex=Text.cex) + 0.15 ) ) / 2
    
-   #cat("mapmed - areaDatKey:",areaDatKey,"\n")
+   # cat("mapmed - areaDatKey:",areaDatKey,"\n")
 
    #
    
@@ -6403,7 +6398,7 @@ rlAreaMapMedian = function(j){
       VisCol        <- rep(11,lenVisKeys)             # background fill
       VisCol[VisNU] <- 12  # not used areas           # not used fill
   
-      #cat("lengths: VisCol:",length(VisCol)," VisNU:",length(VisNU),"\n")
+      # cat("lengths: VisCol:",length(VisCol)," VisNU:",length(VisNU),"\n")
 
       # Median Group/Row with 1 row
       if (i == medGrp & medGrpSize == 1) {
@@ -6486,7 +6481,7 @@ rlAreaMapMedian = function(j){
          VisCol[VisHighU] <- 9
          VisCol[VisHighL] <- 10
       }
-      #cat("length: highUbdr:",length(highUbdr)," highLbdr:",length(highLbdr)," high:",length(high),"\n")
+      # cat("length: highUbdr:",length(highUbdr)," highLbdr:",length(highLbdr)," high:",length(high),"\n")
 
       foreKeys         <- gnams
       fore             <- !is.na(match(rlAreaVisBorders$Key,foreKeys))            # find fore sub-areas and assign color based on order in gnams
@@ -6516,13 +6511,13 @@ rlAreaMapMedian = function(j){
      
          VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
       }
-      #cat("length VisMedi:",length(VisMedi),"\n")
-      #cat("length medi:",length(medi),"\n")
+      # cat("length VisMedi:",length(VisMedi),"\n")
+      # cat("length medi:",length(medi),"\n")
     
       # 2 - Non-Active background (good, but not referenced yet)
      
       back              <- !(fore | high | medi | NotUsed)   # what left is non-active waiting
-      #cat("length back:", length(back),"\n")
+      # cat("length back:", length(back),"\n")
      
       backFlag          <- any(back)
       if (backFlag) {
@@ -6628,7 +6623,7 @@ rlAreaMapMedian = function(j){
       #####
       #
       NTNames <- names(areaNT)
-      #cat("NTNames:",NTNames,"\n")
+      # cat("NTNames:",NTNames,"\n")
       #
       #  Map Labels
       #str(areaNT)
@@ -6669,7 +6664,7 @@ rlAreaMapMedian = function(j){
    # no reference values for this type of column. If present - ignor.
    # as we finish i loop - we are in the last group panel.
 
-   xpin          <- par("pin")
+   xpin          <- graphics::par("pin")
    lastLab3Space <<- xpin[1]/2
 
    if (lab3[j] != "") {
@@ -6703,7 +6698,7 @@ rlAreaMapTail = function(j){
  
    #browser()
  
-   #cat("MapTail-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+   # cat("MapTail-Overlays L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
   
    # the x,y limits must be based on the biggest area plotted, if the data level 
    #   does not cover the entire area, check the L2 and L3 borders.
@@ -6712,9 +6707,9 @@ rlAreaMapTail = function(j){
 
    rxpoly2 <- rPoly$rxpoly2
    rypoly2 <- rPoly$rypoly2
-   #cat("Code: 6710 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+   # cat("Code: 6699 - rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
  
-   #cat("maptail - areaDatKey:",areaDatKey,"\n")
+   # cat("maptail - areaDatKey:",areaDatKey,"\n")
 
    # ____________labeling and axes_______________
    
@@ -6724,8 +6719,8 @@ rlAreaMapTail = function(j){
    
    panelSelect(panels,1,j)    #  Line 1 and Line 2 - panel 1
    x        <- panelScale()
-   par(xpd=T)
-   xpin     <- par("pin")
+   graphics::par(xpd=T)
+   xpin     <- graphics::par("pin")
  
    #
    #    draw box for title label   (convert inches into points for the panel.)
@@ -6852,12 +6847,12 @@ rlAreaMapTail = function(j){
          mediFlag     <- FALSE
          VisMedi      <- rep(FALSE,lenVisKeys)   # no black median
       }
-      #cat("length VisMedi:",length(VisMedi),"\n")
+      # cat("length VisMedi:",length(VisMedi),"\n")
       
       
      # what is left - the background sub-areas.
      back             <- !(fore | medi | high | NotUsed)                  # background is anything not active and not used.   T/F list
-     #cat("length back:",length(back),"\n")
+     # cat("length back:",length(back),"\n")
      backFlag         <- any(back)
      if (backFlag) {
         backKeys         <- unique(rlAreaVisBorders$Key[back])
@@ -6953,7 +6948,7 @@ rlAreaMapTail = function(j){
       #####
       #
       NTNames <- names(areaNT)
-      #cat("NTNames:",NTNames,"\n")
+      # cat("NTNames:",NTNames,"\n")
       #
       #  Map Labels
       #str(areaNT)
@@ -6994,7 +6989,7 @@ rlAreaMapTail = function(j){
    # no reference values for this type of column. If present - ignor.
    # as we finish i loop - we are in the last group panel
    
-   xpin          <- par("pin")
+   xpin          <- graphics::par("pin")
    lastLab3Space <<- xpin[1]/2
   
    if (lab3[j] != "") {
@@ -7010,6 +7005,7 @@ rlAreaMapTail = function(j){
 #
 #####
 
+# cat("Code: 6997 - Maps loaded.\n")
 
 #####
 #
@@ -7046,14 +7042,14 @@ rlAreaRank = function(j){
      ke    <- length(gsubs)
      laby  <- ke:1
 
-     rsubs <- xDFrame$Rank[gsubs]
+     rsubs <- xDFrame$Rank[gsubs]    # is a number.. of rank of the "dat" structure.   Labels for this group/rows.
      
      pen   <- if(i == medGrp & medGrpSize == 1) 7 else 1:ke
      
      panelSelect(panels, i, j)
      x <- panelScale(rx, c(1-pad, ke+pad))
     
-     Fgsubs <- formatC(rsubs, format="f", width=3, digits=0)
+     Fgsubs <- formatC(rsubs, format="f", width=3, digits=0)   # returns vector of strings. 
      graphics::text(rep(rankstart, ke), laby+.1, Fgsubs, adj=0, cex=Text.cex)
   }
 
@@ -7093,9 +7089,9 @@ rlAreaScatDot = function(j){
    #  col1 and col2 point to the X and Y data values in the statsDFrame data.frame (known here as "dat").
    # 
    #
-   #cat("j=",j,"\n")
-   #cat("parm=\n")
-   #print(parm)
+   # cat("j=",j,"\n")
+   # cat("parm=\n")
+   # print(parm)
    
    wstname     <- names(dat)   # names of columns in statsDFrame
    wstdim      <- dim(dat)
@@ -7116,16 +7112,16 @@ rlAreaScatDot = function(j){
    if (!is.null(parm)) {  # check to see if parm row exists in panelDesc data.frame.
       # Yes, get it's value
       stParm       <- parm[[j]]     # get parm list (if any) for this column
-      #cat(str(stParm))              # what did we get.
+      # cat(str(stParm))              # what did we get.
  
-      # process parm list from panelDesc data frame.   ??? uppercase  check for list.
+      # process parm list from panelDesc data frame.   ??? uppercase check for list.
       if (!is.null(stParm)) {
          # may have a list?
          xm     <- is.na(stParm)   # if any element is NA
          stParm <- stParm[!xm]     # keep only none-NA values.
          
          if ( length(stParm) >= 0 ) {
-            #cat("Have parm list for this glyphic..\n")
+            # cat("Have parm list for this glyphic..\n")
             namesParm   <- names(stParm)   # get list of parm names
             validParm   <- c("line", "line.col", "line.lwd", "line.lty", "f")
             xm          <- match.arg(namesParm,validParm,several.ok=TRUE)
@@ -7140,7 +7136,7 @@ rlAreaScatDot = function(j){
                ErrCntMsg(xmsg)  
                stParm    <- stParm[!xmNA]   # delete bad entries - named items we don't know.
             }
-            #cat("Updated stParm:",paste0(stParm,collapse=", ",sep=""),"\n")
+            # cat("Updated stParm:",paste0(stParm,collapse=", ",sep=""),"\n")
          
             LstParm   <- length(stParm)               # how many entries are left?
             namesParm <- names(stParm)
@@ -7148,22 +7144,22 @@ rlAreaScatDot = function(j){
             if (LstParm > 0) {
                for (inx in c(1:LstParm)) {
                   entName <- namesParm[inx]
-                  #cat("nParm index:",inx,"  name:",entName,"\n")
+                  # cat("nParm index:",inx,"  name:",entName,"\n")
                   cmdstr <- paste0("W",entName," <- stParm$",entName)
-                  #cat("cmdstr:",cmdstr,"\n")
+                  # cat("cmdstr:",cmdstr,"\n")
                   res <- eval(parse(text=cmdstr))
                }
             }
          }
       }
    }
-   if (is.null(Wline) || str_trim(Wline) == "") {
+   if (is.null(Wline) || stringr::str_trim(Wline) == "") {
       # get default
       Wline <- SCD.line
-      #cat("line stype in scatdot set to default = DIAGONAL \n.")
+      # cat("line stype in scatdot set to default = DIAGONAL \n.")
    }
-   #cat("Wline after decode: ",Wline,"\n")   
-   Wline    <- str_to_upper(Wline)
+   # cat("Wline after decode: ",Wline,"\n")   
+   Wline    <- stringr::str_to_upper(Wline)
    xm       <- NULL  #  incase of no match
    xm <-    tryCatch(match.arg(Wline,c("NOLINE","DIAGONAL","LOWESS")), error = function(e) NA)
    xmNA     <- is.na(xm)
@@ -7179,7 +7175,7 @@ rlAreaScatDot = function(j){
    ####  Now set up the default and back fill
       
    if (Wline == "NOLINE") {
-      #cat("set def for NOLINE\n")
+      # cat("set def for NOLINE\n")
       Dline.col  <- SCD.Nline.col
       Dline.lwd  <- SCD.Nline.lwd
       Dline.lty  <- SCD.Nline.lty
@@ -7187,25 +7183,25 @@ rlAreaScatDot = function(j){
    }
       
    if (Wline == "DIAGONAL") {
-      #cat("set def for diagonal\n")
+      # cat("set def for diagonal\n")
       Dline.col  <- SCD.Dline.col
       Dline.lwd  <- SCD.Dline.lwd
       Dline.lty  <- SCD.Dline.lty
       Dline.f    <- SCD.Dline.f
    }
    if (Wline == "LOWESS") {
-      #cat("set def for lowess\n")
+      # cat("set def for lowess\n")
       Dline.col  <- SCD.Lline.col
       Dline.lwd  <- SCD.Lline.lwd
       Dline.lty  <- SCD.Lline.lty
       Dline.f	 <- SCD.Lline.f
    }
   
-   #print(Wline)
-   #print(Wline.col)
-   #print(Wline.lwd)
-   #print(Wline.lty)
-   #print(Wline.f)
+   # print(Wline)
+   # print(Wline.col)
+   # print(Wline.lwd)
+   # print(Wline.lty)
+   # print(Wline.f)
 
    #  Over lay defaults on parameters not provided by user.
    if (is.null(Wline.col))  Wline.col  <- Dline.col
@@ -7214,24 +7210,22 @@ rlAreaScatDot = function(j){
    if (is.null(Wline.f))    Wline.f    <- Dline.f
    WLOWf <- Wline.f
    
-   #print(Wline)
-   #print(Wline.col)
-   #print(Wline.lwd)
-   #print(Wline.lty)
-   #print(WLOWf)
+   # print(Wline)
+   # print(Wline.col)
+   # print(Wline.lwd)
+   # print(Wline.lty)
+   # print(WLOWf)
    
    #  All of the system default parms + panelDesc parm list are process and saved.
    
-   #  All of the system default parms + panelDesc parm list are process and saved.
+   Wline.col   <- stringr::str_to_lower(Wline.col)
    
-   Wline.col   <- str_to_lower(Wline.col)
-   
-   #cat("Wline type:",Wline,"  Wline.col:",Wline.col,"  Wline.lwd:",Wline.lwd,"  Wline.lty:",Wline.lty,"  f:",WLOWf,"\n")
+   # cat("Wline type:",Wline,"  Wline.col:",Wline.col,"  Wline.lwd:",Wline.lwd,"  Wline.lty:",Wline.lty,"  f:",WLOWf,"\n")
    
    # "col1"
    stColName1  <- wstname[col1[j]]
    pdUmsg      <- "(X coordinates)"
-   #cat("stColName1:",stColName1,"\n")
+   # cat("stColName1:",stColName1,"\n")
    
    xr          <- CheckPDCol('col1', 'SCATDOT', col1[j], stColName1, j, 1, wstMax, dat, pdUmsg)
    
@@ -7240,16 +7234,16 @@ rlAreaScatDot = function(j){
    # "col2"
    stColName2  <- wstname[col2[j]]
    pdUmsg      <- "(Y coordinates)"
-   #cat("stColName2:",stColName2,"\n")
+   # cat("stColName2:",stColName2,"\n")
    
    xr          <- CheckPDCol('col2', 'SCATDOT', col2[j], stColName2, j, 2, wstMax, dat, pdUmsg)
    
    if (xr$Err) { ErrFnd <- TRUE } else { 
         xdat2 <- xr$Dat
-        #cat("len y:",length(xdat2),"\n")
+        # cat("len y:",length(xdat2),"\n")
       }
    
-   #cat("ErrFnd in SCATDOT:",ErrFnd,"\n")
+   # cat("ErrFnd in SCATDOT:",ErrFnd,"\n")
    if (ErrFnd) return ()
   
    # check the data. 
@@ -7262,7 +7256,6 @@ rlAreaScatDot = function(j){
    workSCD           <- data.frame(x=xdat1,y=xdat2)      # get x and y data from the statsDFrame.
 
    # No missing data, no duplicate areas, can have duplicate X values..
- 
  
    # related data for LOWESS
        
@@ -7292,10 +7285,10 @@ rlAreaScatDot = function(j){
    rPad        <- TRUE
    
    rx          <- range(workSCD$x,na.rm=TRUE)       # range of X values
-   #cat("scatdot-rx:",rx,"\n")
+   # cat("scatdot-rx:",rx,"\n")
    
    #rx         <- SCD.xsc*diff(rx)*c(-.5,.5)+mean(rx)     # min to max range with expansion factors.
-   #cat("scatdot-rx after padding:",rx,"\n")
+   # cat("scatdot-rx after padding:",rx,"\n")
    
    # y scaling                  
    ry          <- range(workSCD$y,na.rm=TRUE)       # range of Y values
@@ -7311,13 +7304,13 @@ rlAreaScatDot = function(j){
       # We have xdat1 = x point, xdat2 = y points, f = 2/3 (def) but can be overridden
       
       # LOWESS Versionl line points PREP
-      Pred       <- lowess(workSCD$x, workSCD$y, f = WLOWf)
+      Pred       <- stats::lowess(workSCD$x, workSCD$y, f = WLOWf)
       workSCD$px <- Pred$x
       workSCD$py <- Pred$y
    }
    
-   #print(workSCD)
-   #cat("Sorting SCATDOT data.frames after all lines information established.\n")
+   # print(workSCD)
+   # cat("Sorting SCATDOT data.frames after all lines information established.\n")
    
    # ____________titles and labeling axes_______________
  
@@ -7335,7 +7328,7 @@ rlAreaScatDot = function(j){
    rx          <- Res$rx
    ry          <- Res$ry
    
-   #cat("ScatDot-Result staggering:",staggering,"  staggered:",staggered,"\n")
+   # cat("ScatDot-Result staggering:",staggering,"  staggered:",staggered,"\n")
    
    #
    #####
@@ -7344,19 +7337,19 @@ rlAreaScatDot = function(j){
  
    # in the ordered list, the median should be 26 of 51 items.  changed because of generalization.
       
-   oldpar      <- par(lend="butt")
+   oldpar      <- graphics::par(lend="butt")
    
    #  build each panel for scatter plot dots
    
    # Y axis & text - can do once for all  
    
    YAxis_cex <- TS.Axis.cex * 0.75
-   xPs       <- par("ps")
+   xPs       <- graphics::par("ps")
    xHPsLU    <- graphics::strheight("00000",cex=1,units="user")
    xHDesPsLU <- graphics::strheight("00000",cex=YAxis_cex,units="user")
    xDifHLU   <- xHPsLU - xHDesPsLU
    YAxis_adj <- xDifHLU / xHPsLU
-   #cat("YAxis adjustment - YAxis_adj:",YAxis_adj,"  YAxis_cex:",YAxis_cex,"\n")
+   # cat("YAxis adjustment - YAxis_adj:",YAxis_adj,"  YAxis_cex:",YAxis_cex,"\n")
      
    for (i in 1:numGrps) {  # groups from 1 to 5, 6, 7 to 11   ##  6 is the median group.
      
@@ -7392,7 +7385,7 @@ rlAreaScatDot = function(j){
       # get list of active rows in this group/row
       gsubs <- ib[i]:ie[i]                  # get beginning to end index row number in this group  
       ke    <- length(gsubs)                # get number of rows in group  (5 or 1)  
-      #cat("ke:",ke,"  gsubs:",gsubs,"\n")
+      # cat("ke:",ke,"  gsubs:",gsubs,"\n")
       
       # Get color indexes.
       # adjust if median group      
@@ -7495,11 +7488,11 @@ rlAreaScatDot = function(j){
               workSCD$bg[m]   <- mstColors[pen[k]]       # set approvate color to circle fill.
               workSCD$col[m]  <- SCD.Fg.pch.col          # color of outline of symbol
               workSCD$lwd[m]  <- SCD.Fg.pch.lwd          # weight of outline of symbol
-              #cat("colored dot at :",workSCD$x[m]," ",workSCD$y[m],"  m=",m,"\n")      
+              # cat("colored dot at :",workSCD$x[m]," ",workSCD$y[m],"  m=",m,"\n")      
           }
           wS  <- workSCD[order(workSCD$cex,decreasing=FALSE),]  # sort by text size to get active point on top.
           # plot all points by size, others first, colored and median last. 
-          #print(wS)
+          # print(wS)
       }
       #  Have lists of points to plot in wS
       #  Since the points we plot must have outlines and have fill colors, 
@@ -7514,15 +7507,15 @@ rlAreaScatDot = function(j){
       saveAtRy <- atRy  # save for possible use on median panel.
         
    }   # end of i loop
-   par(oldpar)
+   graphics::par(oldpar)
    # ____________________________PanelOutline____________________
  
    groupPanelOutline(panelGroup,j)
- 
 }
 
 ############################################
 
+# cat("Code: 7507 - ScatDot plot loaded.\n")
 
 ####
 #
@@ -7570,11 +7563,11 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
    
    # "col1"
    stColName1  <- wstname[col1[j]]
-   #print("col1")
+   # print("col1")
    
    pdUmsg      <- "(First Segment Data Column)"
    xr          <- CheckPDColnCN('col1', gName, col1[j], stColName1, j, 1, wstMax, dat, pdUmsg)
-   #print(xr)
+   # print(xr)
    if (xr$Err) { 
       ErrFnd <- TRUE 
    #} else { 
@@ -7583,11 +7576,11 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
         
    # "col2"
    stColName2  <- wstname[col2[j]]
-   #print("col2")
+   # print("col2")
    
    pdUmsg      <- "(Last Segment Data Column)"
    xr          <- CheckPDColnCN('col2', gName, col2[j], stColName2, j, 2, wstMax, dat, pdUmsg)
-   #print(xr)
+   # print(xr)
    if (xr$Err) {
       ErrFnd <- TRUE 
    #} else { 
@@ -7670,7 +7663,7 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
    #  Reorder the DataList to match.  The assumption was that the input data order for the panelData 
    #  matched the order of the original data in the statsDFrame.
    #
-   #cat("SBBar - areaDatKey:",areaDatKey,"\n")
+   # cat("SBBar - areaDatKey:",areaDatKey,"\n")
 
    
    workMatSB   <- as.matrix(workSB)
@@ -7699,7 +7692,7 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
       lPad     <- FALSE
    }
 
-   #cat("seg/normbar-rx:",rx,"\n")
+   # cat("seg/normbar-rx:",rx,"\n")
 
    ry          <- c(0,1)
    
@@ -7734,20 +7727,20 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
    rx          <- Res$rx
    ry          <- Res$ry
   
-   #cat("SN-staggering:",staggering,"  Result staggered:",staggered,"\n")
+   # cat("SN-staggering:",staggering,"  Result staggered:",staggered,"\n")
   
    #
    #####
 
    # ___________________drawing loop_____________________
 
-   oldpar      <- par(lend="butt")
+   oldpar      <- graphics::par(lend="butt")
    
    #  build each panel for each stacked bar set.
  
-   #printPar()
+   # printPar()
 
-   #print(paste0("rx:",paste0(rx,collapse=" "),"  ry:",paste0(c(1-pad,ke+pad),collapse=" ")))
+   # print(paste0("rx:",paste0(rx,collapse=" "),"  ry:",paste0(c(1-pad,ke+pad),collapse=" ")))
  
    for (i in 1:numGrps)  {
      
@@ -7803,7 +7796,7 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
                      
                      wYPht <- wYPht + wYPdelta
                      wYP2  <- wYP + ((pyPat * wYPht) * ksc )
-                     #print(paste0("Seg:",ik,"  wYP2:",wYP2))
+                     # print(paste0("Seg:",ik,"  wYP2:",wYP2))
                      
                  } else {
                      # fixed height bar segments
@@ -7861,12 +7854,14 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
       
    } # end of i loop
   
-   par(oldpar)
+   graphics::par(oldpar)
    # ____________________________PanelOutline____________________
 
    groupPanelOutline(panelGroup,j)
 
 }
+
+# cat("Code: 7853 - Normal and Segmented Bar glyph loaded.\n")
 
 ###################################################
 #
@@ -7899,7 +7894,7 @@ rlAreaSegBar = function(j, SBnorm=FALSE) {
 
 #####
 #
-# type = TS and TSConf   =====================================================
+# type = ts and tsconf   =====================================================
 #
 # rlAreaTSConf  (Time Series with and without confidence interval in panel groups)
 #
@@ -7919,7 +7914,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    #    If TRUE, do the confidence band using y-low, y-med, and y-high values (columns 2, 3, 4)
    #    If FALSE, only plot the Y value (column 2)
    #
-   #cat("TS - areaDatKey:",areaDatKey,"\n")
+   # cat("TS - areaDatKey:",areaDatKey,"\n")
 
    ErrFnd               <- FALSE
    TSMsgLabel           <- "TS"
@@ -8008,7 +8003,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    xAxisDates       <- NULL
    if (!is.null(attr(DataList,"xIsDate"))) {   # an attr for "xIsDate" was set.
       TS_Attr <- attr(DataList,"xIsDate")   # get copy of attribute
-      #cat("TS_Attr in TS Glyph:",TS_Attr,"\n")
+      # cat("TS_Attr in TS Glyph:",TS_Attr,"\n")
       
       if (methods::is(TS_Attr,"logical")) {
          # check logical value
@@ -8028,20 +8023,26 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
       }
    }
    attr(DataList,"xIsDate") <- TS_Attr
-   #cat("TS_Attr:",TS_Attr,"  axisMethod:",axisMethod,"\n")
+   # cat("TS_Attr:",TS_Attr,"  axisMethod:",axisMethod,"\n")
    
    
+   # Bad assumption - key should not be used.
    
    # The array has been restored to it's original structure (numerical array)
-   #areaDatKey <- row.names(DataList) # TEMP
-   areaTSKey   <- row.names(DataList) #
-   workDArr    <- DataList[areaDatKey,,]   # transfer the data to workDArr and reorder. 4/2024
-   wDArrNames  <- rownames(workDArr)  # get rownames
-   dimDArr     <- dim(workDArr)
+   #areaDatKey <- row.names(DataList)      # TEMP
    
- 
+   #areaTSKey   <- row.names(DataList)      #
+   #workDArr    <- DataList[areaDatKey,,]   # transfer the data to workDArr and reorder. 4/2024
+   #wDArrNames  <- rownames(workDArr)       # get rownames
+   #dimDArr     <- dim(workDArr)
+   
+   TSNames     <- row.names(DataList)
+   zTSord      <- match(dat$RN, TSNames)
+   workDArr    <- DataList[zTSord,,]        # workDArr is sorted.
+   wDArrNames  <- rownames(workDArr)
+   
    #   
-   # cat("TS Scaling- Code: 8039 \n")
+   # cat("TS Scaling- Code: 8034 \n")
    #_______________Scaling of TS Axis____________
    
    # x scaling
@@ -8063,15 +8064,15 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    }
    saveRy <- ry
    
-   #cat("ts-ry:",ry,"\n")
-   #cat("sc:",sc,"\n")
-   #cat("diff:",abs(ry[2]-ry[1]),"\n")
-   #cat("Spliting:",sc*abs(ry[2]-ry[1])*c(-.5,.5),"\n")
-   #cat("mean:",mean(ry),"\n")
+   # cat("ts-ry:",ry,"\n")
+   # cat("sc:",sc,"\n")
+   # cat("diff:",abs(ry[2]-ry[1]),"\n")
+   # cat("Spliting:",sc*abs(ry[2]-ry[1])*c(-.5,.5),"\n")
+   # cat("mean:",mean(ry),"\n")
    
    
    # sc=1.08, mean - center of y graph.  sc(1.08) * width of graph * -.5 and .5 (enlarge by 50% on top of the original 0.04 times.
-   nry         <- sc*abs(ry[2]-ry[1])*c(-.5,.5) + mean(ry)         # min to max range with expansion factors.
+   nry       <- sc*abs(ry[2]-ry[1])*c(-.5,.5) + mean(ry)         # min to max range with expansion factors.
    #              1) get the width of the Y points (all).
    #              2) increase the width by 1.08 (sc)
    #              3) split the width around the mean point of the y points.
@@ -8079,7 +8080,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    #
    
    # cat("ts-nry after padding:",nry,"\n")
-   ry <-nry
+   ry       <-nry
    
    #_______________Find range/min/max of median row line/high/low.____________
    
@@ -8098,14 +8099,14 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    
    # ____________column titles and axis_______________
 
-   #####
+   ####
    #
    #  Setup and draw top and bottom titles and axis for column     TS Glyph
    #
    #  TS, TS-Conf no padding on either side - graph starts at first data point to last data point.
    #   Check out this effects labeling.
    #
-   #cat("Calling DrawXAxisAndTitles.  TS_Attr=",TS_Attr,"\n")
+   # cat("Calling DrawXAxisAndTitles.  TS_Attr=",TS_Attr,"\n")
    Res         <- DrawXAxisAndTitles(j, panels, rx, ry, reftxt, refval, leftPad=lPad, 
                   rightPad=rPad, YAxisPad=TRUE, FDate=TS_Attr, locAxisMethod=axisMethod)
 
@@ -8113,21 +8114,21 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
    rx          <- Res$rx
    ry          <- Res$ry
   
-   #cat("Ts-Result staggering:",staggering,"  staggered:",staggered,"\n")
+   # cat("Ts-Result staggering:",staggering,"  staggered:",staggered,"\n")
   
    #
    #####
 
-   oldpar      <- par(lend="butt")
+   oldpar    <- graphics::par(lend="butt")
  
    #####  Can be done once for all interations of loop.
    YAxis_cex <- TS.Axis.cex * 0.75
-   xPs       <- par("ps")
+   xPs       <- graphics::par("ps")
    xHPsLU    <- graphics::strheight("00000",cex=1,units="user")
    xHDesPsLU <- graphics::strheight("00000",cex=YAxis_cex,units="user")
    xDifHLU   <- xHPsLU - xHDesPsLU
    YAxis_adj <- xDifHLU / xHPsLU
-   #cat("YAxis adjustment - YAxis_adj:",YAxis_adj,"  YAxis_cex:",YAxis_cex,"\n")
+   # cat("YAxis adjustment - YAxis_adj:",YAxis_adj,"  YAxis_cex:",YAxis_cex,"\n")
   
    # _______________drawing loop (panels 1->11)___________________
 
@@ -8157,8 +8158,9 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
          }
       } 
      
-      gnams <- areaDatKey[gsubs]            # get list of area ids for data group of data. (row.names of original data order.)
+      #gnams <- areaDatKey[gsubs]            # get list of area ids for data group of data. (row.names of original data order.)
                                             # translate to area Keys.  (gnams are the keys in the new order.)
+      gnams  <- wDArrNames[gsubs]
 
       # adjust if middle group      
     
@@ -8243,12 +8245,12 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
             cY1 <- c(wDArr[,3],NA)     # lower Y data points
             cY2 <- c(wDArr[,4],NA)     # upper Y data points
                   
-            #cat("cY1:",paste0(cY1,collapse=", "),"\n")
-            #cat("cY2:",paste0(cY2,collapse=", "),"\n")
-            #cat("cX :",paste0(wX ,collapse=", "),"\n")
+            # cat("cY1:",paste0(cY1,collapse=", "),"\n")
+            # cat("cY2:",paste0(cY2,collapse=", "),"\n")
+            # cat("cX :",paste0(wX ,collapse=", "),"\n")
          
             Breaks  <- is.na(c(cX+cY1+cY2))
-            #cat("Breaks:",paste0(Breaks,collapse=", "),"\n")
+            # cat("Breaks:",paste0(Breaks,collapse=", "),"\n")
             
             # we found at least one NA in the data.
             # at X find the L and U Ys.
@@ -8257,13 +8259,13 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
             wY1z <- MMVSplit(cY1,Breaks)
             wY2z <- MMVSplit(cY2,Breaks)
          
-            #cat("wY1z:",paste0(wY1z,collapse=", "),"\n")
-            #cat("wY2z:",paste0(wY2z,collapse=", "),"\n")
-            #cat("wXz :",paste0(wXz ,collapse=", "),"\n")
+            # cat("wY1z:",paste0(wY1z,collapse=", "),"\n")
+            # cat("wY2z:",paste0(wY2z,collapse=", "),"\n")
+            # cat("wXz :",paste0(wXz ,collapse=", "),"\n")
         
             vL <- length(wXz)  # if only one list - then length = 15 installed of one. *****************
         
-            #cat("vL:",vL,"\n")
+            # cat("vL:",vL,"\n")
         
             #  draw confidence shades
             for (ind in c(1:vL)) {
@@ -8272,8 +8274,8 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
                   yL <- c(wY1z[[ind]], rev(wY2z[[ind]]), NA)
                   wPoly <- data.frame(x=xL, y=yL)
                   
-                  #print(wPoly)
-                  #cat("colors:", mstColors[kp+12],"  kp+12:", kp+12,"\n")
+                  # print(wPoly)
+                  # cat("colors:", mstColors[kp+12],"  kp+12:", kp+12,"\n")
                    
                   graphics::polygon(wPoly, col=mstColors[kp+12], border=NA)
                }
@@ -8293,10 +8295,10 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
          
          kp = pen[k]          # color number
       
-         wDArr <- workDArr[gnams[k],,]
+         wDArr  <- workDArr[gnams[k],,]
          
-         wX   <- wDArr[,1]    # get X values for line and polygon plots
-     	 wLine = wDArr[,2]    #  Get Y values for mid line 
+         wX     <- wDArr[,1]    # get X values for line and polygon plots
+     	 wLine  <- wDArr[,2]    #  Get Y values for mid line 
               
          #  Plot mid Line
          graphics::lines(wX,wLine,col=mstColors[kp],lwd=TS.lwd)
@@ -8309,12 +8311,14 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
       saveAtRy <- atRy
    }
    axisMethod  <- SaveAMethod    # restore axis Method for next column.
-   par(oldpar)
+   graphics::par(oldpar)
    # ____________________________PanelOutline____________________
 
    groupPanelOutline(panelGroup,j)
 
 }     # end of TS Glyphs
+
+# cat("Code: 8310 - Time Series Loaded.\n")
 
 #####
 #
@@ -8325,7 +8329,7 @@ rlAreaTSConf = function(j,dataNam,conf=TRUE){
 #############################
 #############################
 
-#print("Glyph functions loaded")
+# print("Glyph functions loaded")
 
 #############################
 #############################
@@ -8397,7 +8401,7 @@ AliasToIndex <- function(xR,aNAIAlias) {
 
 ###
 #
-#_________ function to pattern match alias names
+#_________ function to pattern match alias names    (Not Used 3.1.1)
 #
 AliasToKey <- function(xR,aNAI) {
    #   xR is the string list, aNAI is the Name Table 
@@ -8553,12 +8557,12 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
      
      gc4int  <- "^[-+]?[ ]?[0-9]{1,3}(,[0-9]{3})*$|^[-+]?[ ]?[0-9]*$"                          # is integer number with commas
      
-     #cat("colValues:",paste0(colValues,collapse=", "),"\n")
-     #cat("varName  :",varName,"\n")
-     #cat("varNum   :",varNum,"\n")
-     #cat("gNameList:",paste0(gNameList,collapse=", "),"\n")
-     #cat("wSDFNames:",wSDFNames,"\n")
-     #cat("len_sCN  :",len_sCN,"\n")
+     # cat("colValues:",paste0(colValues,collapse=", "),"\n")
+     # cat("varName  :",varName,"\n")
+     # cat("varNum   :",varNum,"\n")
+     # cat("gNameList:",paste0(gNameList,collapse=", "),"\n")
+     # cat("wSDFNames:",wSDFNames,"\n")
+     # cat("len_sCN  :",len_sCN,"\n")
      #
      # Routine is used to check out the information provided by the user.  If 
      # vector contains a number or a character string, it will validate the number against
@@ -8605,7 +8609,7 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
      #  Value:  rcol (length = the called vector to check.)
      #          
      #
-     #cat("len_sCN:",len_sCN,"  varNum:",varNum,"\n")
+     # cat("len_sCN:",len_sCN,"  varNum:",varNum,"\n")
      
      ErrFnd      <- FALSE                    # no errors indicator
      
@@ -8613,8 +8617,8 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
      xwcol       <- ClnStr2(xwcol)           # clean strings.
      l_xwcol     <- length(colValues)        # length of column list to check - variable contents vector
      l_gNameList <- length(gNameList)        # length of "type" list (number of glyphs)
-     #cat("CheckColx:  colValues:",paste0(xwcol,collapse=", ",sep=""),"\n",
-     #   "            len:",l_xwcol,"  len gNameList:",l_gNameList,"\n")
+     # cat("CheckColx:  colValues:",paste0(xwcol,collapse=", ",sep=""),"\n",
+     #    "            len:",l_xwcol,"  len gNameList:",l_gNameList,"\n")
          
      res         <- rep(0,l_xwcol)          # results column number list. Set Default, no match
 
@@ -8623,7 +8627,7 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
      } else {
          FvarNum <- "0"
      }
-     #cat("FvarNum:",FvarNum,"\n")
+     # cat("FvarNum:",FvarNum,"\n")
         
      #
      if (l_xwcol != l_gNameList) {
@@ -8631,7 +8635,7 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
         if (l_gNameList == 0)  { 
            # gNameList is absent - possible sortVar or rowColNames arguments.
            l_gNameList <- l_xwcol
-     	   #cat("l_gNameList was length 0.\n")
+     	   # cat("l_gNameList was length 0.\n")
      	   
         } else {
            # error - they should be the same length, possible type-o in variable list.
@@ -8641,8 +8645,8 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
         }
      }
     
-     #cat("l_xwcol:",l_xwcol,"  len_sCN:",len_sCN,"  varNum:",varNum," FvarNum:",FvarNum,"\n")
-     #print(wSDFNames)
+     # cat("l_xwcol:",l_xwcol,"  len_sCN:",len_sCN,"  varNum:",varNum," FvarNum:",FvarNum,"\n")
+     # print(wSDFNames)
      
      res <- rep(0,l_xwcol)  # one per value in panelDesc column (col1).
      
@@ -8658,7 +8662,7 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
               # values to check
               
               xm       <- match(xycol, wSDFNames)   # check match.
-              #cat("pdColNum:",pdColNum,"  value:",xycol,"  xm:",xm,"\n")
+              # cat("pdColNum:",pdColNum,"  value:",xycol,"  xm:",xm,"\n")
                   
               if (is.na(xm)) {
                  # no match
@@ -8680,12 +8684,12 @@ CheckColx2 <- function(colValues, varName, varNum, gNameList, wSDFNames, len_sCN
         }
      #}
      # validate
-     #print("xwcol")
-     #print(xwcol)
-     #print("res")
-     #print(res)
-     #cat("wSDFNames:",wSDFNames,"\n")
-     #cat("len_sCN:",len_sCN,"\n")
+     # print("xwcol")
+     # print(xwcol)
+     # print("res")
+     # print(res)
+     # cat("wSDFNames:",wSDFNames,"\n")
+     # cat("len_sCN:",len_sCN,"\n")
     
      return(res)
 }
@@ -8737,8 +8741,8 @@ CheckParmColx <- function(colNames, parmCode, wSDFNames, len_wSDFNames)
         
         res      <- rep(0,l_wcol)   # default results if none found.
      
-        #print("parameter value to check:")
-        #print(xColNames)
+        # print("parameter value to check:")
+        # print(xColNames)
            
         # Loop through list and check each one based on its type.
         for (ind in c(1:l_wcol)) {
@@ -8769,7 +8773,7 @@ CheckParmColx <- function(colNames, parmCode, wSDFNames, len_wSDFNames)
        
      }  # end of zero length check
      
-     #cat("CheckParmColx Results:",paste0(res,collapse=", "),"\n")
+     # cat("CheckParmColx Results:",paste0(res,collapse=", "),"\n")
      return(res)
    }        
 
@@ -8800,19 +8804,19 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
         xn     <- formatC(pdVarNum,format="f",width=1,digits=0)
         
    
-        #cat("CheckNum - gName:",gName," pdVarNum:",pdVarNum," pdColNum:", pdColNum," pdVarName:",pdVarName,"\n")
-        #cat("     stColName:",stColName," pdUsage:",pdUsage," xn:",xn," length(xd):",length(xd),"\n")
-        #cat("     xd:",paste0(xd,collapse=", "),"\n")
+        # cat("CheckNum - gName:",gName," pdVarNum:",pdVarNum," pdColNum:", pdColNum," pdVarName:",pdVarName,"\n")
+        # cat("     stColName:",stColName," pdUsage:",pdUsage," xn:",xn," length(xd):",length(xd),"\n")
+        # cat("     xd:",paste0(xd,collapse=", "),"\n")
    
         if (length(xd) == 0) {
            # invalid vector - length = 0 -> no data
-           ErrFnd   <- errCntMsg(paste0("***02", xn, "D ", gName, " gCol:", pdColNum, " The ", stColName, 
+           ErrFnd   <- errCntMsg(paste0("***02", xn, "D ", gName, " Col:", pdColNum, " The ", stColName, 
                               " data column in the ", sDFName, "\n",
                               "        data frame does not contain any data. Data vector length has length of zero. ", pdUsage,"\n"))
            
            # can't process or check return NULL vector
            xdr      <- xd    # return short vector
-           #print("zero length vector")
+           # print("zero length vector")
         } else {
   
            xdr    <- rep(NA,length(xd))    # default results - vector of NAs.
@@ -8826,19 +8830,19 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
           
            if (is.factor(xd)) {
               xd <- as.character(xd)    # convert factors to characters
-              #print("converted from factor to character")
+              # print("converted from factor to character")
            }
   
            # check for missing values in the vector
            #   Check # 1 - all missing
            if (all(is.na(xd))) {
               # no data can be converted.  ALL NA.  could be all blanks.   
-              ErrFnd    <- errCntMsg(paste0("***02", xn, "A ", gName, " gCol:", pdColNum, " The data provided in the ", 
+              ErrFnd    <- errCntMsg(paste0("***02", xn, "A ", gName, " Col:", pdColNum, " The data provided in the ", 
                                     stColName, "\n",
                                   "        column of the ", sDFName, " data frame does not contain any numerical data.\n",
                                   "        No rows will be drawn. ", pdUsage,"\n"))
               # return all NA vector
-              #print("all are NA")
+              # print("all are NA")
            } else {        
               #   have list of numbers in xd from caller.
               #   They are not ALL NA, so their may be some numbers to check
@@ -8851,35 +8855,37 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
                  lenxd     <- length(xd)
                  seqxd     <- seq(1,lenxd)          # row numbers:   1 to end
                  BadSeqNum <- seqxd[is.na(xd)]	    # get the position number (row) of the number 
-                 # one or more entires are NA (missing) - This check should be done before manipulating the vectors.
-                 #    check is primarily if user leaves entries missing, not is the translation to numeric leaves them NA.
-                 errCntMsg(paste0("***02", xn, "B ", gName, " gCol:", pdColNum, " The ", stColName, 
-                                  " data column in the ", sDFName,"\n",
-                                  "        data frame contains one or more missing values. Rows with missing values will\n",
-                                  "        not be drawn. ", pdUsage,"\n"))
-                 ListIDs <- areaDatIDNames[BadSeqNum]
-                 
-                 xmsg   <- paste0("***02", xn, "C ", gName, " gCol:", pdColNum, 
-                                  "   The row numbers with missing data are:\n")
+                 ListIDs   <- areaDatIDNames[BadSeqNum]
+                                 # one or more entires are NA (missing) - This check should be done before manipulating the vectors.
+                 #xmsg   <- paste0("***02", xn, "C ", gName, " Col:", pdColNum, 
+                 #                 "   The row numbers with missing data are:\n")
+                 xmsgT     <- ""
                  for (ic in seq(from=1,to=length(ListIDs),by=10)) {
                      icend <- ic + 9    # put 10 entries per line.
                      if (icend > length(ListIDs))  icend <- length(ListIDs)
-                     xmsg <- paste0(xmsg,paste0(ListIDs[ic:icend],collapse=", "),"\n")
+                     xmsg <- paste0("        ",paste0(ListIDs[ic:icend],collapse=", "),"\n")
                      ic = icend + 1
+                     xmsgT <- paste0(xmsgT,xmsg)
                  }
-                 warning(xmsg, call.=FALSE)
-                 #print("one or more are NA")
+                               #    check is primarily if user leaves entries missing, not is the translation to numeric leaves them NA.
+                 errCntMsg(paste0("***02", xn, "B ", gName, " Col:", pdColNum, " The ", stColName, 
+                                  " data column in the ", sDFName," data frame\n",
+                                  "        contains one or more missing values. The following ",pdUsage," rows will\n",
+                                  "        not be drawn:\n",xmsgT))
+                 
+                 # warning(xmsg, call.=FALSE)
+                 # print("one or more are NA")
               }
       
               # we may have missing values, but we can still check the vector.
   
               if (!methods::is(xd,"numeric")) { 
-                 #print("not numeric")
+                 # print("not numeric")
                  # no numeric - better be character type..
 
                  if (methods::is(xd,"character")) {
                  
-                    #print("character")
+                    # print("character")
                     # its character (from factor or has always been character)
            
                     # check character string for valid numerical format and allow for commas.  
@@ -8888,7 +8894,7 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
          
                     x   <- gregexpr("^[ \t]*[+-]?((([0-9]{1,3}[,])?([0-9]{3}[,])*[0-9]{3})|([0-9]*))?(([.][0-9]*)|)([eE][-+]?[0-9]+)?[ \t]*$",xd)      
                        # verify characters are all numeric  (not scientific notation)
-                    #cat("x from gregexpr:",paste0(unlist(x),collapse=" ",sep=""),"\n")
+                    # cat("x from gregexpr:",paste0(unlist(x),collapse=" ",sep=""),"\n")
                     # check character string for invalid number format.
                     
                       #
@@ -8972,7 +8978,7 @@ CheckNum <- function(xd, gName, pdVarNum, pdColNum, pdVarName, stColName, pdUsag
              
                     # not a numeric or character type vector  
              
-                    ErrFnd <- errCntMsg(paste0("***02", xn, "9 ", gName, " gCol:", pdColNum, " The ", stColName, 
+                    ErrFnd <- errCntMsg(paste0("***02", xn, "9 ", gName, " Col:", pdColNum, " The ", stColName, 
                                    " data column in the ", sDFName, "\n",
                                    "        data frame is not a character or numeric vector. ", pdUsage,"\n"))
           
@@ -9018,18 +9024,18 @@ CheckPDCol <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarNum,
    wstname   <- names(stDat)
    wstMax    <- dim(stDat)[2]
 
-   #cat("CheckPDCol-pdVarName:",pdVarName," gName:",gName," stColNum:",stColNum," stColName:",stColName," gColNum:",gColNum,"\n")
-   #cat("     pdVarNum:",pdVarNum," stMaxColNum:", stMaxColNum," pdUsage:",pdUsage," xn:",xn," pdColNum:",pdColNum,"\n")
-   #cat("     stDat:",paste0(stDat,collapse=", "),"\n")
-   #cat("     wstname:",paste0(wstname,collapse=", "),"\n")
-   #cat("     wstMax :",wstMax,"\n")
+   # cat("CheckPDCol-pdVarName:",pdVarName," gName:",gName," stColNum:",stColNum," stColName:",stColName," ColNum:",gColNum,"\n")
+   # cat("     pdVarNum:",pdVarNum," stMaxColNum:", stMaxColNum," pdUsage:",pdUsage," xn:",xn," pdColNum:",pdColNum,"\n")
+   # cat("     stDat:",paste0(stDat,collapse=", "),"\n")
+   # cat("     wstname:",paste0(wstname,collapse=", "),"\n")
+   # cat("     wstMax :",wstMax,"\n")
    
  
    if (is.na(match(pdVarName,PDUsed))) {
       #  pdVarName is not present in the panelDesc data.frame variable lists.
       
       xr$Err  <- TRUE
-      errCntMsg(paste0("***02",xn,"5 ", gName," gCol:",pdColNum," The required panelDesc variable \n",
+      errCntMsg(paste0("***02",xn,"5 ", gName," Col:",pdColNum," The required panelDesc variable \n",
                         "        ",pdVarName, " is missing from the ", pDName, " data.frame. ", pdUsage,"\n"))
    }
 
@@ -9037,7 +9043,7 @@ CheckPDCol <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarNum,
       # no error found yet....
       if (is.na(stColNum)) {  # missing stColName 
          xr$Err   <- TRUE
-         errCntMsg(paste0("***02", xn, "4 ", gName, " gCol:", pdColNum, " The specified ",sDFName, 
+         errCntMsg(paste0("***02", xn, "4 ", gName, " Col:", pdColNum, " The specified ",sDFName, 
                             " column \n",
                             "         name or number in ", pdVarName, " panelDesc column (",stColName, 
                             ") does \n",
@@ -9052,8 +9058,8 @@ CheckPDCol <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarNum,
          }
       }   
    }
-   #print("CheckPDCol - Output")
-   #print(xr)
+   # print("CheckPDCol - Output")
+   # print(xr)
    return(xr)
 }
 #
@@ -9084,7 +9090,7 @@ CheckPDColnCN <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarN
    if (is.na(match(pdVarName, PDUsed))) {
 
       xr$Err  <- TRUE
-      errCntMsg(paste0("***02",xn,"5 ", gName, " gCol:", pdColNum, " The required panelDesc variable ", pdVarName, " is missing\n",
+      errCntMsg(paste0("***02",xn,"5 ", gName, " Col:", pdColNum, " The required panelDesc variable ", pdVarName, " is missing\n",
                         "        from the ", pDName, " data.frame. ", pdUsage,"\n"))
    }
    if (!xr$Err) { 
@@ -9093,14 +9099,14 @@ CheckPDColnCN <- function(pdVarName, gName, stColNum, stColName, gColNum, pdVarN
       # valid by CheckColx function earlier.
       if ( is.na(stColNum) ) {
          xr$Err   <- TRUE
-         errCntMsg(paste0("***02",xn,"5 ", gName, " gCol:", pdColNum, " The specified ",sDFName,
+         errCntMsg(paste0("***02",xn,"5 ", gName, " Col:", pdColNum, " The specified ",sDFName,
                            " column name or number in \n",
                            "        ",pdVarName, " panelDesc column (", stColName, 
                            ") does not exist or is out of range. ", pdUsage,"\n"))
       } else {       
          if (  stColNum == 0 ) {  # invalid name or column number in statsDFrame
             xr$Err  <- TRUE
-            errCntMsg(paste0("***02",xn,"6 ", gName, " gCol:", pdColNum, 
+            errCntMsg(paste0("***02",xn,"6 ", gName, " Col:", pdColNum, 
                               " The specified column name or number in ", pdVarName, "\n",
                               "        panelDesc variable (", stColName, 
                               ") does not exist in the for ", sDFName, 
@@ -9189,8 +9195,8 @@ ConvertDV <- function(DV) {
      varsNum   <- length(DV)   # number of variables
      varsName  <- names(DV)    # names of variables 
      
-     #cat("varsNum :",varsNum,"\n")
-     #cat("varsName:",paste0(varsName,"\n"),"\n")
+     # cat("varsNum :",varsNum,"\n")
+     # cat("varsName:",paste0(varsName,"\n"),"\n")
      
      #
      NewDV      <- initDVList(glyphNames)             # initializes each glyph list to a list.
@@ -9203,7 +9209,7 @@ ConvertDV <- function(DV) {
         
         xIndex  <- match(vName,DVTable$varName)
         
-        #cat("vName:",vName,"  vValue:",vValue," xIndex:",xIndex,"\n")
+        # cat("vName:",vName,"  vValue:",vValue," xIndex:",xIndex,"\n")
         
         if (is.na(xIndex)) {
 
@@ -9214,7 +9220,7 @@ ConvertDV <- function(DV) {
 
            varData <- DVTable[xIndex,]                  # get info to validate and translate
            
-           #cat("validate-method:",varData$method," v1:",varData$v1," v2:",varData$v2,"\n")
+           # cat("validate-method:",varData$method," v1:",varData$v1," v2:",varData$v2,"\n")
            tag <- paste0(varName," variable") 
           
            res <- switch(varData$method,
@@ -9260,7 +9266,7 @@ ConvertDV <- function(DV) {
                  { FALSE }
               )
            # res has the validation results 
-           #cat("res:",res," typeof(res):", typeof(res)," ",class(res),"\n")
+           # cat("res:",res," typeof(res):", typeof(res)," ",class(res),"\n")
            
            if (!res) {
               xmsg      <- paste0("***01N0 DETS The ",tag," does not have a valid value: ",vValue,"  Check type ",varData$method," used.\n")
@@ -9270,7 +9276,7 @@ ConvertDV <- function(DV) {
               # replicate variable for each glyph that uses it.
               newVarN   <- varData$newVarName
               
-              #cat("usedBy:",varData$usedBy,"\n")
+              # cat("usedBy:",varData$usedBy,"\n")
               
               GNList    <- eval(parse(text=varData$usedBy))   # list of glyph that use this variable.
               
@@ -9278,13 +9284,13 @@ ConvertDV <- function(DV) {
               
               for (jnd in seq_along(GNList)) {
                   GName    <- GNList[jnd]
-                  #cat("Added GN:",GName," / ",newVarN," = ",vValue,"\n")
+                  # cat("Added GN:",GName," / ",newVarN," = ",vValue,"\n")
               
                   NewDV[[GName]][[newVarN]] <- vValue   # add list with single element.
               }      # end of jnd loop
            }         # end of test results from validation.
         }            # end of check for match variable name.
-        #cat("Check next variable in list.\n")
+        # cat("Check next variable in list.\n")
         
      }               # end of ind loop
      
@@ -9401,8 +9407,8 @@ ConvertPD <- function(PD) {
      wNames              <- colnames(PDGlyphDF)[2:11]  # all column names except "type"
      wPDNames            <- colnames(PD)               # column names in user provided panelDesc
      #
-     #print(wNames)
-     #print(wPDNames)
+     # print(wNames)
+     # print(wPDNames)
      #
      NewPD               <- list()                     # empty new list
 
@@ -9426,7 +9432,7 @@ ConvertPD <- function(PD) {
               # build string for command and execute to get value of variable
               cmdStr1 <- paste0("xVar <- as.character(PD$",varName,"[",ind,"])")
       
-              #print(cmdStr1)
+              # print(cmdStr1)
               eval(parse(text=cmdStr1))   #  get value of variable into xVar
 
               if ((!is.na(xVar)) && (xVar != "") && (xVar != "NA")) {  # check to see if the value is "not present"
@@ -9443,7 +9449,7 @@ ConvertPD <- function(PD) {
                     # xVar is the value of varName, so create the variable and set the value
                     
                     cmdStr2  <- paste0("gList$",varName," <- xVar")
-                    #print(cmdStr2)
+                    # print(cmdStr2)
                     eval(parse(text=cmdStr2))
                  }
               }  # end of check for good data to convert (not NA, "", "NA") 
@@ -9471,7 +9477,7 @@ ConvertPD <- function(PD) {
   #  most of the text is written with 'mtext' function that place the text using 
   #  the "line" offset from the plot area.  In the case a line must be draw and
   #  text must be written, this must be done with the line and text functions
-  #  under par(xpd=TRUE) using user units to position the text and line.
+  #  under graphics::par(xpd=TRUE) using user units to position the text and line.
   #  
   #  The drawing of the refTexts and dotted line must use this approach.
   #
@@ -9488,12 +9494,12 @@ ConvertPD <- function(PD) {
      #  Returns the iLine position in user scales in units.
      #
  
-     xpin      <- par("pin")
-     xusr      <- par("usr")
-     xmar      <- par("mar")
-     xmai      <- par("mai")
+     xpin      <- graphics::par("pin")
+     xusr      <- graphics::par("usr")
+     xmar      <- graphics::par("mar")
+     xmai      <- graphics::par("mai")
    
-     #printPar()
+     # printPar()
      
      if ( iSide == 1 || iSide == 3 ) {
         # for top and bottom sides, get Y units per inch
@@ -9503,7 +9509,7 @@ ConvertPD <- function(PD) {
         UnitsPerInch <- diff(xusr[1:2])/xpin[1]
      }
      InchesPerUnit <- 1/UnitsPerInch
-     #cat("iSide:",iSide,"  UnitsPerInch:",UnitsPerInch,"  InchesPerUnit:",InchesPerUnit,"\n")
+     # cat("iSide:",iSide,"  UnitsPerInch:",UnitsPerInch,"  InchesPerUnit:",InchesPerUnit,"\n")
  
      # side = below, left, above, right 
      distZerou <- NULL
@@ -9523,14 +9529,14 @@ ConvertPD <- function(PD) {
                        # item 4 =>  mar and mai reference indexes.
                        # item 5 =>  basic adjustment amount.  (offset)
                        
-     #cat("distZerou:",distZerou,"\n")
+     # cat("distZerou:",distZerou,"\n")
      
      LinesPerInch  <- xmar[distZerou[4]]/xmai[distZerou[4]]         # below, left, above, right    mar/mai -> "5"
      InchesPerLine <- 1/LinesPerInch                                #   1/5 = 0.2 inches per line.
      UnitsPerLine  <- InchesPerLine * UnitsPerInch + distZerou[6]   # adjust line height
      
-     #cat("distZerou:",distZerou,"\n")
-     #cat("LinesPerInch:",LinesPerInch,"  InchesPerLine:",InchesPerLine,"  UnitsPerLine:",UnitsPerLine,"\n")
+     # cat("distZerou:",distZerou,"\n")
+     # cat("LinesPerInch:",LinesPerInch,"  InchesPerLine:",InchesPerLine,"  UnitsPerLine:",UnitsPerLine,"\n")
         
      # if convert line to user scale Position in user scale
      
@@ -9539,7 +9545,7 @@ ConvertPD <- function(PD) {
      Posu           <- distZerou[2] * ( ( ( iLine    + distZerou[5] ) * UnitsPerLine   ) + distZerou[1]  ) 
      #                  direction   * ( ( (  line #  +  offset      ) * Units per Line ) + unit offset (base axis line value.) )
           
-     #cat("iLine:",iLine,"  Posu:",Posu,"\n")
+     # cat("iLine:",iLine,"  Posu:",Posu,"\n")
      return(Posu)             
   }
  
@@ -9563,12 +9569,12 @@ DrawBoxAndText <- function(wTxt, wTxt.cex, sq.width, sq.col, sq.border.col, ypos
    #
    #  yposl = mtext line position - 0 on top edge to 3 lines???
    # 
-   xps      <- par("ps")
-   xpin     <- par("pin")
-   xusr     <- par("usr")
-   xmar     <- par("mar")
-   xmai     <- par("mai")
-   #cat("xmai:",xmai,"  xmar:",xmar,"  xusr:",xusr,"  xpin:",xpin," xps:",xps,"\n")
+   xps      <- graphics::par("ps")
+   xpin     <- graphics::par("pin")
+   xusr     <- graphics::par("usr")
+   xmar     <- graphics::par("mar")
+   xmai     <- graphics::par("mai")
+   # cat("xmai:",xmai,"  xmar:",xmar,"  xusr:",xusr,"  xpin:",xpin," xps:",xps,"\n")
    
    itouX    <- diff(xusr[c(1,2)])/xpin[1]
    itouY    <- diff(xusr[c(3,4)])/xpin[2]
@@ -9582,14 +9588,14 @@ DrawBoxAndText <- function(wTxt, wTxt.cex, sq.width, sq.col, sq.border.col, ypos
    wLeni    <- graphics::strwidth(paste0("    ",wTxt),units="in", cex=wTxt.cex)
    
    #wLenu   <- graphics::strwidth(paste0("    ",wTxt),units="us", cex=wTxt.cex)
-   #cat("len i:", wLeni, "  len u:",wLenu,"  ratio:",wLenu/wLeni,"\n")
+   # cat("len i:", wLeni, "  len u:",wLenu,"  ratio:",wLenu/wLeni,"\n")
    
    nStr1i   <- (xpin[1]/2) - (wLeni/2)
    nStr1u   <- nStr1i * itouX
    
    #wUseru   <- diff(xusr[c(1,2)])
    #nStr2u  <- (wUseru/2)  - (wLenu/2)
-   #cat("nStr1u:",nStr1u,"  nStr2u:", nStr2u,"\n")
+   # cat("nStr1u:",nStr1u,"  nStr2u:", nStr2u,"\n")
    
    yadji    <- 0.045                  # inches (subtracted)
    
@@ -9620,8 +9626,8 @@ DrawBoxAndText <- function(wTxt, wTxt.cex, sq.width, sq.col, sq.border.col, ypos
    box.yu   <- ( ( box.yi + yposi  ) * itouY )   # then convert to units
    box.xu   <- ( ( box.xi + nStr1i ) * itouX ) 
    
-   #cat("yposl:",yposl,"  yposi",yposi, "\n")
-   #cat("box.xu:", box.xu, "\n  box.yu:", box.yu,"\n")
+   # cat("yposl:",yposl,"  yposi",yposi, "\n")
+   # cat("box.xu:", box.xu, "\n  box.yu:", box.yu,"\n")
    
    # use text to print the string centered.
    
@@ -9652,7 +9658,7 @@ DrawBoxAndText <- function(wTxt, wTxt.cex, sq.width, sq.col, sq.border.col, ypos
 
 CleanXLabels2 <- function(rx, atRx) {
      lAtRx          <- length(atRx)    # length of atRx and number of labels.
-     #cat("CXL2-lAtRx:",lAtRx," trim.\n")
+     # cat("CXL2-lAtRx:",lAtRx," trim.\n")
 
      if (lAtRx > 3) { 
         # if greater than 3 labels - large number of labels - trim labels that are out of range.
@@ -9684,7 +9690,7 @@ CleanXLabels2 <- function(rx, atRx) {
         rx[2] <- atRx[lAtRx]  # expand high end
      }
      
-     #cat("After Extended - rx:",rx,"  atRx:",atRx,"\n")
+     # cat("After Extended - rx:",rx,"  atRx:",atRx,"\n")
      return(list(rx=rx,atRx=atRx))
    }
 
@@ -9709,15 +9715,15 @@ TestOverlap <- function(Acex, atLab, atRx, nSp) {
      widthSp     <- graphics::strwidth("0",cex=Acex,units="user")   # character width of '0' char-our standard.
      widthSpN    <- widthSp * nSp             # width of open space between labels
      
-     #cat("TestOverlap-cex:",Acex," nSp:",nSp,"  widthSpN:",widthSpN," len(atLab):",lAtLab,"\n")
+     # cat("TestOverlap-cex:",Acex," nSp:",nSp,"  widthSpN:",widthSpN," len(atLab):",lAtLab,"\n")
      # width of each label / 2 (half)
      widthAtLabH <- graphics::strwidth(atLab,cex=Acex,units="user")/2
      # calculate the reach of the characters on each side of the atRx point.
      SrtLab      <- atRx - widthAtLabH
      EndLab      <- atRx + widthAtLabH
      
-     #cat("SrtLab:",SrtLab,"\n")    # should be a start and end for each label.
-     #cat("EndLab:",EndLab,"\n")
+     # cat("SrtLab:",SrtLab,"\n")    # should be a start and end for each label.
+     # cat("EndLab:",EndLab,"\n")
      
      #  number of labels 1 to n, so check space between 1-2, 2-3, ... , nm1-n
      OverLapFnd <- FALSE
@@ -9726,14 +9732,14 @@ TestOverlap <- function(Acex, atLab, atRx, nSp) {
      if (lAtLab > 1) {
         for (ind in c(1:(lAtLab-1)) )  {
            wX <- SrtLab[ind+1] - EndLab[ind]  # get space between two labels (ind and ind+1)
-           #cat("ind:",ind,"  wX:",wX,"\n")
+           # cat("ind:",ind,"  wX:",wX,"\n")
            if (wX < widthSpN) {               # 
               OverLapFnd <- TRUE              # LABEL IN X-AXIS WILL OVERLAP
            }
         }
      }
      
-     #cat("OverLapFnd:",OverLapFnd,"\n")
+     # cat("OverLapFnd:",OverLapFnd,"\n")
      return(OverLapFnd)
   }
 #
@@ -9750,10 +9756,10 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
         
         # function to test edges for possible shift.
         # returns atRx adjusted.
-        xusr              <- par("usr") 
-        xpin              <- par("pin")
+        xusr              <- graphics::par("usr") 
+        xpin              <- graphics::par("pin")
 	xupi              <- diff(xusr[1:2])/xpin[1]
-	#cat(" TestLabAtEdge - xusr:",xusr,"  xpin:",xpin,"  xupi:",xupi,"\n")
+	# cat(" TestLabAtEdge - xusr:",xusr,"  xpin:",xpin,"  xupi:",xupi,"\n")
  
         #  width of each label.
         WidthOfLabs       <- graphics::strwidth(atLab,cex=lineAxisSizes["Ax1"],units="user")
@@ -9767,16 +9773,16 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
         lAtLab            <- length(atLab)
      
         #
-        #cat("Label Specifcations: (width, half, srt, end)\n")
-        #print(WidthOfLabs)
-        #print(HalfWidthOfLabs)
-        #print(SrtOfLabs)
-        #print(EndOfLabs)
+        # cat("Label Specifcations: (width, half, srt, end)\n")
+        # print(WidthOfLabs)
+        # print(HalfWidthOfLabs)
+        # print(SrtOfLabs)
+        # print(EndOfLabs)
      
         #  get 1/2 of the column sep gap (in units)
         wColSepGapHU      <- (colSepGap/2)*xupi
         
-        #cat("half of colSepGap in units:",wColSepGapHU,"\n")
+        # cat("half of colSepGap in units:",wColSepGapHU,"\n")
         
         #   Viable left edge of column (rx[1] - col sep gap)
         leftEdge          <- rx[1] - wColSepGapHU     # 1/2 col sep converted to units.
@@ -9786,14 +9792,14 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
             # y Axis present - add standard 0.2 inches of padding.
             wYAGapHU      <- (YAxis.width * xupi)
             leftEdge      <- leftEdge - wYAGapHU
-            #cat("wYAGapU:",  wYAGapHU," added to leftEdge.\n")
+            # cat("wYAGapU:",  wYAGapHU," added to leftEdge.\n")
         }
          
         #   Viable right edge of column (rx[2] + col sep gap)
         rightEdge         <- rx[2] + wColSepGapHU
     
-        #cat("leftEdge:",leftEdge,"   rightEdge:",rightEdge,"  units.\n")
-        #cat("atRx:",atRx,"  rx:",rx,"\n")
+        # cat("leftEdge:",leftEdge,"   rightEdge:",rightEdge,"  units.\n")
+        # cat("atRx:",atRx,"  rx:",rx,"\n")
         
         #
         #   Adjust first and last label point inward for apperance. 
@@ -9812,7 +9818,7 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
         WidthRx        <- diff(rAtRx)
         edgeRxAdj      <- (WidthRx / 1000) * XAxis.indent
       
-        #cat("edgeRxAdj:",edgeRxAdj,"\n")
+        # cat("edgeRxAdj:",edgeRxAdj,"\n")
         
         #
         #  Is not getting applied if staggered.  Problem.
@@ -9823,25 +9829,25 @@ TestLabAtEdge <- function(atLab,atRx,YAxisPad,rx,lineAxisSizes) {
         #
       
         if (SrtOfLabs[1] < leftEdge) {
-           #cat("overlap left edge:", leftEdge - SrtOfLabs[1], " units\n")
+           # cat("overlap left edge:", leftEdge - SrtOfLabs[1], " units\n")
            #  Adjust both edge at points inwared by 1/1000 the range of labels * XAxis.indent(5)
            wAtRx[1]          <- wAtRx[1]     + edgeRxAdj   # key adjustment move inward.
            SrtOfLabs[1]      <- SrtOfLabs[1] + edgeRxAdj
            EndOfLabs[1]      <- EndOfLabs[1] + edgeRxAdj
-           #cat("adj - SrtOfLabs[1]:",SrtOfLabs[1],"  EndOfLabs[1]:",EndOfLabs[1],"\n")
+           # cat("adj - SrtOfLabs[1]:",SrtOfLabs[1],"  EndOfLabs[1]:",EndOfLabs[1],"\n")
         }
         
         if (EndOfLabs[lAtRx] > rightEdge) {
             wAtRx[lAtRx]     <- wAtRx[lAtRx]      - edgeRxAdj     # key adjustment
             EndOfLabs[lAtRx] <- EndOfLabs[lAtLab] - edgeRxAdj
             SrtOfLabs[lAtRx] <- SrtOfLabs[lAtLab] - edgeRxAdj
-            #cat("adj - SrtOfLabs[lAtRx]:",SrtOfLabs[lAtRx],"  EndOfLabs[lAtRx]:",EndOfLabs[lAtRx],"\n")
+            # cat("adj - SrtOfLabs[lAtRx]:",SrtOfLabs[lAtRx],"  EndOfLabs[lAtRx]:",EndOfLabs[lAtRx],"\n")
         }
    
         #   add check to see if shift causses overlap with neighbor label.
 
-        #cat("after 1st and last shift-rx:",rx," atRx:",wAtRx,"\n")
-        #cat(" atLab:",atLab," axisSubTitle:",axisSubTitle,"\n")
+        # cat("after 1st and last shift-rx:",rx," atRx:",wAtRx,"\n")
+        # cat(" atLab:",atLab," axisSubTitle:",axisSubTitle,"\n")
      
         atRx            <- wAtRx   # update label points.  Shift completed, if needed.
 
@@ -10005,49 +10011,49 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      
      # must initially select panel to start getting widths and heights for scaling.
      
-     #cat("\n\nEntered DrawXAxisAndTitle function","\n")
+     # cat("\n\nEntered DrawXAxisAndTitle function","\n")
      
-     #cat("DX01-panels and j:\n")
-     #print(panels)
-     #cat("i:",1," j:",j," rx:",rx," ry:",ry," FDate:",FDate," locAxisMethod:",locAxisMethod,"\n")
+     # cat("DX01-panels and j:\n")
+     # print(panels)
+     # cat("i:",1," j:",j," rx:",rx," ry:",ry," FDate:",FDate," locAxisMethod:",locAxisMethod,"\n")
      
      panelSelect(panels, 1, j)              # select panel   - top panel of column j
      x           <- panelScale(rx, ry)      # set scale for panel based on rx, ry
     
-     xpin        <- par("pin")
-     xusr        <- par("usr")
+     xpin        <- graphics::par("pin")
+     xusr        <- graphics::par("usr")
      xupi        <- diff(xusr[1:2])/xpin[1]
-     xps         <- par("ps")
+     xps         <- graphics::par("ps")
      
      staggering  <- staggerLab              # default is the user request.  May be changed if needed.
      
-     #cat("DXAT-start staggered:",staggered,"  staggerLab:",staggerLab,"  staggering:",staggering,"\n")
-     #cat("Initial rx  :",rx,"\n")
+     # cat("DXAT-start staggered:",staggered,"  staggerLab:",staggerLab,"  staggering:",staggering,"\n")
+     # cat("Initial rx  :",rx,"\n")
      
      #  range adjustment
     
-     xcxy        <- par("cxy")              # must be in the scale of the panel to get the right character width.
+     xcxy        <- graphics::par("cxy")              # must be in the scale of the panel to get the right character width.
      
-     #cat("xcxy:", xcxy,"   usr :",xusr,"  pin :",xpin,"  upi :",xupi,"  ps:",xps,"\n")
+     # cat("xcxy:", xcxy,"   usr :",xusr,"  pin :",xpin,"  upi :",xupi,"  ps:",xps,"\n")
      
      xcxyMod     <- xcxy[1]/4               # assume dot is least then the width of a average character.  Use 1/4 for spacing.
-     #cat("xcxyMod:",xcxyMod,"\n")
+     # cat("xcxyMod:",xcxyMod,"\n")
      
      if (leftPad)  rx[1] <- rx[1] - xcxyMod
      if (rightPad) rx[2] <- rx[2] + xcxyMod
      
-     #cat("Adjustment made for dot size - new rx:",rx,"\n")
+     # cat("Adjustment made for dot size - new rx:",rx,"\n")
     
      # reset scaling based on new rx range.
      x           <- panelScale(rx, ry)           # re-scale panel
      
      # get new values for user and units per inch
-     xusr        <- par("usr") 
+     xusr        <- graphics::par("usr") 
      xupi        <- diff(xusr[1:2])/xpin[1]
     
-     #cat("After dot re-scaling - usr :",xusr,"  pin :",xpin,"  upi :",xupi,"\n")
+     # cat("After dot re-scaling - usr :",xusr,"  pin :",xpin,"  upi :",xupi,"\n")
      
-     par(xpd=T)                                  # turn off clipping for panel
+     graphics::par(xpd=T)                                  # turn off clipping for panel
      
        
      # based on the axis method - prepare the atRx tick points and the atLab vector of labels
@@ -10078,21 +10084,21 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                                       # everything is based on a starting pointsize of 12.
                                                             
      atLabcex       <- Text.cex       # Text.cex              # 0.75 of 12 pt, -> 0.75 %  (9 pt.) 
-     #cat("Code: 10076 atLabcex:",atLabcex,"\n")
+     # cat("Code: 10076 atLabcex:",atLabcex,"\n")
      
      #
      # Build elements to construct header and footer title and axis label positions.
      # 
-     xps            <- par("ps")   # current point size.
+     xps            <- graphics::par("ps")   # current point size.
      ippt           <- 1/72        # inches per point
-     lppt           <- 1/xps       # line per point at par("ps") value (default = 12 pt. for 12 pt per line)
-     ipl            <- xps * ippt  # points * inches per point at par("ps") -> inches per line.
+     lppt           <- 1/xps       # line per point at graphics::par("ps") value (default = 12 pt. for 12 pt per line)
+     ipl            <- xps * ippt  # points * inches per point at graphics::par("ps") -> inches per line.
     
-     #cat("Step size 1 pt:",ippt," in.  ",ippt*xupi," usr - lppt:",lppt," pt/line. \n")
+     # cat("Step size 1 pt:",ippt," in.  ",ippt*xupi," usr - lppt:",lppt," pt/line. \n")
 
                     # 12pt * 0.75 -> 9pt,   18pt * 0.75 -> 13.5pt,  24pt * 0.75 -> 18 point 
                      
-     lineNLabSize   <-  Text.cex    # par("ps") - 3 points                                
+     lineNLabSize   <-  Text.cex    # graphics::par("ps") - 3 points                                
                     # 0.75  -> 0.75   %  1 line    (0.75% of point size)   (9 pt)
      
      lineNSpLabSize <-  lineNLabSize * XAxis.Sp.mcex   # PS * 15%            * spacing   N=normal size (9 pt)  (1.00000)
@@ -10126,26 +10132,26 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #                                 Ax1   Ax2     SSp     L1     L2
      #      must have at least 3.25 lines available.
      #
-     #cat("lineNLabSize  :",lineNLabSize,"\n")
-     #cat("axisNLabSize  :",axisNLabSize,"\n")
-     #cat("axisMLabSize  :",axisMLabSize,"\n")
-     #cat("axisSLabSize  :",axisSLabSize,"\n")
-     #cat("axisSubTSize  :",axisSubTSize,"\n")
-     #cat("\n")
-     #cat("lineNSpLabSize:",lineNSpLabSize,"\n")
-     #cat("lineSSpLabSize:",lineSSpLabSize,"\n")
-     #cat("\n") 
+     # cat("lineNLabSize  :",lineNLabSize,"\n")
+     # cat("axisNLabSize  :",axisNLabSize,"\n")
+     # cat("axisMLabSize  :",axisMLabSize,"\n")
+     # cat("axisSLabSize  :",axisSLabSize,"\n")
+     # cat("axisSubTSize  :",axisSubTSize,"\n")
+     # cat("\n")
+     # cat("lineNSpLabSize:",lineNSpLabSize,"\n")
+     # cat("lineSSpLabSize:",lineSSpLabSize,"\n")
+     # cat("\n") 
      
-     #cat("lineNLabSize-ps:",lineNLabSize*xps,"\n")
-     #cat("axisNLabSize-ps:",axisNLabSize*xps,"\n")
-     #cat("axisMLabSize-ps:",axisMLabSize*xps,"\n")
-     #cat("axisSLabSize-ps:",axisSLabSize*xps,"\n")
-     #cat("axisSubTSize-ps:",axisSubTSize*xps,"\n")
-     #cat("\n")
+     # cat("lineNLabSize-ps:",lineNLabSize*xps,"\n")
+     # cat("axisNLabSize-ps:",axisNLabSize*xps,"\n")
+     # cat("axisMLabSize-ps:",axisMLabSize*xps,"\n")
+     # cat("axisSLabSize-ps:",axisSLabSize*xps,"\n")
+     # cat("axisSubTSize-ps:",axisSubTSize*xps,"\n")
+     # cat("\n")
     
-     xusr        <- par("usr") 
+     xusr        <- graphics::par("usr") 
      xupi        <- diff(xusr[1:2])/xpin[1]
-     #cat("A-usr:",xusr,"  xupi:",xupi,"\n")
+     # cat("A-usr:",xusr,"  xupi:",xupi,"\n")
     
      #
      #  Work pattern, list for which to draw and where
@@ -10236,7 +10242,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      
      #  Results may be - single XAxis labels or XAxis labels with subtitle
      
-     #cat("Code: 10234 locAxisMethod:",locAxisMethod, "  rx:",rx,"\n")
+     # cat("Code: 10236 locAxisMethod:",locAxisMethod, "  rx:",rx,"\n")
      
      if ( locAxisMethod < 1 || locAxisMethod > 5 ) {
         cat("***01D3 CARG-AX The value for axisMethod internal variable is out of range 1-5 : ",locAxisMethod,"\n")
@@ -10272,15 +10278,15 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      
      ErrFnd    <- FALSE   # note errors
      
-     #DoNarCol <- FALSE   # indicate we are in the "arrow" column situtation.
+     # DoNarCol <- FALSE   # indicate we are in the "arrow" column situtation.
      
-     #cat("start of label fitting\n")
-     #cat("lastLab2Space:",lastLab2Space,"\n")
+     # cat("start of label fitting\n")
+     # cat("lastLab2Space:",lastLab2Space,"\n")
+     #  
+     # cat("par('pin')   :",par('pin'),"\n")
      #
-     #cat("par('pin')   :",par('pin'),"\n")
-     #
-     #cat("par('usr')   :",par('usr'),"\n")
-     #cat("xupi         :",xupi,"\n")
+     # cat("par('usr')   :",par('usr'),"\n")
+     # cat("xupi         :",xupi,"\n")
      ###
     
      ###
@@ -10312,7 +10318,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
            WantDate   <- FALSE
         }
      }
-     #cat("Code: 10310 WantDate:",WantDate,"   DateFormat:",DateFormat,"\n")
+     # cat("Code: 10312 WantDate:",WantDate,"   DateFormat:",DateFormat,"\n")
      
      #
      ###
@@ -10338,10 +10344,10 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      # force a minimum of 3 labels.
      if (reqNumLabels < 3)   reqNumLabels <- 3     
     
-     #cat("Start-reqNumLabels:", reqNumLabels," width in:",xpin[1],"  XAxis.nGridlIn:",XAxis.nGridpIn,"\n")
-     #cat("rx   :",rx,"  locAxisMethod:",locAxisMethod,"\n")
+     # cat("Start-reqNumLabels:", reqNumLabels," width in:",xpin[1],"  XAxis.nGridlIn:",XAxis.nGridpIn,"\n")
+     # cat("rx   :",rx,"  locAxisMethod:",locAxisMethod,"\n")
      
-     #cat("setup - colSepGap:",colSepGap,"    staggered:",staggered,"\n")
+     # cat("setup - colSepGap:",colSepGap,"    staggered:",staggered,"\n")
     
      # get sequence of possible number of labels 
      listNumLabels <- seq(reqNumLabels, 3,by=-2)
@@ -10355,12 +10361,12 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
      for (numLabels in listNumLabels) {
      
-        #cat("Loop Start:",numLabels,"\n")
-        #cat("lineAxisSizes:\n")
-        #print(lineAxisSizes)
-        #cat("lineDo       :\n")
-        #print(lineDo)
-        
+        # cat("Loop Start:",numLabels,"\n")
+        # cat("lineAxisSizes:\n")
+        # print(lineAxisSizes)
+        # cat("lineDo       :\n")
+        # print(lineDo)
+         
         # Check rx for range of date and possible format.
 
         ##### start of big loop to get solution between font size and number of labels.
@@ -10370,11 +10376,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         # do requested label generation and scaling.
         # Label Generation:    o = panelInbounds,  e = extended.
         # Scaling Methods :    None,  Scale range,  Scale individual number.
-        #cat("locAxisMethod:",locAxisMethod,"  WantDate:",WantDate,"\n")
+        # cat("locAxisMethod:",locAxisMethod,"  WantDate:",WantDate,"\n")
         
         switch (locAxisMethod,  
               { # method 1 - pretty - the "original"           "o"   # Basic X-Axis - one line.
-                #cat("Method 1-atRx:",atRx,"\n")
+                # cat("Method 1-atRx:",atRx,"\n")
 
 		# get reference points.
                 atRx         <- panelInbounds(rx)               # list of ticks within range of x. (n=5 with triming)
@@ -10395,7 +10401,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               { # method 2 - scale range with subtitle         "s"     # scaled range - 1 line X-Axis, 1 line sub-title (units)
                 #    scaling range - may have subtitle to include
                 #    x-axis date format can not be used.
-                 #cat("Method 2-atRx:",atRx,"\n")
+                # cat("Method 2-atRx:",atRx,"\n")
                 
                 #  get reference points
                 atRx          <- labeling::extended(rx[1],rx[2],numLabels)
@@ -10410,7 +10416,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
  		} else {
                    #  get Scaler1 results on max.
                    atLabVc       <- Scaler1(rx[2])                  # get divisor and subtitle based on max value
-                   #cat("atLabVc:",atLabVc,"\n")
+                   # cat("atLabVc:",atLabVc,"\n")
                 
                    axisSubTitle  <- atLabVc[2]                      # get sub-title (if any)[2]  [1] multiplier
                                    
@@ -10421,7 +10427,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                    
                    if (axisSubTitle != "") {     #  add sub-title to header
                    
-                      #cat("Add - axisSubTitle:",axisSubTitle,"\n")
+                      # cat("Add - axisSubTitle:",axisSubTitle,"\n")
                    
                       #  Make adjustments
                       
@@ -10449,7 +10455,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               { # method 3 - scale numbers with suffix           "sn"
                 #   no subtitle will be added.
                 #   X-Axis date formating can not be used.
-                #cat("Method 3-atRx:",atRx,"\n")
+                # cat("Method 3-atRx:",atRx,"\n")
                 
                 atRx         <- labeling::extended(rx[1],rx[2], numLabels)
       
@@ -10469,7 +10475,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               { # method 4 - extended algorithm (no scaling)     "e"
                 # no scaling - no subtitles 
                 #  replaced wilkinson algorithm with extended - better behaved in number of labels generated vs. request.
-                #cat("Method4 - extended rx:",rx,"  numLabels:",numLabels,"\n")
+                # cat("Method4 - extended rx:",rx,"  numLabels:",numLabels,"\n")
                      
                 atRx         <- labeling::extended(rx[1],rx[2],numLabels)
                 
@@ -10477,7 +10483,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 atRx         <- res$atRx
                 rx           <- res$rx
 
-		#cat("m4-Label:",atRx," ",rx,"  WantDate:",WantDate,"\n")
+		# cat("m4-Label:",atRx," ",rx,"  WantDate:",WantDate,"\n")
 		# convert to character or Date
                 if (WantDate) {
                    atD          <- as.Date(atRx,origin="1970-1-1")
@@ -10490,7 +10496,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               { # method 5 - wilkinson algorithm (no scaling)     "w"
                 # no scaling - no subtitles 
                 #  replaced wilkinson algorithm with extended - better behaved in number of labels generated vs. request.
-                #cat("Method5 - wilkinson rx:",rx,"  numLabels:",numLabels,"\n")
+                # cat("Method5 - wilkinson rx:",rx,"  numLabels:",numLabels,"\n")
                      
                 atRx         <- labeling::wilkinson(rx[1],rx[2],numLabels)
                 
@@ -10517,7 +10523,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 #
                 #  The use of X-Axis date labeling will have to be evaluated when this is implemented.
                 
-                #cat("Method6 - extended rx:",rx,"  numLabels:",numLabels,"\n")
+                # cat("Method6 - extended rx:",rx,"  numLabels:",numLabels,"\n")
                    
                 atRx0         <- panelInbounds(rx)               # list of ticks within range of x. (n=5 with triming)
                 res           <- CleanXLabels2(rx, atRx0)
@@ -10533,7 +10539,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
       
                 atLabVc       <- Scaler1(rx1[2])                  # get divisor and subtitle based on max value
                 axisSubTitle  <- atLabVc[2]                      # get sub-title (if any)
-                #cat("atLabVc:",atLabVc,"\n")
+                # cat("atLabVc:",atLabVc,"\n")
                 atLab2        <- formatC(atRx1 / as.numeric(atLabVc[1]), format="f", digits=2, drop0trailing=TRUE)
         
                 atLab3        <- sapply(atRx1, Scaler2)
@@ -10542,19 +10548,19 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               
               {
                 # default call
-                #cat("locAxisMethod value unknown:",locAxisMethod,"\n")
+                # cat("locAxisMethod value unknown:",locAxisMethod,"\n")
                 ErrFnd   <- TRUE
                 stopCntMsg(paste0("***0490 DMP Error in axisMethod set to ",locAxisMethod," in DrawXAxisAndTitles. ERROR. Default used.\n"))
                 atRx <- c(0,1)
               }
         )
         #
-        #cat("Method executed\n")
-        #cat("atRx :",atRx ,"\n")
-        #cat("atLab:",atLab,"\n")
-        #cat("rx   :",rx,"\n")
-        #print(lineAxisSizes)
-        #print(lineDo)
+        # cat("Method executed\n")
+        # cat("atRx :",atRx ,"\n")
+        # cat("atLab:",atLab,"\n")
+        # cat("rx   :",rx,"\n")
+        # print(lineAxisSizes)
+        # print(lineDo)
         
         #### Labels selected and Scaling done.
         
@@ -10568,9 +10574,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         lAtRx       <- length(atRx)
         rAtRx       <- range(atRx)          # get first and last label values
         lAtLab      <- length(atLab) 
-        #cat("lAtRx:",lAtRx,"  rAtRx:",rAtRx,"  lAtLab:",lAtLab," rx:",rx,"\n")
-        #cat("  par(usr):",par('usr'),"  par(pin):",par('pin'),"  xupi:",xupi,"\n")
-        #cat("staggered :",staggered,"  staggerLab:",staggerLab,"  staggering:",staggering,"\n")
+        # cat("lAtRx:",lAtRx,"  rAtRx:",rAtRx,"  lAtLab:",lAtLab," rx:",rx,"\n")
+        # cat("  par(usr):",graphics::par('usr'),"  par(pin):",graphics::par('pin'),"  xupi:",xupi,"\n")
+        # cat("staggered :",staggered,"  staggerLab:",staggerLab,"  staggering:",staggering,"\n")
         
         FndFit      <- FALSE
         MakeStag    <- FALSE
@@ -10591,11 +10597,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         atRx1       <- atRx[seq(1,length(atRx),by=2)]
         atRx2       <- atRx[seq(2,length(atRx),by=2)]
      
-        #cat("Split label list\n")
-        #cat("atLab1:", atLab1 ,"\n")
-        #cat("atRx1 :", atRx1  ,"\n")
-        #cat("atLab2:", atLab2 ,"\n")
-        #cat("atRx2 :", atRx2  ,"\n")
+        # cat("Split label list\n")
+        # cat("atLab1:", atLab1 ,"\n")
+        # cat("atRx1 :", atRx1  ,"\n")
+        # cat("atLab2:", atLab2 ,"\n")
+        # cat("atRx2 :", atRx2  ,"\n")
 
         #
         # test to see how axis may draw the labels.
@@ -10607,31 +10613,29 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         #   font sizes.  Then test stagger labels at Normal and -1 pt font size.
         # If these don't work = punt and let the main loop try few labels.
         #
-        
-        #
         #  Step 3 - Test single line style, if staggerLab not requested by caller.
         #
         
         if (!staggering) {
         
            # labels will not be stagger - by us or caller - at least not yet - so check single line format.
-           #cat("NOT STAGGERING - Single Line Style Test\n")
+           # cat("NOT STAGGERING - Single Line Style Test\n")
            
            # check the fit of the axis labels, adjust as needed up to a point.
            wX        <- lineAxisSizes["Ax1"]             # original font size
            res       <- TestOverlap(wX, atLab, atRx, 1)  # space between must be 1 space.
-           #cat("test1 - ces=wX:",wX,"  res:",res,"\n")
+           # cat("test1 - ces=wX:",wX,"  res:",res,"\n")
        
            # check X Axis fit as full non-staggered labels.
            if (!res) {
-              #cat("full axis no staggered at font - OK -  wX:",wX,"\n") 
+              # cat("full axis no staggered at font - OK -  wX:",wX,"\n") 
               # leave parameters as set.
               FndFit    <- TRUE
            } else {
               # did not fit single line normal point size.    #### change X-Axis size.
               wX        <- wX - lppt     #   back up 1 point    # orig font - 1 pt
               res       <- TestOverlap(wX,atLab, atRx, 1)
-              #cat("test2 - ces=wX:",wX,"  res:",res,"\n")
+              # cat("test2 - ces=wX:",wX,"  res:",res,"\n")
         
               if (!res) {
                  # Good solution  - update axis parameters
@@ -10641,7 +10645,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                  # did not fit single line normal-1pt size.
                  wX <- wX - lppt   #   back up 2 points        # orig font - 2 pt
 	         res <- TestOverlap(wX,atLab,atRx, 1)
-	         #cat("test3 - ces=wX:",wX,"  res:",res,"\n")
+	         # cat("test3 - ces=wX:",wX,"  res:",res,"\n")
 	 
 	         if (!res) {
 	            # Good Solution - 2 point. - update parameters   
@@ -10653,11 +10657,10 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                  }
               }
            }
-          
            #  Note: if single line fits, it's still drawn as two overlapping label sets.
             
         } # end of single line checks.
-        #cat("FndFit:",FndFit,"\n")
+        # cat("FndFit:",FndFit,"\n")
         
         #
         #  Step 4 - if not fit as single or staggerLab requested, test a staggered label style
@@ -10666,8 +10669,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         if (!FndFit) {
          
            # no fit found for single line (or it was bypassed), do staggerLab style.
-           
-           #cat("Testing staggering style\n")
+           # cat("Testing staggering style\n")
            
            # find longest staggered label list.
             
@@ -10687,15 +10689,15 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
             
            #  wAtLab is the longest set of labels based on character count.
            lwAtLab   <- length(wAtLab)
-           #cat("Longest of labels - wAtLab:",wAtLab,"  lwAtLab:",lwAtLab,"  axisLowestSize:",axisLowestSize,"\n")
+           # cat("Longest of labels - wAtLab:",wAtLab,"  lwAtLab:",lwAtLab,"  axisLowestSize:",axisLowestSize,"\n")
            
            FndFit    <- FALSE
            res       <- TestOverlap(wX, wAtLab, wAtRx, 2)
-           #cat("testS1 - cex=wX:",wX,"  2 space res:",res,"\n")
+           # cat("testS1 - cex=wX:",wX,"  2 space res:",res,"\n")
         
            if (!res) {
               # Good should fit using standard height and staggered
-              #cat("Initial values are good - keep them:",wX,"  Fit found\n")
+              # cat("Initial values are good - keep them:",wX,"  Fit found\n")
               MakeStag   <- TRUE
               FndFit     <- TRUE
            } else {
@@ -10704,12 +10706,12 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               if (wX > axisLowestSize) {  # if bigger then smallest permitted. continue.
                  # test labels and cex
                  res <- TestOverlap(wX, wAtLab, wAtRx, 2)
-                 #cat("test s2 - cex=wX:",wX,"  2 space res:",res,"\n")
+                 # cat("test s2 - cex=wX:",wX,"  2 space res:",res,"\n")
         
                  if (!res) {
                     # good fit at small font.
                     lineAxisSizes["Ax1"] <- wX
-                    #cat("fit found at ",wX,"\n")
+                    # cat("fit found at ",wX,"\n")
                     MakeStag   <- TRUE
                     FndFit     <- TRUE
                  } else {
@@ -10717,12 +10719,12 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                     if (wX > axisLowestSize) {  # if bigger then smallest permitted. continue.
                        # test labels and cex - 2 pts.
                        res <- TestOverlap(wX, wAtLab, wAtRx, 2)
-                       #cat("test s3 - cex=wX:",wX,"  2 space res:",res,"\n")
+                       # cat("test s3 - cex=wX:",wX,"  2 space res:",res,"\n")
                     
                        if (!res) {
                           # goo fit at smaller font
                           lineAxisSizes["Ax1"] <- wX
-                          #cat("fit found at ",wX,"\n")
+                          # cat("fit found at ",wX,"\n")
                           MakeStag   <- TRUE
                           FndFit     <- TRUE
                        }
@@ -10735,44 +10737,43 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         if (FndFit)  break  # if have solution - stop looping.
          
         # if not fit, try reducing number of labels.
-         
-        #cat("End of Single and Staggered - FndFit:",FndFit,"  numLabels:",numLabels," len(atRx):",length(atRx),"\n")
+        # cat("End of Single and Staggered - FndFit:",FndFit,"  numLabels:",numLabels," len(atRx):",length(atRx),"\n")
      
      } # end of for loop on number of labels.
      
      # 
      #   Checking is done. Have fit or not.
      #
-     #cat("exit numLabels loop\n")
+     # cat("exit numLabels loop\n")
      
      #####  end of loop - have solution???
        
      if (!FndFit) {
         # no solution found????
         
-        #cat("no XAxis labels fit found!!!\n")
+        # cat("no XAxis labels fit found!!!\n")
         MakeStag <- TRUE
      }
   
-     #cat("end of numLabels loop - FndFit:",FndFit,"\n")
+     # cat("end of numLabels loop - FndFit:",FndFit,"\n")
 
-     #cat("atLab1:",atLab1,"\n")
-     #cat("atRx1 :",atRx1, "\n")
-     #cat("atLab2:",atLab2,"\n")
-     #cat("atRx2 :",atRx2, "\n")
+     # cat("atLab1:",atLab1,"\n")
+     # cat("atRx1 :",atRx1, "\n")
+     # cat("atLab2:",atLab2,"\n")
+     # cat("atRx2 :",atRx2, "\n")
   
-     #cat("lineDo:\n")
-     #print(lineDo)
-     #cat("lineAxisSizes:\n")
-     #print(lineAxisSizes)
-     #cat("lineTopSizes:\n")
-     #print(lineTopSizes)
-     #cat("lineBotSizes:\n")
-     #print(lineBotSizes)
+     # cat("lineDo:\n")
+     # print(lineDo)
+     # cat("lineAxisSizes:\n")
+     # print(lineAxisSizes)
+     # cat("lineTopSizes:\n")
+     # print(lineTopSizes)
+     # cat("lineBotSizes:\n")
+     # print(lineBotSizes)
   
-     #cat("staggering:", staggering,"  staggered:",staggered,"  MakeStag:",MakeStag,"\n")
+     # cat("staggering:", staggering,"  staggered:",staggered,"  MakeStag:",MakeStag,"\n")
   
-     #cat("start of edge checking - lastLab2Space:",lastLab2Space,"\n")
+     # cat("start of edge checking - lastLab2Space:",lastLab2Space,"\n")
 
      #####
      #
@@ -10782,7 +10783,6 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #                 c) delete edge label (if > 3 labels)
      #
      #####
-     
      #
      #  Step 5 - check edge labels to see if indenting them will help.  
      #
@@ -10795,44 +10795,41 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #       atRx[1] - rx[1], is units from edge to grid for label
      #       colSepGap can also be used as working space.
      #
-     #cat("Step 5 - X-Axis \n")
+     # cat("Step 5 - X-Axis \n")
      
-     #cat("par('usr'):",par("usr"),"\n")
-     #cat("par('pin'):",par("pin"),"\n")
-     #cat("atRx      :",atRx,"\n")
-     #cat("atRx1     :",atRx1,"\n")
+     # cat("par('usr'):",graphics::par("usr"),"  par('pin'):",graphics::par("pin"),"\n")
+     # cat("atRx      :",atRx,      "  atRx1     :",atRx1,"\n")
      res <- TestLabAtEdge(atLab1,atRx1,YAxisPad,rx,lineAxisSizes)
      # get results.
      w1stLabOverI  <- res$w1stLabOverI
      wLastLabOverI <- res$wLastLabOverI
      atRx1         <- res$atRx
-     #cat("1-res$atRx:",res$atRx,"  $1st:",res$w1stLabOverI,"  $Last:",res$wLastLabOverI,"\n")
-    
-    
-     #cat("atRx2     :",atRx2,"\n")
+     # cat("1-res$atRx:",res$atRx,"  $1st:",res$w1stLabOverI,"  $Last:",res$wLastLabOverI,"\n")
+      
+     # cat("atRx2     :",atRx2,"\n")
      res <- TestLabAtEdge(atLab2,atRx2,YAxisPad,rx,lineAxisSizes)
      # get results.
-     #cat("2-res$atRx:",res$atRx,"  $1st:",res$w1stLabOverI,"  $Last:",res$wLastLabOverI,"\n")
+     # cat("2-res$atRx:",res$atRx,"  $1st:",res$w1stLabOverI,"  $Last:",res$wLastLabOverI,"\n")
      atRx2         <- res$atRx
      if (res$w1stLabOverI  < w1stLabOverI)  { w1stLabOverI  <- res$w1stLabOverI  }
      if (res$wLastLabOverI < wLastLabOverI) { wLastLabOverI <- res$wLastLabOverI }
      
-     #cat("results -> w1st:",w1stLabOverI," in.  wLast:",wLastLabOverI," in.\n")
-     #cat("lastLab2Space  :",lastLab2Space," in.\n")
+     # cat("results -> w1st:",w1stLabOverI," in.  wLast:",wLastLabOverI," in.\n")
+     # cat("lastLab2Space  :",lastLab2Space," in.\n")
      
      # check the column overlap:
      xW   <- graphics::strwidth("0",cex=lineAxisSizes["Ax1"],units="inch")  # get size of a digit in inches.
      xW   <- xW  * XAxis.gapPC    # 75% of the width.
-     #cat("sum column overlap:",(w1stLabOverI+lastLab2Space)," in.  Size Digit:",xW," in.\n")
+     # cat("sum column overlap:",(w1stLabOverI+lastLab2Space)," in.  Size Digit:",xW," in.\n")
                 
      if ((w1stLabOverI + lastLab2Space) <= xW ) {
         # overlap condition.  Force staggered.
-        #cat("Lab2 text overlapping between columns - MakeStag set to TRUE\n")
+        # cat("Lab2 text overlapping between columns - MakeStag set to TRUE\n")
         MakeStag <- TRUE    # set staggering active flag. (column request.)
      }
      
      #  lastLab2Space is the number of inches the left column has intruded into our column.
-     #cat("lastLab2Space:",lastLab2Space,"  last column: + need space, - has space. lab 2 row.\n")
+     # cat("lastLab2Space:",lastLab2Space,"  last column: + need space, - has space. lab 2 row.\n")
      
      # lastLab2Space < 0, last column needs space from us. 
      #     If sum(lastLab2Space,w1stLabOverI) =>  0 there is room.
@@ -10844,10 +10841,10 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
           
      lastLab2Space   <<- wLastLabOverI
-     #cat("Setting lastLab2Space:",lastLab2Space,"\n")
-     #cat("lastLab3Space:",lastLab3Space,"\n")
+     # cat("Setting lastLab2Space:",lastLab2Space,"\n")
+     # cat("lastLab3Space:",lastLab3Space,"\n")
      
-     #cat("staggering:", staggering,"  staggered:",staggered,"  MakeStag:",MakeStag,"\n")
+     # cat("staggering:", staggering,"  staggered:",staggered,"  MakeStag:",MakeStag,"\n")
      
      #
      #   Step 6 - if staggered was requested or found to be the solution, set up all parameters.
@@ -10856,14 +10853,14 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      if (MakeStag) {
         
         # take the two label sets and make a staggered XAxis
-        #cat("MakeStag = TRUE - Modifying vector to do staggered.\n")
+        # cat("MakeStag = TRUE - Modifying vector to do staggered.\n")
         
         #  Adjust the sizes of font and spaces between lines for staggered style.
         
         # put in right order for neighboring column
         
         # check status of last column - staggered = TRUE, ended HIGH, = FALSE, ended LOW.
-        #cat("Last Column position - staggered:",staggered,"\n")
+        # cat("Last Column position - staggered:",staggered,"\n")
         
         if (!staggered) {     # staggered = FALSE (no stagger or ended low.) start high. 
            # last column had no stagger, no stagger done, or ends in low position.
@@ -10875,7 +10872,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
            #s1            <-  seq(1,lAtLab,by=2)
            #s2            <-  seq(2,lAtLab,by=2)
     	   # start high (ax1)
-    	   #cat("HIGH position, keep labels in same order - 1st value LOW - atLab1.\n")
+    	   # cat("HIGH position, keep labels in same order - 1st value LOW - atLab1.\n")
         } else {
            # start low
            #s1            <-  seq(2,lAtLab,by=2)
@@ -10887,11 +10884,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
            wAtRx          <- atRx1
            atRx1          <- atRx2
            atRx2          <- wAtRx
-           #cat("LOW position, swap labels - 1st value HIGH - atLab2.\n")
+           # cat("LOW position, swap labels - 1st value HIGH - atLab2.\n")
         }
         
-        #cat("lineAxisSizes:\n")
-        #print(lineAxisSizes)
+        # cat("lineAxisSizes:\n")
+        # print(lineAxisSizes)
         
         #if (lineAxisSizes["Ax1"] == axisNLabSize ) {
         #
@@ -10925,13 +10922,12 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         lineAxisSizes["SP"]  <- lineSSpLabSize     # reduce space to labels/titles       # set new title to axis space height.
         lineMultiB["SP"]     <- 2.25               # fudge on bottom.
                       
-        #cat("Make Staggered - settings - lineAxisSizes:\n")
-        #print(lineAxisSizes)
-        #cat("lineDo:\n")
-        #print(lineDo)
-     }      
-    
-      
+        # cat("Make Staggered - settings - lineAxisSizes:\n")
+        # print(lineAxisSizes)
+        # cat("lineDo:\n")
+        # print(lineDo)
+     }       
+          
      #
      #  Step 7 - finish setting up the top and bottom labels. 
      #
@@ -10941,16 +10937,16 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      names(lineSizesT) <- c("N","Ax2","Ax1","SPT","AST","SP","L2","L1")
      lineSizesTM       <- lineSizesT * lineMultiT
      
-     #cat("lineSizesT&TM:\n")
-     #print(lineSizesT)
-     #print(lineSizesTM)
+     # cat("lineSizesT&TM:\n")
+     # print(lineSizesT)
+     # print(lineSizesTM)
      
      # calculate the positions of each and add offset.
      linePosT          <- cumsum(lineSizesTM) + 0.01        # get line position of each element
      names(linePosT)   <- c("Ax2","Ax1", "SPT", "AST", "SP", "L2", "L1")
      
-     #cat("linePosT:\n")
-     #print(linePosT)
+     # cat("linePosT:\n")
+     # print(linePosT)
      
      #   if overlaped but not staggered, linePosT  "Ax1" and "Ax2" should be the same.
      #
@@ -10958,7 +10954,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      
      #####
      #
-     #  BOTTOM Titles and Headers (RefText)
+     #  BOTTOM Titles and Headers (RefText) Spaces (vertically)
      #
      #  Bottom margin titles/axis                  (N <> src)
      #
@@ -10966,22 +10962,22 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      names(lineSizesB) <- c("N","Ax2","Ax1","SPT","AST","SP","L3","L4")
      lineSizesBM     <- lineSizesB * lineMultiB
          
-     #cat("lineSizesB&BM:\n")
-     #print(lineSizesB)
-     #print(lineSizesBM)
+     # cat("lineSizesB&BM:\n")
+     # print(lineSizesB)
+     # print(lineSizesBM)
      
      # calculate the positions of each and add offset.
      linePosB        <- cumsum(lineSizesBM) + 0.01   # get line position of each elements
      names(linePosB) <- c("Ax2","Ax1", "SPT", "AST", "SP", "L3", "L4")
           
-     #cat("linePosB:\n")
-     #print(linePosB)
+     # cat("linePosB:\n")
+     # print(linePosB)
           
      titleLab3       <- linePosB["L3"]    # make any adjustments in the trailer code.
      titleLab4       <- linePosB["L4"]    # used by RefText
     
-     #cat("lineDo:\n")
-     #print(lineDo)
+     # cat("lineDo:\n")
+     # print(lineDo)
      
      #
      #####
@@ -11002,11 +10998,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      
      #  Select panel and re-scale - 1st panel (top) to do title/labels and axis labels
      
-     #cat("DX02-column headers printing - rx:",rx,"  ry:",ry," i:",1,"  j:",j,"\n")
+     # cat("DX02-column headers printing - rx:",rx,"  ry:",ry," i:",1,"  j:",j,"\n")
      panelSelect(panels,1,j)
      
      x <- panelScale(rx,ry)
-     par(xpd=T)
+     graphics::par(xpd=T)
 
      # print in margin space above panel 1 of column.
 
@@ -11032,8 +11028,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
      if (lineDo["Ax1"]) {                    # line 1 or 2 (above axis # 2)
    
-         #cat("Top-axis calls -   atLab1:",atLab1,"  atRx1:",atRx1,"\n")
-         #cat("  mgp:linePosT['Ax1']:",linePosT["Ax1"],"\n",
+         # cat("Top-axis calls -   atLab1:",atLab1,"  atRx1:",atRx1,"\n")
+         # cat("  mgp:linePosT['Ax1']:",linePosT["Ax1"],"\n",
          #    "  lineAxisSizes['Ax1']:",lineAxisSizes["Ax1"],"\n")
         
          graphics::axis(side=3,  tick=F, at=atRx1, labels=atLab1,
@@ -11042,8 +11038,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      }
      
      if (lineDo["Ax2"]) {                                                             # line 1
-         #cat("Top-axis calls -   atLab2:",atLab2,"  atRx2:",atRx2,"\n")
-         #cat("  mgp:linePosT['Ax2']:",linePosT["Ax2"],"\n",
+         # cat("Top-axis calls -   atLab2:",atLab2,"  atRx2:",atRx2,"\n")
+         # cat("  mgp:linePosT['Ax2']:",linePosT["Ax2"],"\n",
          #    "  lineAxisSizes['Ax1']:",lineAxisSizes["Ax1"],"\n")
         
          graphics::axis(side=3,  tick=F, at=atRx2,  labels=atLab2, 
@@ -11062,11 +11058,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
      # Select and Scale to bottom panel in column
      
-     #cat("DX03-trailer column headers - numGrps-i:",numGrps," j:",j,"  numGrps:",numGrps,"  rx:",rx,"  ry:",ry,"\n")
+     # cat("DX03-trailer column headers - numGrps-i:",numGrps," j:",j,"  numGrps:",numGrps,"  rx:",rx,"  ry:",ry,"\n")
     
      panelSelect(panels,numGrps,j)    # Last panel.
      x <- panelScale(rx,ry)
-     par(xpd=T)
+     graphics::par(xpd=T)
 
      # print in margin space below bottom panel
      
@@ -11077,7 +11073,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      # new bottom margin line adjustment algorithm
      #
      desiredCex    <- lineAxisSizes["Ax1"]
-     xPs           <- par("ps")                # get current system base point size being used.  
+     xPs           <- graphics::par("ps")                # get current system base point size being used.  
                                                # Everything is based on this value.
      xHPsLU        <- graphics::strheight("00000",cex=1,units="user")
      xHDesPsLU     <- graphics::strheight("00000",cex=desiredCex,units="user")
@@ -11087,16 +11083,16 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      botAxisBase   <- 0.15 - xBotAdj    # in lines.
      botAxisBAdj   <- botAxisBase  # + 0.05
      botLAdj       <- 0.05
-     #cat("New Bottom - botAxisBase:",botAxisBase,"  botAxisBAdj:",botAxisBAdj,"  botLAdj:",botLAdj,"\n")
+     # cat("New Bottom - botAxisBase:",botAxisBase,"  botAxisBAdj:",botAxisBAdj,"  botLAdj:",botLAdj,"\n")
      
      # column bottom axis lines - 1 or 2 lines
      
      if (lineDo["Ax1"]) { 
-        #cat("Bot-axis #1 - linePosB['Ax1']:",linePosB["Ax1"],"\n",
+        # cat("Bot-axis #1 - linePosB['Ax1']:",linePosB["Ax1"],"\n",
         #    "  lineAxisSizes['Ax1']:",lineAxisSizes["Ax1"],"\n",
         #    "  botAxisBase:",botAxisBase,"\n",
         #    "  botAxisBAdj:",botAxisBAdj,"\n")
-        #cat("  atRx1:",atRx1,"  atLab1:",atLab1,"\n")
+        # cat("  atRx1:",atRx1,"  atLab1:",atLab1,"\n")
    
         graphics::axis(side=1, tick=F, at=atRx1, labels=atLab1, line=botAxisBAdj, 
                 mgp=c(3.2, linePosB["Ax1"],0), 
@@ -11104,11 +11100,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      }
 
      if (lineDo["Ax2"]) { 
-        #cat("Bot-axis #2 - linePosB['Ax2']:",linePosB["Ax2"],"\n",
+        # cat("Bot-axis #2 - linePosB['Ax2']:",linePosB["Ax2"],"\n",
         #    "  lineSizesB['Ax1']:",lineSizesB["Ax1"],"\n",
         #    "  botAxisBase:",botAxisBase,"\n")
         #    #"  botAxisBAdj:",botAxisBAdj,"\n")
-        #cat("  atRx2:",atRx2,"  atLab2:",atLab2,"\n")
+        # cat("  atRx2:",atRx2,"  atLab2:",atLab2,"\n")
 
         graphics::axis(side=1, tick=F, at=atRx2, labels=atLab2, line=botAxisBAdj, 
                 mgp=c(3.2, linePosB["Ax2"],0), 
@@ -11119,11 +11115,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      if (lineDo["AST"]) {
         wAST <- linePosB["AST"] + botAxisBAdj
    
-        #cat("BotAST - linePosB['AST']:",linePosB["AST"],"\n",
+        # cat("BotAST - linePosB['AST']:",linePosB["AST"],"\n",
         #    "  lineAxisSizes['AST']:",lineAxisSizes["AST"],"\n",
-        #    #"  botAxisBAdj:",botAxisBAdj,"\n")
+        #    "  botAxisBAdj:",botAxisBAdj,"\n")
         #    "  botAxisBase:",botAxisBase,"\n")
-        #cat("  line=wAST:",wAST,"\n")
+        # cat("  line=wAST:",wAST,"\n")
         
         graphics::mtext(axisSubTitle, side=1, line = wAST, 
                   cex=lineAxisSizes["AST"])
@@ -11135,7 +11131,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      if (lineDo["L3"]) {
         titleLab3 <- linePosB["L3"] + botAxisBase - 0.05
         
-        #cat("BotAxis # 3 - linePosB['L3']:",linePosB["L3"],"\n",
+        # cat("BotAxis # 3 - linePosB['L3']:",linePosB["L3"],"\n",
         #    "  botAxisBAdj:", botAxisBAdj, "\n",
         #    "  botAxisBase:", botAxisBase, "\n",
         #    #"  botLAdj   :",botLAdj,"\n",
@@ -11147,7 +11143,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      # _______Reference Value Legend   (Reference Text and Value)
  
      titleLab4     <- linePosB["L4"]  + botAxisBase 
-     #cat("lab4/reftxt - titleLab4:",titleLab4," refval:",refval," reftxt:",reftxt,"  rx range:",rx,"\n")
+     # cat("lab4/reftxt - titleLab4:",titleLab4," refval:",refval," reftxt:",reftxt,"  rx range:",rx,"\n")
      
      #  Handle special needs of the reftxt and it's line for a single column
      
@@ -11160,72 +11156,136 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
               #  Get y pos in user units to draw the line and text.
               # select panel done before this call.
          
-              xpin          <- par("pin")                  # distances in inches
-              xusr          <- par("usr")                  # distances in user scale (points)
-              xmar          <- par("mar")
-              xmai          <- par("mai")
+              xpin          <- graphics::par("pin")                  # distances in inches
+              xusr          <- graphics::par("usr")                  # distances in user scale (points)
+              xmar          <- graphics::par("mar")
+              xmai          <- graphics::par("mai")
               
               #fpc           <- 0.95                        # fudge adjustment 
               
-              #cat("start-reftxt - xpin:",xpin," xusr:",xusr," xmar:",xmar," xmai:",xmai,"\n")
+              # cat("start-reftxt - xpin:",xpin," xusr:",xusr," xmar:",xmar," xmai:",xmai,"\n")
            
               #
               #  Calculate X positions for the line and text in the margin. (units=user)
               #
-           
-              xCenterU      <- mean(xusr[1:2])             # center of the glyph column
-              xWidthU       <- diff(xusr[1:2])             # unit width of glyph column => diff(rx) - user units
-              xUnitsPerInch <- xWidthU/xpin[1]             # units / inch for x
-              xHalfInchU    <- xUnitsPerInch * 0.5      #* fpc   # 1/2" of units
-           
-              #cat("  center of glyph-xCenterU :",xCenterU, "\n",
-              #    "   width of glyph -xWidthU :",xWidthU, "\n",
-              #    "             xUnitsPerInch :",xUnitsPerInch,"\n",
-              #    "                xHalfInchU :",xHalfInchU,"\n")
+              xBaseU        <- xusr[1]                     # get base starting point of panel.
+              xEndU         <- xusr[2]                     # ending of panel.
+              xWidthU       <- abs(diff(xusr[1:2]))        # unit width of glyph column => diff(rx) in user units (absolute)
+              #                These could be < 0 if both sides neg. or <0 if left side is a large neg then right.
+              #xCenterU      <- mean(xusr[1:2])             # center of the glyph column in usr units (could be - or +_
+              #                
+              xUnitsPerInch  <- xWidthU/xpin[1]             # abs( units )/ inch for x 
+              xHalfInchU     <- xUnitsPerInch * 0.5         #* fpc   # 1/2 of units per inche
+              xQuarInchU     <- xUnitsPerInch * 0.25
+              L4cex          <- 0.85                          # use this to adjust calculation and drawing for refText.
+              xLeadU         <- 0                          # no value to center string at the moment
+              
+              # cat("lineSizesB:",lineSizesB["L4"],"  L4cex:",L4cex,"\n")
+                           
+              xLineSpU       <- xWidthU * 0.01
+              # cat("xLineSpU:",xLineSpU,"\n")
+              
+              xLineLenU      <- xHalfInchU    # basic line is 1/2 inch
+              
+              #xmaxTxtLenU    <- xWidthU - (xLineSpU) - xLineLenU
+              xStartPtU      <- xLineSpU
+              xStartPadU     <- xLineSpU
+              
+            
+              # cat(" left edge of glyph=xBaseU :",xBaseU, "\n",
+              #     "  center of glyph-xCenterU :",xCenterU, "\n",
+              #     "    width of glyph-xWidthU :",xWidthU, "\n",
+              #     "             xUnitsPerInch :",xUnitsPerInch,"\n",
+              #     "                xHalfInchU :",xHalfInchU,"\n",
+              #     "                xQuarInchU :",xQuarInchU,"\n")
+              xAlpha         <- "ABCDEFGHIJKLMNOPQRSTUVWXYZabcedfghijklmnopqrstuvwxyz _-"
+              xSingleChU     <- graphics::strwidth(xAlpha,units="user", cex=lineSizesB["L4"]*L4cex )/nchar(xAlpha)
+              
               #
               #  line length will be whats left after taking away room for text or 1/2 inch 
               #
-              
-              xTxt          <- stringr::str_trim(reftxt)            # get reftxt and trim side blanks.
-              
+              xTxt            <- stringr::str_trim(reftxt)     # get reftxt and trim side blanks.
               # length of texts in units
-              xTxtLenU      <- graphics::strwidth(xTxt,units="user", cex=lineSizesB["L4"]) #* fpc  # length reftxt (width)
-              #cat("xTxtLenU (reftxt): ",xTxtLenU," units \n")
+              xTxtLenU      <- graphics::strwidth(xTxt,units="user", cex=(lineSizesB["L4"]*L4cex))    #  * fpc  # length reftxt (width)
+              # cat("xTxtLenU (reftxt):",xTxt,"; len:",xTxtLenU," units  NChar:",nchar(xTxt),"  calcu len:",nchar(xTxt)*xSingleChU," \n")
+                            
               # 
+              # cat("xStartPadU:",xStartPadU," xLineLenU:",xLineLenU," xLineSpU:",xLineSpU," xTxtLenU:",xTxtLenU,"\n")
+              xTotLenU      <-  xStartPadU + xLineLenU + xLineSpU + xTxtLenU + xStartPadU  # basic as it stands length
+              # cat("xTotLenU:",xTotLenU,"\n")
+              if (xTotLenU > xWidthU ) {
+                 # too big - make some adjustments
+                 # reduce xLineSpU
+                 xLineSpU   <- xWidthU * 0.005
+                 xStartPadU <- xLineSpU
+                 # reduce xLineLenU
+                 xLineLenU  <- xQuarInchU
+                 L4cex      <- 0.80 
+                 # Recalculate with adjustments
+                 xTxtLenU      <- graphics::strwidth(xTxt,units="user", cex=(lineSizesB["L4"]*L4cex))
+                 # cat("xStartPadU:",xStartPadU," xLineLenU:",xLineLenU," xLineSpU:",xLineSpU," xTxtLenU:",xTxtLenU,"\n")
+                 xTotLenU      <-  xStartPadU + xLineLenU + xLineSpU + xTxtLenU + xStartPadU  # basic as it stands length
+                 # cat("xTotLenU:",xTotLenU,"  L4cex:",L4cex,"\n")
+                 if (xTotLenU > xWidthU) {
+                    # more changes are needed
+                    xStartPadU <- 0
+                    xLineSpU   <- 0
+                    if ((xTxtLenU+xLineLenU)>xWidthU) {
+                       xSingleChU     <- graphics::strwidth("m",units="user", cex=lineSizesB["L4"]*L4cex )
+		       # cat("xSingleChU:",xSingleChU,"\n")
+           
+                       # big problem  Line is as short as it can be, but text is huge.
+                       xOpenU   = xWidthU - xLineLenU   # is the space available for text.
+                       xNChr    = xOpenU/xSingleChU     # number of character permited
+                       xTxt     <- stringr::str_sub(xTxt,1,xNChr)  # trim refTexts to what will fit.
+                       xTxtLenU <- graphics::strwidth(xTxt,units="user",lineSizesB["L4"]*L4cex)
+                       xTotLenU <-  xStartPadU + xLineLenU + xLineSpU + xTxtLenU + xStartPadU  # basic as it stands length
+                       # cat("xTotLenU:",xTotLenU,"  xWidthU:",xWidthU,"\n")
+                    }
+                 }
+              }
+              # Set up points.
+              xLeadU = 0   # offset is zero
+              # Get total length in user units.
+              xTotLenU = xStartPadU + xLineLenU + xLineSpU + xTxtLenU + xStartPadU
               
-              xLineLenU      <- xTxtLenU * .75     # make line the same length as test reduced to 75%
-              xLineSpU       <- (xTxtLenU - xLineLenU) * 0.5   # 1/2 the length of their difference
-              xTotLenU       <- (xTxtLenU+xLineSpU+xLineLenU)  # get size of entire image.  (line, Spc, text)
-              
-              xFreeLenU      <- xWidthU - xTotLenU         # unused space.  - then center it.
-              # if column is not wide enought, use the - value and extend beyond the column.     
-              xLineStartu    <- xFreeLenU/2                # line starts at the left end of the free space / 2
-              xLineEndu      <- xLineStartu + xLineLenU    # end of line is start + length
-              xTxtStartu     <- xLineEndu+xLineSpU         # start of text
-            
+              if (xWidthU > xTotLenU) {
+                 # if xTotLenU is smaller than width, center the line and text.
+                 xLeadU <- ( xWidthU - xTotLenU ) / 2   # center the image.
+              }
+              # cat("xLeadU:",xLeadU,"\n")
+              #  Build line.
+              # it fits.  
+              xLineStartU <- xLeadU + xStartPadU
+              xLineEndU   <- xLineStartU + xLineLenU
+              xTxtStartU  <- xLineEndU + xLineSpU
+              xTxtEndU    <- xTxtStartU + xTxtLenU
+              # cat("xLeadU:",xLeadU," xLineSpU:",xLineSpU," xLineLenU:",xLineLenU," xTxtLenU:",xTxtLenU,"\n")
+              # cat("xWidthU:",xWidthU,"  xTotLenU:",xTotLenU,"\n")
+          
               # calculations are OK, if origin is Zero.  Need to add the left usr 'x' value to complete it.  
-              
-              #cat("xLineStartu:",xLineStartu," xLineEndu:",xLineEndu," LineLen:",xLineLenU," LineSp:",xLineSpU,"\n",
-              #    " xTxtStartu:",xTxtStartu," TxtLenU:",xTxtLenU," Unit/Inch:",xUnitsPerInch,"\n")
-              #cat("din:",par("din"),"  fin:",par("fin"),"  pin:",par("pin"),"  plt:",par("plt"),"  usr:",par("usr"),"\n")
+              # cat("L4cex:",L4cex,"\n")
+              # cat("xLineStartU:",xLineStartU," xLineEndU:",xLineEndU," xLineLenU:",xLineLenU," xLineSpU:",xLineSpU,"\n")
+              # cat("xTxtStartU:",xTxtStartU," xTxtLenU:",xTxtLenU," Unit/Inch:",xUnitsPerInch,"\n")
+              # cat("din:",par("din"),"  fin:",par("fin"),"  pin:",par("pin"),"  plt:",par("plt"),"  usr:",par("usr"),"\n")
               #
               #  Calculate the Y positions for the line and text in the margin for the reftxt.
               #     line needs units=users,  text needs "lines"
               #
               xTitleLab4    <- titleLab4        # +  botLAdj      #  Text Line offset from Axis line.   
                 
-              #cat("ConvLineToUser call-xTitleLab4:",xTitleLab4,"\n")
+              # cat("ConvLineToUser call-xTitleLab4:",xTitleLab4,"\n")
               # Vertical (Y) position of reftxt.
               yTextPosu     <- ConvLineToUser(1, xTitleLab4)      # position text position in user units.
-              yTextHu       <- graphics::strheight(xTxt, units="user", cex=lineSizesB["L4"])  # find height of text in user units.
+              yTextHu       <- graphics::strheight(xTxt, units="user", cex=(lineSizesB["L4"]))  # find height of text in user units.
                
               #  position of line based on Text position(user) - 60% of the text height.
               yLinePosu     <- yTextPosu - (yTextHu * 0.6)                # lines y coord. is 1/2 text height toward plot.
-              #cat("yTextPosu:",yTextPosu,"  yTextHu:",yTextHu,"\n")
+              # cat("yTextPosu:",yTextPosu,"  yTextHu:",yTextHu,"\n")
            
-              #cat("Y Position for L4 - line(u):",yLinePosu,"  text(u):",yTextPosu,"\n")
+              # cat("Y Position for L4 - line(u):",yLinePosu,"  text(u):",yTextPosu,"\n")
               
-              #cat("text in xTitleLab4:",xTitleLab4,"  titleLab4:", titleLab4,"\n",
+              # cat("text in xTitleLab4:",xTitleLab4,"  titleLab4:", titleLab4,"\n",
               #     "   linePosB['L4']  :",linePosB["L4"],"   lineSizesB['L4']:",lineSizesB["L4"],"\n",
               #     "   botAxisBAdj      :",botAxisBAdj,"  botLAdj:",botLAdj,"\n")
               
@@ -11233,29 +11293,28 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                
               # add text reference line to bottom header   (5/21/13 - added color to line)
               
-              #  Get par("usr") again.  Need the first value (x, start)
-              #xpin          <- par("pin")                  # distances in inches
-	      xusr          <- par("usr")                  # distances in user scale (points)
-	      #xmar          <- par("mar")
-	      #xmai          <- par("mai")
-	      
-	      #cat("reftxt end - xpin:",xpin," xusr:",xusr," xmar:",xmar," xmai:",xmai,"\n")
+              #  Get graphics::par("usr") again.  Need the first value (x, start)
+              xusr           <- graphics::par("usr")                  # distances in user scale (points)
+	       
+	      # cat("reftxt end - xpin:",xpin," xusr:",xusr," xmar:",xmar," xmai:",xmai,"\n")
               
-              xLineStartu <- xLineStartu+xusr[1]      
-              xLineEndu   <- xLineEndu  +xusr[1]
-              xTxtStartu  <- xTxtStartu +xusr[1]
+              #  The adjust for the base...
+              xLineStartU <- xLineStartU+xusr[1]      
+              xLineEndU   <- xLineEndU  +xusr[1]
+              xTxtStartU  <- xTxtStartU +xusr[1]
+              # cat("Adjusted - xLineStartU:",xLineStartU,"  xLineEndU:",xLineEndU,"  xTxtStartU:",xTxtStartU,"\n")
               
               # draw ref line in header.    
-              graphics::lines(c(xLineStartu, xLineEndu), rep(yLinePosu, 2), 
+              graphics::lines(c(xLineStartU, xLineEndU), rep(yLinePosu, 2), 
                      lty=Ref.Val.lty, lwd=Ref.Val.lwd, col=iRef.Val.col)      # draw length line up to 1/2 inch.
               
               # mtext does not let you set the X position of the text, so the old text function must be used with x, y coordinates.
               # draw ref line txt in header.
-              graphics::text(xTxtStartu, y=yLinePosu, labels=xTxt, 
-                      cex=lineBotSizes["L4"], col=iRef.Text.col, 
+              graphics::text(xTxtStartU, y=yLinePosu, labels=xTxt, 
+                      cex=lineBotSizes["L4"]*L4cex, col=iRef.Text.col, 
                       offset=0, adj=c(0,NA))                       # text starting at line end.
 
-              #cat("Line%Start:", xLineStartu/xWidthU, "  Txt%Start:",xTxtStartu/xWidthU,"  titleLab4:", titleLab4,"\n")
+              # cat("Line%Start:", xLineStartU/xWidthU, "  Txt%Start:",xTxtStartU/xWidthU,"  titleLab4:", titleLab4,"\n")
  
            }
         }
@@ -11264,7 +11323,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      #
      ##### end of trailer
      
-     #cat("Returned staggered:",staggered,"\n") 
+     # cat("Returned staggered:",staggered,"\n") 
      
      return(list(atRx=atRx, rx=rx, ry=ry))   # return the set of tick points for grid lines. 
   }
@@ -11317,6 +11376,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
   #
   ###
+  
+  # cat("Code: 11369 - End of general functions loaded.\n")
 
   ###  
   #
@@ -11329,7 +11390,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
   MapPolySetup <- function(mapType, wPanels, wAreaVisBorders=NULL, wL2VisBorders=NULL, wRegVisBorders=NULL, wL3VisBorders=NULL) {
      # entire area..  (what if subset is used.)
-     #cat("Enter MapPolySetup:\n")
+     # cat("Enter MapPolySetup:\n")
      
      rxpolyVB <- NULL
      rypolyVB <- NULL
@@ -11341,26 +11402,26 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
            if (dim(wAreaVisBorders)[1] > 0) {
               rnX  <- range(wAreaVisBorders$x,na.rm=TRUE)
               rnY  <- range(wAreaVisBorders$y,na.rm=TRUE)
-              #cat("areaV range-x:",rnX,"  y:",rnY,"\n")
+              # cat("areaV range-x:",rnX,"  y:",rnY,"\n")
               rxpolyVB <- c(rxpolyVB, rnX)
               rypolyVB <- c(rypolyVB, rnY)
-              #cat("MapPolySetup - Have areaVisBorder\n")
+              # cat("MapPolySetup - Have areaVisBorder\n")
            }
         }
      } 
      
      if (missing(wL2VisBorders) || is.null(wL2VisBorders)) {
-        #cat("***0311 Missing: L2VisBorders dataset in the border group specified.\n")
+        # cat("***0311 Missing: L2VisBorders dataset in the border group specified.\n")
         Map.L2Borders <- FALSE
      } else {
         if (exists("wL2VisBorders")) {
            if (dim(wL2VisBorders)[1] > 0) {
               rnX  <- range(wL2VisBorders$x,na.rm=TRUE)
               rnY  <- range(wL2VisBorders$y,na.rm=TRUE)
-              #cat("L2V range-x:",rnX,"  y:",rnY,"\n")
+              # cat("L2V range-x:",rnX,"  y:",rnY,"\n")
               rxpolyVB <- c(rxpolyVB, rnX)
               rypolyVB <- c(rypolyVB, rnY)
-              #cat("MapPolySetup - Have L2VisBorder\n")
+              # cat("MapPolySetup - Have L2VisBorder\n")
            } else {
               Map.L2Borders <- FALSE
            }
@@ -11368,20 +11429,20 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      }
      
      if (missing(wRegVisBorders)|| is.null(wRegVisBorders)) {
-        #cat("***312 Missing the RegVisBorders dataset in the border group specified.\n")
+        # cat("***312 Missing the RegVisBorders dataset in the border group specified.\n")
         Map.RegBorders <- FALSE
      } else {
-        #cat("Not-Missing: RegVisBorders == typeof:",typeof(wRegVisBorders),"  class:",class(wRegVisBorders),"\n")
-        #cat(" dimensions:",dim(wRegVisBorders),"  ",length(wRegVisBorders), "  ",is.null(wRegVisBorders),"\n")
-        #print(wRegVisBorders)
+        # cat("Not-Missing: RegVisBorders == typeof:",typeof(wRegVisBorders),"  class:",class(wRegVisBorders),"\n")
+        # cat(" dimensions:",dim(wRegVisBorders),"  ",length(wRegVisBorders), "  ",is.null(wRegVisBorders),"\n")
+        # print(wRegVisBorders)
         if (exists("wRegVisBorders")) {
            if (dim(wRegVisBorders)[1] > 0) {
               rnX  <- range(wRegVisBorders$x,na.rm=TRUE)
               rnY  <- range(wRegVisBorders$y,na.rm=TRUE)
-              #cat("RegV range-x:",rnX,"  y:",rnY,"\n")
+              # cat("RegV range-x:",rnX,"  y:",rnY,"\n")
               rxpolyVB <- c(rxpolyVB, rnX)
               rypolyVB <- c(rypolyVB, rnY)
-              #cat("MapPolySetup - Have RegVisBorder\n")
+              # cat("MapPolySetup - Have RegVisBorder\n")
            } else {
               Map.RegBorders <- FALSE
            }
@@ -11389,17 +11450,17 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      }
      
      if (missing(wL3VisBorders)|| is.null(wL3VisBorders)) {
-        #cat("***0313 Missing the L3VisBorders dataset in the border group specified.\n")
+        # cat("***0313 Missing the L3VisBorders dataset in the border group specified.\n")
         Map.L3Borders <- FALSE
      } else {
         if (exists("wL3VisBorders")) {
       
            if (dim(wL3VisBorders)[1] >0) {        rnX  <- range(wL3VisBorders$x,na.rm=TRUE)
               rnY  <- range(wL3VisBorders$y,na.rm=TRUE)
-              #cat("L3V range-x:",rnX,"  y:",rnY,"\n")
+              # cat("L3V range-x:",rnX,"  y:",rnY,"\n")
               rxpolyVB <- c(rxpolyVB, rnX)
               rypolyVB <- c(rypolyVB, rnY)
-              #cat("MapPolySetup - Have L3VisBorder\n")
+              # cat("MapPolySetup - Have L3VisBorder\n")
            } else {
               Map.L3Borders <- FALSE
            }
@@ -11409,7 +11470,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      # all existing sets of boundaries.  Now calculate the boundaries (BBox)
      rxpoly   <- range(rxpolyVB)
      rypoly   <- range(rypolyVB) 
-     #cat("MapPolySetup Results - rxpoly:",rxpoly,"   rypoly:",rypoly,"\n")
+     # cat("MapPolySetup Results - rxpoly:",rxpoly,"   rypoly:",rypoly,"\n")
    
      #  Expand range of X to make sure the edges can be seen.  2% should do it.
      rxadj    <- diff(rxpoly) * 0.02   # adjust x by + and - 2% of the size of the range
@@ -11421,17 +11482,17 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      rypoly   <- rypoly + ryVadj       # adjust the Y range.
   
      yxA      <- diff(rypoly) / diff(rxpoly)  # calculated aspect of the MAP.
-     #cat("Map yxAspect:", yxA, "\n")
+     # cat("Map yxAspect:", yxA, "\n")
   
-     #cat("Adjusted poly:","  rxpoly:",rxpoly,"  rypoly:",rypoly,"\n")
+     # cat("Adjusted poly:","  rxpoly:",rxpoly,"  rypoly:",rypoly,"\n")
  
      # aspect ratio is y / x...
      # size of space in panel =
      panelW    <- diff(wPanels$coltabs[j+1,])   # width (X) of panel     (inches)
      panelH    <- diff(wPanels$rowtabs[2,])     # height (Y) of grab first row as model
                                                 # All should be the same except median row
-     #cat("Panel    W:",panelW,"  H:",panelH,"\n")
-     #cat("banner.max:",banner.max[mapType,"width"],"\n")
+     # cat("Panel    W:",panelW,"  H:",panelH,"\n")
+     # cat("banner.max:",banner.max[mapType,"width"],"\n")
 
      #  adjustments have been made. Recalculate    
      rxDiff    <- diff(rxpoly)   # X Width    (map coordinates units)
@@ -11475,7 +11536,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         vfy     <- c(-wfyd/2, wfyd/2)
         rypoly2 <- rypoly + vfy
      }
-     #cat("Final=rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
+     # cat("Final=rxpoly2:",rxpoly2,"   rypoly2:",rypoly2,"\n")
 
      return(list(rxpoly2=rxpoly2, rypoly2=rypoly2))
   }
@@ -11490,17 +11551,19 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   #
   MMVSplit <- function(wX,Brks) {
    
-     #print(Brks)
+     # print(Brks)
      wXa       <- wX
      wXa[Brks] <- NA
      wXs       <- split(wXa, cumsum(Brks))     # split up vector into smaller vectors in list
      wXz       <- sapply(wXs,  function(x) x[!is.na(x)])  # remove NAs 
    
-     #print(wXz)
+     # print(wXz)
      return(wXz)
   }
   #
   ###
+  
+  # cat("Code: 11557 - End of map functions loading. \n")
 
   ###
   #
@@ -11556,7 +11619,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
      }
    
      return(wAbbr)    # return list of abbreviates or NA if no match.
-  }   # end of SeerToAddr
+  }   # end of SeerToAbbr
 
   #
   ###
@@ -11589,14 +11652,11 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   #
   #### end of micromap functions (glyphs and micromapST internal functions)
   #
-  #
   ###########################
   ###########################
 
-  #print("micromapST functions loaded")
-  
-  
-
+  # print("micromapST functions loaded")
+    
   ################################################################################
   #
   #
@@ -11609,7 +11669,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
   #
   #  Call Argument validation  
   #
-  #cat("Code: 11609  back to validating call parameters.\n")
+  
+  # cat("Code: 11662 -  back to validating call parameters.\n")
 
    #  
    # Previously Checked:
@@ -11656,7 +11717,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    # it can still slip by as a tibble, matrix, array or list. Only let data.frames through.
    #   Test changed to is not a data.frame or is a tibble - fail and warn user.
    
-   if (!methods::is(statsDFrame,"data.frame")||isTib(statsDFrame)) {
+   if (!methods::is(statsDFrame,"data.frame") || isTib(statsDFrame)) {
       StopFnd   <- stopCntMsg(paste0("***0102 CARG-DF The statsDFrame data.frame is not data.frame class. \n"))
    }
    
@@ -11695,7 +11756,6 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    numRows      <- nrow(statsDFrame)         # get number of rows in statsDFrame
    wSFmin       <- 1                         # minimum columns in data.frame  (no rowNamesCol)
       
-
    # The above code should work even if the data.frame has 0 rows and 0 columns
    # The statsDFrame must have at least one column, two if rowNameCol is specified.
    # The number of rows will be checked against the name table, later.
@@ -11712,8 +11772,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #
    mmSys        <- list(SFVarName = sDFName, SFNameL = wSFNameList, SFColNum = len_wSFName, SFRowNum = numRows)
    
-   #print("mmSys")
-   #print(mmSys)
+   # print("mmSys")
+   # print(mmSys)
    
    #
    #  statsDFrame - data rows
@@ -11732,6 +11792,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #  the link verification.
    #
    
+   # cat("Code: 11786 - Step 1 - Validate statsDFrame.\n")
+   
    #
    #  Step 1 - find out where the row names for the area are in the statsDFrame data.frame.
    #
@@ -11747,7 +11809,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #
    #_____________Check and Process the rowNamesCol call argument/parameter option__________017x_________
    #
-   #cat("Code: 11749 - Process rowNamesCol.\n")
+   # cat("Code: 11803 - Process rowNamesCol.\n")
    
    StopFnd     <- FALSE
    ErrFnd      <- FALSE
@@ -11770,7 +11832,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
       
       #  Could be dangerous - later it may be best to STOP.
   
-      #print("No rowNamesCol provided - must be in row.names")
+      # print("No rowNamesCol provided - must be in row.names")
   
    } else {
    
@@ -11794,13 +11856,13 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
       
          litrowNamesCol = rowNamesColx    # Save the original literal value from rowNamesColx (could be number or name)
       
-         #cat("rowNamesColx-precheck:",paste0(rowNamesColx,collapse=", ",sep=""),"\n")
+         # cat("rowNamesColx-precheck:",paste0(rowNamesColx,collapse=", ",sep=""),"\n")
       
          # parameter is cleaned inside of routine.
          rowNamesColx  <- CheckParmColx(litrowNamesCol, c('RNC','rowNamesCol'), wSFNameList, len_wSFName)   # see if value is good.
          #      if error, CheckParmColx issues the warning message and return 0.
       
-         #cat("rowNamesColx-results:", paste0(rowNamesColx,collapse=", ",sep=""),"\n")
+         # cat("rowNamesColx-results:", paste0(rowNamesColx,collapse=", ",sep=""),"\n")
          #
          # got column number(s) if good. Multiple columns doesn't make sense. 
         
@@ -11826,7 +11888,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
          #  At this point, the rolColName exists and is a valid column name.
          #
       
-         #cat("rowNamesCol is valid : ",rowNamesColx,"\n") 
+         # cat("rowNamesCol is valid : ",rowNamesColx,"\n") 
       
          if (len_wSFName < wSFmin) {   # min is 1 or 2.
             StopFnd <- stopCntMsg(paste0("***0103 CARG-DF The ",sDFName," statsDFrame data.frame must have at least 1 or 2 columns.\n"))
@@ -11861,13 +11923,18 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
         
    }   # end of rowNamesCol
    
+   # statsDFrame now has the row.name or column of the rowNames
+   
    statsDFrame$rawRN      <- statsDFrame$RN           # save raw format of row name.
    statsDFrame$RN         <- as.character(statsDFrame$RN)  # make character 
-   statsDFrame$RN         <- ClnStr(statsDFrame$RN)   # clean up, upper case, no punct, single blanks for comparisons.
+   statsDFrame$RN         <- stringr::str_to_upper(ClnStrName_MST(statsDFrame$RN))   # clean up, upper case, no punct, single blanks for comparisons.
    row.names(statsDFrame) <- statsDFrame$RN           # save in statsDFrame$RN as the row.names 
    
    #
    ###
+   
+   # cat("Code: 11935 - End of rowNamesCol.\n")
+   # print(statsDFrame$RN)
    
    ###
    #
@@ -11905,7 +11972,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    ADFrame <- cbind(statsDFrame,Ex)     # move to ADFrame and add Zero column.
         # a 1 column data.frame has a little different behavior the s 2 column data.frame
 
-   #cat("Add 0 column to statsDFrame\n")
+   # cat("Add 0 column to statsDFrame\n")
 
    #   statsDFrame number of rows - validated.
  
@@ -11914,21 +11981,22 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    # Get general defaults   ->   colors and details
    #
 
-   par(fin = par("din"))   # safety value to get moving.
+   graphics::par(fin = graphics::par("din"))   # safety value to get moving.
    graphics::plot.new()
    
-   #cat("Code: 11916 - par values- din:",par("din")," fin:",par("fin")," \n   pin:",par("pin")," plt:",par("plt")," usr:",par("usr"),"\n")
+   # cat("Code: 11976 - par values- din:",par("din")," fin:",par("fin"),"\n ",
+   #    "     pin:",par("pin")," plt:",par("plt")," usr:",par("usr"),"\n")
    
    #
    # ________________Load Colors and Details defaults_______________________________
    #
-   #print("Calling micromapGSetDefaults")
+   # print("Calling micromapGSetDefaults")
 
    micromapGDefaults <- micromapGSetDefaults()  # get master list of variables and defaults
 
-   #print("Got data.frame from micromapGSetDefaults")
-   #print(micromapGDefaults)
-   #cat("MST.Debug-New:",micromapGDefaults$MST.Debug,"  11116 \n")
+   # print("Got data.frame from micromapGSetDefaults")
+   # print(micromapGDefaults)
+   # cat("MST.Debug-New:",micromapGDefaults$MST.Debug,"  Code: 11988 \n")
    
    #####
    #_________________colors _______________________________________
@@ -11942,14 +12010,14 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #  Read defaults into memory
    #
 
-   #print("Validate colors")
+   # print("Validate colors")
 
    colFull      <- TRUE                  # control logical = TRUE doing Color, FALSE doing Greys
    NoErrs       <- TRUE
    doDotOutline <- FALSE
    mstColors    <- NULL
    
-   if ( missing(colors) || is.null(colors) )  {
+   if ( is.null(colors) || missing(colors)  )  {
       mstColors  <- micromapGDefaults$colors    # use package defaults.
 
    } else {
@@ -12016,9 +12084,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
       }
    }   # end of colors
    
-   assign("mstColors",as.character(mstColors))
    mstColorNames <- names(mstColors)
-
+   assign("mstColors",as.character(mstColors))   # this line removed the names, reversed order.
+   
    #rm(colors)
    #____ end of color check and adjustments.___
    #
@@ -12027,21 +12095,22 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #______________________Process details Defaults_________________________
    #
 
-   #print("Validate details")
+   # print("Validate details")
    
    #  Process defaults into the local variables as before.
    #  Setting the defaults into the system.  User provided overrides.
    
-   wDetails <- micromapGDefaults$details     
+   wDetails <- micromapGDefaults$details  
+   wDetailsNames <- names(wDetails)
    
    # dynamic assignment of defaults to individual variables in "micromapST"
    #  namespace.
    
-   #print(wDetails)
+   # print(wDetails)
    
    oldDefNam = "none"
    defNam = names(wDetails)
-   #print(defNam)
+   # print(defNam)
    
    for (i in 1:length(wDetails))
       {
@@ -12059,9 +12128,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #    for the areaParms parameters.
    
    DetailNames    <- c(defNam,detailExtra)
-   #print(DetailNames)
+   # print(DetailNames)
    
-   #cat("MST.Debug:",MST.Debug,"   at 12085 \n")
+   # cat("MST.Debug:",MST.Debug,"   at 12085 \n")
    #
    # The defaults have been moved to the individual variables.
    # Keep the list of names around to be to verify user supplied names.
@@ -12077,7 +12146,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #  "micromapST' namespace..    Overlay with any values provided by user.
    #
    
-   #print("Merge user details with default details.")
+   # print("Merge user details with default details.")
    
    numOverlaid <- 0
    
@@ -12099,7 +12168,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
                 # valid name
                 numOverlaid <- numOverlaid + 1
                 assign(nam[i],details[[i]])
-                #print(paste0("details overlay of ",nam[i]," with ",details[i]))
+                # print(paste0("details overlay of ",nam[i]," with ",details[i]))
              }
          }
       } else {
@@ -12110,19 +12179,19 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    #
    #   Verify and adjust details variables
    #
-   #cat("In micromapST - processing parameters.\n")
-   #cat("MST.Debug:",MST.Debug,"   at 12066 after merge with users \n")
+   # cat("In micromapST - processing parameters.\n")
+   # cat("MST.Debug:",MST.Debug,"   at Code: 12172 after merge with users \n")
 
 
    ####
    #
    # Id.Dot.pch
    #
-   #print("Validate Id.Dot.pch")
+   # print("Validate Id.Dot.pch")
    
    if (!is.between.r(Id.Dot.pch,c(1,25))) {
        #  not an acceptable pch value 
-       #cat("envir=Id.Dot.pch:", find("Id.Dot.pch"),"\n")
+       # cat("envir=Id.Dot.pch:", find("Id.Dot.pch"),"\n")
        
        Id.Dot.pch    <<-  22  # set to default
 
@@ -12139,6 +12208,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
    
    # Need to get ID width values before setting the panel defaults
 
+# cat("Code: 12202 - End of Color and Detail creation and merging.\n")
+
 #
 #______________Function Call Argument Checks______________________
 #
@@ -12147,7 +12218,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
 #------- Start Getting widths of labels and titles to help setup column widths
 #
-#cat("setting up banner DF\n")
+# cat("setting up banner DF\n")
 
     #
     #   This will have to be re-written to handle user provided labels and titles for the glyph columns.
@@ -12155,12 +12226,12 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 
     medianBanner <-  Map.Median.text
     
-    #cat("Calculating banners and column fixed widths.","\n")
-    #print(medianBanner)
-    #print(Map.Hdr1)
-    #print(Map.Hdr2)
-    #print(Id.Hdr1)
-    #print(Id.Hdr1)
+    # cat("Calculating banners and column fixed widths.","\n")
+    # print(medianBanner)
+    # print(Map.Hdr1)
+    # print(Map.Hdr2)
+    # print(Id.Hdr1)
+    # print(Id.Hdr1)
     
     #
     #   Map titles with symbols
@@ -12169,10 +12240,10 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     sw    <- Map.Lab.Box.Width + 0.05 + 0.04 # square width and spaces on each side. (inches)
     
     #     used by MapCum, MapMedian and ID.
-    #cat("Size of Box Symbols (guess) sw:",sw,"\n")
+    # cat("Size of Box Symbols (guess) sw:",sw,"\n")
     
-    #cat("Headers=> 1 * ",Text.cex," = ",1 * Text.cex,"\n")
-    #cat("ID     => 0.8 * ", Id.Text.cex * 0.8 , " = ", 0.8 * Id.Text.cex," and Id.Text.cex * Id.Cex.mod = ",Id.Text.cex*Id.Cex.mod,"\n") 
+    # cat("Headers=> 1 * ",Text.cex," = ",1 * Text.cex,"\n")
+    # cat("ID     => 0.8 * ", Id.Text.cex * 0.8 , " = ", 0.8 * Id.Text.cex," and Id.Text.cex * Id.Cex.mod = ",Id.Text.cex*Id.Cex.mod,"\n") 
    
     # empty banner data.frame
     banner <- data.frame(H1=character(),H2=character(),H3=character(),M1=character(),stringsAsFactors=FALSE)
@@ -12212,8 +12283,8 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     banner$H3 <- as.character(banner$H3)     # Lab2a equivalent (used with maps)
     banner$M1 <- as.character(banner$M1)     # Median.
     
-    #cat("banner header data.frame:\n")
-    #print(banner)
+    # cat("banner header data.frame:\n")
+    # print(banner)
     
     #   .adj -> which lines in each header have symbols?  (boxes)
     #           .adj is the space required to support the "boxes" in the headers.
@@ -12226,7 +12297,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     banner.tc    <- Text.cex * banner.m        # Text.cex = 0.75
     # banner.tc[4] <- Id.Text.cex * banner.m[4]  # handle ID column  Id.Text.cex * 0.8  => 0.6  (same as titles)
     
-    #cat("CEX for headers and median - banner.tc:",banner.tc,"\n")
+    # cat("CEX for headers and median - banner.tc:",banner.tc,"\n")
     
     banner.w <- banner
     
@@ -12244,15 +12315,15 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     banner.w <- as.data.frame(sapply(banner.w, function(x) as.numeric(x)))  # convert numeric.
     row.names(banner.w) <- brn
  
-    #cat("widths in banners - banner.w:\n")
-    #print(banner.w)
+    # cat("widths in banners - banner.w:\n")
+    # print(banner.w)
     
     banner.max <- as.data.frame(sapply(c(1:5), function(x)  max(banner.w[x,]+banner.adj[x,])))
     colnames(banner.max)  <- "width"
     row.names(banner.max) <- brn
 
-    #cat("maximum widths for each type of header - banner.max:\n")
-    #print(banner.max)
+    # cat("maximum widths for each type of header - banner.max:\n")
+    # print(banner.max)
    
     #  Make subroutine to be able to do again later.
     #                                   Id.Text.cex = 0.75            Id.Cex.mod = 0.75   = (.56)
@@ -12262,7 +12333,7 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     # ID value width
     
     #  ID.Name is proper cased upper and lower. no punctuation.  This could be part of the 
-    #  problem - mixed case.  
+    #     problem - mixed case.  
     #  The width consist of the following elements:
     #  <space> <symbol> <space> <text> <space>
     #  
@@ -12285,35 +12356,37 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     #  ID.Name or ID.Abbr = list of the label text for each line.  (ID.Name is properly cap.)
     #  If this is problem, then pull back areaNT$Name.
     #
+    # cat("ID.N:",paste0(ID.Name,collapse=" ",sep=""),"\n")
+    # cat("ID.A:",paste0(ID.Abbr,collapse=" ",sep=""),"\n")
     
     Id.HdrDot   <-   Id.Dot.width * Id.Dot.cexm * Id.Cex.mod
     Id.HdrSect  <-   Id.Space + Id.HdrDot + Id.Space
     
-    Id.TxtSect.A  <- max(strwidth(ID.Abbr,units="inch",cex=(Id.Text.cex*Id.Cex.mod))) + Id.Space * 1.5
-    Id.TxtSect.N  <- max(strwidth(ID.Name,units="inch",cex=(Id.Text.cex*Id.Cex.mod))) + Id.Space * 1.5
+    Id.TxtSect.A  <- max(graphics::strwidth(ID.Abbr,units="inch",cex=(Id.Text.cex*Id.Cex.mod))) + Id.Space * 1.5
+    Id.TxtSect.N  <- max(graphics::strwidth(ID.Name,units="inch",cex=(Id.Text.cex*Id.Cex.mod))) + Id.Space * 1.5
     
     Id.Aw         <- Id.HdrSect + Id.TxtSect.A
     Id.Nw         <- Id.HdrSect + Id.TxtSect.N
     
-    #cat("Id.HdrDot:",Id.HdrDot,"  Id.HdrSect:",Id.HdrSect,"  Id.TxtSect.A:",Id.TxtSect.A," .N:",Id.TxtSect.N,"  Id.Aw:",Id.Aw,"  Id.Nw:",Id.Nw,"\n")
+    # cat("Id.HdrDot:",Id.HdrDot,"  Id.HdrSect:",Id.HdrSect,"  Id.TxtSect.A:",Id.TxtSect.A," .N:",Id.TxtSect.N,"  Id.Aw:",Id.Aw,"  Id.Nw:",Id.Nw,"\n")
     
     #IDTC   <- Id.Text.cex * Id.Cex.mod
-    #cat("IDTC:",IDTC,"\n")
+    # cat("IDTC:",IDTC,"\n")
     #  #   entry text + "sw" for the space for the leading spaces and symbol.
     #ID.Abbr.width       <- max(graphics::strwidth(ID.Abbr,units="inches",cex=(IDTC)))   # all uppercase
     #ID.Name.width       <- max(graphics::strwidth(ID.Name,units="inches",cex=(IDTC)))   # mixed case
     #    # widths of contents of ID labels.
     #    
-    #cat("ID.Abbr.width:",ID.Abbr.width,"\n")   # in cex modified inches
-    #cat("ID.Name.width:",ID.Name.width,"\n")
+    # cat("ID.Abbr.width:",ID.Abbr.width,"\n")   # in cex modified inches
+    # cat("ID.Name.width:",ID.Name.width,"\n")
     #
     #   adjust the widths for ID labels by the space for the symbol and surrounding spaces.
     #Id.OverH <- Id.Dot.width * ( Id.Dot.cexm * Id.Cex.mod ) + Id.Space * 2.5  # two spaces left and right of symbol.
     #                    #  box is 1.15 cex.   (.1 * 1.5 * 0.75 + 0.03125 * 2.5) =  0.190625   in cex mod inches.
     #   
-    #cat("ID overhead - Id.Start, space, Id.Dot.width, space , <letters>, space (letter to edge):",Id.OverH,"\n")
-    #cat("banner.max ID:",banner.max["id","width"],"   IDName:",Id.OverH+ID.Name.width,"  IDAbbr:",Id.OverH+ID.Abbr.width,"\n")
-   
+    # cat("ID overhead - Id.Start, space, Id.Dot.width, space , <letters>, space (letter to edge):",Id.OverH,"\n")
+    # cat("banner.max ID:",banner.max["id","width"],"   IDName:",Id.OverH+ID.Name.width,"  IDAbbr:",Id.OverH+ID.Abbr.width,"\n")
+    # cat("
     
     #  width of ID glyph with border Group names/abbreviations
     
@@ -12328,16 +12401,18 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
     # Id.width include string length + ID Overhead (Id.Start offset, Space, Symbol width, space, <letters>, space..
     #   and it is modified by the Id.Text.cex and Id.Cex.mod..
 
-    #cat("Id.width:",Id.width,"  cex = ",Id.Text.cex*Id.Cex.mod," Code: 12361 \n\n")
+    # cat("Id.width:",Id.width,"  cex = ",Id.Text.cex*Id.Cex.mod," Code: 12396 \n\n")
  
     #
     #  Build title lists for maps and get width for point size.
     #
    
-    #cat("Map.Aspect:",Map.Aspect,"\n\n")
+    # cat("Map.Aspect:",Map.Aspect,"\n\n")
 
     #
-    #print("Column Hdrs - Done")
+    # print("Column Hdrs - Done")
+    
+# cat("Code: 12406 - End of banners, headers, etc. table build.\n")
 
 #_____________Set up for Area Names and Abbreviation links.  
 #
@@ -12346,6 +12421,9 @@ DrawXAxisAndTitles <- function(j, panels, rx, ry, reftxt, refval, leftPad=TRUE, 
 #_____________Process rowNames option___________________
 #
 #
+
+# cat("Code: 12416 - Starting rowNames processing.\n")
+# cat("    rowNames = ",rowNames,"\n")
 
 #
 #  add auto detect code if rowNames = NULL
@@ -12365,16 +12443,22 @@ if ( is.na(rowNames) ) {
    x<-errCntMsg("***0193 The rowNames parameter is NULL, NA or Missing. The default of 'ab' will be used.\n")
 }
 
-#cat("Code: 12364 - Validate rowNames : ", rowNames,"\n")
+# cat("Code: 12437 - Validate rowNames : ", rowNames,"\n")
 if (!is.character(rowNames)) {
    StopFnd <- stopCntMsg("***0197 The rowNames parameter is not a character string.\n")
    rowNames <- def_rowNames
 }
-xm <- match(rowNames,c("auto","ab","abbr","full","seer","alias","id","FIPS","alt_ab"))
+rowNames <- stringr::str_trim(rowNames)   # clear off leading and trailing blanks
+xm <- match(rowNames,c("auto","ab","abbr","full","name","seer","alias","id","FIPS","alt_ab","alt_abbr"))
+
 if (is.na(xm)) { # invalid rowNames value
    StopFnd <- stopCntMsg(paste0("***0190 CARG-RN Invalid rowNames call parameter value of ",
                   rowNames,"\n"))
 } else {
+   xmMap <- c("auto", "ab", "ab", "full", "full", "seer", "alias", "id", "id", "alt_ab","alt_ab")   
+   rowNames <- xmMap[xm]   # translate content
+   # cat("Code: 12451 - Translated rowNames : ",rowNames,"\n")
+   
    #  you have a valid rowNames
 
    #__________________
@@ -12397,28 +12481,26 @@ if (is.na(xm)) { # invalid rowNames value
 
    AD.link <- (statsDFrame$RN)   # get row_names.information (link to borders) (all CAPS, no punct, no multiple blanks)
    
-   ##### may be changed.
-   
    if (rowNames == "auto") {
       # do auto check.
       # AD.link has list of all area names from the data.
       # areaNT  is the name table
-      NTNames   <- names(areaNT)		       
+      NTNames   <- names(areaNT)    # names of columns in Name Table		       
       ChkNames  <- c("Abbr","Name","ID","Alt_Abbr")
       RNames    <- c("ab",  "full","id","Alt_ab")
       
-      xm        <- match(ChkNames,NTNames) # which of these are present.
+      xm        <- match(ChkNames,NTNames) # which of these field are present.
       xmNA      <- !is.na(xm)         # which are present and can be checked.  if F = not present, T = Present
       ChkNames  <- ChkNames[xmNA]     # drop missing columns.
-      ChkData   <- str_to_upper(AD.link)  # get data labels to upper case.
-      #ChkNT    <- str_to_upper(areaNT[,ChkNames])
+      ChkData   <- stringr::str_to_upper(AD.link)  # get data labels to upper case.
+      #ChkNT    <- stringr::str_to_upper(areaNT[,ChkNames])
       LenRN     <- length(ChkData)    # get size of list for percentage calculation
       
       #  Match each entry against the entries in the Name table for one type of LOC ID.
       #    The list to match against is ChkNames.  This is a list of columns in the NT
       #    that we want to check and exist.
       #
-      res    <- sapply(ChkNames, function(k) match(ChkData,str_to_upper(areaNT[,k])))
+      res    <- sapply(ChkNames, function(k) match(ChkData,stringr::str_to_upper(areaNT[,k])))
       #
       #  Now total the number of valid matches for each name table column
       res2   <- sapply(c(1:4), function(m) (length(res[,m])-sum(is.na(res[,m]))) )
@@ -12442,7 +12524,9 @@ if (is.na(xm)) { # invalid rowNames value
          rowNames <- RNames[xm]             # pickup the operational name ("full", "ab", "alt_ab", "id")
             # and set the rowNames to that value.
       }
-      #cat("rowNames value used is : ",rowNames,"\n")
+      cat("rowNames value used is : ",rowNames,"\n")
+      #  the rowNames value set by this code lets us know which column in the Name Table 
+      #  should match up with the data $RN values.
       # we are done with auto, continue as if the user entered the rowNames value.
 
       
@@ -12450,7 +12534,7 @@ if (is.na(xm)) { # invalid rowNames value
       # back to the old logic.	 If the US border groups and rowNames = "full", provide
       # editing on the full name to provide the best match.
    
-      #cat("Initial AD.link (statsDFrame$RN):",AD.link,"\n")    # the statsDFrame$RN
+      # cat("Initial AD.link (statsDFrame$RN):",AD.link,"\n")    # the statsDFrame$RN
       
       if (BordGrpName == "USStatesBG" || BordGrpName == "USstBG" ) {
       
@@ -12505,20 +12589,26 @@ if (is.na(xm)) { # invalid rowNames value
       }
      
    } 
-   #cat("Updated AD.link:",AD.link,"\n")
-   #cat("Current areaNT$Key:",areaNT$Key,"\n")
+   # cat("Updated AD.link:",AD.link,"\n")
+   # cat("Current areaNT$Key:",areaNT$Key,"\n")  # Keys and AD.link from data not the same.
      
    if (rowNames == "alias" && enableAlias == FALSE) {
        StopFnd <- stopCntMsg(paste0("***0191 CARG-RN rowNames='alias' is not supported for this bordGrp.\n"))
+       # assumption is the needed column is present if "enableAlias" = TRUE
    }
    if (rowNames == "seer" && BordGrpName != "USSeerBG") {
        StopFnd <- stopCntMsg(paste0("***0192 CARG-RN rowNames='seer' is only supported for the 'USSeerBG' bordGrp.\n"))
+       # assumption is the needed column is present if "seer" border group. 
    }
    
-   #  areaIndex pointer to Name Table is order of the user data.frame based on the rowNames parameter.
-   #  IndexDFtoNT is based on the type and column of the location id used in the data.
-   #  Note: the rowNames = "auto" should be gone at this point and replaced with a standard name.
-   #cat("Parm Processing:",rowNames,"\n")
+   #
+   #  areaIndex pointer (IndexDFtoNT) to Name Table is order of the user data.frame based on the 
+   #  rowNames parameter. IndexDFtoNT is based on the type and column of the location id used 
+   #  in the data. Note: the rowNames = "auto" should be gone at this point and replaced 
+   #  with a standard name.
+   # cat("Parm Processing:",rowNames,"\n")
+   
+   AD.link <- stringr::str_to_upper(ClnStrName_MST(AD.link))
    
    IndexDFtoNT = switch(rowNames,  # find the correct list to match user provide links.
   
@@ -12537,6 +12627,9 @@ if (is.na(xm)) { # invalid rowNames value
       # if "full" sub-area name, convert index   /  rowNames = "full"
       "full"  = {match(AD.link, areaNT$Name)},
       
+      # if "name" sub-area name, convert index   /  rowNames = "name"
+      "name"  = {match(AD.link, areaNT$Name)},
+      
       # if "seer"  seer sub-area names from SeerStat (read and convert to index )  / rowNames == "seer"
       "seer"  = {AliasToIndex(AD.link,areaNT$Alias)},
       
@@ -12549,12 +12642,13 @@ if (is.na(xm)) { # invalid rowNames value
       #  No match..
       {
          StopFnd <- stopCntMsg(paste0("***0190 CARG-RN Invalid rowNames call parameter value of ",rowNames,"\n",
-                           " The value must be 'ab', 'alt_ab', 'id', 'alias', or 'full'.\n"))
+                           " The value must be 'ab', 'alt_ab', 'id', 'alias', 'name', or 'full'.\n"))
       }
    )
    # if entry in IndexDFtoNT = NA, then have data, but no name table entry.  (nomatch and delete.)
+   # cat("IndexDFtoNT:",paste0(IndexDFtoNT,collapse=",",sep=""),"\n") 
    
-   if (rowNames == "abbr") rowNames = "ab"
+   # if (rowNames == "abbr") rowNames = "ab"
    
    #
    #  IndexDFtoNT is index from caller's data location ID row to the Name Table row. 
@@ -12570,12 +12664,15 @@ callVL$rowNames  <- rowNames
 var              <- "callVarList"  
 wstr             <- paste0("assign(var,callVL,envir=.GlobalEnv)")
 eval(parse(text=wstr))
-   
-#cat("IndexDFtoNT:\n")
-#print(IndexDFtoNT)
 
-#cat("Code: 12576 - Initial IndexDFtoNT:",IndexDFtoNT,"\n")
-#cat("Reverse Check:",areaNT$Key[IndexDFtoNT],"\n")
+# cat("Code: 12657 - End of rowNames = ",rowNames,".\n")
+
+# cat("IndexDFtoNT:\n")
+# print(IndexDFtoNT)
+# print(areaNT$Key)
+
+# cat("Code: 12663 - Initial IndexDFtoNT:",IndexDFtoNT,"\n")
+# cat("Reverse Check:",areaNT$Key[IndexDFtoNT],"\n")
 
    
    ######
@@ -12610,8 +12707,8 @@ eval(parse(text=wstr))
    #
    
    DFtoNTMissed      <- is.na(IndexDFtoNT)     # data loc ids that don't match the name table.
-   #cat("DFtoNTMissed:",DFtoNTMissed,"\n")
-   #cat("any(DFtoNTMissed):",any(DFtoNTMissed),"\n")
+   # cat("DFtoNTMissed:",DFtoNTMissed,"\n")
+   # cat("any(DFtoNTMissed):",any(DFtoNTMissed),"\n")
    
    #
    #  areaUKey is list of abbreviation for each area.  If there is no match
@@ -12650,7 +12747,7 @@ eval(parse(text=wstr))
          
          #    KeepList - T/F   T=Good Keep, F=was NA, no match.
          KeepList    <- !DFtoNTMissed              # get list of areas that don't match (T/F)- good entires = TRUE
-         #cat("Good data rows:",paste0(KeepList,collapse=" "))
+         # cat("Good data rows:",paste0(KeepList,collapse=" "))
      
          # delete bad rows  (those not matching)        # Keep only rows that matched the name table.
          #    delete rows in indexes and statsDFrame and AD.link link
@@ -12669,20 +12766,24 @@ eval(parse(text=wstr))
          xmsg <- paste0("***0109 CARG-DF Data row names in the ",sDFName," data.frame must match the location ids in the name table. Call stopped.\n")
          stop(xmsg,call.=FALSE)
       }   
-   }  # end of ignoreNoMatch
+   }  # end of ignoreNoMatches
    
-   #cat("Adjusted data.frames - statsDFrame, AD.link, IndexDFtoNT:\n")
-   #print(statsDFrame)
-   #print(AD.link)
-   #print(IndexDFtoNT)
+   # cat("Adjusted data.frames - statsDFrame, AD.link, IndexDFtoNT:\n")
+   # print(statsDFrame)
+   # print(AD.link)
+   # print(IndexDFtoNT)
    
    numRows <- length(IndexDFtoNT)      # update number of rows in data frame User Loc ID to Name Table.
               # This also applies to boxplot and ts data to name table.
    
-   #cat("IndexDFtoNT-numRows:",numRows,"\n")
+   # cat("IndexDFtoNT-numRows:",numRows,"\n")
    
    #
    ###
+   
+   # cat("Code: 12774 - End of ignoreNoMatches - ",ignoreNoMatches,"\n")
+   # print(IndexDFtoNT)
+   # print(AD.link)    # 
    
    ###
    #
@@ -12691,7 +12792,7 @@ eval(parse(text=wstr))
    #  grpPattern argument - default = NULL  (use calculated pattern)
    #
    
-   #print("Validate - grpPattern")
+   # print("Validate - grpPattern")
    
    if (!( missing(grpPattern) || is.null(grpPattern) )) {
    
@@ -12752,7 +12853,7 @@ eval(parse(text=wstr))
    #     This is difference from dataRegionOnly.  It says - draw regional boundaries.
    #
       
-   #print("regionsB parameter Check.")
+   # print("regionsB parameter Check.")
    
    def_regionsB    <- FALSE
    regionsBFlag    <- def_regionsB
@@ -12768,7 +12869,7 @@ eval(parse(text=wstr))
           #  argument is missing or not provided
           regionsB     <- def_regionsB
           regionsBFlag <- def_regionsB    # default
-          #cat("regionsB support enabled - but no regionsB call parameter provided - regionsB set to FALSE.\n")
+          # cat("regionsB support enabled - but no regionsB call parameter provided - regionsB set to FALSE.\n")
           
       } else {
 
@@ -12785,7 +12886,7 @@ eval(parse(text=wstr))
       }
    }
       
-   #cat("regionsBFlag parameter:",regionsBFlag,"  regionsB:",regionsB,"\n")
+   # cat("regionsBFlag parameter:",regionsBFlag,"  regionsB:",regionsB,"\n")
    #
    #####
 
@@ -12794,7 +12895,7 @@ eval(parse(text=wstr))
    #  dataRegionsOnly argument  - default = FALSE.
    #
    
-   #print("dataRegionsOnly parameter Check.")
+   # print("dataRegionsOnly parameter Check.")
    
    def_dataRegionsOnly  <- FALSE
    dataRegionsOnlyFlag  <- def_dataRegionsOnly
@@ -12808,7 +12909,7 @@ eval(parse(text=wstr))
           #  argument is missing or not provided
           dataRegionsOnly     <- def_dataRegionsOnly
           dataRegionsOnlyFlag <- def_dataRegionsOnly    # default
-          #cat("regions support enabled - but no regions call parameter provided 
+          # cat("regions support enabled - but no regions call parameter provided 
           #     - regions set to TRUE.\n")
           
       } else {
@@ -12831,17 +12932,20 @@ eval(parse(text=wstr))
       }
    }
    
-   #cat("dataRegionsOnlyFlag parameter:",dataRegionsOnlyFlag,"  dataRegionsOnly:",dataRegionsOnly,"\n")
+   # cat("dataRegionsOnlyFlag parameter:",dataRegionsOnlyFlag,"  dataRegionsOnly:",dataRegionsOnly,"\n")
    
    if (dataRegionsOnlyFlag) {regionsB = TRUE}   # Since dataRegionsOnly may not have a L3 image, draw the regional bounderies.
       
+   # cat("Code: 12929 - grpPattern, regionB, and dataRegionsOnly Flag checked.\n")
+   
+   ###
    #
    #  If duplicated rows exist, Notify user and stop.
    #
    #  Is this now a duplicate test to the previous test???    Yes it is.   (retire)
    #
    
-   #print("check for duplicate statsDF rows - location ids - duplicate?")
+   # print("check for duplicate statsDF rows - location ids - duplicate?")
    #
    #  statsDFrame$RN (AD.link) is the cleaned up strings initially used for link
    #  Should be able to re-use this field to link to any panelData structure.
@@ -12866,48 +12970,24 @@ eval(parse(text=wstr))
 
    # What link to use for boxplot and TS type data?
    
-   #cat("Get panelData Key for ",rowNames,"\n")
+   # cat("Get panelData Key for ",rowNames,"\n")
    
-   ###### should change to areaNTxxx ClnStr versions. #####
+   ###### should change to areaNT$xxx ClnStr versions. #####
    
    ###### Following is duplicate of other code.  The panelData order is known. The row.names
    # values are linked to the name table and then to the statsDFrame.
    # 
    
-   # based on the rowNames values, pick up the data to use as key for the panelData in the panelDesc
-      
-   panelDataKey <- switch(rowNames,
-   
-                         "ab"    =  areaNT$Abbr[IndexDFtoNT], 
-                         "full"  =  areaNT$Name[IndexDFtoNT],
-                         "id"    =  areaNT$ID[IndexDFtoNT],
-                         "alias" =  areaNT$Abbr[IndexDFtoNT],
-                         "seer"  =  areaNT$Abbr[IndexDFtoNT],
-                         "alt_ab"=  areaNT$Alt_Abbr[IndexDFtoNT]
-                         )
-   
    # The TS and Boxplot data structure contain the area location ID and must match
    # the values for the specified rowNames parameter.  This get the list of values in the order
    # of the DF.
    
-   #cat("panelDataKey:",panelDataKey,"\n")
-   #cat("NT Key:",areaNT$Key[IndexDFtoNT],"\n")
-   #cat("May not be the same...\n")
-   
    #  IndexDFtoNT is an index from statsDFrame rows to name/abbr/ID rows,
-   #  The panelDataKey is the location ID based on the statsDFrame of what is expected
-   #    in the panelData based on the rowNames parameters.
-   
-   
-   
    #
-   #  Setup for IndexDFtoNT checks
    
-   #  areaDatKey is the key (based on rowNames) in sorted order of data.frame
+   #  areaDatKey is the key (based on rowNames) in sorted order of the user data.frame
    #    or areaNT$Key[IndexDFtoNT].
    
-   #
-   #  areas to regions to Area processing 
    #
    #  Get list of areas in regions referenced by the data.
    #  Set up used regions as the only spaces to map.
@@ -12917,22 +12997,22 @@ eval(parse(text=wstr))
    areaNT$NotUsed <- FALSE     # set all areas to "USED"    # duplicate instruction
    
    #  List of all regions and L2 keys         
-   #print("Build regions lists from NT regIDs and NT L2_IDs")   
+   # print("Build regions lists from NT regIDs and NT L2_IDs")   
 
    listAllL2         <- unique(areaNT$L2_ID) # get list of unique L2 IDs 
-   #cat("listAllL2:",listAllL2,"\n")
+   # cat("listAllL2:",listAllL2,"\n")
 
    listAllRegions    <- unique(areaNT$regID) # get list of unique region IDs
-   #cat("listAllRegions:",listAllRegions,"\n")
+   # cat("listAllRegions:",listAllRegions,"\n")
    
    # get list of all NameTable Keys by definition-unique
    listAllAreas      <- areaNT$Key  
    listAllAreaKeys   <- listAllAreas
-   #cat("listAllAreas:",listAllAreas,"\n")
+   # cat("listAllAreas:",listAllAreas,"\n")
    
    #  Now handle the selective REGIONAL situations.
    
-   #cat("dataRegionsOnlyFlag:",dataRegionsOnlyFlag,"\n")
+   # cat("dataRegionsOnlyFlag:",dataRegionsOnlyFlag,"\n")
    
    #  IndexDFtoNT is a list of data rows present mapping to the NameTable. No data no mapping.
  
@@ -12945,13 +13025,13 @@ eval(parse(text=wstr))
       statsDFrame$L2_ID <- areaNT$L2_ID[IndexDFtoNT] 
       #  Get list of used L2_IDs areas.
       listUsedL2        <- unique(statsDFrame$L2_ID)  # unique list.
-      #cat("listUsedL2:",listUsedL2,"\n")
+      # cat("listUsedL2:",listUsedL2,"\n")
    
       #  Pick up regID for each data row.
       statsDFrame$regID <- areaNT$regID[IndexDFtoNT] 
       #  Get list of used Regions
       listUsedRegions   <- unique(statsDFrame$regID)  # unique list
-      #cat("listUsedRegions:",listUsedRegions,"\n")
+      # cat("listUsedRegions:",listUsedRegions,"\n")
       
       # find all areas in regions to be mapped-NT match indicate area in region
       areaRegMatch      <- match(areaNT$regID,listUsedRegions)
@@ -12979,18 +13059,18 @@ eval(parse(text=wstr))
       listUsedAreas      <- listAllAreas
       listUsedAreaKeys   <- listAllAreas
       
-      #cat("regionsFlag=FALSE -> reset listUsed to listAllxx\n")
+      # cat("regionsFlag=FALSE -> reset listUsed to listAllxx\n")
    }
    
    # Have all areas in rlAreaNamesAbbrsIDs (areaNT) (name table), areaVisBorders, L2VisBorders, 
    # and RegVisBorders.  If used #s are less the totals and regionsB is TRUE, 
    # reduce the tables to only the used regions.
    
-   #cat("UsedRegions:",listUsedRegions,"\n")
-   #cat("UsedL2     :",listUsedL2,"\n")
-   #cat("UsedAreas  :",listUsedAreas,"\n")
+   # cat("UsedRegions:",listUsedRegions,"\n")
+   # cat("UsedL2     :",listUsedL2,"\n")
+   # cat("UsedAreas  :",listUsedAreas,"\n")
  
-   #cat("Overlays - L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+   # cat("Overlays - L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
 
    if (length(listUsedRegions) != length(listAllRegions)) {
        
@@ -13004,23 +13084,23 @@ eval(parse(text=wstr))
       
       # identify polygons to remove.
       rlAreaKeep           <- !is.na(rlAreaVM)    
-      #cat("rlAreaKeep:",rlAreaKeep,"\n")
+      # cat("rlAreaKeep:",rlAreaKeep,"\n")
       
       # Reduce size of areaVisBorder.  no data no plot
       rlAreaVisBorders     <- rlAreaVisBorders[rlAreaKeep,]    
    
-      #cat("rlAreaVisBorders:\n")
-      #print(head(rlAreaVisBorders,50))
+      # cat("rlAreaVisBorders:\n")
+      # print(head(rlAreaVisBorders,50))
      
       #  sub-divide RegVisBorders - keys equal regIDs
       
       rlRegVM             <- match(rlRegVisBorders$Key,listUsedRegions)   # get list of NT rows in USED regions.
       rlRegKeep           <- !is.na(rlRegVM)  # good rows to keep         # find good regions with data
-      #cat("rlRegKeep:",rlRegKeep,"\n")                               
+      # cat("rlRegKeep:",rlRegKeep,"\n")                               
       rlRegVisBorders     <- rlRegVisBorders[rlRegKeep,]   # keep good part
 
-      #cat("rlRegVisBorders:\n")
-      #print(head(rlRegVisBorders,50))
+      # cat("rlRegVisBorders:\n")
+      # print(head(rlRegVisBorders,50))
       
       #  Test original Region and L3 VisBorder data
       if (!identical(RegVisBorders,L3VisBorders)) {
@@ -13033,11 +13113,11 @@ eval(parse(text=wstr))
       
       rlL2VM              <- match(rlL2VisBorders$Key,listUsedL2)
       rlL2Keep            <- !is.na(rlL2VM)
-      #cat("rlL2Keep:",rlL2Keep,"\n")
+      # cat("rlL2Keep:",rlL2Keep,"\n")
       rlL2VisBorders      <- rlL2VisBorders[rlL2Keep,]      # keep only L2 areas with data.
    
-      #cat("rlL2VisBorders:\n")
-      #print(head(rlL2VisBorders,50))
+      # cat("rlL2VisBorders:\n")
+      # print(head(rlL2VisBorders,50))
  
       #  Handle L3VisBorders 
       #  Turn off overlaying L3
@@ -13048,23 +13128,20 @@ eval(parse(text=wstr))
          
       #  Report status
       
-      #cat("Adjusted listUsed - area, Regions and listUsedL2:\n")
-      #cat("UsedRegions :",listUsedRegions,"\n")
-      #cat("UsedL2      :",listUsedL2,"\n")
-      #cat("UsedAreas   :",listUsedAreas,"\n")
-      
-      #cat("AllAreas    :",listAllAreas,"\n") 
-      #cat("Num data SAs:", length(listUsedAreas),"  Num NT SAs:",length(listAllAreas),"\n")
-      #print("-end-")
+      # cat("Adjusted listUsed - area, Regions and listUsedL2:\n")
+      # cat("UsedRegions :",listUsedRegions,"\n")
+      # cat("UsedL2      :",listUsedL2,"\n")
+      # cat("UsedAreas   :",listUsedAreas,"\n")
+       
+      # cat("AllAreas    :",listAllAreas,"\n") 
+      # cat("Num data SAs:", length(listUsedAreas),"  Num NT SAs:",length(listAllAreas),"\n")
+      # print("-end-")
       
    }  # End of regional VisBorder processing sub-dividing.
    
-   #cat("Overlays - L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
+   # cat("Overlays - L2:",Map.L2Borders,"  Reg:",Map.RegBorders,"  L3:",Map.L3Borders,"\n")
    
-   
-   
-   
-   #print("Completed regions subsetting of boundary data.")
+   # print("Completed regions subsetting of boundary data.")
    #
    #  Can't do much more until after the sortVar is handled.
    #
@@ -13072,13 +13149,20 @@ eval(parse(text=wstr))
    #  regID or regName in the Name Table; the VisBorders data.frames have been 
    #  split into used and non-used.  Only the used portion will be plotted.
    #
-   
+
+# cat("Code: 13143 - Now check plotNames.\n")
+
 #   
 #_______________plotNames option__________________
 #
    # Get area names or abbreviations to plot_______________________
+   #
+   # Only valid values for plotNames are:  "ab", "abbr", "full", "name"
+   
+   # cat("ID.Name:",paste0(ID.Name,collapsed=" ",sep=""),"\n")
+   # cat("ID.Abbr:",paste0(ID.Abbr,collapsed=" ",sep=""),"\n")
 
-   #print("Validate plotNames.")
+   # print("Validate plotNames.")
    def_plotNames <- "ab"
 
    #  Set the defaults if not present or NA
@@ -13105,13 +13189,19 @@ eval(parse(text=wstr))
    }    
 
    if (plotNames == "abbr") plotNames="ab"   # accept "abbr" but convert to "ab".
+   if (plotNames == "name") plotNames="full"
+   if (plotNames == "Abbr") plotNames="ab"   # accept "Abbr" but convert to "ab".
+   if (plotNames == "Name") plotNames="full"
 
-   # Default - abbreviations
-   areaUAbbr   <- areaNT$Abbr[IndexDFtoNT]     # label values  (all uppercase)
-   areaUFull   <- ID.Name[IndexDFtoNT]     #               (all upper AND LOWER)
+   # cat("Code: 13187 - plotNames:",plotNames,"\n")
+   
+   # Default - abbreviations indexes
+   areaUAbbr   <- ID.Abbr[IndexDFtoNT]     # label values  (all uppercase)
+   areaUFull   <- ID.Name[IndexDFtoNT]     #   (all upper AND LOWER)
      
-   areaIDNames <- areaUAbbr
+   areaIDNames <- areaUAbbr              # default is to use abbr.
    IdW         <- Id.width[2]  # temp initialization  (abbreviation)
+   # cat("plotNames:",plotNames,"  areaIDNames:",paste0(areaIDNames,collapse=" ",sep=""),"\n")
    
    #  Get width of ID gryphics column
    areaIDNames = switch(plotNames,
@@ -13122,28 +13212,33 @@ eval(parse(text=wstr))
 
           {  # no match
 
-             plotNames = def_plotNames
+             plotNames   <- def_plotNames
+             areaIDNames <- areaUAbbr
 
-             errCntMsg(paste0("***01B0 CARG-PN Invalid plotNames argument value.  The value must be 'ab' or 'full'. The default of 'ab' will be used.\n"))
+             errCntMsg(paste0("***01B0 CARG-PN Invalid plotNames argument value.  The value must be 'ab' or 'full'.\n",
+                          "The default of 'ab' will be used.\n"))
+             areaUAbbr
           }
         )
+        
+   # cat("plotNames:",plotNames,"  areaIDNames:",paste0(areaIDNames,collapse=" ",sep=""),"\n")
    
    # IdW is now the longest string (characters) to be used based on plotnames.
    # areaIDNames are in statsDFrame order containing the ab or full name associated 
    #   with the row in statsDFrame - used by ID glyph.
    
-   #cat("IdW:",IdW," already modified - etc. Code: 13168 \n")
-   #cat("areaIDNames:",areaIDNames,"\n")
+   # cat("IdW:",IdW," already modified - etc. Code: 13213 \n")
    
-   statsDFrame$IDNames <- as.character(areaIDNames)   # set IDNames for sorting and ID into statsDFrame
-   
+   statsDFrame$IDNames <- as.character(areaIDNames)   # set IDNames for sorting and ID into statsDFrame for plotName and id 
+   #         glyph - Is never an ID..
+ 
    #  the comparison with headers and text should have already been done !!!!
   
    # IdColWidth is based on number of strwidth and does not include the symbol or spacing.
-   #print(banner.max)
+   # print(banner.max)
    
    IdColWidth <- max(banner.max["id","width"],IdW)        # maximum of banners or label.
-   #cat("ID column width to use - IdColWidth:",IdColWidth," inch. & IdW:",IdW," inch.\n")
+   # cat("ID column width to use - IdColWidth:",IdColWidth," inch. & IdW:",IdW," inch.\n")
     
    #  now complete the default sort.
    
@@ -13154,14 +13249,16 @@ eval(parse(text=wstr))
    #   incase an alias or alt_abbreviation was used to link the data to boundaries.
    #
    
-   #cat("statsDFrame$IDNames:\n")
-   #print(statsDFrame$IDNames)
+   # cat("Code: 13234 - Final plotNames value:",plotNames,"\n")
+   
+   # cat("statsDFrame$IDNames (ID names independent of rowNames):\n")
+   # print(statsDFrame$IDNames)
    
 
 #_______________title option (mstTitle)_______01Ax_______________
 #
 
-   #print("title validation.")
+   # print("title validation.")
 
    mstTitle <- title      # can have multiple elements (1 or 2)
 
@@ -13192,16 +13289,16 @@ eval(parse(text=wstr))
    }
 
 
-   #print("statsDFrame before sort")
-   #print(str(statsDFrame))
+   # print("statsDFrame before sort")
+   # print(str(statsDFrame))
 
 #_______________ascend option________018x_____________
 #
 #   default value is ascending.  (TRUE)
 
-   #print("Validate ascend")
+   # print("Validate ascend")
    def_ascend <- TRUE
-   ordDecr <- FALSE
+   ordDecr    <- FALSE
   
    if (missing(ascend) || is.null(ascend) ) {
       # parameter is missing or null
@@ -13221,11 +13318,15 @@ eval(parse(text=wstr))
           }
       } 
    }
+   
+   #
+   #  Order passed on in ordDecr   (=FALSE -> Ascend   =TRUE   -> Decreasing) 
+   #
 
 #_______________sortVar option________19x____________
 #
 
-   #print("Validate sortVar")
+   # print("Validate sortVar")
 
    # sort and store statsDFrame, areaID, and rlAreaNames____________
 
@@ -13237,7 +13338,10 @@ eval(parse(text=wstr))
    # 
 
    # Set Default sort orders results
+   #    default order is a sort on the IDNames - which is defaulted to the "ab" string before plotNames
+   #    is evaluated.  It may change later.   rankOrd is based on the IDNames ("ab") at this time.
    
+   #             default sort is in the plotNames type of label order.. (document)
    ord       <- order(statsDFrame$IDNames, na.last=TRUE, decreasing=ordDecr)      # default is to sort in the sub-area names/abbr
    rankOrd   <- rank(sort(statsDFrame$IDNames),ties.method="min",na.last=TRUE)
 
@@ -13247,8 +13351,14 @@ eval(parse(text=wstr))
    # data data.frame must be edited by now or sort will not work.
    #
    # names table must stay the same from now on.
-   # sortVar can be a vector of column numbers/names...  OUCH!
    #
+   # sortVar can be a vector of column numbers/names... 
+   #
+   
+   # cat("Code: 13349 - Starting point for sortVar.\n")
+   # cat("    sortVar:",sortVar,"\n")
+   # print(ord)
+   
    
    # process sortVar
    
@@ -13275,16 +13385,16 @@ eval(parse(text=wstr))
            # column names and numbers are verified and converted to column numbers.
            # column 0 represents a no match, can't find.
  
-         #print("sortVar returned by CheckParmColx")
-         #print(sortVar)
+         # print("sortVar returned by CheckParmColx")
+         # print(sortVar)
   
          wSortVar <- sortVar[sortVar > 0]   # keep good column indexes
      
          if (length(wSortVar) > 0) {        # get list of good indexes to sort order of DF. 
-                                         # should have at least one or more columns
+                                            # should have at least one or more columns
          
             wSv      <- lapply(wSortVar, function(x) stringr::str_trim(as.character(statsDFrame[,x])))   # pull one or more rows, make character, and trim blanks
-            wSv2     <- lapply(wSv, function(y) gsub(",","",y))           # kill "," 
+            wSv2     <- lapply(wSv,  function(y) gsub(",","",y))          # kill "," 
             wSv3     <- lapply(wSv2, function(y) as.numeric(y))           # convert to numeric
             wSv9Test <- lapply(wSv3, function(z) all(is.na(z)))           # did data get converted to numeric?
          
@@ -13300,14 +13410,16 @@ eval(parse(text=wstr))
        
             wSv4$na.last    <- TRUE               # set na.last = TRUE option
             wSv4$decreasing <- ordDecr            # set sort order
-         
+            # have new parameters - redo the sort orders.
             ord             <- do.call(order,wSv4)
-            rankOrd         <- rank(statsDFrame[,sortVar[1]],ties.method="min",na.last=TRUE)
+            rankOrd         <- rank(statsDFrame[,sortVar[1]],ties.method="min",na.last=TRUE) # order..
          }
       }  
    } 
-   #cat("sortVar - ord:",ord,"\n")
-   #print(rankOrd)
+   # cat("sortVar - ord:",ord,"\n")    # Sorted Order is the order of the SDF data.frame to match the sortVar parameter
+   # print(rankOrd)		       # it is associated with the SDF data not the Name Table.  
+   #                                   # The boxplot and TS data must be in the same order as the original SDF.
+   #                                   # In that way, the sortedOrder can be used with all three data structure.
   
 #
 #--------------Set up working vectors based on the sort
@@ -13317,10 +13429,11 @@ eval(parse(text=wstr))
 #  sortedOrd is the order of the statsDFrame data.frame 
 #
 
-   sortedOrd               <- ord                         # sorted display names (abbr or full)
+   sortedOrd               <- ord                         # sorted data 
 
-   #print("sort completed.")
-   #cat("sortedOrd:",sortedOrd,"\n")
+   # cat("Code: 13432 - sort completed.\n")
+   # cat("     sortedOrd:",sortedOrd,"\n")
+
  
 #
 #_______________SORT the data array as requested____________
@@ -13328,46 +13441,60 @@ eval(parse(text=wstr))
 
    ###  are assigns needed in our mode?    Data area for all calls below...   dat$RN ..
 
-   assign("dat",statsDFrame[sortedOrd,])  # data fields    "dat" has sorted version of statsDFrame
-   #cat("data dim(dat):",dim(dat),"\n")
+   assign("dat",statsDFrame[sortedOrd,])  # data fields    "dat" has sorted version of statsDFrame (all fields)
+   # cat("data dim(dat):",dim(dat),"\n")
    
    # 
    #  From now on, the "dat" structure is the primary data.frame containing the user's data.
    #
    IndexDattoNT           <- IndexDFtoNT[sortedOrd]    # index list from "dat" (sorted) to Name table
+   
    #  This vector should be used in error messages to take the sorted position of the problems
    #  and convert the # into the row name.
+   #
+   #  DF is not sorted,  NT is not sorted by sortVar.
+   #  Dat is SORTED.
+   #    IndexDFtoNT links DF rows to NT rows.
+   #    IndexDattoNT links sorted dat data rows to NT rows.
    #  IndexDFtoNT still represents the mapping of the statsDFrame rows to the NT.
    
-   #cat("IndexDFtoNT:",IndexDFtoNT,"\n")          # unsorted
-   #cat("IndexDattoNT:",IndexDattoNT,"\n")        # sorted
+   # cat("IndexDFtoNT:",IndexDFtoNT,"\n")          # unsorted
+   # cat("IndexDattoNT:",IndexDattoNT,"\n")        # sorted
    
         # areaIDNames is left over from the plotnames processing.
         # It represents the form of the row name as specified by the plotnames parameter.
-   areaDatIDNames         <- areaIDNames[sortedOrd]    # list of names for the unsorted statsDFrame to sorted order.
-                    # Use with error messages.
+        
+   areaDatIDNames         <- areaIDNames[sortedOrd]    # list of names for the unsorted statsDFrame 
+   # print(dat$IDNames)
+   		#	to sorted order Use with error messages. 
                     
    #  IndexDattoNT is in data.frame order pointing to the name table
    
    #  information related to statsDFrame (sorted order) (dat - sorted, elements from NT)
    
+   #  The following variable dat to NT : Key, Abbr, Full(Name), ID, Alt_Abbr.
+   # none of the following will have row.names since they are all one row structures.
+   
    areaDatKey             <- areaNT$Key[IndexDattoNT]   # keys in order of the sorted user data.
+                 # key gets me from data to boundary data.  Should not be related to rowNames.
+                 
    areaDatAbbr            <- areaNT$Abbr[IndexDattoNT]
    
    areaDatFull            <- areaNT$Name[IndexDattoNT]
    areaDatID              <- areaNT$ID[IndexDattoNT]
    areaDatAlt_Abbr        <- areaNT$Alt_Abbr[IndexDattoNT]
+   areaDatRN              <- areaNT$RN[IndexDattoNT]         # rowNames values.
    
-   #cat("data Keys:\n")
-   #print(dat$RN)
-   #cat("areaDatKey:\n")
-   #print(areaDatKey)
+   # cat("data Keys:\n")
+   # print(dat$RN)
+   # cat("areaDatKey:\n")
+   # print(areaDatKey)
    
-   #cat("dim(dat):",dim(dat),"\n")
+   # cat("dim(dat):",dim(dat),"\n")
    
    naADK                  <- is.na(areaDatKey)    # check to make sure all rows in "dat" have a "key".
-   #cat("areaDatKey-NA:",naADK,"\n")
-   #cat("length(naADK):",length(naADK)," any(naADK):",any(naADK),"  all:",all(naADK)," sum:",sum(naADK),"\n")
+   # cat("areaDatKey-NA:",naADK,"\n")
+   # cat("length(naADK):",length(naADK)," any(naADK):",any(naADK),"  all:",all(naADK)," sum:",sum(naADK),"\n")
    
    if (any(naADK)) {
       cat("bad areaDatKey:\n")
@@ -13375,38 +13502,41 @@ eval(parse(text=wstr))
       print("SHOULD not get here.")
    }
    
-   #cat("before row.names(dat):",row.names(dat),"\n")
-   row.names(dat)         <- areaDatKey            # reset the row.names to the Key
-   #cat("after row.names(dat):",row.names(dat),"\n")
+   # cat("before row.names(dat):",row.names(dat),"\n")
+   row.names(dat)         <-  areaDatKey             # reset the row.names to the Key   ???
+   # cat("after row.names(dat):",row.names(dat),"\n")
  
+   # for later possible use with RANK. no one else uses it. 
    xDFrame                <- data.frame(Key=areaDatKey, Abbr=areaDatAbbr, 
-                                 Full=areaDatFull, ID=areaDatID,
+                                 Full =areaDatFull,     ID  =areaDatID,
                                  DatID=areaDatIDNames,  
-                                 Rank=rankOrd,
+                                 Rank =rankOrd,
                                  Index=IndexDattoNT)
-   # effectively a sorted DF as name table.
+                                 
+   areaDatRank    <- rankOrd
+   # effectively a sorted DF as name table.    USED IN RANK glyph....
    
-   #cat("xDFrame:\n")
-   #print(xDFrame)
+   # cat("xDFrame:\n")
+   # print(xDFrame)
    
-   # build index for name table to statsDFrame (sorted - dat)
+   # build index for name table to sorted statsDFrame (dat)
    
    IndexNTtoDat           <- rep(NA,length(areaNT$Key))
    
    for (ind in c(1:length(IndexDattoNT))) {   # scan DattoNT from 1 to n
-      # and find put the DattoNT index into the related NTtoDat entry.
+      # and find put the DattoNT index value into the related NTtoDat entry.
       IndexNTtoDat[IndexDattoNT[ind]] <- ind
    }
    
-   #cat("IndexNTtoDat:",paste0(IndexNTtoDat,collapse=", "),"\n")
+   # cat("IndexNTtoDat:",paste0(IndexNTtoDat,collapse=", "),"\n")
    
    #  IndexNTtoDat is in the name table order pointing to the data.frame.
    
-   NotUsedList    <- is.na(IndexNTtoDat)                # areas not used in data. (NT order)
-   NotUsedKeys    <- areaNT$Key[NotUsedList]            # get list of unreferred area keys.
-   NotUsedNames   <- areaNT$Name[NotUsedList]           # get list of area names not referenced.
+   NotUsedList    <- is.na(IndexNTtoDat)         # areas not used in data. (NT order)
+   NotUsedKeys    <- areaNT$Key[NotUsedList]     # get list of unreferred area keys.
+   NotUsedNames   <- areaNT$Name[NotUsedList]    # get list of area names not referenced.
    
-   #cat("NotUsedKeys>",paste0(NotUsedKeys,collapse=", "),"<\n")
+   # cat("NotUsedKeys>",paste0(NotUsedKeys,collapse=", "),"<\n")
    
    #if (any(NotUsedList)) {    # better message? 
    #   errCntMsg(paste0("***0102 CARG-DF The following sub-area(s) in the name table were not referenced in the user data.\n"))
@@ -13415,40 +13545,39 @@ eval(parse(text=wstr))
    #   warning(xmsg,call.=FALSE)
    #}
 
-   #cat("NotUsedKeys:",paste0(NotUsedKeys,collapse=", "),"\n")
-   #cat("NotUsedList:\n")
-   #print(NotUsedList)
-   #cat("\n")
-   
+   # cat("NotUsedKeys:",paste0(NotUsedKeys,collapse=", "),"\n")
+   # cat("NotUsedList:\n")
+   # print(NotUsedList)
+   # cat("\n")
+
+   assign("areaDatRN"       ,areaDatRN)          # area RN (row.names) in order of the dat.   
    assign("areaDatAbbr"     ,areaDatAbbr)        # area Abbr         "area Abbr" in order of the dat
    assign("areaDatID"       ,areaDatID)          # area ID           "area ID"   in order of the dat
    assign("areaDatFull"     ,areaDatFull)        # area Full         "area Full" in order of the dat
    assign("areaDatKey"      ,areaDatKey)         # area Key          "area Key"  in order of the dat
    assign("areaDatAlt_Abbr" ,areaDatAlt_Abbr)    # area Alt_Abbr     "area Alt_Abbr"  in order of the dat
    assign("areaDatIDNames"  ,areaDatIDNames)     # area Dat ID       "area ID Names in order of dat
-   # assign("areaIDNames"     ,areaIDNames[sortedOrd])  # area Display Names  "rlAreaNames in order of the dat. (???)
    assign("NotUsedKeys"     ,NotUsedKeys)        # area keys that were not referenced in the data.
    assign("NotUsedList"     ,NotUsedList)        # T/F list of not used sub-areas.
 
-   assign("datOrder",sortedOrd)                  # data order for use with panelData back to statsDFrame
-
+   assign("datOrder",sortedOrd)         # data order for use with panelData back to statsDFrame   (Not Used)
  
 #  Note:  sDFdat is the statsDFrame in sorted order.  All areaDatxxx are in the same sorted order.     
 #
 
-#print("done with Not Used Key List.")
+# print("done with Not Used Key List.")
+
+# cat("Code: 13559 - End of index structures.\n")
 
 #
 #  Working references on VisBorders
-#
-
 #
 #  axisScale   -  Call Parameter
 #
 #   Default Call = NULL,  Default value = "e"   new extended
 #
-   #cat("axisScale>",axisScale,"<\n")
-   #print("Validating axisScale:")
+   # cat("axisScale>",axisScale,"<\n")
+   # print("Validating axisScale:")
    
    axisScale <- axisScale[[1]][1]
 
@@ -13487,7 +13616,7 @@ eval(parse(text=wstr))
       axisScale       <- "e"    # extended algorithm
       axisMethod      <- 4
    }
-   #cat("axisScale:",axisScale,"  axisMethod:",axisMethod,"\n")
+   # cat("axisScale:",axisScale,"  axisMethod:",axisMethod,"\n")
    
    # convert to axisMethod - use this from now on.
 
@@ -13499,7 +13628,7 @@ eval(parse(text=wstr))
    def_staggerLab <- FALSE
    staggered  <<- FALSE    # start with a lower value. (lower line of staggered set.)
    
-   #print("Validating staggered:")
+   # print("Validating staggered:")
    if ( missing(staggerLab) || is.null(staggerLab) ) {
       staggerLab <- def_staggerLab     
    } else {
@@ -13515,12 +13644,13 @@ eval(parse(text=wstr))
          }
       } 
    
-      #cat("staggerLab:",staggerLab,"\n")
-   
-      #cat("staggered:",staggered,"\n")
+      # cat("staggerLab:",staggerLab,"\n")
+      # cat("staggered:",staggered,"\n")
    }
 #
 ######
+
+# cat("Code: 13635 - End of X-Axis parameters.\n")
 
 ######
 #
@@ -13528,7 +13658,7 @@ eval(parse(text=wstr))
 #
 #   Default Call = NULL,  Default value = 5  
 #
-   #print("Validating maxAreasPerGrp:")
+   # print("Validating maxAreasPerGrp:")
    maxAreasPerGrp <- maxAreasPerGrp[[1]][1]
 
    def_maxAreasPerGrp = 5    # start with a lower value.
@@ -13552,8 +13682,7 @@ eval(parse(text=wstr))
       maxAreasPerGrp    <- def_maxAreasPerGrp    # default = 5 - don't stagger axis labels.
    }
    
-   #cat("maxAreasPerGrp:",maxAreasPerGrp,"\n")
-
+   # cat("maxAreasPerGrp:",maxAreasPerGrp,"\n")
 #
 ######
 
@@ -13563,11 +13692,11 @@ eval(parse(text=wstr))
 #  panels can finally be setup.
 #
 numRows     <- nrow(dat)
-#cat("numRows in data.frame:",numRows,"  12590 \n")
+# cat("numRows in data.frame:",numRows,"  Code: 13690 \n")
 #
 ######
 
-#print("done call parameters - on to panelDesc..")
+# cat("Code: 13681 - done call parameters - on to panelDesc..")
 
 ######
 
@@ -13577,8 +13706,8 @@ numRows     <- nrow(dat)
 
 micromapGPanelDefaults <- micromapGSetPanelDef(numRows,rowSizeMaj,rowSizeMin,rowSepGap, 5, grpPattern)
 
-#cat("micromapGPanelDefaults - 12879 \n")
-#print(micromapGPanelDefaults)
+# cat("Code: 13691 - micromapGPanelDefaults \n")
+# print(micromapGPanelDefaults)
 
 #__________________________ Save Panel Defaults to memory 
  
@@ -13593,11 +13722,9 @@ micromapGPanelDefaults <- micromapGSetPanelDef(numRows,rowSizeMaj,rowSizeMin,row
       {
         assign(defNam[i],wPanelDet[[i]])
       }
-
 #
 
 cGrpRatios <- c(1.333/5.333, 2.333/5.333, 3.333/5.333, 4.333/5.333, 5.333/5.333)
-
    
 #
 #####
@@ -13725,7 +13852,7 @@ if (is.na(match('type',PDUsed))) {
 
    PDMapCol <- xSeq[PDMap]                       # Get column number of maps
 
-   #print(paste0("Map columns=",PDMapCol))
+   # print(paste0("Map columns=",PDMapCol))
 }
 #
 #_________________panelDesc$labx____________________
@@ -13787,8 +13914,8 @@ if (is.na(match('lab4',PDUsed))) {
 
 # more panelDesc checks and setups after the function definitions.
 
-#cat("panelDesc checks:  statsDFrame name list: ",len_wSFName,"\n")
-#print(wSFNameList)
+# cat("panelDesc checks:  statsDFrame name list: ",len_wSFName,"\n")
+# print(wSFNameList)
 #
 #_______________________panelDesc$colx_____________________
 #
@@ -13811,28 +13938,28 @@ if (is.na(match('lab4',PDUsed))) {
      # Check col1 - column number or names.  0 = no such.
      col1    <- CheckColx2(litcol1,"col1",1,panelDesc$type,wSFNameList,len_wSFName)  
      x <-  (col1 == 0)
-     #print(x)
+     # print(x)
      if (any(x,na.rm=TRUE)) {  StopFnd <- TRUE }
   } else {
      litcol1 <- NAList
      col1    <- NAList
   }
- #cat("col1:",paste0(col1,collapse=", "),">>",paste0(litcol1,collapse=", "),"\n")
+  # cat("col1:",paste0(col1,collapse=", "),">>",paste0(litcol1,collapse=", "),"\n")
   
   # col2     - data column name/number 2
   if (!is.na(match('col2',PDUsed))) {
      # col2 is present
      litcol2 <- as.character(panelDesc$col2)   # character vector of values in Col2
      col2    <- CheckColx2(litcol2,"col2",2,panelDesc$type,wSFNameList,len_wSFName)
-     #cat("col2:",col2,"\n")
+     # cat("col2:",col2,"\n")
      x <- (col2 == 0)
-     #print(x)
+     # print(x)
      if (any(x,na.rm=TRUE)) {  StopFnd <- TRUE }
   } else {
      litcol2 <- NAList
      col2    <- NAList
   }
- #cat("col2:",paste0(col2,collapse=", "),">>",paste0(litcol2,collapse=", "),"\n")
+  # cat("col2:",paste0(col2,collapse=", "),">>",paste0(litcol2,collapse=", "),"\n")
   
   # col3     - data column name/number 3
   if(!is.na(match('col3',PDUsed))) {
@@ -13840,13 +13967,13 @@ if (is.na(match('lab4',PDUsed))) {
      litcol3 <- as.character(panelDesc$col3)
      col3    <- CheckColx2(litcol3,"col3",3,panelDesc$type,wSFNameList,len_wSFName)
      x <- (col3 == 0)
-     #print(x)
+     # print(x)
      if (any(x,na.rm=TRUE)) {  StopFnd <- TRUE }
   } else {
      litcol3 <- NAList
      col3    <- NAList
- }
-#cat("col3:",paste0(col3,collapse=", "),">>",paste0(litcol3,collapse=", "),"\n")
+  }
+  # cat("col3:",paste0(col3,collapse=", "),">>",paste0(litcol3,collapse=", "),"\n")
   
 #
 #_____________panelDesc$rmin and rmax______________
@@ -13912,9 +14039,9 @@ if (is.na(match('lab4',PDUsed))) {
      
    #_________________-
    #
-   #cat("Check on header row counts - top:",numTopHeaderRows,"  bot:",numBotHeaderRows,"\n")
-   #cat("    top mar:",numTopHeaderRows * 0.2, "   bot mar:",numBotHeaderRows* 0.2,"\n")
-   #cat("  compare to 1.1 and 0.5/0.75\n")
+   # cat("Check on header row counts - top:",numTopHeaderRows,"  bot:",numBotHeaderRows,"\n")
+   # cat("    top mar:",numTopHeaderRows * 0.2, "   bot mar:",numBotHeaderRows* 0.2,"\n")
+   # cat("  compare to 1.1 and 0.5/0.75\n")
    
 #   
 #______________panelDesc$colSize_________User specificed column width processing and checking
@@ -13926,7 +14053,7 @@ if (is.na(match('lab4',PDUsed))) {
 
    numCol = length(type)    # get number of columns to support
   
-   #cat("Building cparm table for run - Number of columns:",numCol,"\n")
+   # cat("Building cparm table for run - Number of columns:",numCol,"\n")
    
    cparm   <- data.frame(cSize=numeric(0),lSep=numeric(0),rSep=numeric(0),rMinH=numeric(0),rMaxH=numeric(0))   # empty data.frame
 
@@ -13935,7 +14062,7 @@ if (is.na(match('lab4',PDUsed))) {
    for (j in 1:numCol) {
        # Test type of column to be built and call build routine.
        # Get Map.Min.width from default details ; Map.MinH, Map.MaxH from areaParms
-      #cat("top of loop - type=",type[j],"\n")
+      # cat("top of loop - type=",type[j],"\n")
       cparm2 =  switch(type[j],
             #  colSize, col width, left sep, right sep, row min, row max)
             "map"=      c(max(banner.max["map","width"],Map.Min.width),0,0,Map.MinH, Map.MaxH),            
@@ -13959,7 +14086,7 @@ if (is.na(match('lab4',PDUsed))) {
             "rank"    = c(Rank.width,0,0,0,0),
             "nomatch" = c(0,0,0,0,0)
          )
-      #cat("cparm2:",paste0(cparm2,collapse=", "),"\n")
+      # cat("cparm2:",paste0(cparm2,collapse=", "),"\n")
       cparm <- rbind(cparm,cparm2)
      
    }
@@ -13968,9 +14095,9 @@ if (is.na(match('lab4',PDUsed))) {
    
    colnames(cparm) <- c("cSize","lSep","rSep","rMinH","rMaxH")
 
-   #cat("Column Sizing Table completed. Code: 14004 \n") # dump table.
-   #print(cparm)
-   #cat("\n")
+   # cat("Column Sizing Table completed. Code: 14094 \n") # dump table.
+   # print(cparm)
+   # cat("\n")
    
    # one row per column.
 
@@ -13985,13 +14112,13 @@ if (is.na(match('lab4',PDUsed))) {
    rowMinH          <- max(cparm[,"rMinH"],rowSizeMn)     # Largest mininum for all glyphs involved and system minimum size (inches)
    rowMaxH          <- max(cparm[,"rMaxH"],rowSizeMx)     # Largest maximum for all glyphs involved
    
-   #cat("rowMinH:",rowMinH,"   rowMaxH:",rowMaxH,"\n")
+   # cat("rowMinH:",rowMinH,"   rowMaxH:",rowMaxH,"\n")
      
    #  Same formula as panelLayout
 
    xPlotWidth = (par("din")[1])-borders[1]-borders[2]-leftMar-rightMar   #  width in inches - (colSep, borders, left and right margins).
    
-   #cat("xPlotWidth:", xPlotWidth,"\n")
+   # cat("xPlotWidth:", xPlotWidth,"\n")
    
 #
 #_____________panelDesc$colSize____________________Part 2_____
@@ -14005,7 +14132,7 @@ if (is.na(match('lab4',PDUsed))) {
    colNumID       <- c(1:length(colWidths))
    colGood        <- rep(TRUE,length(colWidths))
    
-   #cat("colSize-Start colWidths:",colWidths," len:",length(colWidths),"  colFlex:",colFlex,"\n")
+   # cat("colSize-Start colWidths:",colWidths," len:",length(colWidths),"  colFlex:",colFlex,"\n")
    
    DoColSize      <- FALSE
   
@@ -14016,7 +14143,7 @@ if (is.na(match('lab4',PDUsed))) {
      DoColSize    <- TRUE              # colSize is present - do proportional space allocation.
 
      wColS       <- panelDesc$colSize
-     #cat("Processing colSize parameter:",wColS,"  len:",length(wColS),"\n")
+     # cat("Processing colSize parameter:",wColS,"  len:",length(wColS),"\n")
 
      if (length(wColS) != length(colWidths)) stop
 
@@ -14034,7 +14161,7 @@ if (is.na(match('lab4',PDUsed))) {
         colGood[wColBadList] <- FALSE    # mark problem column
      }
      
-     #cat("1-wColS:",wColS,"  colGood:",colGood,"\n")
+     # cat("1-wColS:",wColS,"  colGood:",colGood,"\n")
      
      # check for invalid fixed width fields in colSize - NA, "", " ", 0 -> OK.  Else - Bad and report.
      
@@ -14057,7 +14184,7 @@ if (is.na(match('lab4',PDUsed))) {
         wColS[!colFlex] <- NA  
      }
     
-     #cat("2-wColS:",wColS,"  colFlex:",colFlex,"  colGood:",colGood,"\n")
+     # cat("2-wColS:",wColS,"  colFlex:",colFlex,"  colGood:",colGood,"\n")
      
      # Convert to numeric, if NA in colSize fields - eError report and set to NULL or "".
      #   Fixed Width Columns are NA, so we not work on flexible columns that can have values.
@@ -14085,7 +14212,7 @@ if (is.na(match('lab4',PDUsed))) {
         colGood[wColBadList] <- FALSE 
      }
      
-     #cat("3-wColS:",wColS," numColS:",numColS," colGood:",colGood,"\n")
+     # cat("3-wColS:",wColS," numColS:",numColS," colGood:",colGood,"\n")
           
      # colSize check range.
      wColFG       <- colFlex & colGood    # only range check good (so far) colSize values.
@@ -14105,11 +14232,11 @@ if (is.na(match('lab4',PDUsed))) {
         colGood[wColNum[wColBad]] <- FALSE   # set all out of range values as no bad.
      }
      
-     #cat("4-wColS:",wColS," numColS:",numColS," colGood:",colGood,"\n")
+     # cat("4-wColS:",wColS," numColS:",numColS," colGood:",colGood,"\n")
                
      numColS[!colGood] <- 0     # set bad values to zero.
      
-     #cat("5-wColS:",wColS," numColS:",numColS,"\n")
+     # cat("5-wColS:",wColS," numColS:",numColS,"\n")
      
      # Fix colSize columns to Mean - "" columns in colFlex range.
          
@@ -14120,7 +14247,7 @@ if (is.na(match('lab4',PDUsed))) {
                # bad values were set to zero.
      meanColSize      <- mean(numColS[wColFG]) # mean of values
      
-     #cat("6-sumFix:",sumFixCol,"  sum colSize:",sumColSize," mean:",meanColSize,"\n")
+     # cat("6-sumFix:",sumFixCol,"  sum colSize:",sumColSize," mean:",meanColSize,"\n")
      
      if (sumColSize == 0)             { DoColSize <- FALSE }   # sum of colSize = zero.
      if (all(!colGood[colFlex]))      { DoColSize <- FALSE }   # if all entries are bad - ignore colSize
@@ -14140,7 +14267,7 @@ if (is.na(match('lab4',PDUsed))) {
         }
         colSize     <- numColS                  # transfer back to colSize.
         litColSize  <- as.character(numColS)    # common starting point - either character or numeric.
-        #cat("final colSize:",colSize,"\n")
+        # cat("final colSize:",colSize,"\n")
      } else {
         errCntMsg(paste0("***01F6 CARG-CS The colSize parameter in ",pDName,
 	                    " contains no useful information and will be ignored.\n"))
@@ -14156,9 +14283,9 @@ if (is.na(match('lab4',PDUsed))) {
    #  Only keep colSize entires for flexible glyphs
    #
    
-   #cat("Finish pre-processing colSize -- DoColSize:",DoColSize,"  colSize:",paste0(colSize,collapse=", "),"\n")
+   # cat("Finish pre-processing colSize -- DoColSize:",DoColSize,"  colSize:",paste0(colSize,collapse=", "),"\n")
    
-   #cat("Starting column width calculations\n")
+   # cat("Starting column width calculations\n")
    
    #  colWidths      has column widths in inches or zero is not set yet. (initially fixed width columsn.)
    #  colFlex        has TRUE for columns that are width is undetermined.
@@ -14170,8 +14297,8 @@ if (is.na(match('lab4',PDUsed))) {
    # based on column type, add more space on left or right.  (cparm[,2] for left, cparm[,3] for right.) - Y Axis.  
    colSep[1:numCol]     <- colSep[1:numCol] + cparm[,2]          # add space on left of panel
    colSep[2:(numCol+1)] <- colSep[2:(numCol+1)] + cparm[,3]      # add space on right of panel
-   #cat("colSep:",colSep,"\n")
-
+   # cat("colSep:",colSep,"\n")
+     
    colSepSum     <- sum(colSep)               # total width used by separators
    
    xPlotWidthOrg <- xPlotWidth
@@ -14181,10 +14308,10 @@ if (is.na(match('lab4',PDUsed))) {
    usedSpace     <- sum(colWidths)             # get amount of allocated space.
    freeSpace     <- xPlotWidth - usedSpace      # available space
    
-   #cat("Setup-Space:",xPlotWidthOrg,"  colSepSum:",colSepSum,"  Avail:",xPlotWidth,"  freeSpace:",freeSpace," usedSpace:",usedSpace,"\n")
+   # cat("Setup-Space:",xPlotWidthOrg,"  colSepSum:",colSepSum,"  Avail:",xPlotWidth,"  freeSpace:",freeSpace," usedSpace:",usedSpace,"\n")
  
    if (DoColSize) {
-     #cat("Doing colSize - colSize:",colSize,"  colWidths:",colWidths,"\n")
+     # cat("Doing colSize - colSize:",colSize,"  colWidths:",colWidths,"\n")
      if (length(colSize) <= 0) stop
      
      # Cycle 1 - calculate and adjust for minimum column widths
@@ -14198,13 +14325,13 @@ if (is.na(match('lab4',PDUsed))) {
      colWidths[wColMinE]  <- colSizeMin       # set low values to min. (if they exist)
      colSize[wColMinE]    <- 0                # remove low values from colSize calculation.
      
-     #cat("C1-colSize:",colSize,"  wColSizeP:",wColSizeP,"  colWidths:",colWidths,"\n")
+     # cat("C1-colSize:",colSize,"  wColSizeP:",wColSizeP,"  colWidths:",colWidths,"\n")
 
      # Cycle 2 - calculate (again) and adjust for maximum column widths
      
      usedSpace   <- sum(colWidths)
      freeSpace   <- xPlotWidth - usedSpace
-     #cat("C2-usedSpace:",usedSpace,"  freeSpace:",freeSpace,"\n")
+     # cat("C2-usedSpace:",usedSpace,"  freeSpace:",freeSpace,"\n")
      
      sumColSize  <- sum(colSize,na.rm=TRUE)   # sum values
      wColSizeP   <- colSize/sumColSize        # get proportion.
@@ -14212,7 +14339,7 @@ if (is.na(match('lab4',PDUsed))) {
      wColSize    <- wColSizeP * freeSpace     # calculate allocations.    
      
      wColMaxE    <- (wColSize > colSizeMax)
-     #cat("C2-Max test - sumColSize:",sumColSize,"  wColSizeP:",wColSizeP,"  wColSize:",wColSize,"  wColMaxE:",wColMaxE,"\n")
+     # cat("C2-Max test - sumColSize:",sumColSize,"  wColSizeP:",wColSizeP,"  wColSize:",wColSize,"  wColMaxE:",wColMaxE,"\n")
      
      if (any(wColMaxE,na.rm=TRUE)) {
         # only do one more cycle if a value > max is found.
@@ -14220,13 +14347,13 @@ if (is.na(match('lab4',PDUsed))) {
         colWidths[wColMaxE] <- colSizeMax      # set high values to max.
         colSize[wColMaxE]    <- 0               # remove high values from colSize calculation.
      
-        #cat("C2-Max adj-colSize:",colSize,"  wColSizeP:",wColSizeP,"  colWidths:",colWidths,"\n")
-
+        # cat("C2-Max adj-colSize:",colSize,"  wColSizeP:",wColSizeP,"  colWidths:",colWidths,"\n")
+	  
         # Cycle 3 - if max adjustments - do it one more time.
 
         usedSpace   <- sum(colWidths)
         freeSpace   <- xPlotWidth - usedSpace
-        #cat("C3-usedSpace:",usedSpace,"  freeSpace:",freeSpace,"\n")
+        # cat("C3-usedSpace:",usedSpace,"  freeSpace:",freeSpace,"\n")
 
         # Repeat for final values.
      
@@ -14252,7 +14379,7 @@ if (is.na(match('lab4',PDUsed))) {
      zeroCol    <- !(colWidths > 0)          # TRUE for any column with no width assigned. 
      numberCol  <- sum(zeroCol,na.rm=TRUE)   # get number of TRUEs = number of columns that need widths. (sum 1s)
      equalCol   <- freeSpace / numberCol     # get width of each column.
-     #cat("Initial equalCol:",equalCol,"  FreeSpace:",freeSpace,"\n")
+     # cat("Initial equalCol:",equalCol,"  FreeSpace:",freeSpace,"\n")
    
      if (equalCol > colSizeMax)  {  equalCol <- colSizeMax  }
    
@@ -14268,7 +14395,7 @@ if (is.na(match('lab4',PDUsed))) {
      colWidths[zeroCol] <- equalCol
    }
    
-   #cat("Final-colWidths:",colWidths,"\n")
+   # cat("Final-colWidths:",colWidths,"\n")
    
    #
    savedColWidths <- colWidths    # save a copy of the column size parameters.
@@ -14279,7 +14406,7 @@ if (is.na(match('lab4',PDUsed))) {
    # add space if reference values provided.
    # JP-2010/07/23 0 change to refVals to be consistent.
    
-   #cat("numTopHeaderRows:",numTopHeaderRows,"  numBotHeaderRows:",numBotHeaderRows,"\n")
+   # cat("numTopHeaderRows:",numTopHeaderRows,"  numBotHeaderRows:",numBotHeaderRows,"\n")
 
 #
 #  _____________panelDesc$refVals___________________
@@ -14300,7 +14427,7 @@ if (is.na(match('lab4',PDUsed))) {
          #### Check on the use and need for "legfactor" in older code.
       }      
    }
-   #cat("botMar:",botMar,"\n")
+   # cat("botMar:",botMar,"\n")
        
    #assign('legfactor',legfactor)  
 
@@ -14309,8 +14436,8 @@ if (is.na(match('lab4',PDUsed))) {
 #
    
    #  added 10/30/24 to allow parameters (more complex) to be available to SCATDOT
-   #cat("panelDesc$parm value:\n")
-   #print(str(panelDesc$parm))
+   # cat("panelDesc$parm value:\n")
+   # print(str(panelDesc$parm))
    
    wparm <- NULL
    
@@ -14328,14 +14455,16 @@ if (is.na(match('lab4',PDUsed))) {
    }
    assign('parm',wparm)   # save list off to upper storage.
   
-   #cat("parm:",paste0(parm,collapse=", ",sep=""),"\n")
+   # cat("parm:",paste0(parm,collapse=", ",sep=""),"\n")
+   
+   # cat("Code: 14456 - End of panelDesc Checks.\n")
       
    ########
    #
    #  Check for warnings or stops that should terminate the package/function
    #
    
-   #cat("Flags-ErrFnd:",ErrFnd,"  StopFnd:",StopFnd,"\n")
+   # cat("Flags-ErrFnd:",ErrFnd,"  StopFnd:",StopFnd,"\n")
   
    if (StopFnd) {
       stopCntMsg(paste0("***01Z9 CARG Errors have been found in parameters and data.\n",
@@ -14391,9 +14520,9 @@ if (is.na(match('lab4',PDUsed))) {
    #
    #
 
-   #cat("panelLayout - panels\n")
-   #cat("panels-numGrps:",numGrps," rowSep:",rowSep," rowSize:",rowSize,"\n")
-   #cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
+   # cat("panelLayout - panels\n")
+   # cat("panels-numGrps:",numGrps," rowSep:",rowSep," rowSize:",rowSize,"\n")
+   # cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
    
    # build layout for glyphs panels  (numGrps x ncol) (Individual)
    #    Titles, columns and top group/rows each, columns and median single or group/row if present,
@@ -14418,12 +14547,12 @@ if (is.na(match('lab4',PDUsed))) {
                         rDebug      = MST.Debug)
           )                                                  # c(.1,.1,.1) for 3
 
-   #printPanelParms("panels")
+   # printPanelParms("panels")
    
    
-   #cat("panelLayout - panelGroup\n")
-   #cat("Group -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
-   #cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
+   # cat("panelLayout - panelGroup\n")
+   # cat("Group -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
+   # cat("      -numCol :",numCol," colSep:",colSep," colWidths:",colWidths,"\n")
   
    #  Done above by "micromapSetPanelDef"
    #grounpedRowSize = details[["groupedRowSize"]]            # c(35,1.65,35) -> USStatesBG (51)
@@ -14433,7 +14562,7 @@ if (is.na(match('lab4',PDUsed))) {
    
    #groupedRowSep   = details[["groupedRowSep"]]             # c(0,0.1,0.1,0) or c(0,0.1,0)
 
-   #cat("medGrp:",medGrp,"\n")
+   # cat("medGrp:",medGrp,"\n")
       
    # Major panel group  title-top, panels, title-bottom  by columns (overlays panels)
    # section of panels (top(25), median(1), bottom(25) and "N" columns wide.
@@ -14476,12 +14605,12 @@ if (is.na(match('lab4',PDUsed))) {
                         rDebug       = MST.Debug)
         )
   
-   #printPanelParms("panelGroup")
+   # printPanelParms("panelGroup")
    
    
-   #cat("panelLayout - panelOne\n")
-   #cat("One   -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
-   #cat("      -vncol      :",1," colSep: 0  colSize: 1\n")
+   # cat("panelLayout - panelOne\n")
+   # cat("One   -panelBlocks:",panelBlocks," rowSep:",groupedRowSep," rowSize:",groupedRowSize,"\n")
+   # cat("      -vncol      :",1," colSep: 0  colSize: 1\n")
   
    # build layout for page (3 or 2  x 1)
    #    Build outline layout for Title, group\rows, bottom 
@@ -14503,7 +14632,7 @@ if (is.na(match('lab4',PDUsed))) {
          )
   
    
-   #printPanelParms("panelOne")
+   # printPanelParms("panelOne")
   
    
    #
@@ -14516,11 +14645,14 @@ if (is.na(match('lab4',PDUsed))) {
                         # in the atRx1 is greater thatn atRx2 = TRUE then value is TRUE.
 
 
+
+# cat("Code: 14645 - End of panel structure builds.\n")
+
 #####
 #
 #   Setup for area VisCol processing:  foreground, median, highlights, not used, background
 #
-#print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
+# print("VisNodes, VisKeys, VisHoles, NotUsed, VisNU")
 # per VisBorder polygon (point/vector)
   
 VisNodes       <- is.na(rlAreaVisBorders$x)            # end points of each polygons in VisBorders (indexes)
@@ -14532,11 +14664,11 @@ lenVisKeys     <- length(VisKeys)
  
 # one entry per end of polygon. Multi-polygons per area.
   
-#cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
-#print(VisKeys)
+# cat("Basic list of VisKeys (one per polygon):\n")      # one entry per point.
+# print(VisKeys)
   
-#cat("Basic list of VisHoles (zero or more per polygon):\n")
-#print(VisHoles)
+# cat("Basic list of VisHoles (zero or more per polygon):\n")
+# print(VisHoles)
   
 # per Visborder all point/vector
   
@@ -14556,20 +14688,20 @@ lenVisKeys     <- length(VisKeys)
 #  This will change to do:  Setup, Page 1-Page Header, Glyph "n1" to "n2", and then the next page.
 #
 #####
-#cat("Main Loop\n")
-#cat("Main Loop:  MST.Debug:",MST.Debug,"\n")
-#print(statsDFrame)
-#cat("Length of areaNT:",dim(areaNT)[1],"\n")
-#print(areaNT)
-#cat("areaVisBorders sample:\n")
-#str(rlAreaVisBorders)
-#cat("  length of AVB:",dim(rlAreaVisBorders)[1]," ",dim(rlAreaVisBorders)[2],"\n")
-#head(rlAreaVisBorders,40)
-#cat("End of areaVisBorders Sample.\n")
+# cat("Main Loop\n")
+# cat("Main Loop:  MST.Debug:",MST.Debug,"\n")
+# print(statsDFrame)
+# cat("Length of areaNT:",dim(areaNT)[1],"\n")
+# print(areaNT)
+# cat("areaVisBorders sample:\n")
+# str(rlAreaVisBorders)
+# cat("  length of AVB:",dim(rlAreaVisBorders)[1]," ",dim(rlAreaVisBorders)[2],"\n")
+# head(rlAreaVisBorders,40)
+# cat("End of areaVisBorders Sample.\n")
 
-#cat("numCol:",numCol,"\n")
+# cat("numCol:",numCol,"\n")
 
-#cat("Main Loop\n")
+# cat("Main Loop\n")
 
 #  Build images of each column
 #
@@ -14578,7 +14710,7 @@ lenVisKeys     <- length(VisKeys)
 
    for (j in 1:numCol)  {
    
-      #cat("Doing Type:",type[j],"  column:",j,"\n")
+      # cat("Code: 14709 - Doing Type:",type[j],"  column:",j,"\n")
    
       # Test type of column to be built and call build routine.
       switch(type[j],
@@ -14603,7 +14735,7 @@ lenVisKeys     <- length(VisKeys)
          "rank"    = rlAreaRank(j),
          "nomatch"
       )
-      #cat("End of glyphs Call - lastSpace Lab2:",lastLab2Space,"  Lab3:", lastLab3Space,"\n")
+      # cat("End of glyphs Call - lastSpace Lab2:",lastLab2Space,"  Lab3:", lastLab3Space,"\n")
    }
  
    # All columns are built and sitting in the panel.
@@ -14612,9 +14744,9 @@ lenVisKeys     <- length(VisKeys)
    #
    # Fill in the top Page Titles
    #
-   #cat("End of main loop.  Bottom title\n")
+   # cat("End of main loop.  Bottom title\n")
    
-   #cat("panelSelect - panelOne - margin='top'\n")
+   # cat("panelSelect - panelOne - margin='top'\n")
    
    panelSelect(panelOne,margin="top")    # full page top label area.
    x <- panelScale()
@@ -14636,21 +14768,21 @@ lenVisKeys     <- length(VisKeys)
    #
    
    message("End of micromapST processing.\n\n")
-   #cat("Getting warning counts:\n")
+   # cat("Getting warning counts:\n")
    warnNum <- get("i",envir=environment(warnCnt))  # get warnings counter
    if (warnNum > 0) {
       message(paste0(warnNum," warnings messages were logged.  Please review the run log and resolve any issues."))
    } else { 
       message("No warnings were logged.")
    }
-   #cat("Getting stop counts:\n")
+   # cat("Getting stop counts:\n")
    stopNum <- get("i",envir=environment(stopCnt))  # get stop message counter
    if (stopNum > 0) {
       message(paste0(stopNum," Stop messages were logged.  Please resolve issues and rerun."))
    } else {
       message("No stop messages were logged.")
    }
-   #cat("Getting Total Counts:\n")
+   # cat("Getting Total Counts:\n")
    if (( warnNum + stopNum ) > 0) {
       message("If warnings and error messages did not appear on your R console, please execute",
               "'warnings()' to retrieve the messages.\n")

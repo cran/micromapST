@@ -1,5 +1,5 @@
 \name{glyph-dotconf}
-\alias{DOTCONF}
+\alias{dotconf}
 \alias{glyph-dotconf}
 \title{The dotconf glyph creates a graphic of a single data point as a dot with a line through the dot from the low to high confidence limits.}
 \description{
@@ -33,6 +33,11 @@ used to sort the order of the areas using the sortVar call parameter.
   \var{panelDesc} rows not used by the glyph should be set to NA.  The dotconf glyph does not
   use the panelData, and parm rows. 
   
+  The following is an example of a section of a boxplot glyph column in a linked micromap:
+  
+  \if{html}{\figure{ExamDotconf.png}{options: width=200}}
+  \if{latex}{\figure{ExamDotconf.png}{options: width=200px}}
+
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.
   

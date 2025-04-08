@@ -1,6 +1,6 @@
 \name{glyph-bar}
 \alias{glyph-bar}
-\alias{BAR}
+\alias{bar}
 \title{The bar glyph creates a graphic of a single data point as the height of the bar.}
 \description{
 The \var{bar} glyph creates a simple bar with the starting point for the bar being zero.  The value is defined by 
@@ -24,6 +24,11 @@ The col1 data must be numeric values and can be used to sort the order of the ar
   \var{panelDesc} rows not used by a glyph should be set to NA if not used.  The bar glyph does not
   use the col2, col3, panelData, and parm rows. 
   
+  The following is an example of a section of a boxplot glyph column in a linked micromap:
+  
+  \if{html}{\figure{ExamBar.png}{options: width=150}}
+  \if{latex}{\figure{ExamBar.png}{options: width=150px}}
+
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.
   

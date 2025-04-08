@@ -1,8 +1,8 @@
-\name{PlotVis}
-\alias{PlotVis}
+\name{Plot_Vis}
+\alias{Plot_Vis}
 \title{A function to plot the micromapST boundary format called VisBorders}
 \description{
-The \var{PlotVis} function will plot the boundary data contained in a border group.  The border group boundary
+The \var{Plot_Vis} function will plot the boundary data contained in a border group.  The border group boundary
 information is stored as a data.frame with an "x", "y", "hole", and "key" columns.  The "key" column identifies
 the name table entry the boundary point and polygon belongs to.  The "x" and "y" are the coordinates for the 
 boundary vertex in the polygon, and the "hole" column identifies if the polygon is a hole in the area identified by the 
@@ -11,7 +11,7 @@ be the same point.  This is followed by a "x" and "y" coordinates of c(NA,NA) to
 wait for the next point. It's primary purpose is to visualize boundary data that has been prepared for 
 micromapST and assist in developing new border groups for micromapST.
 }
-\usage{PlotVis ( VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) }
+\usage{Plot_Vis( VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) }
 \details{
 More details to follow.
 }

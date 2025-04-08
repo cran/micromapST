@@ -10,7 +10,8 @@ The first column in the series is specified in \var{panelDesc} data.frame in \va
 The last column in the sequence is specified in \var{col2}. The stacked bars can contain from 2 to 9 bars.
 
 The normbar graphic converts the length for each bar to values that will sum up to 100.  Each normbar is drawn
-with bars fram the left to right edge of the panel. 
+with bars from the left to right edge of the panel. 
+
 Each bar is filled with the same color as the area the data represents.  The transparency of the color 
 varies from left to right and a line is used to separate each bar for an area.
 }
@@ -22,6 +23,27 @@ varies from left to right and a line is used to separate each bar for an area.
   to the gryphic whether to use variable height bars in the gryphic or not.  By default the value is set to \var{FALSE}.
   When set to \var{TRUE}, all Center Segmented Stacked Bar Charts will have their bars vary in height from the left to
   the right.
+  
+  The colors used in each segment are adjusted based on the number of segments in the glyph.  If 5 bar are being displayed,
+  the 1/5, 2/5, 3/5, and so on of the original color are used to fill in each bar as transparent colors.  The last bar
+  is always 100% of the original color.
+  
+  The following is an example of a section of a normalized stacked bar glyph in a linked micromap:
+    
+  \if{html}{\figure{ExamNormbarF.png}{options: width=200}}
+  \if{latex}{\figure{ExamNormbarF.png}{options: width=200px}}
+  
+  The stacked bar glyphs have a unique property.  The height of each segment can vary from small to full height 
+  from left to right.  While the colors of the segments are varied in intensity from The following is an example of a section of a time series glyph in a linked micromap:
+    
+  \if{html}{\figure{ExamNormbarV.png}{options: width=200}}
+  \if{latex}{\figure{ExamNormbarV.png}{options: width=200px}}
+  
+  To have micromapST do variable heights in the Segmented Stacked Bar, and Normalized Stacked Bar,
+  the detail call parameter is used to enable the feature.
+  \preformatted{
+      details=list(SNBar.varht=TRUE,...)
+  }
   
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.

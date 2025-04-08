@@ -1,5 +1,5 @@
 \name{glyph-dotse}
-\alias{DOTSE}
+\alias{dotse}
 \alias{glyph-dotse}
 \title{The dotse glyph creates a graphic of a single data point and a line representing the standard error of the data.}
 \description{
@@ -11,10 +11,10 @@ in the \var{statsDFrame} data columns referenced by the column name/number is \v
 The upper and lower values are calculated based on 
 
 \preformatted{
-       zval <- stats::qnorm( .5 + Dot.SE / 200 )  # where Dot.SE is defaulted to 95
-       inc  <- zval * col2 referenced data
-       upper <- col1 referenced data + inc
-       lower <- col1 referenced data - inc
+    zval <- stats::qnorm( .5 + Dot.SE / 200 )  # where Dot.SE is defaulted to 95
+    inc  <- zval * col2 referenced data
+    upper <- col1 referenced data + inc
+    lower <- col1 referenced data - inc
 }       
 
 The \var{dotse} is plotted at the col1 data value from \var{statsDFrame}.  The line is drawn from the lower to upper 
@@ -40,9 +40,14 @@ used to sort the order of the areas using the sortVar call parameter.
   For the dotse glyph, the col1 and col2 column name/numbers refereninc the \var{statsDFrame} data.frame 
   must be provided and valid.   All data in these columns must be numeric.
   
-  \var{panelDesc} rows not used by the glyph should be set to NA.  The dotse glyph does not
-  use the panelData, and parm rows. 
+  \var{panelDesc} rows not used by the glyph should be set to NA.  The dotse glyph does not use the \var{col3}, 
+  \var{panelData}, and \var{parm} rows. 
   
+  The following is an example of a section of a boxplot glyph column in a linked micromap:
+  
+  \if{html}{\figure{ExamDotse.png}{options: width=200}}
+  \if{latex}{\figure{ExamDotse.png}{options: width=200px}}
+
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.
   

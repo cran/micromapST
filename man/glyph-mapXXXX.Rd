@@ -23,20 +23,48 @@ in the columns on the left or right of the map.
   draw a column of the map glyphs, one per group/row.  
  
   The map collection consist of four ways the maps are used to present the area information moving down the page.
+  
   1) Map - is a simple map with out any extra areas colored in.   Only the "active" areas being presented 
-  in the graphics on either side
-  are colored.  The same color is used in the statistical graphic to line the area to the data.
+  in the graphics on either side are colored.  The same color is used in the statistical graphic to 
+  line the area to the data.
+  
+  \if{html}{\figure{ExamMap.png}{options: height="150" width="125"}}
+  \if{latex}{\figure{ExamMap.png}{options: width=125px height=150px}}
+    
   2) MapCum - is map, is the same as the "MAP" glypic, but after an area has been referenced, 
   it is colored yellow to 
-  let the user know the area was presented in a group/row above.
+  let the user know the area was presented in a group/row above as seen in the following figure:
+  
+  \if{html}{\figure{ExamMapcum.png}{options: width=150}}
+  \if{latex}{\figure{ExamMapcum.png}{options: width=150px}}
+  
   3) MapTail - this map is the same as the MapCum in that it accumulate areas that have been presented.  
   However, at the median point, the areas shaded are changed to the areas that have not been presented 
   before to area to be repesented.  As the graphics continue, the number of yellow area decreases. 
   In the last row, only the presented states are colored and no area are colored yellow.
+  
+  \if{html}{\figure{ExamMaptailU.png}{options: width=200}}
+  \if{latex}{\figure{ExamMaptailU.png}{options: width=200px}}
+  
+  The other half of the tail leading away from the median can been seen in the lower maps.
+  
+  \if{html}{\figure{ExamMaptailL.png}{options: width=200}}
+  \if{latex}{\figure{ExamMaptailL.png}{options: width=200px}}
+      
   4) MapMedian - this map colors all of the areas with values above the median (as sorted) a very 
-  pale red. All of the areas below the median   are colore a vary pale blue.  The areas being 
+  pale red. All of the areas below the median are colored a vary pale blue.  The areas being 
   presented are still colored with a unique color and linked to the statistical graphic using
   that color.
+  
+  This figure shows maps above the median point:
+  
+  \if{html}{\figure{ExamMapMedianU.png}{options: height="150" width="150"}}
+  \if{latex}{\figure{ExamMapMedianU.png}{options: width=150px height=150px }}
+  
+  This figure shows what the map looks like below the median point:
+  
+  \if{html}{\figure{ExamMapMedianL.png}{options: height="150" width="150"}}
+  \if{latex}{\figure{ExamMapMedianL.png}{options: width=150px height=150px }}
   
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.

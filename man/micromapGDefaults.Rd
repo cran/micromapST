@@ -127,6 +127,7 @@ safe to be modified by the user.
        \describe{
          \item{\bold{General Variables:}}{
           The following are the internal variables for the XAxis, Grid, Panels, Reference Line, and the Glyphs.
+
           \describe{
            \item{\bold{X-Axis variables:}}{
             \describe{
@@ -136,6 +137,7 @@ safe to be modified by the user.
              \item{XAxis.gapPC}{= 0.75 (*100 for precentage). Percentage of the width of a space 
                used to determine label overlaps.}
             }
+            
            }
            \item{\bold{Y-Axis variables:}}{
            
@@ -143,6 +145,7 @@ safe to be modified by the user.
              \item{YAxis.width}{= 0.2 inches. Extra column gap size required to support drawing an 
                Y-Axis for TS and ScatDot glyphics}
             }
+            
            }
            \item{\bold{Grid and Panel Variables:}}{
            
@@ -152,6 +155,7 @@ safe to be modified by the user.
              \item{Panel.Fill.col}{= "#676767FF", defaults to light gray}
              \item{Panel.Outline.col}{= "black", color of panel outlines}
             }
+            
            }
            \item{\bold{Reference Line and Text:}}{
             The following variable related to the reference text and line feature.
@@ -159,10 +163,12 @@ safe to be modified by the user.
              \item{Ref.Val.lty}{= "dashed", set reference value line to dashed}
              \item{Ref.Val.lwd}{= 1.5, line width of reference line}
              \item{Ref.Val.col}{= "midgreen", color of reference line when color is used.}
-             \item{Ref.Val.BW.col}{= "black", color of reference line when grays are used.}\cr            
+             \item{Ref.Val.BW.col}{= "black", color of reference line when grays are used.}
+             
              \item{Ref.Text.col}{= "black", color of reference line text when color is used.}
              \item{Ref.Text.BW.col}{= "black", color of reference line text when grays are used.}  
             }
+            
            }
            \item{\bold{Arrow Glyph:}}{
             The following variables are used by the \option{arrow} glyph.
@@ -170,11 +176,13 @@ safe to be modified by the user.
             \describe{
              \item{Arrow.lwd}{= 2.5, line width of arrow.}
              \item{Arrow.cex}{= 0.08, size of arrow  ( not implemented )}
-             \item{Arrow.Head.length}{= 0.08, length of arrow.}\cr             
+             \item{Arrow.Head.length}{= 0.08, length of arrow.}
+             
              \item{Arrow.Dot.pch}{= 21, arrow-dot symbol 19-25.}
              \item{Arrow.Dot.pch.size}{= 0.9 cex, arrow-dot size.}
-             \item{Arrow.Dot.pch.lwd}{= 0.5, line weight used on filled arrow-dot symbols.}\cr
-             \item{Arrow.Dot.Outline}{= FALSE, include dot outline when filled. FALSE=NO, TRUE=YES}
+             \item{Arrow.Dot.pch.lwd}{= 0.5, line weight used on filled arrow-dot symbols.}
+             
+             \item{Arrow.Dot.Outline}{=FALSE, include dot outline when filled. FALSE=NO, TRUE=YES}
              \item{Arrow.Dot.Outline.col}{= "black", color used for arrow-dot outline.}
              \item{Arrow.Dot.Outline.lwd}{= 0.5, line weight for arrow-dot outline.}
             }
@@ -189,6 +197,7 @@ safe to be modified by the user.
              \item{Bar.Outline.lwd}{= 0.5, line width for bar outline }
              \item{Bar.Outline.lty}{= "solid", line type for bar outline }
             }
+            
            }
            \item{\bold{Boxplot Glyph:}}{
            
@@ -205,6 +214,7 @@ safe to be modified by the user.
              \item{BoxP.Outlier.cex}{= 0.7, size of outlier dots.}
              \item{BoxP.Outlier.BW.col}{= "#4c4c4cFF" color of outliner lines when greys used.}
             }
+            
            }
            \item{\bold{Dot, Dotconf, and DotSE glyphs:}}{
            
@@ -218,6 +228,7 @@ safe to be modified by the user.
              \item{Dot.Outline.col}{= "black", color of dot outline.}
              \item{Dot.Outline.lwd}{= 0.5, line width of dot outline.}
             }
+            
            }
            \item{\bold{Dotconf Glyph:}}{
            
@@ -226,11 +237,14 @@ safe to be modified by the user.
             \describe{
              \item{Dot.Conf,pch}{= 21, solid circle (S compatible).}
              \item{Dot.Conf.pch.size}{= 0.9 cex, size of dot.}
-             \item{Dot.Conf.pch.lwd}{= 0.5, linen weight for dot outline when 0:18 dot used.}\cr
+             \item{Dot.Conf.pch.lwd}{= 0.5, linen weight for dot outline when 0:18 dot used.}
+             
              \item{Dot.Conf.Outline}{=FALSE, whether to outline the dots.}
              \item{Dot.Conf.Outline.col}{= "black", color of dot outline.}
-             \item{Dot.Conf.Outline.lwd}{= 0.5, line width of dot outline.}\cr           
+             \item{Dot.Conf.Outline.lwd}{= 0.5, line width of dot outline.}
+             
              \item{Dot.Conf.lwd}{= 2, line width of confidence interval lines.}
+             
             }
            }
            \item{\bold{Dotse Glyph:}}{
@@ -241,13 +255,16 @@ safe to be modified by the user.
             \describe{
              \item{Dot.SE,pch}{= 21, solid circle (S compatible).}
              \item{Dot.SE.pch.size}{= 0.9 cex, size of dot.}
-             \item{Dot.SE.pch.lwd}{= 0.5, linen weight for dot outline when 0:18 dot used.}\cr
+             \item{Dot.SE.pch.lwd}{= 0.5, linen weight for dot outline when 0:18 dot used.}
+             
              \item{Dot.SE.Outline}{=FALSE, whether to outline the dots.}
              \item{Dot.SE.Outline.col}{= "black", color of dot outline.}
-             \item{Dot.SE.Outline.lwd}{= 0.5, line width of dot outline.}\cr           
+             \item{Dot.SE.Outline.lwd}{= 0.5, line width of dot outline.}
+             
              \item{Dot.SE}{= 95, percent confidence interval }
              \item{Dot.SE.lwd}{= 2, line width of confidence interval lines.}
             }
+            
            }
            \item{\bold{dotsignif Glyph:}}{
            
@@ -258,13 +275,16 @@ safe to be modified by the user.
              \item{Dot.Signif.pch}{= 4, overprint character "x" when not significance.}
              \item{Dot.Signif.pch.size}{= 0.9*1.2 cex size of the overprint character.}
              \item{Dot.Signif.pch.lwd}{= 0.5, linen weight for dot outline when 0:18 dot used.}
-             \item{Dot.Signif.pch.col}{= "black", color of overlaid symbol on DOT.}\cr
+             \item{Dot.Signif.pch.col}{= "black", color of overlaid symbol on DOT.}
+             
              \item{Dot.Signif.Outline}{=FALSE, whether to outline the dots.}
              \item{Dot.Signif.Outline.col}{= "black", color of dot outline.}
-             \item{Dot.Signif.Outline.lwd}{= 0.5, line width of dot outline.}\cr
+             \item{Dot.Signif.Outline.lwd}{= 0.5, line width of dot outline.}
+             
              \item{Dot.Signif.pvalue}{= 0.05, p-value for testing significance.}
              \item{Dot.Signif.range}{= c(0,1), valid range for significant test data for p-value}
             }
+            
            }
            \item{\bold{id Glyph:}}{
            
@@ -274,35 +294,45 @@ safe to be modified by the user.
              \item{Id.Title.1.pos}{= 0.9 inches, top panel 1st line id title placement above the first panel, 
                used with lab1}
              \item{Id.Title.2.pos}{= 0.1 inches, top panel 2nd line id title placement above the first panel, 
-               used with lab2}\cr
-             \item{Id.Text.cex}{= 0.65, text side of ID column}\cr
+               used with lab2}
+               
+             \item{Id.Text.cex}{= 0.65, text side of ID column}
+             
              \item{Id.Dot.pch}{= 22, pch symbol value to plot next to state name/abbrev.}
              \item{Id.Dot.cexm}{= 1.5, size of dot symbol for state ID}
              \item{Id.Dot.lwd}{= 0.8, size of solid dot symbol for state ID}
-             \item{Id.Dot.width}{= 0.1 inches.  With of the ID symbol (box)}\cr
+             \item{Id.Dot.width}{= 0.1 inches.  With of the ID symbol (box)}
+             
              \item{Id.Space}{= 0.03125,  width of a space in inches.}
              \item{Id.Start}{= 0.055,  offset from left for start of ID column.}
             }
+            
            }
            \item{\bold{map, mapcum, maptail, and mapmedian Glyphs:}}{
            
             The following variables are used by all of the "map" type glyphs.
             \describe{
              \item{Map.Area.Spec.cex}{= 0.32, font size for state labels}
+             
              \item{Map.Bg.col}{= "#262626FF",  (grey(0.88)) color of background (not active) sub-areas fill in maps}
              \item{Map.Bg.Line.col}{= "white", background of maps}
              \item{Map.Bg.Line.lwd}{= 0.3,  line weight for map background boundaries}
+             
              \item{Map.Fg.Line.col}{= "black", foreground color of maps}
              \item{Map.Fg.Line.lwd}{= 0.3, line weight for map foreground boundaries}
+             
              \item{Map.L2.Line.col}{= "lighter grey", color of Layer 2 outline in maps}
              \item{Map.L2.Line.lwd}{= 0.35. line weight for Layer 2 boundaries}
+             
              \item{Map.L3.Line.col}{= "black", color of Layer 3 (national) outline in maps}
              \item{Map.L3.Line.lwd}{= 0.4. line weight for Layer 3 (national) boundaries}
+             
              \item{Map.Lab.Box.Width}{= 0.09, width in inches of box symbols using in titles for maps}
              \item{Map.Max.width}{= 2.5 inches, maximum width of each map}
              \item{Map.Min.width}{= 1.5 inches, minimum width of each map}
              \item{Map.Median.text}{= "Median for Sorted Panel", text used in single row median panel instead of a map.}
             }
+            
            }
            \item{\bold{Rank Glyph:}}{
            
@@ -311,12 +341,14 @@ safe to be modified by the user.
              \item{Rank.width}{= 0.25 inches - column fixed width}
              \item{Rank.method}{= 1,  rank method - to be defined.}
             }
+            
            }
            \item{\bold{Scatter Dot Glyph:}}{
            
             The following variables are used by the scatter dot glyph (\option{scatdot}).
             \describe{
-             \item{SCD.Axis,cex}{= 0.52, font size for Y axis labels for scatter dots}\cr
+             \item{SCD.Axis,cex}{= 0.52, font size for Y axis labels for scatter dots}
+             
              \item{SCD.Bg.pch}{= 21, type of point/symbol to be used for background 
                data points (not active) - state's dots.}
              \item{SCD.Bg.pch.fill}{= "transparent", fill color for not selected state's 
@@ -341,17 +373,20 @@ safe to be modified by the user.
                - scatter dots.}
              \item{SCD.Median.pch.fill}{= "black", color of filled symbol for median value 
                - scatter dots.}
-             \item{SCD.hGrid}{= FALSE, whether or not to include horizontal grid lines in panel.}\cr    
+             \item{SCD.hGrid}{= FALSE, whether or not to include horizontal grid lines in panel.}
+             
              \item{SCD.xsc}{= 1.08,  x range multiplier to keep dots from being clipped}
-             \item{SCD.ysc}{= 1.12, y range multiplier to keep dots from being clipped}\cr    
+             \item{SCD.ysc}{= 1.12, y range multiplier to keep dots from being clipped}
+             
              \item{SCD.DiagLine}{= TRUE, whether or not to include x=y sloped line}
-             \item{SCD.DiagLine.col}{= colGrid, color of sloped line, default, grid line color.  
-                SCD.DiagLine must be TRUE.}
-             \item{SCD.DiagLine.lwd}{= 1.25, line weight of sloped line, default, grid line color.  
-                SCD.DiagLine must be TRUE.}
-             \item{SCD.DiagLine.lty}{= "solid", line type of sloped line, default, grid line color.  
-                SCD.DiagLine must be TRUE.}
+             \item{SCD.DiagLine.col}{= colGrid, color of sloped line, default, 
+             grid line color. SCD.DiagLine must be TRUE.}
+             \item{SCD.DiagLine.lwd}{= 1.25, line weight of sloped line, default, 
+             grid line color. SCD.DiagLine must be TRUE.}
+             \item{SCD.DiagLine.lty}{= "solid", line type of sloped line, default, 
+             grid line color. SCD.DiagLine must be TRUE.}
             }
+            
            }
            \item{\bold{Segmented Stacked Bar Glyphs:}}{
            
@@ -375,21 +410,25 @@ safe to be modified by the user.
                \item{CSNBar.Last.barht}{= 0.80, height of last bar when variable 
                 height bars are used. Must be greater than CSNBar.First.barht and in the 
                 range of 0.6667 to 0.90. CSNBar.varht or CBar.varht must be TRUE for 
-                this option of function.}\cr          
+                this option of function.}
+                
                \item{CSNBar.Outline.col}{= "black", color of stacked bar outlines.}
                \item{CSNBar.Outline.lwd}{= 0.75, line weight for bar segment outline in 
                 segmented bar plots.}
                \item{CSNBar.Outline.lty}{= "solid", line type for bar segment outline 
                 in segmented bar plots.}
               }
+              
              }
              \item{\bold{Centered Stacked Bar Glyph:}}{
               The following variables are only used by the \option{ctrbar} glyph.
               \describe{
                \item{CBar.varht}{= FALSE,  enables variable height bars.}
-               \item{CBar.two.ended}{= FALSE, request two ended variable height bars be used }\cr          
+               \item{CBar.two.ended}{= FALSE, request two ended variable height bars be used }
+               
                \item{CBar.Center.Line.enable}{= FALSE, request a line is drawn at center point.}
-               \item{CBar.Center.value}{= 0, value of the center stacked bar glyph. def=0}\cr
+               \item{CBar.Center.value}{= 0, value of the center stacked bar glyph. def=0}
+               
                \item{CBar.Zero.Line.col}{= "white", centered bar zero vertical line color}
                \item{CBar.Zero.Line.lwd}{= 1, line width for centered bar zero vertical line}
                \item{CBar.Zero.Line.lty}{= "dotted", type of centered bar zero line.}
@@ -400,11 +439,12 @@ safe to be modified by the user.
               glyphs:
               \describe{
                \item{SNBar.varht}{= FALSE, enables variable height bars from 
-                SBar.First.barht to \cr SBar.Last.barht.}
+                SBar.First.barht to SBar.Last.barht.}
                \item{SNBar.two.ended}{= FALSE, request two ended variable height 
                 bars be used (small to large to small).( Not implemented )}           
                \item{SNBar.Middle.Dot}{=FALSE, request a dot be draw in at the 
                 mid point in the segmented bars.}
+                
                \item{SNBar.MDot.pch}{=21, type of point/symbol used as the mid 
                  point dot. SNBar.Middle.Dot must be TRUE for this parameter 
                  to function.}
@@ -412,15 +452,17 @@ safe to be modified by the user.
                  used as the mid point dot. SNBar.Middle.Dot must be TRUE for 
                  this parameter to function.}
                \item{SNBar.MDot.pch.size}{=0.3, size of point/symbol used 
-                 as the mid point dot. \cr SNBar.Middle.Dot must be TRUE for this 
-                 parameter to function.}\cr             
+                 as the mid point dot.  SNBar.Middle.Dot must be TRUE for this 
+                 parameter to function.}   
+                 
                \item{SNBar.MDot.pch.border.lwd}{=NA, line width of outline of 
-                 point/symbol used as the mid point dot. \cr
+                 point/symbol used as the mid point dot. 
                  SNBar.Middle.Dot must be TRUE for this parameter to function.}
                \item{SNBar.MDot.pch.border.col}{=NA, color of outline of 
                  point/symbol used as the mid point dot. SNBar.Middle.Dot 
                  must be TRUE for this parameter to function.}
               }
+              
              }
             }
            }
@@ -433,6 +475,7 @@ safe to be modified by the user.
              \item{TS.hGrid}{= FALSE, whether or not to include horizontal 
               grid lines in panel}
             }
+            
            }
           }
          } 
@@ -443,29 +486,35 @@ safe to be modified by the user.
           gentle changes and experimentation, you can modify the look of 
           the resulting micromapST output.  While not recommended, the authors 
           felt access to these internal variable will help a user in some 
-          unexpected situations. \cr
+          unexpected situations. 
+          
           These variables should not be modified unless absolutely necessary.  
           IF there area modified, the outcome can not be predicted and can't 
           be supported.  Modify at your own risk:
           \describe{
            \item{\bold{Page and Panel Layout:}}{
             \describe{
-             \item{topMar}{= 1.2, top margin in inches}\cr
+             \item{topMar}{= 1.2, top margin in inches}
+             
              \item{botMar}{= 0.5, bottom margin in inches}
              \item{botMarLegend}{= 0.75, bottom margin for legend }
-             \item{botMardif}{= 0.2,  bottom margin difference}\cr
+             \item{botMardif}{= 0.2,  bottom margin difference}
+             
              \item{leftMar}{= 0.0, left margin in inches}
              \item{leftMarAxis}{= 0.2, left margin when Y axis labels and title are required}
-             \item{rightMar}{= 0.0, right margin in inches}\cr            
+             \item{rightMar}{= 0.0, right margin in inches}
+             
              \item{borderSize}{= 0.5 inches. The border space between the page 
               edges and the margins. This value is used for the top, bottom, 
               left and right border spacing.}
             }
+            
            }
            \item{\bold{Margins and Axis Layout:}}{
             \describe{
              \item{mgpLeft}{= c(0.75, 0.1, 0), Left Y axis margin line for axis labels and axis line.}
             }
+            
            }
            \item{\bold{Scaling, Separation, and Padding:}}{
             \describe{
@@ -473,6 +522,7 @@ safe to be modified by the user.
              \item{padex}{= 0.34 inches, total panel padding (i.e., 0.17 at top and bottom of panel)}
              \item{padMinus}{= 0.63 inches, spacing to keep reference line off panel edge}
             }
+            
            }
            \item{\bold{Row and Column Parameters:}}{
             \describe{
@@ -480,15 +530,19 @@ safe to be modified by the user.
                around the median panel. There are 7 units per panel. The average 
                unit is between 1/10 and 1/8 inches.}
              \item{rowSizeMn}{= 0.5 inches. Minimum panel group height.}
-             \item{rowSizeMx}{= 1.25 inches. Maximum panel group height.}\cr       
+             \item{rowSizeMx}{= 1.25 inches. Maximum panel group height.}
+             
              \item{rowSizeMin}{= 1.65 units. Minor panel group height in units 
               for single area panel.}
              \item{rowsizeMaj}{= 7 units. Major panel group height for all panels, 
-              except single area panel.}\cr
-             \item{colSepGap}{= 0.75 inches.  Glyphics column separator space.}\cr 
+              except single area panel.}
+              
+             \item{colSepGap}{= 0.75 inches.  Glyphics column separator space.}
+             
              \item{colSizeMin}{= 0.75 inches. Minimum Glyph column size.}
              \item{colSizeMax}{= 2.0 inches.  Maximum Glyph column size.}
             }
+            
            }
            \item{\bold{Title Variables:}}{
             \describe{
@@ -508,6 +562,7 @@ safe to be modified by the user.
               of panel), used with lab4}
              \item{Title.cex}{= 1.0, text size of title, used with title}
             }
+            
            }
            \item{\bold{Debug Variable:}}{
             The following variable is reserved for package testing only and 
@@ -515,20 +570,23 @@ safe to be modified by the user.
             \describe{
              \item{MST.Debug}{= 0, disabled.  Do not use.}
             }
+            
            }
           }
          } 
          \item{Unused Variables:}{
           The following variables are not implemented and reserved for future use.
           \describe{
-           \item{(small to large to small).}{( Not implemented )}\cr         
+           \item{(small to large to small).}{( Not implemented )}
+           
            \item{rcRatioMin}{= 0.25, minimum row size to col size ratio permited. (not implemented)}
            \item{rcRatioMax}{= 2, maximum row size to col size ratio permited. (not implemented)}
            \item{mgpTop}{= c(3.2,0.1,0), Top margin line for X axis labels and axis line.}
            \item{mgpBottom}{= c(3.2,0.1,0), Bottom margin line for X axis labels and axis line.}
            \item{padjBottom}{= -0.35, Axis tick label placement adjustment}
            \item{sc}{= 1.08, x axis scale expansion factor.  Applied to the data range to 
-            calculate the graph\'s range.}\cr           
+            calculate the graph\'s range.}
+            
            \item{XAxis.staggered}{= TRUE,  enable staggered label feature - NOT USED}
            \item{XAxis.L.mcex}{= 0.888889 - actually 0.6667  Size used for large XAxis labels}
            \item{XAxis.M.mcex}{= 0.777778 - actually 0.5833  Size used for medium XAxis labels}
@@ -538,28 +596,36 @@ safe to be modified by the user.
            \item{YAxis.cex}{= 0.33332 cex size of Y Axis labels}
            \item{YAxis.offset}{= 0.0 lines. Offset of Y Axis labels from panel edge.}
            \item{YAxis.nGridpIn}{= 5 labels. Number of labels per inche for Y Axis - initial goal.}
-           \item{YAxis.staggered}{= TRUE.  Enable staggered labels on Y Axis - NOT USED.}/cr
-           \item{Ref.Text.cex}{= 0.75, size of reference line text}\cr         
+           \item{YAxis.staggered}{= TRUE.  Enable staggered labels on Y Axis - NOT USED.}
+           
+           \item{Ref.Text.cex}{= 0.75, size of reference line text}
+           
            \item{Arrow.Shadow.lwd}{= 4.0, line width of arrow shadow to create outline ( not implemented )}
-           \item{Arrow.Shadow.col}{= "black", arrow shadow color ( not implemented )}\cr
+           \item{Arrow.Shadow.col}{= "black", arrow shadow color ( not implemented )}
+           
            \item{BoxP.Outlier.pch}{= 20, symbol for outlier - 19-25.}
            \item{BoxP.Outline.col}{= "#262626FF", boxplot outline color}
            \item{BoxP.Median.Dot.pch}{= 19,  solid circle symbol.}
            \item{BoxP.Median.Dot.col}{= "white", color of median dot.}
-           \item{BoxP.Median.Dot.cex}{= 0.95, size of circles.}\cr         
+           \item{BoxP.Median.Dot.cex}{= 0.95, size of circles.}
+           
            \item{Dot.Conf.size}{= 0.55, size of confidence interval}
-           \item{Dot.SE.size}{= 0.55, size of confidence interval}\cr          
+           \item{Dot.SE.size}{= 0.55, size of confidence interval}
+           
            \item{Id.Dot.Outline.col}{= "dark gray", color of outlines of ID symbols}
-           \item{Id.Dot.Outline.lwd}{= 0.8, line weight for outlines of ID symbols}\cr          
+           \item{Id.Dot.Outline.lwd}{= 0.8, line weight for outlines of ID symbols}
+           
            \item{Map.Bg.Line.lty}{= "solid",  line type for map background boundaries}
            \item{Map.Fg.Line.lty}{= "solid", line type for map foreground boundaries}
            \item{Map.L2.Line.lty}{= "solid", line type for Layer 2 boundaries}
            \item{Map.L3.Line.lty}{= "solid", line type for Layer 3 (national) boundaries}
            \item{Map.Panel.col}{= "white",  background color of map panels}
-           \item{Map.Unu.col}{= "lightest grey",  color of sub-areas not referenced in maps}\cr  
+           \item{Map.Unu.col}{= "lightest grey",  color of sub-areas not referenced in maps}
+           
            \item{staggered}{= FALSE.  Position of last staggered label.  FALSE = low, TRUE = high.}
            \item{Text.cex}{= 0.75 cex, general text size}		
           }
+          
          }
         }
        }

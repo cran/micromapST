@@ -130,7 +130,7 @@
   of the 6 data.frames and thier variables that make up a border group dataset. 
   
   \describe{
-    \item{areaParms data.frame}{ The \option{areaParms} data.frame
+    \item{areaParms}{ The \option{areaParms} data.frame
       contains specific information about and in support of its
       border group. It provides column headers for the map and id
       glyphics and controls several features that related to handling a 
@@ -170,10 +170,10 @@
 	  when needed to other border groups if the "Alias" column in the name
 	  table is filled in with unique strings.
          }
-        \item{aP_Regions}{ - logical variable. If \var{TRUE}, the package contains a valid 
-          \var{RegVisBorders} data.frame and the name table 
-          (\var{areaNamesAbbrsIDs}) contains the \var{regID} (or name) of a 
-          region boundary associated with the area. If the caller set the 
+        \item{aP_Regions}{ - logical variable. If \var{TRUE}, the package contains 
+          a valid \var{RegVisBorders} data.frame and the name table 
+          (\var{areaNamesAbbrsIDs}) contains the \var{regID} 
+          (or name) of a region boundary associated with the area. If the caller set the 
           \option{regions} call parameter to \var{TRUE}, the package will 
           only draw areas in regions and the region boundaries if the region
           contains areas with data. For examples: this allows you to
@@ -182,12 +182,12 @@
 	  available to all border groups, but is currently only used by the 
 	  USStatesBG, USSeerBG, UKIrelandBG and ChinaBG border groups. If set 
 	  to \var{FALSE}, the regions feature is disabled and all regional 
-	  information ignored.\cr
-	  The \var{RegVisBorders} should still exist, but should be set to 
-	  equal the \var{L3VisBorders} data.frame. The \option{regions} 
-	  call parameter will be ignored. As an example: In the USStatesBG 
-	  and USSeerBG border groups, the regions are set up using the 
-	  4 U. S. census regions of: West, South, Midwest, and NorthEast. 
+	  information ignored.
+	  
+	  The \var{RegVisBorders} should still exist, but should be set to equal the \var{L3VisBorders} 
+	  data.frame. The \option{regions} call parameter will be ignored. As an example: 
+	  In the 'USStatesBG' and 'USSeerBG' border groups, the regions are set up using the 
+	  four U. S. census regions of: West, South, Midwest, and NorthEast. 
 	  If only data for states in the NorthEast are passed to micromapST,
 	  only the NorthEast region and its states will be mapped when 
 	  \option{regions} is set to \var{TRUE}.  If \option{regions} is set 
@@ -267,7 +267,7 @@
          }
        }
      }
-    \item{areaNamesAbbrsIDs data.frame}{The \var{areaNamesAbbrsIDs}
+    \item{areaNamesAbbrsIDs}{The \var{areaNamesAbbrsIDs}
       data.frame provides the linkages between the fullname, abbreviation, 
       and numerical identifier to link the \var{statsDFrame} data to the 
       boundaries for the county areas. It is also used to validate the 

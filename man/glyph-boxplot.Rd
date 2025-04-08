@@ -1,5 +1,5 @@
-\name{glyph-Boxplot}
-\alias{BOXPLOT}
+\name{glyph-boxplot}
+\alias{boxplot}
 \alias{glyph-boxplot}
 \title{The boxplot glyph creates a graphic of a scatter dot plot of x and y coordinate points.}
 \description{
@@ -19,6 +19,11 @@ data.frame used to describe the requested linked micromap.
   the \var{panelDesc} data.frame. 
   
   For the boxplot glyph, doesnot use the col1, col2, col3, refval or reftxt rows of the \var{panelDesc} data.frame.   
+  
+  The following is an example of a section of a boxplot glyph column in a linked micromap:
+  
+  \if{html}{\figure{ExamBoxplot.png}{options: width=200}}
+  \if{latex}{\figure{ExamBoxplot.png}{options: width=200px}}
   
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.

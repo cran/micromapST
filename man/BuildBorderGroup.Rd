@@ -13,13 +13,15 @@
  a name table that provide the the "Name", "Abbr", and "ID" location names for 
  each area in the boundary group.  The Name Table also assists in providing
  the L2 and Regional features. The border groups were originally created 
- manually, one by one. \cr
+ manually, one by one. 
+ 
  The \var{BuildBorderGroup} function is a compilation 
  of the learning from building past border groups. The function 
  tries to provide a common foundation to address many of the unique 
  situations discovered building the border groups manually. However, there
  are still some situations that required the builder's intervention in 
- order to produce a usable map for linked micromaps. \cr
+ order to produce a usable map for linked micromaps. 
+ 
  The \var{BuildBorderGroup} function accepts a shape file (ESRI format)
  and a user built name table.  The name table provides the location ids 
  (name, abbreviation or id) to allow the micromapST user ways to specify 
@@ -27,7 +29,8 @@
  The forms used by the \var{BuildBorderGroup} and \var{micromapST} functions 
  are "Name", "Abbr" (abbreviation), and the numerical "ID" identifiers
  that have been assigned and accepted over time for the area as the 
- primary location identifiers. \cr
+ primary location identifiers. 
+ 
  In two special cases \var{micromapST} has been extended to support an 
  "Alt_Abbr" and an "Alias" form of the location identifiers.  The "Alt_abbr"
  form was added to handle geographic area that have two sets of commonly 
@@ -53,7 +56,8 @@
  the area. These modifiers were used to scale Alaska to 35% of 
  it's normal size and move it to below California to reduce the size 
  of the total map.  Hawaii was also moved below the U. S. to reduce 
- the total size of the map. \cr  
+ the total size of the map. 
+ 
  The name table also allows the builder to assocate areas with regions 
  in their map and Level 2 border outlining. Check the \var{micromapST} 
  documentation on how the Level 2 and Region boundaries are to be used.  
@@ -62,7 +66,8 @@
  of polygons from the shapefile.  The Name Table also provide multiple 
  location ids to allow the user to provide the full formal name ("Name"), 
  one of two abbreviates (if available), or the numerical ID 
- assigned to each area.\cr
+ assigned to each area.
+ 
  When the processing is completed, the user has a border group .RDA file 
  ready for use with \var{micromapST} with boundaries usable in the 
  small maps in linked micromaps and the name table documentation for 
@@ -76,11 +81,203 @@
  group: may different spatial areas by using different border groups.
  
  In Version 3.0.0 of the \var{BuildBorderGroup} function, the function was 
- upgraded to retire and package functions from the rgdal, rgeos and 
- maptools packages as of October 16th, 2023.  The spatial functions are 
- not done by the "sf" package.
+ upgraded to calls to functions in the retired R packages (rgdal, rgeos and 
+ maptools) as of October 16th, 2023.  The spatial functions are 
+ now done by the "sf" package.
+ }
  
- The following describes the process of conconstructing a border group dataset:
+\usage{BuildBorderGroup(
+ 		ShapeFile         = NULL,   # required	       
+                ShapeFileDir      = NULL,   # defaults to NameTableDir
+                # required if not the default value of "link"
+                ShapeLinkName     = NULL,   
+                NameTableFile     = NULL,   # required
+                NameTableDir      = NULL,   # required
+                # required if not the default value of "link"   
+                NameTableLink     = NULL,       
+                BorderGroupName   = NULL,   # required
+                # defaults to NameTableDir	
+                BorderGroupDir    = NULL,  	
+                MapHdr            = NULL,   # optional		
+                MapMinH           = NULL,   # optional           
+                MapMaxH           = NULL,   # optional      
+                # required, default is the BorderGroupName and "Areas"
+                IDHdr             = NULL,  		
+                LabelCex          = NULL,   # optional      
+                # optional, but highly recommended 
+                ReducePC          = 1.25,   # percent value	
+                proj4             = NULL,   # optional		
+                checkPointReStart = NULL,   # optional
+                debug             = 0	     # debug only	
+            ) 
+  }   
+\arguments{
+  \item{ShapeFile}{a character string of the name of the ERSI formated 
+    shape file.  Only the main part of the shape file name should be 
+    provided.  The .shp, .shx, .dbf extensions should be omitted.
+   }
+  \item{ShapeFileDir}{a character string defining the path to the folder
+    containing the ERSI shape file. If the ShapeFileDir parameter is not 
+    provided or empty, the Name Table Directory will be used.
+   }  
+  \item{ShapeLinkName}{a character string defining the name of the 
+    variable within the shape file @data slot to use to match the 
+    polygons in the shape file with the area's row in the Name Table.  
+    The default value is "__Link". 
+   }
+  \item{NameTableDir}{a character string defining the path to the folder 
+    containing the Name Table File. There is no default value for this 
+    parameter.
+   }
+  \item{NameTableFile}{a character string defining the name of the 
+    excel spreadsheet file or a .csv file containing the user built 
+    Name Table columns and information.
+   }
+  \item{NameTableLink}{a character string defining the Name Table 
+    column name that should be used to match the \var{ShapeFileLink} 
+    variable to link the Name Table to the area's collection of 
+    polygons. The default value is "link".
+   }
+  \item{BorderGroupName}{a character string to use as the border group's 
+    name and dataset name.  If the string ends with a "BG", it will be 
+    striped and re-added when the border group is built. If the string 
+    does not end with "BG", "BG" will be added to designate the file is
+    a border group.
+   }
+  \item{BorderGroupDir}{a character string defining the path to the 
+    folder where the border group dataset will be written at the end of 
+    the processing.  If this parameter is not provided or "NA", the 
+    \var{NameTableDir} parameter will be used as the 
+    \var{BorderGroupDir} parameter.  If the \var{BorderGroupDir} path does not
+    exist, the \var{BuildBorderGroup} function will create the directory.
+    }
+  \item{MapHdr}{is a two element character vector used to modify the 
+    pre-defined map header labels in \var{micromapST} for map type glyphs. 
+    The value is entered as \cr \code{MapHdr = c("1stHdr", "2ndHdr")}. 
+    Check the \var{micromapST} documentation for more details.
+    The first element (MapHdr[1]) is not implemented and is reserved for 
+    a future release.  The MapHdr[2] element is used to generated the 
+    map headers for all of the map glyph tyeps.  It should
+    specify the type of area being mapped.  For example for the US States
+    map, it was set to "States". The default value is 
+    MapHdr=c(<border group name>,"Areas").
+    This call parameter is not required.
+   }
+  \item{MapMinH}{is a numerical variable specifying the minimum height 
+    the maps should be in the group/rows in a linked micromap graphic.  
+    The default value is 0.5.
+   }
+  \item{MapMaxH}{is a numerical variable specifying the maximum height 
+    the maps should be in the group/rows in a linked micromap graphic.  
+    The default value is 1.75. 
+   }
+  \item{IDHdr}{is a two element character vector used to modify the id 
+    glyph headers in \var{micromapST}. The two values are entered as 
+    \code{IDHdr=c("1stHdr","2ndHdr")}. The defaults for this parameter 
+    are \var{""} and \var{"States}.  See \var{micromapST} documentation 
+    for more details.
+   }
+  \item{LabelCex}{a numerical value indicating the cex multiplier to 
+    use when drawing the Map Labels (MapL) on the first map in a linked 
+    micromap graphic.  The default value is 0.4 to match the micromapST maps.
+   }
+  \item{ReducePC}{a numerical value between .01 and 100 %.   100% is used to 
+    tell the package to not reduce the number vertex in the shapefile. This is 
+    change from earlier releases where 0 to 1 could be used to represent 0 to 100%.
+    With the use of smaller keep values, the scale of the parameter can't be 
+    determined. Reduced percentage below 1 are common.  Therefore, 0.65 is not
+    65 % but a 0.65 % keep value.  It represents the presentage of vertex 
+    that be remaining in the shape file after simplification by rmapshaper. 
+    The default value is 1.25 %.  In many cases the minimizing can be reduced 
+    to even 0.65% or more. Finding the best value may require multiple runs of 
+    BuildBorderGroup to determine how this factor attects your boundary 
+    data. \cr
+    The default setting for this variable is meant to handle large complex 
+    shapefiles.  If the shapefile is already reduced and simplified, then it
+    may start to look fractured and may have lines across the map.  In this 
+    case, it is suggested the value for \var{ReducePC} be raised to keep more
+    and more of the original shapefile data. A value as high as 50 % may provide 
+    a better map for the link micromap.
+   }
+  \item{proj4}{is a character string representing a projection using the 
+    Proj4 notation. The transformation to this projection is done as the 
+    last step in the processing of the shape file before converting the 
+    boundary data into the micromapST boundary data.frame. \option{proj4} 
+    is provided, the projection in the original shape file is used.
+    If the projection in the original shape file is missing or Long/Lat, 
+    then the function will create an Albers Equal Area protection centered
+    on the centroid of the map's area.
+   }
+  \item{checkPointReStart}{The \var{BuildBorderGroup} function allows for 
+    the builder to manually adjust the shape file, just before building the 
+    \var{micromapST} boundary data.frame. During the normal process, the 
+    function writes check point images of the shape file, areaParms 
+    data.frame, and the Name Table data.frame to the "CheckPoint" folder 
+    in the \option{NameTableDir} folder. The builder can inspect and 
+    modify any of the tables and the shape file, but must be very 
+    careful with what and how they are modified.  When done, the builder 
+    can re-issue the \var{BuildBorderGroup} function call with the
+    \option{checkPointReStart} parameter set to \var{TRUE}.  
+    The function will bypass all of the processing up to the check point,
+    then read in the check point files and continue building the border 
+    group. This will frequently be required when the map region contains
+    many small area that will not be seen when shaped and simple scaling 
+    or shifting does not produce the desired arrangement of the areas.
+   }
+  \item{debug}{is a numerical value from 0 to 65536.  It is used by the 
+    developers to turn on specific actions or information displays to
+    aid in the debugging and troubleshooting this function.  The 
+    developers assigned a single actions to each bit in a 16 bit integer.
+    In this way, multiple actions can be requested without any posibility
+    of them interferring with each other.  For example: the value
+    of 512 (b'00000010 00000000') is assigned to plotting the border
+    group map at each of the 4 stages of processing the shapefile.  The 
+    four stages are: 1) RAW, just read; 2) after being process by rmapshaper;
+    3) after the polygons are manipulated as specified in the Name Table;
+    and finally 4) the boundaries after they are converted into the point
+    table format (VisBorders) for use by micromapST.  The output plots 
+    are saved as PDF files. All that is needed is to set debug=512.  
+    Another action the developers created is to save the plots created 
+    by the 512 action in PNG type files, not PDF. This can be done by 
+    setting debug = 512+128 = 640, in binary: b'00000010 00000000' OR 
+    b'00000000 10000000' = b'00000010 10000000'.  The integer values are 
+    much easier to work with then the long 0s and 1s binary represention 
+    of the bits. Default is 0. 
+    
+    The full table of assigned values used by \var{debug} call parameter are: 
+    \tabular{lll}{
+      bit #\tab	value\tab definition\cr
+      1\tab       1\tab  line by line debugging is being used and some code accomodates are required.\cr 
+      2\tab	  2\tab  Outputs variable data to trace the function processes\cr
+      3\tab       4\tab  Display Information related to projection processing\cr
+      4\tab       8\tab  Plot intermediate Shape file, SF and SPDF (not the same plots as generated by 256 or 512)\cr
+      5\tab       16\tab Display processing and variables related to the SF\cr
+      6\tab       32\tab Display processing and variables related to the Name Table\cr
+      7\tab       64\tab Display other internal variables during processing of the data\cr
+      8\tab       128\tab = 0 sets output file type for the 512 option to PDF (default)\cr
+       \tab          \tab = 1 sets output file type for the 512 option to PNG\cr
+      9\tab       254\tab Generate multiple plot graphics of the map using a small format similar to the image\cr
+       \tab          \tab   in the linked micromap with each plot with each plot having only 5 areas shaped.\cr
+       \tab          \tab   Number of images = Areas/5 + 1.\cr
+      10\tab      512\tab Generate a 4" x 4" plot of the area at key processing stage: RAW, After rmapshaping,\cr 
+        \tab         \tab   After Name Table modifications, and after transformation and the conversion \cr
+        \tab         \tab   to the micromapST VisBorder format (Final).\cr
+      11\tab      1024\tab Same as 512, but only generates 4" x 4" plots for the RAW and Final images.\cr
+      12\tab      2048\tab Display the final BorderGroup map for each layer on the screen: Areas, Level 2,\cr
+        \tab          \tab   Regions, Map Outline (level 3). Each is display in a separate window and \cr
+        \tab          \tab   must be manually closed.\cr
+      13\tab      4096\tab Future Use - not assigned.\cr
+      14\tab      8192\tab Write to disk a PDF file of multiple area boundary maps with 5 areas colored in each\cr
+        \tab          \tab   map as done for the 256 option.\cr
+      15\tab      16384\tab Future Use - not assigned.\cr
+      16\tab      32768\tab Future Use - not assigned.\cr
+     }
+    Using any of these debug options will greatly increase the size of the output generated by BuildBorderGroup
+    and should not be used unless requested by the package developer.
+   }
+ }
+ \details{
+ The following describes the process of constructing a border group dataset:
   \itemize{
    \item{1. Validate all of the calling parameters provided on the 
     function call and provide targeted error and warning messages.
@@ -205,230 +402,235 @@
  the counties of Kansas, Maryland, New York, Utah, the countries and provinces 
  of the U.K. and China, and the U. S. Seer Registries used by the 
  National Cancer Institute.  
- 
- The example in this section shows how to build the Kentucky County 
- border group using a simple name table and the U. S. Census Bureau 
- Kentucky county 2000 boundary data.
- 
-}
- 
- \usage{BuildBorderGroup(ShapeFile         = NULL,   # required	       
-                         ShapeFileDir      = NULL,   # defaults to NameTableDir
-                         # required if not the default value of "link"
-                         ShapeLinkName     = NULL,   
-                         NameTableFile     = NULL,   # required
-                         NameTableDir      = NULL,   # required
-                         # required if not the default value of "link"   
-                         NameTableLink     = NULL,       
-                         BorderGroupName   = NULL,   # required
-                         # defaults to NameTableDir	
-                         BorderGroupDir    = NULL,  	
-                         MapHdr            = NULL,   # optional		
-                         MapMinH           = NULL,   # optional           
-                         MapMaxH           = NULL,   # optional      
-                         # required, default is the BorderGroupName and "Areas"
-                         IDHdr             = NULL,  		
-                         LabelCex          = NULL,   # optional      
-                         # optional, but highly recommended 
-                         ReducePC          = 1.25,   # percent value	
-                         proj4             = NULL,   # optional		
-                         checkPointReStart = NULL,   # optional
-                         debug             = 0	     # debug only	
-                      ) 
- 			     
- }   
-\arguments{
-  \item{ShapeFile}{a character string of the name of the ERSI formated 
-    shape file.  Only the main part of the shape file name should be 
-    provided.  The .shp, .shx, .dbf extensions should be omitted.
-   }
-  \item{ShapeFileDir}{a character string defining the path to the folder
-    containing the ERSI shape file. If the ShapeFileDir parameter is not 
-    provided or empty, the Name Table Directory will be used.
-   }  
-  \item{ShapeLinkName}{a character string defining the name of the 
-    variable within the shape file @data slot to use to match the 
-    polygons in the shape file with the area's row in the Name Table.  
-    The default value is "__Link". 
-   }
-  \item{NameTableDir}{a character string defining the path to the folder 
-    containing the Name Table File. There is no default value for this 
-    parameter.
-   }
-  \item{NameTableFile}{a character string defining the name of the 
-    excel spreadsheet file or a .csv file containing the user built 
-    Name Table columns and information.
-   }
-  \item{NameTableLink}{a character string defining the Name Table 
-    column name that should be used to match the \var{ShapeFileLink} 
-    variable to link the Name Table to the area's collection of 
-    polygons. The default value is "link".
-   }
-  \item{BorderGroupName}{a character string to use as the border group's 
-    name and dataset name.  If the string ends with a "BG", it will be 
-    striped and re-added when the border group is built. If the string 
-    does not end with "BG", "BG" will be added to designate the file is
-    a border group.
-   }
-  \item{BorderGroupDir}{a character string defining the path to the 
-    folder where the border group dataset will be written at the end of 
-    the processing.  If this parameter is not provided or "NA", the 
-    \var{NameTableDir} parameter will be used as the 
-    \var{BorderGroupDir} parameter.  If the \var{BorderGroupDir} path does not
-    exist, the \var{BuildBorderGroup} function will create the directory.
-    }
-  \item{MapHdr}{is a two element character vector used to modify the 
-    pre-defined map header labels in \var{micromapST} for map type glyphs. 
-    The value is entered as \cr \code{MapHdr = c("1stHdr", "2ndHdr")}. 
-    Check the \var{micromapST} documentation for more details.
-    The first element (MapHdr[1]) is not implemented and is reserved for 
-    a future release.  The MapHdr[2] element is used to generated the 
-    map headers for all of the map glyph tyeps.  It should
-    specify the type of area being mapped.  For example for the US States
-    map, it was set to "States". The default value is 
-    MapHdr=c(<border group name>,"Areas").
-    This call parameter is not required.
-   }
-  \item{MapMinH}{is a numerical variable specifying the minimum height 
-    the maps should be in the group/rows in a linked micromap graphic.  
-    The default value is 0.5.
-   }
-  \item{MapMaxH}{is a numerical variable specifying the maximum height 
-    the maps should be in the group/rows in a linked micromap graphic.  
-    The default value is 1.75. 
-   }
-  \item{IDHdr}{is a two element character vector used to modify the id 
-    glyph headers in \var{micromapST}. The two values are entered as 
-    \code{IDHdr=c("1stHdr","2ndHdr")}. The defaults for this parameter 
-    are \var{""} and \var{"States}.  See \var{micromapST} documentation 
-    for more details.
-   }
-  \item{LabelCex}{a numerical value indicating the cex multiplier to 
-    use when drawing the Map Labels (MapL) on the first map in a linked 
-    micromap graphic.  The default value is 0.4 to match the micromapST maps.
-   }
-  \item{ReducePC}{a numerical value between .01 and 100 %.   100% is used to 
-    tell the package to not reduce the number vertex in the shapefile. This is 
-    change from earlier releases where 0 to 1 could be used to represent 0 to 100%.
-    With the use of smaller keep values, the scale of the parameter can't be 
-    determined. Reduced percentage below 1 are common.  Therefore, 0.65 is not
-    65 % but a 0.65 % keep value.  It represents the presentage of vertex 
-    that be remaining in the shape file after simplification by rmapshaper. 
-    The default value is 1.25 %.  In many cases the minimizing can be reduced 
-    to even 0.65% or more. Finding the best value may require multiple runs of 
-    BuildBorderGroup to determine how this factor attects your boundary 
-    data. 
-   }
-  \item{proj4}{is a character string representing a projection using the 
-    Proj4 notation. The transformation to this projection is done as the 
-    last step in the processing of the shape file before converting the 
-    boundary data into the micromapST boundary data.frame. \option{proj4} 
-    is provided, the projection in the original shape file is used.
-    If the projection in the original shape file is missing or Long/Lat, 
-    then the function will create an Albers Equal Area protection centered
-    on the centroid of the map's area.
-   }
-  \item{checkPointReStart}{The \var{BuildBorderGroup} function allows for 
-    the builder to manually adjust the shape file, just before building the 
-    \var{micromapST} boundary data.frame. During the normal process, the 
-    function writes check point images of the shape file, areaParms 
-    data.frame, and the Name Table data.frame to the "CheckPoint" folder 
-    in the \option{NameTableDir} folder. The builder can inspect and 
-    modify any of the tables and the shape file, but must be very 
-    careful with what and how they are modified.  When done, the builder 
-    can re-issue the \var{BuildBorderGroup} function call with the
-    \option{checkPointReStart} parameter set to \var{TRUE}.  
-    The function will bypass all of the processing up to the check point,
-    then read in the check point files and continue building the border 
-    group. This will frequently be required when the map region contains
-    many small area that will not be seen when shaped and simple scaling 
-    or shifting does not produce the desired arrangement of the areas.
-   }
-  \item{debug}{is a numerical value from 0 to 65536.  It is used by the 
-    developers to turn on specific actions or information displays to
-    aid in the debugging and troubleshooting this function.  The 
-    developers assigned a single actions to each bit in a 16 bit integer.
-    In this way, multiple actions can be requested without any posibility
-    of them interferring with each other.  For example: the value
-    of 512 (b'00000010 00000000') is assigned to plotting the border
-    group map at each of the 4 stages of processing the shapefile.  The 
-    four stages are: 1) RAW, just read; 2) after being process by rmapshaper;
-    3) after the polygons are manipulated as specified in the Name Table;
-    and finally 4) the boundaries after they are converted into the point
-    table format (VisBorders) for use by micromapST.  The output plots 
-    are saved as PDF files. All that is needed is to set debug=512.  
-    Another action the developers created is to save the plots created 
-    by the 512 action in PNG type files, not PDF. This can be done by 
-    setting debug = 512+128 = 640, in binary: b'00000010 00000000' OR 
-    b'00000000 10000000' = b'00000010 10000000'.  The integer values are 
-    much easier to work with then the long 0s and 1s binary represention 
-    of the bits. Default is 0. 
-    
-    The full table of assigned values is: 
-    \tabular{lll}{
-      bit #\tab	value\tab definition\cr
-      1\tab       1\tab  line by line debugging is being used and some code accomodates are required.\cr 
-      2\tab	  2\tab  Outputs variable data to trace the function processes\cr
-      3\tab       4\tab  Display Information related to projection processing\cr
-      4\tab       8\tab  Plot intermediate Shape file, SF and SPDF (not the same plots as generated by 256 or 512)\cr
-      5\tab       16\tab Display processing and variables related to the SF\cr
-      6\tab       32\tab Display processing and variables related to the Name Table\cr
-      7\tab       64\tab Display other internal variables during processing of the data\cr
-      8\tab       128\tab = 0 sets output file type for the 512 option to PDF (default)\cr
-       \tab          \tab = 1 sets output file type for the 512 option to PNG\cr
-      9\tab       254\tab Generate multiple plot graphics of the map using a small format similar to the image\cr
-       \tab          \tab   in the linked micromap with each plot with each plot having only 5 areas shaped.\cr
-       \tab          \tab   Number of images = Areas/5 + 1.\cr
-      10\tab      512\tab Generate a 4" x 4" plot of the area at key processing stage: RAW, After rmapshaping,\cr 
-        \tab         \tab   After Name Table modifications, and after transformation and the conversion \cr
-        \tab         \tab   to the micromapST VisBorder format (Final).\cr
-      11\tab      1024\tab Same as 512, but only generates 4" x 4" plots for the RAW and Final images.\cr
-      12\tab      2048\tab Display the final BorderGroup map for each layer on the screen: Areas, Level 2,\cr
-        \tab          \tab   Regions, Map Outline (level 3). Each is display in a separate window and \cr
-        \tab          \tab   must be manually closed.\cr
-      13\tab      4096\tab Future Use - not assigned.\cr
-      14\tab      8192\tab Write to disk a PDF file of multiple area boundary maps with 5 areas colored in each\cr
-        \tab          \tab   map as done for the 256 option.\cr
-      15\tab      16384\tab Future Use - not assigned.\cr
-      16\tab      32768\tab Future Use - not assigned.\cr
-     }
-    Using any of these debug options will greatly increase the size of the output generated by BuildBorderGroup
-    and should not be used unless requested by the package developer.
-   }
- }
- \details{
- The output of this function is a single R dataset containing 6 data.frames 
- and a text report for inclusion in documentation for the border group.
- The details on each of the 6 data.frames and their contents can be found in the 
- bordGrp section.
- 
- The default border group is \var{USStatesBG} to be compatible with older 
- R scripts using previous versions of the \var{micromapST} package.  
-  
- Each of the border groups contained in this package have detail descriptions of
- the specific geographic area they represent. See the "xxxxx"BG section for each 
- border group:
- 
-    \var{USStatesBG}
-    \var{USSeerBG}
-    \var{KansasBG}
-    \var{MarylandBG}
-    \var{NewYorkBG}
-    \var{UtahBG}
-    \var{UKIrelendBG}
-    \var{ChinaBG}
-    \var{SeoulSKoreaBG}
-    \var{AfricaBG}
-    
- }
 
+  The output of this function is a single R dataset containing 6 data.frames 
+  and a text report for inclusion in documentation for the border group.
+  The details on each of the 6 data.frames and their contents can be found in the 
+  bordGrp section.
+  
+  The default border group is \var{USStatesBG} to be compatible with older 
+  R scripts using previous versions of the \var{micromapST} package.  
+   
+  Each of the border groups contained in this package have detail descriptions of
+  the specific geographic area they represent. See the "xxxxx"BG section for each 
+  border group:
+  
+     \var{USStatesBG}
+     \var{USSeerBG}
+     \var{KansasBG}
+     \var{MarylandBG}
+     \var{NewYorkBG}
+     \var{UtahBG}
+     \var{UKIrelendBG}
+     \var{ChinaBG}
+     \var{SeoulSKoreaBG}
+     \var{AfricaBG}
+     
+ Refer to the "bordGrp" section of the manual for more details on the 
+ datasets and structure of the final border group dataset.  
+  
+ To help document the name table in the border group produced by 
+ the BuildBorderGroup function, the function prints a summary of the location IDs
+ for each area defined in the boundary data and the draft name table.
+ The row.names are the keys or abbreviations of the areas in the border group.
+ There are columns for the "Name", "Abbr", "ID", "Alt-Abbr", "Alias"
+ 
+\preformatted{ 
+PUBLICATION INFORMATION FOR NAME TABLE IN BORDER GROUP : 
+     USstBG   2025-04-07 11:59:16 
+
+   Abbr                 Name ID Alt_Abbr                Alias
+AL   AL              ALABAMA 01       AL              ALABAMA
+AK   AK               ALASKA 02       AK               ALASKA
+AZ   AZ              ARIZONA 04       AZ              ARIZONA
+AR   AR             ARKANSAS 05       AR             ARKANSAS
+CA   CA           CALIFORNIA 06       CA           CALIFORNIA
+CO   CO             COLORADO 08       CO             COLORADO
+CT   CT          CONNECTICUT 09       CT          CONNECTICUT
+DE   DE             DELAWARE 10       DE             DELAWARE
+DC   DC DISTRICT OF COLUMBIA 11       DC DISTRICT OF COLUMBIA
+FL   FL              FLORIDA 12       FL              FLORIDA
+GA   GA              GEORGIA 13       GA              GEORGIA
+HI   HI               HAWAII 15       HI               HAWAII
+ID   ID                IDAHO 16       ID                IDAHO
+IL   IL             ILLINOIS 17       IL             ILLINOIS
+IN   IN              INDIANA 18       IN              INDIANA
+IA   IA                 IOWA 19       IA                 IOWA
+KS   KS               KANSAS 20       KS               KANSAS
+KY   KY             KENTUCKY 21       KY             KENTUCKY
+LA   LA            LOUISIANA 22       LA            LOUISIANA
+ME   ME                MAINE 23       ME                MAINE
+MD   MD             MARYLAND 24       MD             MARYLAND
+MA   MA        MASSACHUSETTS 25       MA        MASSACHUSETTS
+MI   MI             MICHIGAN 26       MI             MICHIGAN
+MN   MN            MINNESOTA 27       MN            MINNESOTA
+MS   MS          MISSISSIPPI 28       MS          MISSISSIPPI
+MO   MO             MISSOURI 29       MO             MISSOURI
+MT   MT              MONTANA 30       MT              MONTANA
+NE   NE             NEBRASKA 31       NE             NEBRASKA
+NV   NV               NEVADA 32       NV               NEVADA
+NH   NH        NEW HAMPSHIRE 33       NH        NEW HAMPSHIRE
+NJ   NJ           NEW JERSEY 34       NJ           NEW JERSEY
+NM   NM           NEW MEXICO 35       NM           NEW MEXICO
+NY   NY             NEW YORK 36       NY             NEW YORK
+NC   NC       NORTH CAROLINA 37       NC       NORTH CAROLINA
+ND   ND         NORTH DAKOTA 38       ND         NORTH DAKOTA
+OH   OH                 OHIO 39       OH                 OHIO
+OK   OK             OKLAHOMA 40       OK             OKLAHOMA
+OR   OR               OREGON 41       OR               OREGON
+PA   PA         PENNSYLVANIA 42       PA         PENNSYLVANIA
+RI   RI         RHODE ISLAND 44       RI         RHODE ISLAND
+SC   SC       SOUTH CAROLINA 45       SC       SOUTH CAROLINA
+SD   SD         SOUTH DAKOTA 46       SD         SOUTH DAKOTA
+TN   TN            TENNESSEE 47       TN            TENNESSEE
+TX   TX                TEXAS 48       TX                TEXAS
+UT   UT                 UTAH 49       UT                 UTAH
+VT   VT              VERMONT 50       VT              VERMONT
+VA   VA             VIRGINIA 51       VA             VIRGINIA
+WA   WA           WASHINGTON 53       WA           WASHINGTON
+WV   WV        WEST VIRGINIA 54       WV        WEST VIRGINIA
+WI   WI            WISCONSIN 55       WI            WISCONSIN
+WY   WY              WYOMING 56       WY              WYOMING
+}
+If the border group contains Layer 2 boundary and/or regional
+boundary data the section of the name table contains the L2_ID, 
+L2_ID_Name, regID, and regName values if present.  Otherwise the following
+table is not printed.
+
+\preformatted{
+
+Name Table Layer 2 and Regional Values
+
+   L2_ID L2_ID_Name regID   regName
+AL     2      South     2     South
+AK     0   Offshore     0  Offshore
+AZ     4       West     4      West
+AR     2      South     2     South
+CA     4       West     4      West
+CO     4       West     4      West
+CT     1  Northeast     1 Northeast
+DE     2      South     2     South
+DC     2      South     2     South
+FL     2      South     2     South
+GA     2      South     2     South
+HI     0   Offshore     0  Offshore
+ID     4       West     4      West
+IL     3    Midwest     3   Midwest
+IN     3    Midwest     3   Midwest
+IA     3    Midwest     3   Midwest
+KS     3    Midwest     3   Midwest
+KY     2      South     2     South
+LA     2      South     2     South
+ME     1  Northeast     1 Northeast
+MD     2      South     2     South
+MA     1  Northeast     1 Northeast
+MI     3    Midwest     3   Midwest
+MN     3    Midwest     3   Midwest
+MS     2      South     2     South
+MO     3    Midwest     3   Midwest
+MT     4       West     4      West
+NE     3    Midwest     3   Midwest
+NV     4       West     4      West
+NH     1  Northeast     1 Northeast
+NJ     1  Northeast     1 Northeast
+NM     4       West     4      West
+NY     1  Northeast     1 Northeast
+NC     2      South     2     South
+ND     3    Midwest     3   Midwest
+OH     3    Midwest     3   Midwest
+OK     2      South     2     South
+OR     4       West     4      West
+PA     1  Northeast     1 Northeast
+RI     1  Northeast     1 Northeast
+SC     2      South     2     South
+SD     3    Midwest     3   Midwest
+TN     2      South     2     South
+TX     2      South     2     South
+UT     4       West     4      West
+VT     1  Northeast     1 Northeast
+VA     2      South     2     South
+WA     4       West     4      West
+WV     2      South     2     South
+WI     3    Midwest     3   Midwest
+WY     4       West     4      West
+}
+There is one row per area in the border group.
+
+If the name table contained any modifying information 
+(MapL, MapX, MapY, Xoffset, Yoffset, Scale, or Rotate), then one
+additional section of the name table is printed.
+
+\preformatted{
+
+Name Table Modifications and Map Label Values
+
+   Xoffset Yoffset Scale Rotate MapL     MapX         MapY
+AL   0.000    0.00    NA     NA <NA>       NA           NA
+AK  36.500  -36.00   0.3      0   AK -1505744 -1306750.302
+AZ   0.000    0.00    NA     NA <NA>       NA           NA
+AR   0.000    0.00    NA     NA <NA>       NA           NA
+CA   0.000    0.00    NA     NA <NA>       NA           NA
+CO   0.000    0.00    NA     NA <NA>       NA           NA
+CT  -0.075   -0.09   1.2      0 <NA>       NA           NA
+DE   0.000    0.00    NA     NA <NA>       NA           NA
+DC   3.750   -2.15   4.0      0   DC  2503328    -6425.072
+FL   0.000    0.00    NA     NA <NA>       NA           NA
+GA   0.000    0.00    NA     NA <NA>       NA           NA
+HI  52.000    6.00   1.0      0   HI  -139296 -1481684.362
+ID   0.000    0.00    NA     NA <NA>       NA           NA
+IL   0.000    0.00    NA     NA <NA>       NA           NA
+IN   0.000    0.00    NA     NA <NA>       NA           NA
+IA   0.000    0.00    NA     NA <NA>       NA           NA
+KS   0.000    0.00    NA     NA <NA>       NA           NA
+KY   0.000    0.00    NA     NA <NA>       NA           NA
+LA   0.000    0.00    NA     NA <NA>       NA           NA
+ME   0.000    0.00    NA     NA <NA>       NA           NA
+MD   0.000    0.00    NA     NA <NA>       NA           NA
+MA   0.000    0.00    NA     NA <NA>       NA           NA
+MI   0.000    0.00    NA     NA <NA>       NA           NA
+MN   0.000    0.00    NA     NA <NA>       NA           NA
+MS   0.000    0.00    NA     NA <NA>       NA           NA
+MO   0.000    0.00    NA     NA <NA>       NA           NA
+MT   0.000    0.00    NA     NA <NA>       NA           NA
+NE   0.000    0.00    NA     NA <NA>       NA           NA
+NV   0.000    0.00    NA     NA <NA>       NA           NA
+NH   0.000    0.00    NA     NA <NA>       NA           NA
+NJ   0.000    0.00    NA     NA <NA>       NA           NA
+NM   0.000    0.00    NA     NA <NA>       NA           NA
+NY   0.000    0.00    NA     NA <NA>       NA           NA
+NC   0.000    0.00    NA     NA <NA>       NA           NA
+ND   0.000    0.00    NA     NA <NA>       NA           NA
+OH   0.000    0.00    NA     NA <NA>       NA           NA
+OK   0.000    0.00    NA     NA <NA>       NA           NA
+OR   0.000    0.00    NA     NA <NA>       NA           NA
+PA   0.000    0.00    NA     NA <NA>       NA           NA
+RI   0.000   -0.09   1.4      0 <NA>       NA           NA
+SC   0.000    0.00    NA     NA <NA>       NA           NA
+SD   0.000    0.00    NA     NA <NA>       NA           NA
+TN   0.000    0.00    NA     NA <NA>       NA           NA
+TX   0.000    0.00    NA     NA <NA>       NA           NA
+UT   0.000    0.00    NA     NA <NA>       NA           NA
+VT   0.000    0.00    NA     NA <NA>       NA           NA
+VA   0.000    0.00    NA     NA <NA>       NA           NA
+WA   0.000    0.00    NA     NA <NA>       NA           NA
+WV   0.000    0.00    NA     NA <NA>       NA           NA
+WI   0.000    0.00    NA     NA <NA>       NA           NA
+WY   0.000    0.00    NA     NA <NA>       NA           NA
+ }
+The text is written to a file named after the border group name with 
+"_rpt.txt" appended.   For Example for the MarylandBG border group, the file
+written by the BuildBorderGroup functions is "MarylandBG_rpt.txt".
+
+These tables would be included in any documentation to pass along to 
+the users of the new border group.
+}
 \value{Path to the saved Border Group file.}
 \author{
 Jim Pearson, StatNet Consulting, LLC, Gaithersburg, MD 
 }
 \seealso{
   \link{micromapST},
-  \link{micromapSEER}
+  \link{micromapSEER},
 }
 \examples{
 
@@ -449,7 +651,7 @@ if (!dir.exists(TempD)) {
      TempD <- paste0(tempdir(),"/") 
      DataD <- paste0(system.file("extdata",package="micromapST"),"/")
 } else {
-     DataD <- "c:/projects/statnet/r code/micromapST-3.0.2/inst/extdata/"
+     DataD <- "c:/projects/statnet/r code/micromapST-3.1.1/inst/extdata/"
 }
 
 cat("Temporary Directory:",TempD,"\n")

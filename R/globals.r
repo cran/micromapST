@@ -2,6 +2,7 @@
 # Create key global variable before referenced - These variables are referencable by all subroutines and functions 
 # in this package.
 #
+Sys.setenv('_R_CHECK_SYSTEM_CLOCK_' = 0)
 
 utils::globalVariables(c( 
           # Call Parameters
@@ -53,7 +54,6 @@ utils::globalVariables(c(
                 
           # Call Parameters 
                 "ignoreNoMatch",      
-           
                 "bordGrp",            "bordDir",           "grpPattern",
           
           # Counter functions 
@@ -201,12 +201,14 @@ utils::globalVariables(c(
                 "MST.Debug",
                 
             # functions
-                "GetMColors",         "mchr",               "masc",               "NewCounter",
-                "PlotVis",            "Plotsf",             "is.between.r",       "is.between",
+                "GetMColors",         "mchr",               "masc",               
+                "NewCounter",
+                "Plotsf",             "is.between.r",       "is.between",
                 "errCntMsg",          "stopCntMsg",         "TS_Date",            
-                "ClnStr",             "ClnStr2",
+                "ClnStr",             "ClnStr2",	   
                 "ErrCntMsg"
-                
+              
+              # Possible Conflicts ===  "Plot_Vis",   "ClnStrName_MST",
            
                 ), add=TRUE)
 
@@ -388,6 +390,35 @@ ClnStr2 <- function(x) {
 
 ####
 #
+#  Clean up Names strings ("Name", "Abbr", "ID")  - remove 
+#    1) punctuation marks
+#    2) special single and double quotes (open and closed)
+#    3) tick mark
+#    4) control characters
+#    5) permit "-", "_" and single " ".
+#    6) Make upper case.
+#    7) remove multiple blanks.
+#
+#    Designed to allow strings that may have different times of quotes, apos. to be compared.
+#
+#  Exported for external use by users and testers.
+#
+
+ClnStrName_MST <- function(x) {
+    rc <- "[(([:punct:]||[:cntrl:]||[+$^|<>=~`])&&[^-_])]{1,}"
+    z <- stringr::str_replace_all(x,rc," ")
+    #z <- stringr::str_to_upper(z)
+    z <- stringr::str_squish(z)
+    z <- stringr::str_trim(z)
+    return(z)
+}
+#
+#  Removed to upper to help capatibility with test data.  4/5/25
+####
+
+
+####
+#
 # simpleCap - capitalize each word in a phrase and removes "."s, "_"s, and extra blanks.
 #     Not good on vectors - must apply
 #
@@ -517,9 +548,11 @@ GetMColors <- function() {
 
 #####
 #
-#   PlotVis ( VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.5)
+#   Plot_Vis ( VisB, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.5)
 #   Function to plot border data in VisBorder data structure format.  
 #   The color of the areas can be specified as a vector in VisCol.
+#
+#   Exported for external use by users and testers.
 #
 #     VisB  = VisBorder data .frame structure.
 #           se = sequence number
@@ -554,7 +587,7 @@ GetMColors <- function() {
 #
 #     xLwd   - line width for the map drawing.
 #
-PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
+Plot_Vis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
 
     # If VisCol is missing, set the VisCol to NULL.
     if (missing(VisCol) || is.null(VisCol) || length(VisCol) == 0) 
@@ -591,13 +624,12 @@ PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
 #
 #####
 
-
 #####
 #
 #   Plotsf (xsf, xCol ,xTitle=NULL, xAxes=FALSE, xLwd=0.5)
 #   Function plots an sf data structure.  
 #   The color of the areas can be specified.  This is the same
-#   type of function as the PlotVis function.  It corrects for 
+#   type of function as the Plot_Vis function.  It corrects for 
 #   the aspect ratio of the map and graphic plot space, and 
 #   draws the map from the spatial structure.
 #
@@ -614,6 +646,8 @@ PlotVis <- function(VisBrd, VisCol, xTitle=NULL, xAxes=FALSE, xLwd=0.05) {
 #    xAxes -  TRUE or FALSE - include an axis line and numbers (def=FALSE, don't)
 #
 #    xLwd - line width for the map drawing.
+#
+#   NOT USED - 4/2025
 #
 Plotsf <- function(xsf, xCol, xTitle=NULL, xAxes=FALSE, xLwd=0.5) {
 

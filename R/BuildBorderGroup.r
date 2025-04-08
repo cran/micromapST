@@ -1,7 +1,7 @@
 ######
 #####
 #
-#  date: November 19, 2024
+#  date: April 7, 2025
 #
 #  packages used by BuildBorderGroup function
 #
@@ -328,10 +328,10 @@
 #             - Add functions to draw the maps for the SPDF data format and 
 #               the VisBorder data format of the boundaries.
 #             - Added a new sample Plots function to draw the shape file (SPDF) 
-#               boundaries in the same manner as the PlotVis and a similar size 
+#               boundaries in the same manner as the Plot_Vis and a similar size 
 #               that would be used in micromapST and show how the color shaping 
 #               work appear.
-#             - Corrected the PlotVis and PlotSPDF map drawing functions to 
+#             - Corrected the Plot_Vis and PlotSPDF map drawing functions to 
 #               ensure the maps have the correct aspect regardless of the size of
 #               the ploting space.
 #             - Setup debug flag to output sample maps about 1.5 x 2" at each level
@@ -402,7 +402,7 @@
 #                              1 = set output file type for the 512 option to PNG
 #               Bit  9 = 256 - Generate a multiple plot graphic of the map in small format 
 #                              with each plot having only 5 areas shaped.  Number of images = Areas/5 + 1
-#               Bit 10 = 512 - Generate a 4" x 4" plot of the area at key states in the processing:
+#               Bit 10 = 512 - Generate a 4" x 4" plot of the border group at key areas in the processing:
 #                               RAW, After rmapshaping, After Name Table modifications, and 
 #                               after transformation and converstion to the micromapST VisBorder
 #                               format.
@@ -414,6 +414,7 @@
 #                              boundaries - one map per 5 colors as done for the 256 option.
 #               Bit 15 =16384 - Future
 #               Bit 16 =32768 - Future
+#
 #             - Changed the minimum map height to .5
 #             - Resolved issues with multipel globalVariables calls.
 #  2022-09-05 - Removed documentation on MapHdr call parameter.  Set default of Map.Hdr2 to "Areas".
@@ -730,6 +731,11 @@
 #               but caused problems and could not handle interior slivers or gaps
 #               between areas.  st_buffer helped for a while, but would not scale
 #               and did modify the L3 shape.
+#  2025-03-28 - Improved code to handle poorly build boundary shapefiles as much
+#               as possible.
+#             - Updated the location ID filters to only support alpha-numeric (upper
+#               and lower case) and the "-", "_" and blank symbols in names, abbr and
+#               alt-abbr field.
 #
 # 
 #  Operation Sequence:
@@ -800,7 +806,7 @@
 #  and NA,NA values for the final X, Y point in a polygon.
 #
 #  Author:  James Pearson, StatNet Consulting, Gaithersburg, MD 20877
-#  Updated  January 3, 2024
+#  Updated  March 28, 2025
 #
 #  Version:  1.1.0 (with package V2.0.2) updated nacol
 #
@@ -834,6 +840,13 @@
 #                  plots.
 #                  Updated documentation to only include one description of the border
 #                  group data.frames (data sets) in bordGrp chapter.
+#
+#  Version   3.1.0 Updated code to use sf functions instead of sp function since sp was 
+#                  being retired.   Also added LOWESS line building code to the Scatdot 
+#                  glyphic.
+#
+#  Version   3.1.1 Cleaned up minor problems and documentation for 2025 release to 
+#                  support new book on link micromaps.
 #                  
 #                  
 #
@@ -883,7 +896,7 @@
 #######
 #####
 #
-#  Main Code Call - Version 3.0.2 - 2024-01-03
+#  Main Code Call - Version 3.1.1 - 2024-03-28
 #
 
 BuildBorderGroup <- function(
@@ -1587,7 +1600,7 @@ BuildBorderGroup <- function(
       #print(res)
        
       # it should be a crs or it is invalid
-      #cat("I got to the last half.. convertPROJ4 code 1544 \n")
+      #cat("I got to the last half.. convertPROJ4 code 1590 \n")
       return(res)
       
      }  # end of convertPROJ4 function
@@ -1658,14 +1671,14 @@ BuildBorderGroup <- function(
         #  this function is not dependent on the shift and really does not want the shift
         #  to be in effect.   The first st_union and st_make_valid are also used to revert.
         #
-	#cat("Entered AEAProjection Function Code 1615 .\n")
+	#cat("Entered AEAProjection Function Code 1661 .\n")
 	wsfc <- sf::st_geometry(wsf)
         
         suppressMessages(
            FullMap <- sf::st_make_valid(sf::st_union(wsfc))     # now one area
         )
         # need because of trying st_centroid on LL
-        #cat("Find centroid of full map Code 1622 \n")
+        #cat("Find centroid of full map Code 1668 \n")
         suppressWarnings(
             FullMapCtr    <- sf::st_coordinates(sf::st_centroid(FullMap))
         )
@@ -1745,14 +1758,14 @@ BuildBorderGroup <- function(
       #   name table.
       # 
       #
-      #cat("BuildVisBorder Function - for ",TypeVis," file. Code 1702 \n")
+      #cat("BuildVisBorder Function - for ",TypeVis," file. Code 1748 \n")
       
       #
       # This function takes a geometry and converts it into a VisBorder structure and returns
       # the VisBorder image.
       #
       #print(wsf, n=60)
-      wsfG    <- sf::st_geometry(wsf)     # get rid of data.
+      wsfG    <- sf::st_geometry(wsf)     # get rid of data, keep geometry.
   
       # Build data.frame to return the VisBorders format.
       VisForm <- data.frame(x=numeric(0), y=numeric(0), 
@@ -1867,7 +1880,7 @@ BuildBorderGroup <- function(
       #                                               and any others not needed.
       #str(VisForm2)
       
-      #cat("Now to remove duplicates. code 1823 \n")
+      #cat("Now to remove duplicates. code 1870 \n")
       
       VisForm3        <- as.data.frame(RemoveDups(VisForm2, TypeVis))
       Lft             <- dim(VisForm3)[1]
@@ -2081,7 +2094,7 @@ BuildBorderGroup <- function(
    #
    dsatur <- function (x, coloring = NULL)   # D.Brelaz (1979) ACM
    {    #   x - adj matrix for the areas.
-       #cat("Enter Dsatur function Code 2038 \n")
+       #cat("Enter Dsatur function Code 2084 \n")
        adj_mat       <- x                 # get the adjaceny matrix
        #cat("dim of adj_mat:",dim(adj_mat),"\n")
        #cat("class of adj_mat:",class(adj_mat),"\n")
@@ -2106,7 +2119,7 @@ BuildBorderGroup <- function(
                    index_maximum_degree <- index_node
                }
            }
-           #cat("calling getNeighbors Code 2063 .\n")
+           #cat("calling getNeighbors Code 2109 .\n")
            neighbors = getNeighbors(adj_mat, index_maximum_degree)
            
            for (index_neighbor in neighbors) {
@@ -3962,7 +3975,7 @@ BuildBorderGroup <- function(
          } 
       }
          
-      #cat("proj4 results - proj4:",proj4,".  Code 3886 \n")
+      #cat("proj4 results - proj4:",proj4,".  Code 3965 \n")
         
       #  Note if +proj=longlat, there is no units... Only if not LONGLAT
       #  In wkt world its GEOGCRS, DATUM, ELLIPSOID, LENGTHUNIT["metre",1]d
@@ -4393,7 +4406,7 @@ BuildBorderGroup <- function(
       
       #  The SP, SPDF, and sf are in WorkSf01 is RAW no modifications as a sf structure.
       
-      #cat("End of section 3.2 - Code 4364 \n")
+      #cat("End of section 3.2 - Code 4396 \n")
       #####
       #######
       #########
@@ -4805,13 +4818,13 @@ BuildBorderGroup <- function(
       #
       #  Variable Setup
       #
-      #cat("Name Table Variable Setup - Code 4717 \n")
+      #cat("Name Table Variable Setup - Code 4808 \n")
       UserLinkCol <- c(NameTableLink)           # columns that must be present
       LinkCol   <- c("Link")
       OneCol    <- c("Abbr","Name","ID")        # columns that at least one must be present
       OptCol1   <- c("Alt_Abbr")                # extension to the OneCol list.
       OptCol3   <- c("Alias")
-      OptCol2   <- c("L2_ID","L2_ID_Name","regID","regName")  # optional columns to be added.  L2 and Regional Info.
+      OptCol2   <- c("L2_ID","L2_ID_Name","regID","regName")  # ?? optional columns to be added.  L2 and Regional Info.
       ManCol    <- c("Xoffset","Yoffset","Scale","Rotate")
       ManOCol   <- c("ModOrder")
       #ProjCol  <- c("Proj","Proj4")                    # optional columns used for adjustments.
@@ -4898,6 +4911,7 @@ BuildBorderGroup <- function(
          }  # End of existing path check
       }   
       # if NTPassed, NTable is already loaded with the passed data.frame
+      
       if (StopFlag) {
           xmsg <- paste0("***3999 Errors have been found and noted above. Execution stopped.\n",
                          "        Please fix problem(s) and retry.\n")
@@ -4905,7 +4919,7 @@ BuildBorderGroup <- function(
          
       }
       StopFlag = FALSE
-      #cat("End of Name Table Read - Code 4819 \n")
+      #cat("End of Name Table Read - Code 4908 \n")
      
       ##### 352x
       #
@@ -4925,14 +4939,14 @@ BuildBorderGroup <- function(
       NTNames     <- stringr::str_to_upper(NTNames)
       
       #  step 2 - match them against the AltColCaps list.
-      xm          <- match(NTNames,AltColCaps)
-      xmna        <- is.na(xm)  # no match
+      xm            <- match(NTNames,AltColCaps)
+      xmna          <- is.na(xm)  # no match
       #  step 3 - replace any matches in the original list.  (no match stay as is.)
-      NTNames     <- AltCol[xm]  # update enties that matched.
+      NTNames       <- AltCol[xm]  # update enties that matched.
       NTNames[xmna] <- NTNamesOrig[xmna]   # restore entires that did not match
       
       if (bitwAnd(debug,64) != 0) { 
-         cat("Updated Name Table column names: \n")  #  Code 4917 \n")
+         cat("Updated Name Table column names: \n")  #  Code 4935 \n")
          print(data.frame(o=NTNamesOrig, n=NTNames))   # if one is wrong it remains upper cast.
       }
       
@@ -4966,7 +4980,7 @@ BuildBorderGroup <- function(
       #  Part 5.3 is the Link column still in the table?  (required columns)
       #
       # check "link" column name (provided by user or default)
-      #cat("Part 5.3 - Code 4880 \n")
+      #cat("Part 5.3 - Code 4979 \n")
       
       NTable03    <- NTable
       
@@ -5020,7 +5034,7 @@ BuildBorderGroup <- function(
       #
       #  Part 5.5 - Remove any columns not in our acceptable list  (can delete the user named link - NOW!
       #
-      #cat("Part 5.5 - Code 4934 \n")
+      #cat("Part 5.5 - Code 5033 \n")
       
       xmM          <- TotCol %in% NTNames          # identify good columns
       KeepList     <- TotCol[xmM]
@@ -5041,8 +5055,9 @@ BuildBorderGroup <- function(
       #  Part 5.6  - Clean up the data in each column.  Included Link column
       #            Check for NA or "" Values
       #            Check for duplicate Values
+      #            Also Clean up string.
       #
-      #cat("Part 5.6 - Code 4956 \n")
+      #cat("Part 5.6 - Code 5055 \n")
       
       NoDupCol   <- c(LinkCol, OneCol, OptCol1, OptCol3)   # list of columns that cant have duplicate entries.
       NoDupList  <- NTNames[NTNames %in% NoDupCol]
@@ -5079,10 +5094,11 @@ BuildBorderGroup <- function(
       #
       #  Now work on cleaning up the contents of the columns and back fill 
       #  important columns 
+      #  Need to leave "=" as a valid character.
       # 
       xm0  <- any("Name" == NTNames)   # is the "Name" column present?
       if (xm0) {   # yes it is
-         NTable$Name <- stringr::str_replace_all(NTable$Name,"[[:punct:]]", "")   # remove punctuation from the Name field.
+           NTable$Name  <- stringr::str_to_upper( ClnStrName_MST(NTable$Name) )
       }
       # this must also be added to filter the row names on the user supplied data.frame
       ###### 357x
@@ -5091,6 +5107,19 @@ BuildBorderGroup <- function(
       #
       
       #cat("Part 5.7 - Name Table Backfill:  If Abbr is missing, can use Name, ID, Alt-Abbr or Alias VALUES.\n")
+      xm1 <- any("Abbr" == NTNames)
+      if (xm1) {   # yes it there
+         NTable$Abbr <- stringr::str_to_upper( ClnStrName_MST(NTable$Abbr) )
+      }
+      xm2 <- any("ID" == NTNames)
+      if (xm2) { # yes ID is there
+         NTable$ID  <- stringr::str_to_upper( ClnStrName_MST(NTable$ID) )
+      }
+      xm3 <- any("Alt_Abbr" == NTNames)
+      if (xm3) {   # yes, Alt-Abbr is there
+         NTable$Alt_Abbr <- stringr::str_to_upper( ClnStrName_MST(NTable$Alt_Abbr) )
+      }
+      # All loc id columns are now cleaned up.
       
       ######  355x & 357x
       #
@@ -5110,59 +5139,61 @@ BuildBorderGroup <- function(
          } else {         
             # the Alt_Abbr column is not present.
             xm1     <- any("Name" == NTNames)
-         	 if (xm1) {
+            if (xm1) {
                # Use Name for Abbr
                #cat("Used Name for Abbr.\n")
                NTable$Abbr <- NTable$Name
             } else {            
                # the Name column is not present.
-         	    xm1     <- any("ID" == NTNames)
-         	    if (xm1) {
+               xm1     <- any("ID" == NTNames)
+               if (xm1) {
                   # Use ID for Abbr	      
-         	       #cat("Used ID for Abbr.\n")
-         	       NTable$Abbr <- NTable$ID
-         	    } else {
+                  #cat("Used ID for Abbr.\n")
+                  NTable$Abbr <- NTable$ID
+               } else {
                   # ID field is not present
-         	       xm1    <- any("Link" == NTNames)
-         	       if (xm1) {
+                  xm1    <- any("Link" == NTNames)
+                  if (xm1) {
                      # Use Link for Addr
-         	          #cat("Used Link for Abbr.\n")
-         	          NTable$Abbr <- NTable$Link  # $Link may not be Shape$Link
-         	       } else {
+                     #cat("Used Link for Abbr.\n")
+                     NTable$Abbr <- NTable$Link  # $Link may not be Shape$Link
+                     NTable$Abbr <- stringr::str_to_upper( ClnStrName_MST(NTable$Abbr) )
+                  } else {
                      # Link field is not present 	     
-         	          xm1    <- any("Alias" == NTNames)
-         	          if (xm1) {
-         	             # use the Alias as the Abbr
-         	             #cat("Used Alias for Abbr.\n")
-         	             NTable$Abbr <- NTable$Alias
-         	          } else { 
-         	             # the Alias column is not present. 
-         	             # Nothing left to backfill with.
-         	             # This can not happen.  STOP
-         	             xmsg <- paste0("***3576 None of the columns needed are present. The Link and\n",
-         	                            "        one of the Name, Abbr, and ID column should have been there.\n",
-         	                            "        This should never happen with the previous checks.\n")
-         	             stop(xmsg,call.=FALSE)
-         	          }
-         	       }
-         	    }
+                     xm1    <- any("Alias" == NTNames)
+                     if (xm1) {
+                        # use the Alias as the Abbr
+                        #cat("Used Alias for Abbr.\n")
+                        NTable$Abbr <- NTable$Alias
+                     } else { 
+                        # the Alias column is not present. 
+                        # Nothing left to backfill with.
+                        # This can not happen.  STOP
+                        xmsg <- paste0("***3576 None of the columns needed are present. The Link and\n",
+                                       "        one of the Name, Abbr, and ID column should have been there.\n",
+                                       "        This should never happen with the previous checks.\n")
+                        stop(xmsg,call.=FALSE)
+                     }
+                  }
+               }
             }
          }
       } else {
-        # Abbr field is present - no backfill needed.
-        if (bitwAnd(debug,32) != 0) 
-           cat("***3573 The Name Table Abbr field is persent-no backfill required.\n")
-      } 
-      #   Add check for length of abbreviation
+         # Abbr field is present - no backfill needed.
+         if (bitwAnd(debug,32) != 0) { 
+            cat("***3573 The Name Table Abbr field is persent-no backfill required.\n")
+         } 
+         #   Add check for length of abbreviation
       
-      xAbbrMax <- max(nchar(NTable$Abbr,keepNA=TRUE))   # get maximum length of Abbr values
-      if (xAbbrMax > 6) {
-         xmsg <- paste0("***3574 Some of the Name Table Abbr values are longer than\n",
+         xAbbrMax <- max(nchar(NTable$Abbr,keepNA=TRUE))   # get maximum length of Abbr values
+         if (xAbbrMax > 6) {
+            xmsg <- paste0("***3574 Some of the Name Table Abbr values are longer than\n",
                         "        6 characters. It is recommended the Abbr values be keep short.\n")
-         warning(xmsg, call.=FALSE)
-      }
+            warning(xmsg, call.=FALSE)
+         }
       
-      #  Abbr field is now setup no matter what.
+         #  Abbr field is now setup no matter what.
+      }
       
       ######  357x
       #
@@ -5667,7 +5698,7 @@ BuildBorderGroup <- function(
       } #1 loop through each row (area)
       
       #
-      NTNames  <- names(NTable) ###  Code: 5511 - Point a
+      NTNames  <- names(NTable) ###  Code: 5670 - Point a
       
       #
       #####
@@ -6017,14 +6048,14 @@ BuildBorderGroup <- function(
       #
       NTNames <- names(NTable)  # refresh the name list
       
-      #cat("Complete Name Table - ",NTNames,"  Code 5916 \n")
+      #cat("Complete Name Table - ",NTNames,"  Code 6020 \n")
       #print(NTable)
          
       #
       #####
       #######
       #########
-      #cat("End of Name Table Processing - Code 5923 \n")
+      #cat("End of Name Table Processing - Code 6027 \n")
       #  End of Name Table Processing and setup.
       ############
 
@@ -6268,7 +6299,7 @@ BuildBorderGroup <- function(
       #   keys are selected in the Name Table. This is after the 
       #   polygon union.
       #
-      #cat("Part 7.4 - Code 6166 - shape file LINK \n")
+      #cat("Part 7.4 - Code 6271 - shape file LINK \n")
 
       #
       #  7.4 - Set Up Shape Link and Name Table Link for match:
@@ -6624,7 +6655,7 @@ BuildBorderGroup <- function(
       #  Part 7.7.2 - COMBINE polygons under single area entries.  
       #        (unionSpatialPolygns)  (WorkSf04-> WorkSf05)
       #
-      #cat("WorkSf04 before aggregation. Code 6523 \n")
+      #cat("WorkSf04 before aggregation. Code 6627 \n")
       #print(WorkSf04, n=40)
        
       MList           <- WorkSf04$X_Link   # List of polygon Link names
@@ -6657,7 +6688,7 @@ BuildBorderGroup <- function(
              "     04:",utils::object.size(WorkSf04),
              "     05:",utils::object.size(WorkSf05),"\n")
          cat("ShapeFile combination completed. ",length(sf::st_geometry(WorkSf04))," now ",
-                length(sf::st_geometry(WorkSf05))," areas. Code: 6543 \n")
+                length(sf::st_geometry(WorkSf05))," areas. Code: 6660 \n")
       }
       #
       #####
@@ -6700,7 +6731,7 @@ BuildBorderGroup <- function(
          x         <- grDevices::dev.off()
       }   
       if (bitwAnd(debug,64) !=0) {
-         cat("New ShapeFile Data information - WorkSf06 data: Code 6599 \n")
+         cat("New ShapeFile Data information - WorkSf06 data: Code 6703 \n")
          print(sf::st_drop_geometry(WorkSf06))
       }
       #
@@ -7022,7 +7053,7 @@ BuildBorderGroup <- function(
                
                areaSFC    <- Worksfc[xKey]   # get sfc for the area to adjust.   
                
-               #cat("get centroid of area. code 7011 \n")
+               #cat("get centroid of area. code 7025 \n")
                suppressWarnings(
                   areaCtr    <- sf::st_centroid(areaSFC)  # old coordinates  of sfc
                ) 
@@ -7491,7 +7522,7 @@ BuildBorderGroup <- function(
       #    that area.
       #
       
-      #cat("Calling getColoring Code 7372 \n")
+      #cat("Calling getColoring Code 7494 \n")
       xNTCC           <- getColoring(sf::st_geometry(WorkSf08))   # color indexes assigned based on area neighbors.
                          # values are in a matrix.
       xNTCC           <- as.data.frame(xNTCC,stringsAsFactors=FALSE) # Convert matrix to DF.
@@ -7573,7 +7604,7 @@ BuildBorderGroup <- function(
       
       #cat("xLim:",xLim,"  yLim:",yLim,"\n")
       #cat("class:",class(xLim),"  ",class(yLim),"\n")
-      #cat("Step 9.0 Code 7455 - VisAsp:",VisAsp,"  bbdx:",bbdx,"  bbdy:",bbdy,"\n")   #  get here
+      #cat("Step 9.0 Code 7576 - VisAsp:",VisAsp,"  bbdx:",bbdx,"  bbdy:",bbdy,"\n")   #  get here
      
       WorkSfMaster <- WorkSf08
       #plot(sf::st_geometry(WorkSfMaster),xlim=xLim,ylim=yLim,xaxt="n",yaxt="n",key.pos=NULL)
@@ -7983,7 +8014,7 @@ BuildBorderGroup <- function(
    }  
       
    suppressMessages(      # Turn it off so we can process the shapefile.
-      sf_use_s2(FALSE)
+      sf::sf_use_s2(FALSE)
    )	
  
    #####  3A0x
@@ -7991,9 +8022,9 @@ BuildBorderGroup <- function(
    # Since Shapefile could have been modified, make sure 
    # shape file is OK.
    #
-   WorkSfMst     <- sf::st_make_valid(WorkSfMst)
+   WorkSfMst     <- sf::st_make_valid(WorkSfMst)        # make valid
    
-   WorkSfMst     <- st_cast(WorkSfMst,"MULTIPOLYGON")   # Make sure all geometry elements are multipolygons
+   WorkSfMst     <- sf::st_cast(WorkSfMst,"MULTIPOLYGON")   # Make sure all geometry elements are multipolygons
    WorkSfMstData <- sf::st_drop_geometry(WorkSfMst)
    WorkSfNames   <- names(WorkSfMst)   # get names of variables
 
@@ -8030,21 +8061,29 @@ BuildBorderGroup <- function(
    #
    #  Step 10.x - Build VisBorder data.frames from sf and UNION as needed.
    #
-   #  a) Save sf Images for area, Regions, L2 and L3.
+   #  a) Make sure the spatial polygon is_Valid (st_make_valid)..
    #
-   #  b) Preform UNIONS aS NEEDED ON sf for Regions, L2, and L3.
+   #  b) Save sf Images for area, Regions, L2 and L3 as needed.
+   #
+   #  c) Preform UNIONS (aggregations) aS NEEDED ON sf for Regions, L2, and L3.
+   #
+   #  d) st_make_valid.
+   #
+   #  e) find st_boundary of each collection.
+   #
+   #  f) st_make_valid.
    #   
-   #  c) Convert images into VisBorders format.
+   #  g) Convert images into VisBorders format.
    #     Repeat for each layers sf (area, L2, L3, Regions)
    #
-   #  d) Test images and Name Table together,
+   #  h) Test images and Name Table together,
    #
-   #  e) Write border group dataset.
+   #  i) Write border group dataset.
    #
-   #  f) Print out documentation on Name Table.
+   #  j) Print out documentation on Name Table.
    #      labels to be used in data (Name, Abbr, Alt_Abbr, ID, and Alias.)
    #
-   #  g) Draw the lattice maps and single map from the VisBorder 
+   #  k) Draw the lattice maps and single map from the VisBorder 
    #      boundary dataset information.
    #
    
@@ -8057,7 +8096,7 @@ BuildBorderGroup <- function(
    #
    #  Rounding smoothing.  For lat/long rounding of 2 is approprivate (xxx.xx)
    #     However, this must be changed for other units of measure:
-   #       Lat/Long  = round(x,4)     x.xxxx (0.00008983)   = 1/11131.94 of degree (0.008983% of degree)
+   #       Lat/Long  = round(x, 4)     x.xxxx (0.00008983)   = 1/11131.94 of degree (0.008983% of degree)
    #          round(,6) = .xxxxxx,  5) = .xxxxx,   4) = .xxxx  ...  target =0.0001 (4)
    #       meters    = round(x,-1)    xxx0     = 10 meters or 36.9 feet.
    #       kilometer = round(x,-4)    x.xx0  = 10 meters 
@@ -8073,8 +8112,8 @@ BuildBorderGroup <- function(
    #   Right now the rounding is at about the 36.4 to 36.9 feet increments.
    #
    #   Scaling and Rounding:
-   #     a) Long/Lat = round(y, 4)   down to xxx.xxxx
-   #     b) meters =   round(y,-1)   down to xxxx0 
+   #     a) Long/Lat   = round(y, 4) down to xxx.xxxx
+   #     b) meters     = round(y,-1) down to xxxx0 
    #     c) kilometers = round(y,-4) down to xx.xx0
    #
    #RndValue = 4, -1, -4   ???? fix
@@ -8101,10 +8140,14 @@ BuildBorderGroup <- function(
     
    cat("***3A30 Creating the 4 micromapST boundary data.frames (area, L2,\n",
        "        L3, and Regions).\n")
+   
+   Save_WorkStMst <- WorkSfMst
+   WorkSfMst      <- sf::st_make_valid(WorkSfMst)
     
+   #  colors for printing examples and keeping neighbors different
    BCol    <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999")
    
-   vDebug  <- debug
+   vDebug  <- debug   # copy debug flag (number)
    
    if (bitwAnd(vDebug,256) != 0) {              # change - dropped 512 and 1024
       # caller wants sample maps
@@ -8135,17 +8178,19 @@ BuildBorderGroup <- function(
    
       WorkL2             <- aggregate(WorkL2,by=list(L2Grps),FUN=aggFun)
       row.names(WorkL2)  <- WorkL2$agg  # restore row.names
-      #cat("calling getColoring for L2 Code 8014 \n")
+      #cat("calling getColoring for L2 Code 8150 \n")
       
       L2_NTCC            <- as.data.frame(getColoring(sf::st_geometry(WorkL2)),stringsAsFactors=FALSE)  # Have colors for super-areas.
       row.names(L2_NTCC) <- row.names(WorkL2)             # save xNTCC table for later use. ? check point.
                                                           # can't recreate after conversion to VisBorders.
       NTable$L2CCode     <- L2_NTCC[row.names(NTable),1]  # save the color index for the area.
+      
+      WorkL2             <- sf::st_make_valid(WorkL2)
    
       #### Only if L2 flag set. 
    
       if (bitwAnd(debug,8) != 0 ) {
-         #cat("Calling getColoring - Code 8024 \n")
+         #cat("Calling getColoring - Code 8162 \n")
          WorkL2Neib   <- getColoring(sf::st_geometry(WorkL2))
          #cat("Looking at Neighbors:", WorkL2Neib, " (colors)\n")
          
@@ -8166,7 +8211,7 @@ BuildBorderGroup <- function(
       #
       #  Regional Groups create boundaries
       #
-      #cat("Regional Feature Groups Code 8045 .\n")
+      #cat("Regional Feature Groups Code 8183 .\n")
       WorkReg          <- WorkSfMst
       RegGrps          <- NTable[SfMstrows,"regID"]   # assuming one sf row per name table row.
       WorkReg$agg      <- RegGrps
@@ -8181,6 +8226,8 @@ BuildBorderGroup <- function(
       NTable$R2CCode   <- Reg_NTCC[row.names(NTable),1]       # save the color index for the area.
                                     # CCode ranges from 1 to "n" - that is the number of colors required.
   
+      WorkReg         <- sf::st_make_valid(WorkReg)
+      
       #print(sf::st_geometry(WorkReg))
  
       # Only if region flag set.
@@ -8212,21 +8259,24 @@ BuildBorderGroup <- function(
    #  Aggregate reverted the spatial objects back to polygons.  Have to re cast it again.
    #plot(sf::st_geometry(WorkL3agg))
    
-   ##WorkL3aggb      <- sf::st_boundary(WorkL3agg)
-   ##   In some cases st_boundary creates a linestring geometry.  This can't be
-   ##   converted back to Multipolygon in one step.  Needs MULTIPOLYGON to 
-   ##   ensure the conversion to VisBorders works.
-   ##object.size(WorkL3aggb)
-   
-   #cat("Layer 3 - outline of all.\n")
+   cat("Layer 3 - outline of all.\n")
    
    WorkL3          <- sf::st_cast(WorkL3agg,"MULTIPOLYGON")   # Make sure all geometry elements are multipolygons
    #            This is required for the BuildVisBorders to work right.
    WorkL3$agg      <- BorderGroupName
    WorkL3$agg_name <- BorderGroupName
   
+   WorkL3          <- sf::st_make_valid(WorkL3)
+   
+   # one extra step appears to be required to get rid of junk in the shapefile and clean up the map at least
+   # for the L3 outline of the geographic space.
+   
+   WorkL3         <- sf::st_make_valid(sf::st_buffer(WorkL3,0.000001))
+   
+   #st_write(WorkL3,"c:/projects/statnet","TestL3Shp",driver="ESRI Shapefile")  # test output for troubleshooting.
+   
    #
-   #  Steps to find concave hull  - not used.
+   #  Steps to find concave hull  - not used. Did not product a usable outline.
    #  a) st_union (not useful, skip)
    #  b) get bbox for sizing
    #  c) find distance for st_buffer  =  width of map / 7500 (meters)  = US is 4882 km = 4,882,000
@@ -8239,19 +8289,33 @@ BuildBorderGroup <- function(
    #  -- Did not use st_buffer since it inflated the size of the objects by 2x and did not really help.
    #
    #  Alternate Steps:
-   #  1) get a clean and valid copy of the boundaries.
-   #  2) aggregate all boundaries to one key.
-   #  3) Use st_boundary function to clean up edges.
-   #  4) Set the results to ALL MULTIPOLYGON elements.
-   #  5) Set the aggregate names in the data section.
+   #  1) get a clean and valid copy of the boundaries.  (is_make_valid)
+   #  2) aggregate all boundaries to one key.           (aggregate)
+   #  3) Use st_boundary function to clean up edges.    (st_boundary)
+   #  4) Set the results to ALL MULTIPOLYGON elements.  (st_cast)
+   #  5) Set the aggregate names in the data section.   (set aggregate names)
    #
-   #suppressMessages(    # removed.
-   #   suppressWarnings(
-   #      WorkL3          <- sf::st_as_sf(sf::st_union(WorkL3))  # all of the areas.
-   #   )
-   #)
-   #WorkL3   <- sf::st_buffer(WorkL3,wDist)
-
+   #  Newest problem getting a L3 overall boundary for the geo space.
+   #  With the boundary data pull down for Mexico, it was found to have a lot of slivers
+   #  between states areas and non-matching boundary.  When st_union or aggregate combines areas,
+   #  it sees there slivers and gaps as open spaces and will create holes in the map.
+   #  Either recognize they are internal features of the geometry and causes extra non-boundary
+   #  lines to be included.
+   #
+   #  A bad collection of polygons will have overlaping borders, silvers between areas - 
+   #  errors or rivers, lake areas or just bad holes, and 3 pointed polygons.
+   #  The result of just a st_union is these oddities will be come boundaries to the 
+   #  geographic space, even through they are internal (effectively).  
+   #  The CRS has already been set at the begining with the shapefile was read.
+   #  The polygons have een simplified by rmapshaper and rounding.  
+   #  It has now been found the sf functions can and may add invalid elements to the 
+   #  spatial data as the data is processed.
+   #  
+   #  The current 3.1.0 code does the following sequence for L3 geographic area outline:
+   #   a) 
+   #
+   #
+  
    #plot(sf::st_geometry(WorkL3))
   
    if (bitwAnd(debug,8) != 0) {
@@ -8286,9 +8350,9 @@ BuildBorderGroup <- function(
       cat("Building VisBorders for the level 2 boundaries.\n")
       L2VisBorders        <- BuildVisBorder(WorkL2, "Level 2")
       #head(L2VisBorders,20)
-      GrpList <- c(GrpList,"L2VisBorders")
+      GrpList   <- c(GrpList,"L2VisBorders")
       
-      uL2VBKey <- unique(L2VisBorders$Key)
+      uL2VBKey  <- unique(L2VisBorders$Key)
       #cat("Keys - L2VisBorders - Unique\n")
       #print(uL2VBKey)
    
@@ -8303,6 +8367,7 @@ BuildBorderGroup <- function(
       #cat("uRegVBKey - RegVisBorders - Unique\n")
       #print(uRegVBKey)
    }
+   
    cat("Building VisBorders for the Level 3 map outline.\n")
    L3VisBorders        <- BuildVisBorder(WorkL3, "Level 3 Map Outline")
    #head(L3VisBorders,20)
@@ -8361,7 +8426,7 @@ BuildBorderGroup <- function(
       WANAC            <- WANCol[WANAreaCCode]  # ordered by neigbhor
       
       #   areaVisBorders 
-      PlotVis(areaVisBorders,WANAC)
+      Plot_Vis(areaVisBorders,WANAC)
       graphics::title("VisBorder of areas")
       grDevices::dev.new()
         
@@ -8386,7 +8451,7 @@ BuildBorderGroup <- function(
          xm               <- match(L2VisB$Key, uniL2Keys)
          L2VisB$Col       <- L2Col[xm]
         
-         PlotVis(L2VisBorders,L2VisB$Col)
+         Plot_Vis(L2VisBorders,L2VisB$Col)
          graphics::title("VisBorders of L2")
          grDevices::dev.new()
       }
@@ -8419,13 +8484,13 @@ BuildBorderGroup <- function(
          #  Name Table.
          #
        
-         PlotVis(RegVisBorders,RegVisB$Col)
+         Plot_Vis(RegVisBorders,RegVisB$Col)
          graphics::title("VisBorder of Regions")
          grDevices::dev.new()
       }  
        
       
-      PlotVis(L3VisBorders,"green")
+      Plot_Vis(L3VisBorders,"green")
       graphics::title("VisBorder of L3")
       
    }  # end of the test plots of each VisBorder data.frame as a set of windows.
@@ -8471,7 +8536,7 @@ BuildBorderGroup <- function(
       par(mai=c(0,0,0,0))
       par(mar=c(0,0,2,0))
               
-      PlotVis(areaVisBorders,WANAC)     # micromapST defaults lwd to 0.5  
+      Plot_Vis(areaVisBorders,WANAC)     # micromapST defaults lwd to 0.5  
       #graphics::title(main=PPTitle,cex.main=0.1)
       
       # draw the extra characters (wrong - correct)
@@ -8589,7 +8654,7 @@ BuildBorderGroup <- function(
          KeyNA$Col    <- KeyCol[KeyNA$Inx,"Col"]
          PlotCol      <- KeyNA$Col
             
-         PlotVis(areaVisBorders,PlotCol,xLwd=.5)
+         Plot_Vis(areaVisBorders,PlotCol,xLwd=.5)
          par(new=TRUE)
         
          xm           <- !is.na(KeyCol$Col)
@@ -8617,6 +8682,8 @@ BuildBorderGroup <- function(
    #
    #  Convert to write to Ascii file.
    #
+   #  Updated to match the name table type entries - March 30, 2025
+   #
    RepOutFile <- paste0(BorderGroupDir,"/",BGBase,"BG_rpt.txt")
    
    cat("***3A60 Summary build report of names, abbr, id and other data \n",
@@ -8626,13 +8693,13 @@ BuildBorderGroup <- function(
         
    cat("\n\n\nPUBLICATION INFORMATION FOR NAME TABLE IN BORDER GROUP : \n",
        "   ",paste0(BGBase,"BG")," ",format(Sys.time(),format="%Y-%m-%d %H:%M:%S"),"\n")
-   cat("\n\n")
+   cat("\n")
    
    NTNames  <- names(NTable)
    #print(NTNames)
    
    TCol     <- c("Name","Abbr","ID", "Alt_Abbr", "Alias")
-   CCol     <- c("full","ab","id", "alt_ab", "alias")
+   CCol     <- c("full","ab","id", "alt_ab", "alias")  # don't use.
    L2Col    <- c("L2_ID","L2_ID_Name")
    RegCol   <- c("regID", "regName")
    AltL2RegCol <- c(L2Col,RegCol)
@@ -8644,70 +8711,75 @@ BuildBorderGroup <- function(
    #print(xm)
    
    # Have a number if there is a match otherwise a NA.
-   xmNA     <- !is.na(xm)  # now a TRUE for the matches.
+   xmNA     <- !is.na(xm)  # now a TRUE for the matches.  Keep column.
    #print(xmNA)
-   NTUser   <- NTable[,xmNA]
-   NTNames  <- names(NTUser)
-   xmm      <- match(NTNames,TCol)
-   xmmNA    <- !is.na(xmm)
-   NTNamesC <- CCol[xmm]
-   names(NTUser) <- NTNamesC
+   NTUser   <- NTable[,xmNA]         # get user columns to print.
+   NTNames  <- names(NTUser)         # get names of columns
+  
+   # xmm      <- match(NTNames,TCol)   # See if more common name.
+   # xmmNA    <- !is.na(xmm)
+   # NTNamesC <- CCol[xmm]
+   # names(NTUser) <- NTNamesC
    
    print(NTUser)	    #  print a copy of the users name table. 
+   
    cat("\n\n")
    
-   ###  Duplicate - already done..
+   NTrn      <- row.names(NTable)
+   NTnr      <- dim(NTable)[1]              # number of rows in NTable
    
-   NTrn    <- row.names(NTable)
-   NTnr    <- dim(NTable)[1]              # number of rows in NTable
+   # List the L2Feature and RegFeature flags
    
    if (L2Feature) {
       L2Uni   <- length(unique(NTable$L2_ID))  # number of unique entries in L2 list
-      L2List  <- ( L2Uni != NTnr )
-      L2Yes   <- L2List & (L2Uni > 1)
+      L2List  <- ( L2Uni != NTnr )             # TRUE=L2_ID exist, FALSE=L2_ID equal # of Rows.
+      L2Yes   <- L2List & (L2Uni > 1)          # If uniq>1 & L2List is TRUE
+      # if L2_ID is missing from table, L2Uni = 0.
    }
    if (RegFeature) {
       RegUni  <- length(unique(NTable$regID)) 
-      RegList <- RegUni != NTnr
+      RegList <- ( RegUni != NTnr )
       RegYes  <- RegList & ( RegUni > 1)
    }
    if (RegFeature && L2Feature) {
       # Both sets of columns are valid.
-      cat("\n\nName Table Layer 2 and Regional Values\n")
+      cat("\n\nName Table Layer 2 and Regional Values\n\n")
       print(NTable[,AltL2RegCol])
       
    } else {
       # none, one or the other are needed.
       if (L2Feature) {
-         cat("\n\nName Table Layer 2 Values\n")
+         cat("\n\nName Table Layer 2 Values\n\n")
          print(NTable[,L2Col])
       }   
       if (RegFeature) {
-         cat("\n\nName Table Regional Values\n")
+         cat("\n\nName Table Regional Values\n\n")
          print(NTable[,RegCol])
       }
    }
    
-   MapLYes   <- sum(!is.na(NTable$MapL)) > 0
+   MapLYes   <- sum(!is.na(NTable$MapL)) > 0    # one or more rows have data.
    DoAdjYes  <- sum(NTable$DoAdj) > 0
    
+   # List the MapL and DoAdjYes information.
+   
    if (MapLYes & DoAdjYes) {
-      cat("\n\nName Table Modifications and Map Label Values\n") 
+      cat("\n\nName Table Modifications and Map Label Values\n\n") 
       print(NTable[,AltModMapLCol])
    
    } else {
       if (DoAdjYes) {
-         cat("\n\nName Table Map Modifications Values\n")
+         cat("\n\nName Table Map Modifications Values:\n\n")
          print(NTable[,ModCol])
       }
       if (MapLYes) {
-         cat("\n\nName Table Map Label Values\n")
+         cat("\n\nName Table Map Label Values and locations:\n\n")
          print(NTable[,MapLabel])
       }
    
   } 
   cat("\n\nAny entries in the name table with location ids with a value \n",
-      "of 'NA', '', or ' ' are considered empty and will not be ignored.\n\n")
+      "of 'NA', '', or ' ' are considered empty and will be ignored.\n\n")
   sink()   # end of report to file. 
   # END OF report for documentation.
   

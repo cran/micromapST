@@ -18,6 +18,26 @@ The transparency of the color varies from left to right and a line is used to se
   The segment stacked bars only use the \var{panelDesc} col1, col2, lab1, lab2, lab3, lab4, refVal, and refTxt variable.
   The glyph uses the R draw rectangle function to draw and fill each part of the stack.
   
+  The colors used in each segment are adjusted based on the number of segments in the glyph.  If 5 bar are being displayed,
+  the 1/5, 2/5, 3/5, and so on of the original color are used to fill in each bar as transparent colors.  The last bar
+  is always 100% of the original color.
+  
+  The following is an example of a section of a segmented stacked bar glyph in a linked micromap:
+    
+  \if{html}{\figure{ExamSegbarF.png}{options: width=200}}
+  \if{latex}{\figure{ExamSegbarF.png}{options: width=200px}}
+  
+  The stacked bar glyphs have a unique property.  The height of each segment can vary from small to full height 
+  from left to right.  While the colors of the segments are varied in intensity from The following is an example of a section of a time series glyph in a linked micromap:
+    
+  \if{html}{\figure{ExamSegbarV.png}{options: width=200}}
+  \if{latex}{\figure{ExamSegbarV.png}{options: width=200px}}
+  
+  To have micromapST do variable heights in the Segmented Stacked Bar, and Normalized Stacked Bar,
+  the detail call parameter is used to enable the feature.
+  \preformatted{
+      details=list(SNBar.varht=TRUE,...)
+  }
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically
   accessible to the process along with several other major structures.
   

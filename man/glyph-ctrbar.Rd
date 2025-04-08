@@ -1,6 +1,6 @@
 \name{glyph-ctrbar}
 \alias{glyph-ctrbar}
-\alias{CTRBAR}
+\alias{ctrbar}
 \title{The ctrbar glyph creates a centered stacked bar diagram centered about the value of zero.}
 \description{
 The \var{ctrbar} glyph creates a stacked bar diagram, where the centered segment stacked bar (ctrbar) 
@@ -28,10 +28,19 @@ in the col2 column.  The values may be specified as statsDRrame column names or 
   
   In the \var{details} data.frames there is a \var{CBar.varht} (a logical variable) that is used to indicate 
   to the gryphic whether to use variable height bars in the gryphic or not.  By default the value is set to 
-  \var{FALSE}.
-  When set tos \var{TRUE}, all Center Segmented Stacked Bar Charts will have their bars vary in height from the left to
-  the right.
+  \var{FALSE}.   When set to \var{TRUE}, all Center Segmented Stacked Bar Charts will have their bars vary in 
+  height from the left to the right.
   
+  The following is an example of a section of a Centered Stacked Bar glyph column in a linked micromap:
+  
+  \if{html}{\figure{ExamCtrbarF.png}{options: width=200}}
+  \if{latex}{\figure{ExamCtrbarF.png}{options: width=200px}}
+ 
+  If variable height stacked bars are used, then the glyph graphics will look like:
+  
+  \if{html}{\figure{ExamCtrbarV.png}{options: height="150" width="175"}}
+  \if{latex}{\figure{ExamCtrbarV.png}{options: width=175px, height=150px}}
+
   The \var{statsDFrame} and \var{panelDesc} data.frames reside in the global environment and automatically 
   accessible to the process along with several other major structures.
   

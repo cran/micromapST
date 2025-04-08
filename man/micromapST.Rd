@@ -204,8 +204,8 @@ All border groups are distrbuted with the package as .rda datasets.
     is added as a suffix. (e.g., 1240334 become 1.24M)   "w" is the wilkinson algorithm 
     without any scaling.
     }
-  \item{staggerLab}{is a logical variable the controls if the axis labels are staggered and 
-    drawn on on two lines instead of one.  If set to FALSE (the default), the labels are 
+  \item{staggerLab}{is a logical variable that controls whether the axis labels are staggered and 
+    drawn on on two lines or non-staggered in one line.  If set to FALSE (the default), the labels are 
     not staggered.  If TRUE, two lines are used to draw the axis labels, alternating labels
     on each line.
     }
@@ -667,6 +667,8 @@ x <- grDevices::dev.off()
 #   USES data loaded for Example 03 (temprates).
 #
 ####
+TDir<-"c:/projects/statnet/"  # my private test PDF directory exist, don't use temp.
+if (!dir.exists(TDir)) {TDir <- paste0(tempdir(),"/") }  # get a temp directory for the output 
 
 # Load example data from package.
 utils::data(TSdata,envir=environment())  
@@ -686,7 +688,7 @@ wparm <- list(NA,NA,NA,list(line="LOWESS",f=.77,line.col="blue",line.lwd=1,line.
 panelDesc04$parm <- wparm
 
 ExTitle <- c("Ex04-US Dot Plot for 1996, Scatter Plot Comparing 1996 to 2010",
-               "Female Lung Cancer Mortality Rates")
+               "Female Lung Cancer Mortality Rates, LOWESS Line")
 
 FName <- paste0(TDir,"Ex04-US FLCMR Scatter-Dots-1996-2010.pdf")
 grDevices::pdf(file=FName,width=7.5,height=10)
@@ -709,23 +711,26 @@ x <- grDevices::dev.off()
 
 # Load example data from package.
 utils::data(statePop2010,envir=environment())
+utils::data(Educ8thData,envir=environment())  
+
+JData <- cbind(statePop2010,Educ8thData)
 
 panelDesc05 <- data.frame(                   
-    type=c("map","id","segbar","normbar"), 
-    lab1=c("","","Stacked Bar","Normalized Stacked Bar"), 
-    lab2=c("","","Counts","Percent"),     
-    col1=c(NA,NA,"Hisp","Hisp"),                     
-    col2=c(NA,NA,"OtherWBH","OtherWBH")		  
+    type=c("map","id","segbar","normbar","ctrbar"), 
+    lab1=c("","","Stacked Bar","Normalized Stacked Bar","Centered Bar"), 
+    lab2=c("","","Counts","Percent","Education"),     
+    col1=c(NA,NA,"Hisp","Hisp","PctBelowBasic"),                     
+    col2=c(NA,NA,"OtherWBH","OtherWBH","PctAdvanced") 		  
     )
-ExTitle <- c("Ex05-Stkd Norm Bars: 2010 Census Pop by Race, Sorted by Cnt Other Race",
-             "Cat-L to R: Hispanic, non-Hisp White, Black, Other-sn-varbar")
+ExTitle <- c("Ex05-Seg Norm Ctr Bars-2010 Census Pop by Race Sorted by Cnt Other Race",
+             "Cat-L to R: Hispanic, non-Hisp White, Black, Educ with ctrbar all with varbar")
 
-grDevices::pdf(file=paste0(TDir,"Ex05-US Stkd-Norm Bar-var-height.pdf"),
+grDevices::pdf(file=paste0(TDir,"Ex05-US-Seg-Norm-Ctr-Bar-with-varheight.pdf"),
      width=7.5,height=10)
 
-micromapST(statePop2010, panelDesc05, sortVar="OtherWBH", ascend=FALSE,
+micromapST(JData, panelDesc05, sortVar="OtherWBH", ascend=FALSE,
            title= ExTitle,
-           details=list(SNBar.varht=TRUE), axisScale="sn" )  
+           details=list(SNBar.varht=TRUE,CBar.varht=TRUE), axisScale="sn" )  
      
 x <- grDevices::dev.off()
 #
